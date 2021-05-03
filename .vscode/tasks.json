@@ -1,0 +1,49 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build:tsc",
+			"problemMatcher": {
+				"owner": "typescript",
+				"fileLocation": "relative",
+				"pattern": {
+					"regexp": "^(.*):(\\d+):(\\d+).*(warning|error)\\s+(.*)$",
+					"file": 1,
+					"location": 2,
+					"severity": 3,
+					"code": 4,
+					"message": 5
+				}
+			},
+			"group": {
+				"kind":"build",
+				"isDefault": true,
+			},
+			"label": "npm: build:tsc",
+			"detail": "tsc --noEmit"
+		},
+		{
+			"type": "npm",
+			"script": "build:prod",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build:prod",
+			"detail": "parcel build src/index.html -d dist-prod --public-url ./"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [],
+			"label": "npm: start",
+			"detail": "echo The app is starting! It will automatically open in your browser when ready && env-cmd -f ./neardev/dev-account.env parcel src/index.html --open"
+		},
+		{
+			"type": "npm",
+			"script": "serve:design",
+			"problemMatcher": [],
+			"label": "npm: serve:design",
+			"detail": "python3 -m http.server"
+		}
+	]
+}

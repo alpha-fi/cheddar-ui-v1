@@ -1,0 +1,86 @@
+section#faq article {
+    min-width: 65vw;
+    font-weight: 500;
+    padding-bottom: 0em;
+}
+
+section#faq ul {
+    margin-block-end: 0em;
+    display: grid;
+}
+
+.collapsible {
+    align-self: flex-start;
+    width: 100%;
+    margin-bottom: 1em;
+    padding-bottom: 1em;
+}
+
+.collapsible:not(:nth-last-child(1)) {
+    border-bottom: 1px dashed #D8DBE5;
+}
+
+.collapsible input {
+    position: absolute;
+    left: -9999px;
+}
+
+.collapsible input:focus ~ .collapser {
+    border-color: grey;
+}
+
+.collapsible .collapser {
+    cursor: pointer;
+    border: 1px transparent dotted;
+}
+
+.collapsible span.arrow:before {
+    content: ">";
+}
+
+.collapsible .arrow {
+    padding: 0em;
+    margin-right: 0.5em;
+    transform: rotate(0deg);
+    transition: transform 0.25s ease-out;
+    display: inline-flex;
+}
+
+.collapsible input:checked ~ .arrow, .collapsible input:checked ~ .collapser .arrow {
+    transform: rotate(90deg);
+}
+
+.collapsible .collapsed, .collapsible .collapsed li {
+    font-size: 0;
+    white-space: break-spaces;
+    margin: 0;
+    opacity: 0;
+    padding: 0;
+    /* fade out, then shrink */
+    transition: opacity .6s, margin 0.5s 0.25s, font-size 0.5s 0.25s, padding 0.5s 0.25s;
+}
+.collapsible input:checked ~ .collapsed li {
+    opacity: 1;
+    font-size: 1em;
+    margin-left: 2em;
+    margin-right: 2em;
+    white-space: break-spaces;
+    transition: margin 0.1s, padding 0.1s, font-size 0.1s, opacity .1s;
+    padding-bottom: 6px;
+}
+.collapsible input:checked ~ .collapsed {
+    font-size: 1em;
+    line-height: 1.45em;
+    white-space: break-spaces;
+    opacity: 1;
+    height: auto;
+    padding: 1em;
+    padding-left: 2em;
+    margin-bottom: 0;
+    /* grow, then fade in */
+    transition: margin 0.25s, padding 0.25s, font-size 0.25s, opacity .2s 0.25s;
+}
+
+.collapsed a {
+  border-bottom: 1px dashed #90939d;
+}

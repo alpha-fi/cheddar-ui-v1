@@ -1,0 +1,8 @@
+@import url('https://rsms.me/inter/inter.css');
+/*getting from rsms.me. The fonts from google API do not have glyphs like 'Ⓝ'*/
+
+:root, button { font-family: 'Inter', sans-serif; }
+@supports (font-variation-settings: normal) {
+  :root, button { font-family: 'Inter var', sans-serif; }
+}
+
