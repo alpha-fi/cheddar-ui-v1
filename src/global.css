@@ -59,17 +59,25 @@ h1 {
 }
 
 h2 {
-  font-weight: 350;
+  font-weight: 600;
   font-size: 22px;
   line-height: 22px;
   /* identical to box height, or 109% */
-  color      : #474A4F;
-
-
+  color      : #222222;
   text-align : center;
-  margin-top: 38px;
-  margin-bottom: 0;
+  margin-top: 15px;
+  margin-bottom: 15px
 
+}
+
+h2 img {
+    vertical-align: middle;
+    box-shadow: rgb(0 0 0 / 19%) 0px 2px 14px;
+    width: 35px;
+    height: 35px;
+    padding: 5px;
+    border-radius: 50%;
+    justify-content: center;
 }
 
 h3 {
@@ -156,6 +164,122 @@ header nav a {
   padding-right: 1em;
   font-size: 14px;
 }
+
+.icon-header {
+  display:inline;
+}
+
+.icon-header img {
+    vertical-align: middle;
+    box-shadow: rgb(0 0 0 / 19%) 0px 2px 14px;
+    width: 35px;
+    height: 35px;
+    padding: 5px;
+    border-radius: 50%;
+    justify-content: center;
+}
+
+.icon-header span {
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 22px;
+  color: #222222;
+  vertical-align: middle;
+}
+.pool-meta {
+  display: flex;
+  -webkit-box-pack: justify;
+  -moz-box-pack:justify;
+  -ms-flex-pack:justify;
+  justify-content: space-between;
+  min-width: 75%;
+}
+
+.pool-meta div:nth-child(1) {
+  color: rgb(6, 55, 103);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.pool-meta div:nth-child(2) {
+  color: rgb(6, 55, 103);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.pool-meta.deposit div:nth-child(1) {
+  color: rgb(6, 55, 103);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.pool-meta.deposit div:nth-child(2) {
+  color: rgb(6, 55, 103);
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.pool-meta.earned {
+  justify-content: left;
+}
+
+.pool-meta.earned div:nth-child(1) {
+  color: rgb(15, 132, 248);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: uppercase;
+  padding-right: 3px;
+}
+
+.pool-meta.earned div:nth-child(2) {
+  color: rgb(108, 157, 205);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.pool-meta.earned.amount {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pool-meta.earned.amount div:nth-child(1) {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: rgb(6, 55, 103);
+}
+
+.pool-meta.earned.amount div button {
+  margin: 0;
+  background: rgb(68, 196, 226);
+  color:white;
+}
+
+.pool-meta.wallet-balance {
+  display:block;
+  justify-content: right;
+  min-width:95%;
+}
+.pool-meta.wallet-balance div:nth-child(1) {
+  -webkit-box-align: center;
+    align-items: center;
+    color: rgb(15, 132, 248);
+    display: flex;
+    font-size: 14px;
+    font-weight: 700;
+    height: 22px;
+    -webkit-box-pack: end;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
 .user-info{
   background-color:#4BC7EF;
   border-radius: 10px;
@@ -163,6 +287,21 @@ header nav a {
   margin-right: 1em;
   margin-left: 0.6em;
   padding-left: 0.5em;
+}
+
+.pool-meta.actions {
+  justify-content: flex-end;
+}
+
+.pool-meta.actions button {
+    height: 48px;
+    width: 48px;
+    padding: 0;
+    min-width: 48px;
+}
+
+.stake-action {
+  fill: white;
 }
 
 .user-info span {
@@ -195,8 +334,8 @@ header nav a {
 }
 
 .wallet-logo {
-  width : 140px;
-  height: 140px;
+  width : 125px;
+  height: 125px;
 }
 
 .near-logo {
@@ -262,7 +401,7 @@ article, form, .box {
   border-radius: 8px;
   padding: 10px;
   display: flex;
-  width: 100%;
+  width: 95%;
   margin: 6px;
 }
 
@@ -276,22 +415,27 @@ input, .input-group span {
   margin-left: 4px;
 }
 .input-group span {
-  flex: 1 1 5%;
+  flex: 1 1 30%;
 }
 .inside-input {
   color: #8542ebcc;
   cursor: pointer;
+  text-align:right; 
 }
 
 button {
   font-weight: 400;
-  font-size: 12px;
+  font-size: 16px;
+  height: 48px;
+  min-width:50%;
   background: var(--primary);
-  border-radius: 12px;
+  border-radius: 16px;
   color: #ffffffe3; 
   margin: 5px 7px;
-  padding: 3px 16px;
+  padding: 0px 24px;
   border: 0;
+  box-shadow: rgb(14 14 44 / 40%) 0px -1px 0px 0px inset;
+
 }
 button:disabled {
   opacity: 0.5;

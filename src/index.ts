@@ -776,7 +776,7 @@ window.onload = async function () {
         showError(err,"Transaction - " + method||"");
       }
       else if (method=="deposit_and_stake"){
-            showSuccess("Stake succeeded")
+            showSuccess("Deposit Successful")
       }
       else if (data){
         switch(method){
