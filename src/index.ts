@@ -126,9 +126,9 @@ qs('form#stake').onsubmit =
     try {
       if (!contractParams.is_open) throw Error("pools are not open yet")
       //get amount
+      const min_deposit_amount = 1;
       let amount = toNumber(stakeAmount.value);
       if (isStaking) {
-        const min_deposit_amount = 1;
         if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} NEAR`);
         // make a call to the smart contract
         await contract.stake(amount)
@@ -139,6 +139,7 @@ qs('form#stake').onsubmit =
         await contract.withdraw_crop(amount)
       }
       else {
+        if (amount == 0) throw Error(`Input unstake amount`);
         await contract.unstake(amount)
       }
 
@@ -679,23 +680,27 @@ function loginNarwallets() {
 
 let speed = 0.00001;
 let skip = 0;
+let staked = 0;
 let target = 0;
 let current = 0;
 async function refreshRewardsLoop() {
   if (wallet.isConnected()) {
     if (skip <= 0) {
       accountInfo = await contract.status()
+      staked = yton(accountInfo[0]);
       target = yton(accountInfo[1]);
-      if (current == 0) current = target;
-      if (current < target - 0.001) speed = (target - current) / 12;
-      else if (current > target + 0.001) speed = speed / 2;
-      console.log(target, current, target - current, speed);
+      if (staked > 0) {
+        if (current == 0) current = target;
+        if (current < target - 0.001) speed = (target - current) / 12;
+        else if (current > target + 0.001) speed = speed / 2;
+        console.log(target, current, target - current, speed);
+      }
       current = target;
       skip = 10;
     }
     else {
       skip--;
-      current += speed;
+      if (staked != 0) current += speed;
     }
     qsaInnerText("#cheddar-balance", toStringDecLong(current))
   }
@@ -718,6 +723,8 @@ async function refreshAccountInfo() {
       accountInfo = await contract.status()
       contractParams = await contract.get_contract_params()
       total_supply = yton(await tokenContract.ft_total_supply())
+      staked = yton(accountInfo[0]);
+      target = yton(accountInfo[1]);
     }
     else {
       contractParams.rewards_per_year = 10000;
@@ -728,7 +735,7 @@ async function refreshAccountInfo() {
       aprString = `${contractParams.rewards_per_year / 1000}k`;
     }
     qsaInnerText("#apr", aprString + "%")
-    qsaInnerText("#near-balance", toStringDec(yton(accountInfo[0])))
+    qsaInnerText("#near-balance", toStringDec(staked))
     // qs("#trip-rewards").innerText = toStringDec(yton(accountInfo.trip_rewards))
     // qs("#trip-start").innerText = new Date(Number(accountInfo.trip_start)).toLocaleString()
     // qsaInnerText("#your-share-value", toStringDec(yton(accountInfo.nslp_share_value)))
