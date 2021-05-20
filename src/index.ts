@@ -77,7 +77,7 @@ function navClickHandler_ConnectFirst(event: Event) {
 
 qs('nav #unstake').onclick = navClickHandler_ConnectFirst
 qs('nav #liquidity').onclick = navClickHandler_ConnectFirst
-qs('nav #delayed-unstake').onclick = navClickHandler_ConnectFirst
+//qs('nav #delayed-unstake').onclick = navClickHandler_ConnectFirst
 qs('nav #my-account').onclick = navClickHandler_ConnectFirst
 
 //qs('#unstake-from-my-account').onclick = () => { showSection("#unstake") }
@@ -308,121 +308,121 @@ function showRemoveLiquidityResult(yoctoCheddar: string) {
 
 
 //add liquidity button
-qs('button#add-liquidity').onclick =
-  async function (event) {
-    event.preventDefault()
-    showPopup("#add-liquidity.popup")
-  }
+// qs('button#add-liquidity').onclick =
+//   async function (event) {
+//     event.preventDefault()
+//     showPopup("#add-liquidity.popup")
+//   }
 //add liquidity popup-form
-qs('form#add-liquidity').onsubmit =
-  async function (event) {
-    event.preventDefault()
+// qs('form#add-liquidity').onsubmit =
+//   async function (event) {
+//     event.preventDefault()
 
-    const form = event.target as HTMLFormElement
-    // get elements from the form using their id attribute
-    const { fieldset, amountElem } = form
+//     const form = event.target as HTMLFormElement
+//     // get elements from the form using their id attribute
+//     const { fieldset, amountElem } = form
 
-    // disable the form while the call is made
-    fieldset.disabled = true
-    showWait("adding liquidity...")
+//     // disable the form while the call is made
+//     fieldset.disabled = true
+//     showWait("adding liquidity...")
 
-    try {
-      if (!contractParams.is_open) throw Error("pools are not open yet")
+//     try {
+//       if (!contractParams.is_open) throw Error("pools are not open yet")
 
-      //get amount
-      const amount = toNumber(amountElem.value);
-      //const MIN_ADD_LIQ = 2*yton(total_supply.min_deposit_amount)
-      //if (amount < MIN_ADD_LIQ) throw Error(`add at least ${MIN_ADD_LIQ} NEAR`);
+//       //get amount
+//       const amount = toNumber(amountElem.value);
+//       //const MIN_ADD_LIQ = 2*yton(total_supply.min_deposit_amount)
+//       //if (amount < MIN_ADD_LIQ) throw Error(`add at least ${MIN_ADD_LIQ} NEAR`);
 
-      // make a call to the smart contract
-      //await contract.nslp_add_liquidity(amount)
+//       // make a call to the smart contract
+//       //await contract.nslp_add_liquidity(amount)
 
-      //clear form
-      form.reset()
+//       //clear form
+//       form.reset()
 
-      //refresh acc info
-      await refreshAccountInfo()
+//       //refresh acc info
+//       await refreshAccountInfo()
 
-      showLiquidityOwned()
+//       showLiquidityOwned()
 
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-    // re-enable the form, whether the call succeeded or failed
-    fieldset.disabled = false
-  }
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//     // re-enable the form, whether the call succeeded or failed
+//     fieldset.disabled = false
+//   }
 
-function showLiquidityOwned() {
-  //showSuccess(`You own ${accountInfo.nslp_share_bp==0? "<0.01": toStringDecMin(accountInfo.nslp_share_bp/100)}% of the Liquidity Pool`,"Add liquidity")    
-}
+// function showLiquidityOwned() {
+//   //showSuccess(`You own ${accountInfo.nslp_share_bp==0? "<0.01": toStringDecMin(accountInfo.nslp_share_bp/100)}% of the Liquidity Pool`,"Add liquidity")    
+// }
 
 //remove liquidity button
-qs('button#remove-liquidity').onclick =
-  async function (event) {
-    event.preventDefault()
-    showPopup("#remove-liquidity.popup")
-  }
+// qs('button#remove-liquidity').onclick =
+//   async function (event) {
+//     event.preventDefault()
+//     showPopup("#remove-liquidity.popup")
+//   }
 //remove liquidity max button
-qs('form#remove-liquidity #max').onclick =
-  async function (event) {
-    try {
-      event.preventDefault()
-      //qsi("form#remove-liquidity #amountElem").value = toStringDecMin(yton(accountInfo.nslp_share_value))
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-  }
+// qs('form#remove-liquidity #max').onclick =
+//   async function (event) {
+//     try {
+//       event.preventDefault()
+//       //qsi("form#remove-liquidity #amountElem").value = toStringDecMin(yton(accountInfo.nslp_share_value))
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//   }
 //remove liquidity popup-form
-qs('form#remove-liquidity').onsubmit =
-  async function (event) {
-    event.preventDefault()
+// qs('form#remove-liquidity').onsubmit =
+//   async function (event) {
+//     event.preventDefault()
 
-    const form = event.target as HTMLFormElement
-    // get elements from the form using their id attribute
-    const { fieldset, amountElem } = form
+//     const form = event.target as HTMLFormElement
+//     // get elements from the form using their id attribute
+//     const { fieldset, amountElem } = form
 
-    // disable the form while the call is made
-    fieldset.disabled = true
-    showWait("removing liquidity...")
+//     // disable the form while the call is made
+//     fieldset.disabled = true
+//     showWait("removing liquidity...")
 
-    try {
-      //get amount
-      const amount = toNumber(amountElem.value);
-      if (amount <= 0) throw Error("amount should be greater than zero");
+//     try {
+//       //get amount
+//       const amount = toNumber(amountElem.value);
+//       if (amount <= 0) throw Error("amount should be greater than zero");
 
-      // make a call to the smart contract
-      let result = await contract.withdraw_crop(amount)
+//       // make a call to the smart contract
+//       let result = await contract.withdraw_crop(amount)
 
-      //clear form
-      form.reset()
+//       //clear form
+//       form.reset()
 
-      //refresh acc info
-      await refreshAccountInfo()
+//       //refresh acc info
+//       await refreshAccountInfo()
 
-      //showRemoveLiquidityResult(result)
+//       //showRemoveLiquidityResult(result)
 
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-    // re-enable the form, whether the call succeeded or failed
-    fieldset.disabled = false
-  }
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//     // re-enable the form, whether the call succeeded or failed
+//     fieldset.disabled = false
+//   }
 
 //------ DELAYED UNSTAKE
 //delayed unstake max button
-qs('form#delayed-unstake #max').onclick =
-  async function (event) {
-    try {
-      event.preventDefault()
-      //qsi("form#delayed-unstake #amountElem").value = toStringDecMin(yton(accountInfo.stnear))
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-  }
+// qs('form#delayed-unstake #max').onclick =
+//   async function (event) {
+//     try {
+//       event.preventDefault()
+//       //qsi("form#delayed-unstake #amountElem").value = toStringDecMin(yton(accountInfo.stnear))
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//   }
 
 //compute epoch info
 let epochCached: EpochInfo;
@@ -456,115 +456,115 @@ function checkMinUnstake(amountToUnstake: number) {
 }
 
 //delayed unstake warning -> withdraw now
-qs('#delayed-unstake-warning #withdraw-now').onclick = withdrawUnstakedClickHandler;
+//qs('#delayed-unstake-warning #withdraw-now').onclick = withdrawUnstakedClickHandler;
 
 //delayed unstake initial form
-qs('form#delayed-unstake').onsubmit =
-  async function (event) {
-    event.preventDefault()
+// qs('form#delayed-unstake').onsubmit =
+//   async function (event) {
+//     event.preventDefault()
 
-    //do not start a new waiting period before withdrawing the last-one!
-    // if (accountInfo.unstaked!="0" && accountInfo.can_withdraw) {
-    //   showPopup("#delayed-unstake-warning");
-    //   return;
-    // }
+//     //do not start a new waiting period before withdrawing the last-one!
+//     // if (accountInfo.unstaked!="0" && accountInfo.can_withdraw) {
+//     //   showPopup("#delayed-unstake-warning");
+//     //   return;
+//     // }
 
-    const form = event.target as HTMLFormElement
-    // get elements from the form using their id attribute
-    const { fieldset, amountElem } = event.target as HTMLFormElement
+//     const form = event.target as HTMLFormElement
+//     // get elements from the form using their id attribute
+//     const { fieldset, amountElem } = event.target as HTMLFormElement
 
-    // disable the form while the call is made
-    fieldset.disabled = true
+//     // disable the form while the call is made
+//     fieldset.disabled = true
 
-    try {
+//     try {
 
-      //get amount
-      const amount = toNumber(amountElem.value)
-      checkMinUnstake(amount)
+//       //get amount
+//       const amount = toNumber(amountElem.value)
+//       checkMinUnstake(amount)
 
-      qs("#delayed-unstake-confirm.popup #amount").innerText = toStringDec(amount);
+//       qs("#delayed-unstake-confirm.popup #amount").innerText = toStringDec(amount);
 
-      let computedMsg: string;
-      try {
-        showWait("Computing epoch info", "Delayed unstake")
-        //compute delay according to contract state
-        const wait_epochs = 0; //await contract.compute_current_unstaking_delay(amount);
-        //compute from current epoch
-        const epochEnds = await endOfEpoch(); //when the current epoch ends
-        const ms_to_end_of_epoch = epochEnds.getTime() - new Date().getTime()
-        const extra_time = (wait_epochs - 1) * epochDurationMs;
-        computedMsg = `Funds will be available in approximately <b>${Math.round((ms_to_end_of_epoch + extra_time) / HOURS + 2)} hours.</b> You will <b>not</b> receive rewards during that period.`;
-      }
-      catch (ex) {
-        computedMsg = ex.message;
-      }
-      finally {
-        hideWaitKeepOverlay()
-      }
+//       let computedMsg: string;
+//       try {
+//         showWait("Computing epoch info", "Delayed unstake")
+//         //compute delay according to contract state
+//         const wait_epochs = 0; //await contract.compute_current_unstaking_delay(amount);
+//         //compute from current epoch
+//         const epochEnds = await endOfEpoch(); //when the current epoch ends
+//         const ms_to_end_of_epoch = epochEnds.getTime() - new Date().getTime()
+//         const extra_time = (wait_epochs - 1) * epochDurationMs;
+//         computedMsg = `Funds will be available in approximately <b>${Math.round((ms_to_end_of_epoch + extra_time) / HOURS + 2)} hours.</b> You will <b>not</b> receive rewards during that period.`;
+//       }
+//       catch (ex) {
+//         computedMsg = ex.message;
+//       }
+//       finally {
+//         hideWaitKeepOverlay()
+//       }
 
-      qs("#delayed-unstake-confirm.popup .header-note").innerHTML = computedMsg;
+//       qs("#delayed-unstake-confirm.popup .header-note").innerHTML = computedMsg;
 
-      //clear form
-      form.reset()
+//       //clear form
+//       form.reset()
 
-      showPopup("#delayed-unstake-confirm.popup")
+//       showPopup("#delayed-unstake-confirm.popup")
 
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-    // re-enable the form, whether the call succeeded or failed
-    fieldset.disabled = false
-  }
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//     // re-enable the form, whether the call succeeded or failed
+//     fieldset.disabled = false
+//   }
 
 //delayed unstake popup-form
-qs('form#delayed-unstake-confirm').onsubmit =
-  async function (event) {
-    event.preventDefault()
+// qs('form#delayed-unstake-confirm').onsubmit =
+//   async function (event) {
+//     event.preventDefault()
 
-    showWait("starting delayed unstake...")
+//     showWait("starting delayed unstake...")
 
-    try {
-      //get amount from div on screen 
-      const amount = toNumber(qs("#delayed-unstake-confirm.popup #amount").innerText);
-      if (amount <= 0) throw Error("amount should be greater than zero");
+//     try {
+//       //get amount from div on screen 
+//       const amount = toNumber(qs("#delayed-unstake-confirm.popup #amount").innerText);
+//       if (amount <= 0) throw Error("amount should be greater than zero");
 
-      // make a call to the smart contract
-      let result = await contract.unstake(amount)
+//       // make a call to the smart contract
+//       let result = await contract.unstake(amount)
 
-      //refresh acc info
-      await refreshAccountInfo()
+//       //refresh acc info
+//       await refreshAccountInfo()
 
-      showSuccess("Delayed Unstake process started")
+//       showSuccess("Delayed Unstake process started")
 
-    }
-    catch (ex) {
-      showErr(ex)
-    }
-  }
+//     }
+//     catch (ex) {
+//       showErr(ex)
+//     }
+//   }
 
 //delayed unstake withdraw button
-qs('button#delayed-withdraw-unstaked').onclick = withdrawUnstakedClickHandler;
+// qs('button#delayed-withdraw-unstaked').onclick = withdrawUnstakedClickHandler;
 
-async function withdrawUnstakedClickHandler(event: MouseEvent) {
-  event.preventDefault()
+// async function withdrawUnstakedClickHandler(event: MouseEvent) {
+//   event.preventDefault()
 
-  showWait("withdrawing unstaked...")
+//   showWait("withdrawing unstaked...")
 
-  try {
-    // make a call to the smart contract
-    //let result = await contract.withdraw_unstaked()
+//   try {
+//     // make a call to the smart contract
+//     //let result = await contract.withdraw_unstaked()
 
-    //refresh acc info
-    await refreshAccountInfo()
+//     //refresh acc info
+//     await refreshAccountInfo()
 
-    showSuccess("unstaked transferred to you NEAR account")
+//     showSuccess("unstaked transferred to you NEAR account")
 
-  }
-  catch (ex) {
-    showErr(ex)
-  }
-}
+//   }
+//   catch (ex) {
+//     showErr(ex)
+//   }
+// }
 
 //--------------------------------------
 // AutoRefresh

@@ -43,12 +43,13 @@
         </div>
       </div>
 
-      <h2>2. Stake and Farm Cheddar</h2>
+
       <form id="stake-form-not-connected">
         <div class="icon-header">
           <img src="./assets/stakin-cheddar.svg" width="50px" height="50px">
           <span>Cheddar</span>
         </div>
+        <h2>2. Stake and Farm Cheddar</h2>
         <div class="pool-meta">
           <div>Deposit Fee:</div>
           <div>0%</div>
@@ -57,7 +58,7 @@
           <div>Earn:</div>
           <div>Cheddar</div>
         </div>
-        <div class="pool-meta deposit">
+        <div class="pool-meta deposit" style="display:none;">
           <div>APR:</div>
           <div></div>
         </div>
@@ -106,7 +107,7 @@
           <div>Earn:</div>
           <div>Cheddar</div>
         </div>
-        <div class="pool-meta  deposit">
+        <div class="pool-meta  deposit" style="display:none;">
           <div>APR:</div>
           <div id="apr"></div>
         </div>
@@ -218,120 +219,6 @@
 
     </section>
 
-
-    <section id="liquidity" style="display:none">
-
-      <h2>NEAR/cheddar Pool</h2>
-      <h5>Swap Fee <span id="liquidity-unstake-fee"></span></h5>
-      <p></p>
-
-      <article id="liquidity-pool-stats">
-        <div class="stat-line">
-          <dt>Target Liquidity</dt>
-          <dd id="target-liquidity" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>Current Liquidity</dt>
-          <dd id="liquidity-balance" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>cheddar in the Pool</dt>
-          <dd id="liquidity-cheddar-balance" class="near balance"></dd>
-        </div>
-      </article>
-
-      <article id="user-liquidity-pool-stats">
-        <div class="stat-line">
-          <div class="line-left">
-            <span class="bold large near" id="your-share-value"></span>
-            <span>Your share value</span>
-          </div>
-          <div class="line-right"><button type="button" id="add-liquidity">Add Liquidity</button> <button type="button"
-              id="remove-liquidity">Remove</button> </div>
-        </div>
-        <div class="stat-line">
-          <div class="line-left">
-            <span class="bold large pct" id="your-share"></span>
-            <span>Your share of the Liquidity Pool</span>
-          </div>
-          <div class="line-right"> </div>
-        </div>
-      </article>
-
-      <article id="user-stats">
-        <div class="stat-line">
-          <dt>Available NEAR wallet</dt>
-          <dd id="wallet-available" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>cheddar Tokens/Staked</dt>
-          <dd id="cheddar-balance" class="near balance"></dd>
-        </div>
-      </article>
-
-
-    </section>
-
-
-    <section id="delayed-unstake" style="display:none">
-
-      <h2>Delayed Unstake</h2>
-      <p></p>
-      <form id="delayed-unstake">
-        <fieldset id="fieldset">
-          <div class="input-group">
-            <span>stⓃ</span>
-            <input id="amountElem" class="near amount input-box" inputmode="numeric"
-              placeholder="cheddar amount for delayed-unstake" autocomplete="off">
-            <span id="max" class="inside-input">Max</span>
-          </div>
-          <button type="submit">Start delayed unstake</button>
-          <div class="tooltip">info <span class='info'><span>
-                <div class="box tooltip-text">Delayed unstake will lock your funds for 2-6 days. <b>You will not receive
-                    rewards during that period.</b> After the waiting period is over, your funds will be available for
-                  withdraw.</div>
-          </div>
-        </fieldset>
-      </form>
-
-      <article id="user-stats">
-        <div class="stat-line">
-          <dt>Available NEAR wallet</dt>
-          <dd id="wallet-available" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>cheddar Tokens/Staked</dt>
-          <dd id="cheddar-balance" class="near balance"></dd>
-        </div>
-      </article>
-
-      <article id="delayed-unstake-info-group">
-        <div class="stat-line">
-          <div class="line-left">
-            <span class="bold large near" id="delayed-unstake-amount"></span>
-            <span>Unstaked waiting</span>
-          </div>
-          <div class="line-right"> </div>
-        </div>
-        <div class="stat-line">
-          <div class="line-left">
-            <span class="bold large">
-              <span>~</span><span id="delayed-unstake-hours"></span> <span>hs</span>
-            </span>
-            <span>Hours remaining</span>
-          </div>
-          <div class="line-right"><button type="button" disabled id="delayed-withdraw-unstaked">Withdraw</button> </div>
-        </div>
-        <div class="stat-line" id="delayed-unstake-when-line">
-          <div class="line-left">
-            <span class="bold large" id="delayed-unstake-when"></span>
-            <span>Wait finishes</span>
-          </div>
-          <div class="line-right"> </div>
-        </div>
-      </article>
-
-    </section>
 
     <section id="faq" style="display:none">
 

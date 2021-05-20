@@ -239,6 +239,7 @@ div {
 
 .pool-meta.earned {
   justify-content: left;
+  padding-top: 10px;
 }
 
 .pool-meta.earned div:nth-child(1) {
