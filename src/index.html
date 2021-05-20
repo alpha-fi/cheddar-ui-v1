@@ -15,7 +15,7 @@
 <body>
 
   <header>
-    <div><img src="./assets/cheddar-logo.svg" /></div>
+    <div><img src="./assets/cheddar-logo.svg" width="175px;"/></div>
     <nav>
       <a href="#" id="home">Home</a>
       <a href="#" id="unstake" class="hidden">Unstake</a>
@@ -90,13 +90,14 @@
 
     <section id="home-connected" style="display:none">
 
-      <h2>Stake NEAR to Earn Cheddar</h2>
+
       <p></p>
       <form id="stake">
         <div class="icon-header">
           <img src="./assets/stakin-cheddar.svg" width="50px" height="50px">
           <span>Cheddar</span>
         </div>
+              <h2>Stake NEAR -> Farm Cheddar</h2>
         <div class="pool-meta">
           <div>Deposit Fee:</div>
           <div>0%</div>
@@ -133,7 +134,7 @@
             <span>Ⓝ NEAR</span>
           </div>
           <div class="pool-meta wallet-balance">
-            <div class="">Available to stake <span id="wallet-available" class="near balance"></span></div>
+            <div class="">Available to stake:&nbsp;<span id="wallet-available" class="near balance"></span></div>
           </div>
           <div class="pool-meta actions">
             <div class="hQrVZb">
@@ -341,18 +342,23 @@
         <label class="collapsible">
           <input type="checkbox" />
           <div class="collapser">
-            <span class="arrow"></span>Why stake in this beautiful meta-staking pool?
+            <span class="arrow"></span>
+            What is cheddar?
           </div>
-          <div class="collapsed">Several Reasons:<ul>
-              <li>You <i>tokenize your stake</i> so now you can use cheddar in the emerging NEAR DEFI market while you
-                keeping earning staking rewards. Liberate your stake!!</li>
-              <li>Once you stake here, you can do <i>Liquid Unstakes</i>, meaning you can get your NEAR back without
-                waiting several days</li>
-              <li>You avoid putting all eggs in one basket. This contract distributes it’s delegated funds into several
-                validators, so you greatly reduce the risk of getting no-rewards due to validator outages</li>
-              <li>By distributing stake, you contribute to decentralization and censorship-resistance for the NEAR
-                protocol</li>
-              <li>You get $META governance tokens automatically while using this contract</li>
+          <div class="collapsed"><b>Cheddar</b> is a NEP-141 loyalty token that rewards users of the NEAR ecosystem of dApps. Our vision is to help create a thriving ecosystem of NEAR dApps and DeFi through strategic partnerships that promote the use of NEAR while rewarding users.<br/><br/>Use NEAR dApps to Farm, Stake, LP and stack Cheddar! 
+          </div>
+        </label>
+
+        <label class="collapsible">
+          <input type="checkbox" />
+          <div class="collapser">
+            <span class="arrow"></span>
+            Does Cheddar have an airdrop?
+          </div>
+          <div class="collapsed">No, instead of an airdrop we opted to allow everyone in the NEAR ecosystem the opportunity to stack some Cheddar.<ul>
+              <li>1.5M Cheddar</li>
+              <li>3 Weeks of farming</li>
+              <li>Stake NEAR to Farm Cheddar</li>
             </ul>
           </div>
         </label>
@@ -361,108 +367,28 @@
           <input type="checkbox" />
           <div class="collapser">
             <span class="arrow"></span>
-            What's cheddar?
+            What happens to my staked NEAR?
           </div>
-          <div class="collapsed"><b>cheddar</b> means staked-NEAR, is the NEP-141 token this contract manages,
-            representing your staked-NEAR. After staking, you can use your cheddar in other markets while still earning
-            rewards. After each epoch, you'll get <i>more cheddar</i> as staking-rewards, just by holding cheddar
+          <div class="collapsed">It is soley for the purpose of farming Cheddar. We don't transfer, leverage or lock your NEAR.
           </div>
         </label>
 
         <label class="collapsible">
           <input type="checkbox" />
           <div class="collapser">
-            <span class="arrow"></span>
-            Are there rewards for early adopters?
+            <span class="arrow"></span>How long do I have to leave my NEAR staked?
           </div>
-          <div class="collapsed">Yes. The first several epochs of the contract in mainnet, there will be special
-            multipliers for early adopters:<ul>
-              <li> If you make a liquid unstake you get 5x $META per each NEAR in fees</li>
-              <li> If you stake and hold cheddar, you get 10x $META from staking rewards</li>
-              <li> Liquidity Providers get 50x $META per each NEAR of earned fee </li>
-            </ul>
+          <div class="collapsed">That's completely up to you at this stage. The longer you stake, the more Cheddar you earn.
           </div>
         </label>
 
         <label class="collapsible">
           <input type="checkbox" />
           <div class="collapser">
-            <span class="arrow"></span>
-            How does the "Liquid Unstake" works?
+            <span class="arrow"></span>Is there a Liquidity Pool (LP)?
           </div>
-          <div class="collapsed">Within the contract there's a <i>Liquidity Pool</i>, the pool works like an
-            "single-direction swap pool" allowing you to enter <b>cheddar</b>(staked-NEAR) in the pool and get NEAR back
-            after paying a "swap fee". The fee decreases when there's liquidity in the pool and reaches minimum when the
-            liquidity target is reached.
+          <div class="collapsed">As a loyalty token Cheddar is meant to be used in the NEAR ecosystem of apps. The team does not have an active plan to launch liquidity pools (LP's). We will however provide Cheddar as a loyalty token for LP's the community or other AMM / DEX's launch in a future phase.
           </div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>Who's providing the Liquidity?
-          </div>
-          <div class="collapsed">Anyone can provide liquidity and earn fees in the process. Check the "Pool" section.
-          </div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>What's "Delayed-Unstake"?
-          </div>
-          <div class="collapsed">In the NEAR blockchain, validating stakers can not remove their stake immediately and
-            must wait some period to do so. Waiting periods can be from 2 to 4 days.
-          </div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>Why my staking is not reflected in the "staking" section of my NEAR Wallet?
-          </div>
-          <div class="collapsed">Good question! The meta-pool staking is reflected in you holding <b>cheddar tokens</b>,
-            it will not be reflected in the wallet as "staking", it will be reflected as <b>cheddar tokens</b>
-          </div>
-        </label>
-
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>What's the reward trip-meter?
-          </div>
-          <div class="collapsed">This contract allows you to precisely measure staking-rewards. If you click in your
-            account (top-right), you'll see the exact amount of rewards you've received while holding <b>cheddar</b>
-            even if you staked and unstaked several times
-          </div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>I want to know more about the meta-pool
-          </div>
-          <div class="collapsed">See more documentation <a href="https://narwallets.github.io/meta-pool/">here</a>.
-          </div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>Beta-Testing: Where's the old version?, I want to unstake and move to the new
-            version
-          </div>
-          <div class="collapsed">Cheddar Token V1 is at <a target="blank"
-              href="https://narwallets.com/dapp/testnet/meta-v1/">narwallets.com/dapp/testnet/meta-v1</a></div>
-        </label>
-
-        <label class="collapsible">
-          <input type="checkbox" />
-          <div class="collapser">
-            <span class="arrow"></span>What's the Answer to the Ultimate Question of Life, the Universe, and Everything?
-          </div>
-          <div class="collapsed">42.</div>
         </label>
 
       </article>

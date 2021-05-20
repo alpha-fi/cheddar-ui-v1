@@ -23,6 +23,7 @@ html {
   font-feature-settings: 'case'on;
   background     : url(assets/cheddar-farm-background.svg) no-repeat;
   background-size: 100% auto;
+  background-color: #5e8c01;
   /* Fill width, retain proportions */
 }
 
@@ -61,13 +62,13 @@ h1 {
 
 h2 {
   font-weight  : 600;
-  font-size    : 22px;
-  line-height  : 22px;
+  font-size    : 20px;
+  line-height  : 20px;
   /* identical to box height, or 109% */
-  color        : #222222;
+  color        : #fd941f;
   text-align   : center;
   margin-top   : 0px;
-  margin-bottom: 15px
+  margin-bottom: 15px;
 }
 
 h2 img {
