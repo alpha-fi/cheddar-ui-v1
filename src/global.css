@@ -1,9 +1,5 @@
 * {
-  box-sizing    : border-box;
-  padding       : 2px;
-  /*  word-break: keep-all;
-  white-space   : nowrap;  
-*/
+  -webkit-font-smoothing: antialiased;
 }
 
 html {
@@ -25,8 +21,7 @@ html {
   /* identical to box height, or 123% */
   color                : var(--fg);
   font-feature-settings: 'case'on;
-
-  background     : url(assets/background.svg);
+  background     : url(assets/cheddar-farm-background.svg) no-repeat;
   background-size: 100% auto;
   /* Fill width, retain proportions */
 }
@@ -39,7 +34,12 @@ html {
   border-radius: 6px;
 }
 
+*, ::before, ::after {
+    box-sizing: border-box;
+}
+
 body {
+  line-height: 1;
   margin: 0;
 }
 
@@ -47,7 +47,7 @@ header {
   display    : flex;
   flex-flow  : row;
   align-items: center;
-  margin     : 16px 10px;
+  margin     : 15px 15px 15px 15px;
 }
 
 h1 {
@@ -66,7 +66,7 @@ h2 {
   /* identical to box height, or 109% */
   color        : #222222;
   text-align   : center;
-  margin-top   : 15px;
+  margin-top   : 0px;
   margin-bottom: 15px
 }
 
@@ -168,8 +168,17 @@ header nav a {
   font-size    : 14px;
 }
 
+div {
+  margin: 0px;
+  padding: 0px;
+  border: 0px;
+  font-size: 100%;
+  vertical-align: baseline;
+}
+
 .icon-header {
   display: inline;
+  padding: 1em 0 2em 0;
 }
 
 .icon-header img {
@@ -273,6 +282,8 @@ header nav a {
 }
 
 .pool-meta.wallet-balance div:nth-child(1) {
+  box-align: center;              /* As specified */
+  -moz-box-align: center;         /* Mozilla */
   -webkit-box-align: center;
   align-items      : center;
   color            : rgb(15, 132, 248);
@@ -288,10 +299,7 @@ header nav a {
 .user-info {
   background-color: #4BC7EF;
   border-radius   : 10px;
-  height          : 22px;
-  margin-right    : 1em;
-  margin-left     : 0.6em;
-  padding-left    : 0.5em;
+  padding          : 0.5em 1em;
 }
 
 .pool-meta.actions {
@@ -299,7 +307,6 @@ header nav a {
 }
 
 .pool-meta.actions button {
-  height   : 48px;
   width    : 48px;
   padding  : 0;
   min-width: 48px;
@@ -313,7 +320,7 @@ header nav a {
   display     : inline-block;
   color       : var(--bg);
   font-weight : 400;
-  font-size   : 12px;
+  font-size   : 14px;
   line-height : 11px;
   padding-left: 0.5em;
   margin-top  : 0px;
@@ -370,7 +377,7 @@ form,
 article,
 form,
 .box {
-  padding      : 15px;
+  padding      : 10px;
   background   : #FFFFFF;
   box-shadow   : 0px 0px 20px rgba(220, 226, 235, 0.7);
   border-radius: 12px;
@@ -412,7 +419,7 @@ form,
   section,
   article,
   form {
-    min-width: 430px;
+    min-width: 380px;
   }
 }
 
@@ -449,18 +456,17 @@ input,
 }
 
 button {
-  font-weight  : 400;
-  font-size    : 16px;
-  height       : 48px;
-  min-width    : 50%;
-  background   : var(--primary);
+  font-weight: 400;
+  font-size: 16px;
+  height: 48px;
+  min-width: 50%;
+  background: var(--primary);
   border-radius: 16px;
-  color        : #ffffffe3;
-  margin       : 5px 7px;
-  padding      : 0px 24px;
-  border       : 0;
-  box-shadow   : rgb(14 14 44 / 40%) 0px -1px 0px 0px inset;
-
+  color: hsla(0,0%,100%,.8901960784313725);
+  margin: 5px 7px;
+  padding: 0 24px;
+  border: 0;
+  box-shadow: inset 0 -1px 0 0 rgb(14 14 44 / 40%);
 }
 
 button:disabled {
@@ -473,6 +479,71 @@ button.hollow {
   color         : var(--primary);
   padding-top   : 2px;
   padding-bottom: 2px;
+}
+
+.hQrVZb {
+    display: flex;
+}
+
+.hQrVZb svg {
+    width: 20px;
+    height: 20px;
+}
+
+.eUMSBu {
+    fill: white;
+    flex-shrink: 0;
+}
+
+.gAaTZf {
+    -webkit-box-align: center;
+    align-items: center;
+    background-color: var(--primary);
+    border: 0px;
+    border-radius: 16px;
+    box-shadow: none;
+    color: brown;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    width: max-content;
+    height: 48px;
+    line-height: 1;
+    letter-spacing: 0.03em;
+    -webkit-box-pack: center;
+    justify-content: center;
+    outline: 0px;
+    padding: 0px 24px;
+    transition: background-color 0.2s ease 0s;
+    opacity: 1;
+    margin-right: 6px;
+}
+
+.hwJKVX {
+    -webkit-box-align: center;
+    align-items: center;
+    background-color: var(--primary);
+    border: 0px;
+    border-radius: 16px;
+    box-shadow: none;
+    color: brown;
+    cursor: pointer;
+    display: inline-flex;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    width: max-content;
+    /* height: 48px; */
+    line-height: 1;
+    letter-spacing: 0.03em;
+    -webkit-box-pack: center;
+    justify-content: center;
+    outline: 0px;
+    padding: 0px 24px;
+    transition: background-color 0.2s ease 0s;
+    opacity: 1;
 }
 
 .overlay {
@@ -701,5 +772,9 @@ small img {
 }
 
 .hidden {
+  display: none;
+}
+
+#max {
   display: none;
 }

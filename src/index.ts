@@ -713,7 +713,7 @@ async function refreshAccountInfo() {
     if (accName.length > 22) accName = accName.slice(0, 10) + ".." + accName.slice(-10);
     qs(".user-info #account-id").innerText = accName;
     //show top-right-balance only if connected wallet
-    show(qs("#top-right-balance"), wallet.isConnected())
+    //show(qs("#top-right-balance"), wallet.isConnected())
 
     //update shown wallet balance
     qsaInnerText("#wallet-available", toStringDec(yton(await wallet.getAccountBalance())));
