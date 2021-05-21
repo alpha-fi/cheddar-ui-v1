@@ -27,7 +27,7 @@ let tokenContract: NEP141Trait;
 
 let accountInfo: string[];
 let total_supply: number;
-let contractParams: ContractParams = { owner_id: "", token_contract: "cheddar.token", rewards_per_year: 10000, is_open: false }
+let contractParams: ContractParams = { owner_id: "", token_contract: "cheddar.token", rewards_per_year: 10000, is_open: false, farming_start: 0, farming_end: 0 }
 
 let nearWebWalletConnection: WalletConnection;
 
@@ -134,8 +134,8 @@ qs('form#stake').onsubmit =
         await contract.stake(amount)
       }
       else if (isHarvest) {
-        if (current < 1) throw Error("not enough cheddar")
-        amount = current - 1
+        if (computed < 1) throw Error("not enough cheddar")
+        amount = computed - 1
         await contract.withdraw_crop(amount)
       }
       else {
@@ -151,8 +151,8 @@ qs('form#stake').onsubmit =
 
       showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount) + (isHarvest ? " CHEDDAR" : " NEAR"))
       if (isHarvest) {
-        current = 1;
-        target = 1;
+        computed = 1;
+        real = 1;
       }
 
     }
@@ -678,33 +678,52 @@ function loginNarwallets() {
   window.open("http://www.narwallets.com/help/connect-to-web-app")
 }
 
-let speed = 0.00001;
+let rewards_per_second = 0.001;
 let skip = 0;
 let staked = 0;
-let target = 0;
-let current = 0;
+let real = 0;
+let computed = 0;
+let previous_real = 0;
+let previous_timestamp = 0;
 async function refreshRewardsLoop() {
-  if (wallet.isConnected()) {
-    if (skip <= 0) {
-      accountInfo = await contract.status()
-      staked = yton(accountInfo[0]);
-      target = yton(accountInfo[1]);
-      if (staked > 0) {
-        if (current == 0) current = target;
-        if (current < target - 0.001) speed = (target - current) / 12;
-        else if (current > target + 0.001) speed = speed / 2;
-        console.log(target, current, target - current, speed);
+  try {
+    let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+    if (wallet.isConnected() && contractParams.is_open && unixTimestamp >= contractParams.farming_start && unixTimestamp <= contractParams.farming_end) {
+      if (skip <= 0) {
+        accountInfo = await contract.status()
+        staked = yton(accountInfo[0]);
+        real = yton(accountInfo[1]);
+        unixTimestamp = Number(accountInfo[2]);
+        let now = unixTimestamp * 1000 //to milliseconds
+        if (staked > 0) {
+          if (previous_timestamp && real > previous_real) {
+            //recompute speed
+            let advanced = real - previous_real
+            let elapsed_ms = now - previous_timestamp
+            rewards_per_second = advanced * 1000 / elapsed_ms
+            console.log(previous_real, real, advanced, computed, real - computed, elapsed_ms, rewards_per_second);
+          }
+        }
+        previous_real = real;
+        previous_timestamp = now
+        skip = 20;
+        computed = real;
       }
-      current = target;
-      skip = 10;
+      else {
+        skip--;
+        if (previous_timestamp) {
+          let elapsed_seconds = Math.trunc((Date.now() - previous_timestamp) / 1000)
+          if (staked != 0) computed = previous_real + rewards_per_second * elapsed_seconds;
+        }
+      }
+      qsaInnerText("#cheddar-balance", toStringDecLong(computed))
     }
-    else {
-      skip--;
-      if (staked != 0) current += speed;
-    }
-    qsaInnerText("#cheddar-balance", toStringDecLong(current))
+  } catch (ex) {
+    console.error(ex);
   }
-  setTimeout(refreshRewardsLoop, 200)
+  finally {
+    setTimeout(refreshRewardsLoop, 200)
+  }
 }
 
 async function refreshAccountInfo() {
@@ -724,17 +743,19 @@ async function refreshAccountInfo() {
       contractParams = await contract.get_contract_params()
       total_supply = yton(await tokenContract.ft_total_supply())
       staked = yton(accountInfo[0]);
-      target = yton(accountInfo[1]);
+      real = yton(accountInfo[1]);
+      qs("#farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
+      qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
     }
     else {
       contractParams.rewards_per_year = 10000;
       accountInfo = ["0", "0"]
     }
-    let aprString = contractParams.rewards_per_year.toString();
-    if (contractParams.rewards_per_year > 1000) {
-      aprString = `${contractParams.rewards_per_year / 1000}k`;
-    }
-    qsaInnerText("#apr", aprString + "%")
+    //let aprString = contractParams.rewards_per_year.toString();
+    //if (contractParams.rewards_per_year > 1000) {
+    //  aprString = `${contractParams.rewards_per_year / 1000}k`;
+    //}
+    //qsaInnerText("#apr", aprString + "%")
     qsaInnerText("#near-balance", toStringDec(staked))
     // qs("#trip-rewards").innerText = toStringDec(yton(accountInfo.trip_rewards))
     // qs("#trip-start").innerText = new Date(Number(accountInfo.trip_start)).toLocaleString()
@@ -858,7 +879,7 @@ window.onload = async function () {
           }
           case "nslp_add_liquidity": {
             showSection("#liquidity")
-            showLiquidityOwned();
+            //showLiquidityOwned();
             break;
           }
           case "withdraw_crop": {
