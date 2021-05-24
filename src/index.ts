@@ -15,6 +15,7 @@ import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, show
 import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { computeCurrentEpoch, EpochInfo } from './util/near-epoch';
 import { NEP141Trait } from './contracts/NEP141';
+import { InvalidSignature } from 'near-api-js/lib/generated/rpc_error_types';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'development')
@@ -27,7 +28,7 @@ let tokenContract: NEP141Trait;
 
 let accountInfo: string[];
 let total_supply: number;
-let contractParams: ContractParams = { owner_id: "", token_contract: "cheddar.token", rewards_per_year: 10000, is_open: false, farming_start: 0, farming_end: 0 }
+let contractParams: ContractParams = { owner_id: "", token_contract: "cheddar.token", rewards_per_day: ntoy(10), is_open: false, farming_start: 0, farming_end: 0 }
 
 let nearWebWalletConnection: WalletConnection;
 
@@ -678,7 +679,7 @@ function loginNarwallets() {
   window.open("http://www.narwallets.com/help/connect-to-web-app")
 }
 
-let rewards_per_second = 0.001;
+let rewards_per_second = 0.00001;
 let skip = 0;
 let staked = 0;
 let real = 0;
@@ -748,14 +749,13 @@ async function refreshAccountInfo() {
       qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
     }
     else {
-      contractParams.rewards_per_year = 10000;
+      contractParams.rewards_per_day = ntoy(10);
       accountInfo = ["0", "0"]
     }
-    //let aprString = contractParams.rewards_per_year.toString();
-    //if (contractParams.rewards_per_year > 1000) {
-    //  aprString = `${contractParams.rewards_per_year / 1000}k`;
-    //}
-    //qsaInnerText("#apr", aprString + "%")
+    let cheddarPerDay = Math.round(yton(BigInt(contractParams.rewards_per_day).toString()) * 7 * staked * 100) / 100;
+    let cheddarPerWeekString = `${cheddarPerDay} Cheddar/week`;
+    qsaInnerText("#cheddar-rate", cheddarPerWeekString)
+
     qsaInnerText("#near-balance", toStringDec(staked))
     // qs("#trip-rewards").innerText = toStringDec(yton(accountInfo.trip_rewards))
     // qs("#trip-start").innerText = new Date(Number(accountInfo.trip_start)).toLocaleString()

@@ -5,7 +5,7 @@ type U128String = string;
 export type ContractParams = {
     owner_id: string,
     token_contract: string,
-    rewards_per_year: number,
+    rewards_per_day: string, //yoctoCheddar per day per NEAR
     is_open: boolean,
     farming_start: number, //unix timestamp
     farming_end: number, //unix timestamp
