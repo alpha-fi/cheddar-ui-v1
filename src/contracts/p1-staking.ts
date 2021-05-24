@@ -47,8 +47,8 @@ export class StakingPoolP1 extends SmartContract {
         return this.call("close", {}, TGas(75), "1")
     }
 
-    withdraw_crop(amount: number): Promise<void> {
-        return this.call("withdraw_crop", { amount: ntoy(amount) }, TGas(125), "1")
+    withdraw_crop(): Promise<void> {
+        return this.call("withdraw_crop", { }, TGas(125), "1")
     }
 
 }

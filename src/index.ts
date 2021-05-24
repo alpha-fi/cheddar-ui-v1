@@ -135,9 +135,9 @@ qs('form#stake').onsubmit =
         await contract.stake(amount)
       }
       else if (isHarvest) {
-        if (computed < 1) throw Error("not enough cheddar")
+        if (computed < 1) throw Error("not enough cheddar (min 1 cheddar)")
         amount = computed - 1
-        await contract.withdraw_crop(amount)
+        await contract.withdraw_crop()
       }
       else {
         if (amount == 0) throw Error(`Input unstake amount`);
@@ -394,7 +394,7 @@ function showRemoveLiquidityResult(yoctoCheddar: string) {
 //       if (amount <= 0) throw Error("amount should be greater than zero");
 
 //       // make a call to the smart contract
-//       let result = await contract.withdraw_crop(amount)
+//       let result = await contract.withdraw_crop()
 
 //       //clear form
 //       form.reset()
@@ -713,8 +713,8 @@ async function refreshRewardsLoop() {
       else {
         skip--;
         if (previous_timestamp) {
-          let elapsed_seconds = Math.trunc((Date.now() - previous_timestamp) / 1000)
-          if (staked != 0) computed = previous_real + rewards_per_second * elapsed_seconds;
+          let elapsed_ms = Date.now() - previous_timestamp
+          if (staked != 0) computed = previous_real + rewards_per_second * elapsed_ms / 1000;
         }
       }
       qsaInnerText("#cheddar-balance", toStringDecLong(computed))
@@ -883,7 +883,7 @@ window.onload = async function () {
             break;
           }
           case "withdraw_crop": {
-            showSuccess(`Withdrew cheddar crop`)
+            showSuccess(`Withdrew all cheddar crop`)
             //showSuccess("Delayed Unstake process started")
             break;
           }
