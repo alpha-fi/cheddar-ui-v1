@@ -888,12 +888,12 @@ window.onload = async function () {
             break;
           }
           case "unstake": {
-            showSuccess(`Total Staked ${yton(data)}`)
+            showSuccess(`Total unstaked ${yton(data)}`)
             //showSuccess("Delayed Unstake process started")
             break;
           }
           case "stake": {
-            showSuccess(`Total Staked ${yton(data)} NEAR`)
+            showSuccess(`Total staked ${yton(data)} NEAR`)
             break;
           }
           default:
