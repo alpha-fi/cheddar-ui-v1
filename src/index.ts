@@ -686,10 +686,12 @@ let real = 0;
 let computed = 0;
 let previous_real = 0;
 let previous_timestamp = 0;
+
 async function refreshRewardsLoop() {
+  let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+  let isOpened = (contractParams.is_open && unixTimestamp >= contractParams.farming_start && unixTimestamp <= contractParams.farming_end);
   try {
-    let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-    if (wallet.isConnected() && contractParams.is_open && unixTimestamp >= contractParams.farming_start && unixTimestamp <= contractParams.farming_end) {
+    if (wallet.isConnected() && isOpened) {
       if (skip <= 0) {
         accountInfo = await contract.status()
         staked = yton(accountInfo[0]);
@@ -747,6 +749,7 @@ async function refreshAccountInfo() {
       real = yton(accountInfo[1]);
       qs("#farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
       qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
+      qsaInnerText("#cheddar-balance", toStringDecLong(real))
     }
     else {
       contractParams.rewards_per_day = ntoy(10);
