@@ -135,8 +135,8 @@ qs('form#stake').onsubmit =
         await contract.stake(amount)
       }
       else if (isHarvest) {
-        if (computed < 1) throw Error("not enough cheddar (min 1 cheddar)")
-        amount = computed - 1
+        if (cheddar_displayed <= 0) throw Error("no cheddar to harvest :(")
+        amount = cheddar_displayed;
         await contract.withdraw_crop()
       }
       else {
@@ -154,6 +154,7 @@ qs('form#stake').onsubmit =
       if (isHarvest) {
         computed = 1;
         real = 1;
+        display_cheddar(0);
       }
 
     }
@@ -710,7 +711,9 @@ async function refreshRewardsLoop() {
         previous_real = real;
         previous_timestamp = now
         skip = 20;
-        computed = real;
+        if (real > computed || (real > 0 && computed - real > real / 4)) { //if real is bigger or differ is >25%
+          computed = real
+        }
       }
       else {
         skip--;
@@ -719,7 +722,7 @@ async function refreshRewardsLoop() {
           if (staked != 0) computed = previous_real + rewards_per_second * elapsed_ms / 1000;
         }
       }
-      qsaInnerText("#cheddar-balance", toStringDecLong(computed))
+      display_cheddar(computed);
     }
   } catch (ex) {
     console.error(ex);
@@ -727,6 +730,12 @@ async function refreshRewardsLoop() {
   finally {
     setTimeout(refreshRewardsLoop, 200)
   }
+}
+
+let cheddar_displayed: number = 0;
+function display_cheddar(cheddar_amount: number) {
+  qsaInnerText("#cheddar-balance", toStringDecLong(cheddar_amount))
+  cheddar_displayed = cheddar_amount // so they can harvest
 }
 
 async function refreshAccountInfo() {
@@ -749,7 +758,7 @@ async function refreshAccountInfo() {
       real = yton(accountInfo[1]);
       qs("#farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
       qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
-      qsaInnerText("#cheddar-balance", toStringDecLong(real))
+      display_cheddar(real); // so they can harvest
     }
     else {
       contractParams.rewards_per_day = ntoy(10);
