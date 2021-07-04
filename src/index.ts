@@ -259,6 +259,12 @@ async function stakeMaxClick(event: MouseEvent) {
   }
 }
 
+ qs('a#terms-of-use').onclick =
+  async function (event) {
+    event.preventDefault()
+    showPopup("#terms.popup")
+  }
+
 qs('a#wallet-available').onclick =
   async function (event) {
     try {

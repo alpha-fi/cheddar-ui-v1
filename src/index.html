@@ -150,9 +150,13 @@ onblur="this.placeholder = 'Enter Amount'"
               <button id="unstake" class="gAaTZf" type="submit">UnStake</button>
             </div>
           </div>
+          <div class="disclaimer">
+            <input type="checkbox" id="terms-of-use" name="terms-of-use" value="true" checked="checked">
+              <label for="vehicle1">By depositing, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
+          </div>
+
         </fieldset>
       </form>
-
 
       <article id="meta-stats" style="display:none">
         <h4>Cheddar Token Stats</h4>
@@ -438,6 +442,21 @@ onblur="this.placeholder = 'Enter Amount'"
       <h3 id="title">Error</h3>
       <img class="icon" src="assets/warning.svg"></img>
       <p id="msg">message</p>
+      <button type="button" id="cancel" class="hollow close-popup">close</button>
+    </div>
+
+    <div id="terms" class="box popup" style="display:none">
+      <h3 id="title">Cheddar Terms of Use</h3>
+      <p id="msg">
+      <ol>
+        <li>
+          You shall use Cheddar for the sole purpose of utility in relation to the NEAR ecosystem and in conjunction with other NEAR DApps and for no other purpose. You shall use Cheddar in a manner that will, at all times, be in accordance with the laws of Switzerland and which will not injure or detract the reputation or conflict with any other interest of the Association.
+        </li>
+        <li>
+          You are prohibited from transferring Cheddar to a third party by sale, rent, lending, or in any other manner except for the utility in relation to the NEAR ecosystem and in conjunction with other NEAR DApps.
+        </li>
+      </ol>
+      </p>
       <button type="button" id="cancel" class="hollow close-popup">close</button>
     </div>
 

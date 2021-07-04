@@ -781,3 +781,7 @@ small img {
 #max {
   display: none;
 }
+
+a#terms-of-use {
+  color: blue;
+}
