@@ -309,8 +309,7 @@ div {
 }
 
 .pool-meta.actions button {
-  width    : 48px;
-  padding  : 0;
+  padding  : 1rem;
   min-width: 48px;
 }
 
@@ -505,7 +504,7 @@ button.hollow {
     border: 0px;
     border-radius: 16px;
     box-shadow: none;
-    color: brown;
+    color: white;
     cursor: pointer;
     display: inline-flex;
     font-family: inherit;
@@ -531,7 +530,7 @@ button.hollow {
     border: 0px;
     border-radius: 16px;
     box-shadow: none;
-    color: brown;
+    color: white;
     cursor: pointer;
     display: inline-flex;
     font-family: inherit;
@@ -585,6 +584,7 @@ fieldset {
   flex-flow  : column;
   align-items: center;
   width      : 100%;
+  padding-block-start: 0.75em;
 }
 
 .stat-line {

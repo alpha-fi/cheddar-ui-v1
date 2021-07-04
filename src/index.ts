@@ -11,7 +11,7 @@ import { StakingPoolP1 } from './contracts/p1-staking';
 import type { ContractParams } from './contracts/contract-structs';
 
 //qs/qsa are shortcut for document.querySelector/All
-import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup } from './util/document';
+import { qs, qsa, qsi, qso, ge, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup } from './util/document';
 import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { computeCurrentEpoch, EpochInfo } from './util/near-epoch';
 import { NEP141Trait } from './contracts/NEP141';
@@ -109,19 +109,39 @@ qs('#sign-out').onclick =
   }
 
 
-//button stake
-qs('form#stake').onsubmit =
-  async function (event: any) {
+//Stake button. Workaround for Safari emmitter issue.
+qs('button#stake').onclick =
+async function (event) {
+  event.preventDefault()
+  var buttonId = 'button#' + event.target.id
+  var button = qs(buttonId)
+
+  submitForm(event.target.id, button.form)
+}
+
+//UnStake button. Workaround for Safari emmitter issue.
+qs('button#unstake').onclick =
+async function (event) {
+  event.preventDefault()
+  var buttonId = 'button#' + event.target.id
+  var button = qs(buttonId)
+
+  submitForm(event.target.id, button.form)
+}
+
+//Form submission
+//qs('form#stake').onsubmit =
+  async function submitForm(action: string, form: any) {
     event.preventDefault()
 
-    const form = event.target as HTMLFormElement
+    //const form = event.target as HTMLFormElement
     // get elements from the form using their id attribute
     const { fieldset, stakeAmount } = form
 
     // disable the form while the call is made
     fieldset.disabled = true
-    const isStaking = (event.submitter.id == "stake")
-    const isHarvest = (event.submitter.id == "harvest")
+    const isStaking = (action == "stake")
+    const isHarvest = (action == "harvest")
     showWait(isStaking ? "staking..." : isHarvest ? "Harvesting..." : "unstaking...")
 
     try {
@@ -170,7 +190,6 @@ qs('form#stake').onsubmit =
 
     // re-enable the form, whether the call succeeded or failed
     fieldset.disabled = false
-
   }
 
 // /// make same fee calculation as contract (linear curve from max to min on target)
@@ -239,6 +258,19 @@ async function stakeMaxClick(event: MouseEvent) {
     showErr(ex)
   }
 }
+
+qs('a#wallet-available').onclick =
+  async function (event) {
+    try {
+      event.preventDefault()
+      var amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
+      console.log()
+      qsi("#stakeAmount").value = parseInt(amountAvailable.replace(",", ""))
+    }
+    catch (ex) {
+      showErr(ex)
+    }
+  }
 
 //button unstake max
 qs('form#unstake #max').onclick =
