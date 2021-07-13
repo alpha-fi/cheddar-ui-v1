@@ -18,7 +18,7 @@
     <div><img src="./assets/cheddar-logo.svg" width="175px;" /></div>
     <nav>
       <a href="#" id="home">Home</a>
-      <a href="#" id="unstake" class="hidden">Unstake</a>
+      <a href="#" id="unstake-m" class="hidden">Unstake</a>
       <a href="#" id="liquidity" class="hidden">Pool</a>
       <a href="#" id="delayed-unstake" class="hidden">Delayed-Unstake</a>
       <a href="#" id="faq">FAQ</a>
@@ -68,7 +68,7 @@
         </div>
         <div class="pool-meta earned amount">
           <div id="cheddar-balance">0</div>
-          <div><button id="harvest" type="submit">Harvest</button></div>
+          <div><button id="harvest-not-connected" type="submit">Harvest</button></div>
         </div>
         <div class="pool-meta earned">
           <div class="">NEAR</div>
@@ -151,8 +151,8 @@ onblur="this.placeholder = 'Enter Amount'"
             </div>
           </div>
           <div class="disclaimer">
-            <input type="checkbox" id="terms-of-use" name="terms-of-use" value="true" checked="checked">
-              <label for="vehicle1">By depositing, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
+            <input type="checkbox" id="terms-of-use" name="terms-of-use" value="true" checked="checked" disabled disabled="disabled" onclick="return true;" onkeydown="return true;">
+              <label>&nbsp;By staking, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
           </div>
 
         </fieldset>
@@ -178,11 +178,11 @@ onblur="this.placeholder = 'Enter Amount'"
     </section>
 
 
-    <section id="unstake" style="display:none">
+    <section id="unstake-old" style="display:none">
 
       <h2>Liquid Unstake</h2>
       <p></p>
-      <form id="unstake">
+      <form id="unstakeForm">
         <fieldset id="fieldset">
           <div class="input-group">
             <span>stⓃ</span>
@@ -321,24 +321,6 @@ onblur="this.placeholder = 'Enter Amount'"
           <!--<div class="line-right"><button type="button" id="unstake-from-my-account">Liquid Unstake</button> </div>-->
         </div>
 
-        <!--<div class="stat-line">
-          <div class="line-left">
-            <span id="trip-rewards" class="bold large near"></span>
-            <span>Rewards since</span> <span id="trip-start"></span>
-          </div>
-          <div class="line-right"> </div>
-        </div>
-
-        <div class="stat-line">
-          <div class="line-left">
-            <span id="meta-balance" class="bold large meta"></span>
-            <span>$META Tokens</span> <span id="trip-start"></span>
-          </div>
-          <div class="line-right">
-            <button type="button" id="harvest-meta">Harvest</button> 
-          </div>
-        </div>
-        -->
       </article>
 
     </section>
@@ -347,73 +329,6 @@ onblur="this.placeholder = 'Enter Amount'"
 
   <!----- OVERLAY POPUPS ----->
   <div class="overlay" id="overlay1" style="display:none">
-
-    <div id="add-liquidity" class="box popup" style="display:none">
-      <h3>Add Liquidity</h3>
-      <h5>Available <span id="wallet-available"></span>&nbsp;Ⓝ</h5>
-      <form id="add-liquidity">
-        <fieldset id="fieldset">
-          <div class="input-group">
-            <span>Ⓝ</span>
-            <input id="amountElem" class="near amount input-box" inputmode="numeric" placeholder="Amount"
-              autocomplete="off">
-          </div>
-          <div class="confirm-cancel-line">
-            <button type="submit" id="confirm">confirm</button>
-            <button type="button" id="cancel" class="hollow">cancel</button>
-          </div>
-        </fieldset>
-      </form>
-      <div class="footer-note">By adding liquidity you'll receive a share of the liquidity pool. On each liquid unstake
-        you'll get a proportion of the fees and also $META tokens</div>
-    </div>
-
-    <div id="remove-liquidity" class="box popup" style="display:none">
-      <h3>Remove Liquidity</h3>
-      <h5>Your share value<span id="your-share-value"></span>&nbsp;Ⓝ</h5>
-      <form id="remove-liquidity">
-        <fieldset id="fieldset">
-          <div class="input-group">
-            <span>Ⓝ</span>
-            <input id="amountElem" class="near amount input-box" inputmode="numeric" placeholder="Amount"
-              autocomplete="off">
-            <span id="max" class="inside-input">Max</span>
-          </div>
-          <div class="confirm-cancel-line">
-            <button type="submit" id="confirm">confirm</button>
-            <button type="button" id="cancel" class="hollow">cancel</button>
-          </div>
-        </fieldset>
-      </form>
-      <div class="footer-note">By removing liquidity you'll NEAR and cheddar in proportion of your share of the
-        liquidity pool.</div>
-    </div>
-
-    <div id="delayed-unstake-confirm" class="box popup" style="display:none">
-      <h3>Start Delayed Unstake</h3>
-      <div class="header-note"></div>
-      <form id="delayed-unstake-confirm">
-        <h4>Start delayed-unstake process for stⓃ<span id="amount"></span></h4>
-        <fieldset id="fieldset">
-        </fieldset>
-        <div class="confirm-cancel-line">
-          <button type="submit" id="confirm">confirm</button>
-          <button type="button" id="cancel" class="hollow">cancel</button>
-        </div>
-      </form>
-      <div class="footer-note">After the waiting period is over, the funds will be available for withdraw.</div>
-    </div>
-
-    <div id="delayed-unstake-warning" class="box popup" style="display:none">
-      <h3 id="title">Wait!</h3>
-      <img class="icon" src="assets/warning.svg"></img>
-      <p id="msg">Your previous delayed-unstake is available.</p>
-      <p>You should withdraw first</p>
-      <div class="confirm-cancel-line">
-        <button type="button" id="withdraw-now" class="">Withdraw Now</button>
-        <button type="button" id="cancel" class="hollow close-popup">close</button>
-      </div>
-    </div>
 
     <!-- generic popups -->
 
@@ -457,7 +372,7 @@ onblur="this.placeholder = 'Enter Amount'"
         </li>
       </ol>
       </p>
-      <button type="button" id="cancel" class="hollow close-popup">close</button>
+      <button type="button" id="cancel" class="hollow close-popup">Close</button>
     </div>
 
   </div>

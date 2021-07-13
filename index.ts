@@ -76,7 +76,7 @@ function navClickHandler_ConnectFirst(event: Event) {
   }
 }
 
-qs('nav #unstake-m').onclick = navClickHandler_ConnectFirst
+qs('nav #unstake').onclick = navClickHandler_ConnectFirst
 qs('nav #liquidity').onclick = navClickHandler_ConnectFirst
 //qs('nav #delayed-unstake').onclick = navClickHandler_ConnectFirst
 qs('nav #my-account').onclick = navClickHandler_ConnectFirst
@@ -136,6 +136,7 @@ async function (event) {
   var buttonId = 'button#' + event.target.id
   var button = qs(buttonId)
   console.log(button)
+
   submitForm(event.target.id, button.form)
 }
 
@@ -152,8 +153,7 @@ async function (event) {
     fieldset.disabled = true
     const isStaking = (action == "stake")
     const isHarvest = (action == "harvest")
-    const isUnstaking = (action == "harvest")
-    showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
+    showWait(isStaking ? "staking..." : isHarvest ? "Harvesting..." : "unstaking...")
 
     try {
       if (!contractParams.is_open) throw Error("pools are not open yet")
@@ -171,7 +171,7 @@ async function (event) {
         await contract.withdraw_crop()
       }
       else {
-        if (amount <= 0) throw Error(`Unstake a positive amount`);
+        if (amount == 0) throw Error(`Input unstake amount`);
         await contract.unstake(amount)
       }
 
@@ -290,7 +290,7 @@ qs('a#wallet-available').onclick =
   }
 
 //button unstake max
-qs('form#unstakeForm #max').onclick =
+qs('form#unstake #max').onclick =
   async function (event) {
     try {
       event.preventDefault()
@@ -302,7 +302,7 @@ qs('form#unstakeForm #max').onclick =
   }
 
 //unstake form
-qs('form#unstakeForm').onsubmit =
+qs('form#unstake').onsubmit =
   async function (event) {
     event.preventDefault()
 
@@ -958,9 +958,6 @@ window.onload = async function () {
       else if (method == "deposit_and_stake") {
         showSuccess("Deposit Successful")
       }
-      if (method == "unstake" && data == null) {
-        showSuccess("Unstaked All and Harvested Cheddar")
-      } 
       else if (data) {
         switch (method) {
           case "liquid_unstake": {
@@ -974,15 +971,17 @@ window.onload = async function () {
             break;
           }
           case "withdraw_crop": {
-            showSuccess(`Harvested ${yton(data)} Cheddar`)
+            showSuccess(`Withdrew all cheddar crop`)
+            //showSuccess("Delayed Unstake process started")
             break;
           }
           case "unstake": {
-            showSuccess(`Unstaked ${yton(data)} NEAR`)
+            showSuccess(`Total unstaked ${yton(data)}`)
+            //showSuccess("Delayed Unstake process started")
             break;
           }
           case "stake": {
-            showSuccess(`Staked ${yton(data)} NEAR`)
+            showSuccess(`Total staked ${yton(data)} NEAR`)
             break;
           }
           default:

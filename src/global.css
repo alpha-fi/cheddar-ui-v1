@@ -295,7 +295,7 @@ div {
   height           : 22px;
   -webkit-box-pack : end;
   justify-content  : flex-end;
-  margin-bottom    : 20px;
+  margin-bottom    : 10px;
 }
 
 .user-info {
@@ -305,7 +305,7 @@ div {
 }
 
 .pool-meta.actions {
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .pool-meta.actions button {
@@ -784,4 +784,49 @@ small img {
 
 a#terms-of-use {
   color: blue;
+}
+
+
+input[type=checkbox][disabled]{
+  outline:1px solid blue;
+}
+
+input#terms-of-use{
+background-color:green;
+}
+
+input[type="checkbox"]#terms-of-use {
+    display: none;
+}
+
+.disclaimer {
+  margin-top: 10px;
+}
+
+.disclaimer label:before{
+    background: green;
+    border: 1px solid #035f8f;
+    height: 18px;
+    width: 18px;
+    display: inline-block;
+    cursor: pointer;
+}
+input[type="checkbox"]#terms-of-use + label:before {
+    content: '';
+    background: blue;
+    border-color: blue;
+    color: blue;
+    font-size: 15px;
+    line-height: 15px;
+    text-align: center;
+}
+
+input[type="checkbox"]#terms-of-use:disabled + label:before {
+    border-color: blue;
+    color: #fff;
+    background: blue;
+}
+
+input[type="checkbox"]#terms-of-use:checked + label:before {
+    content: '✓';
 }

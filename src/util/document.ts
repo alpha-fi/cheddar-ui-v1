@@ -66,6 +66,7 @@ export function showMessage(msg:string,title?:string){
     showPopup("#message-box",msg,title);
 }
 export function showSuccess(msg:string,title?:string){
+    console.log(msg + " " + title)
     showPopup("#success-box",msg,title);
 }
 
