@@ -9,5 +9,7 @@ export type ContractParams = {
     is_open: boolean,
     farming_start: number, //unix timestamp
     farming_end: number, //unix timestamp
+    total_rewards: string, //yoctoCheddar
+    total_stake: string, //yoctoNEAR
 }
 
