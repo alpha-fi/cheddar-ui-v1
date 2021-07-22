@@ -35,6 +35,13 @@ html {
   border-radius: 6px;
 }
 
+#logo:focus {
+  outline-style: none;
+  outline-color: (--primary);
+  box-shadow   : none;
+  outline-width: 0px;
+}
+
 *, ::before, ::after {
     box-sizing: border-box;
 }
@@ -237,21 +244,21 @@ div {
   line-height: 1.5;
 }
 
-.pool-meta.earned {
+.pool-meta.earned, .pool-meta.staked {
   justify-content: left;
   padding-top: 10px;
 }
 
-.pool-meta.earned div:nth-child(1) {
+.pool-meta.earned div:nth-child(1), .pool-meta.staked div:nth-child(1) {
   color         : rgb(15, 132, 248);
   font-size     : 12px;
   font-weight   : 600;
   line-height   : 1.5;
-  text-transform: uppercase;
   padding-right : 3px;
 }
 
-.pool-meta.earned div:nth-child(2) {
+.pool-meta.earned div:nth-child(2), 
+.pool-meta.staked  div:nth-child(2) {
   color         : rgb(108, 157, 205);
   font-size     : 12px;
   font-weight   : 600;
@@ -259,19 +266,19 @@ div {
   text-transform: uppercase;
 }
 
-.pool-meta.earned.amount {
+.pool-meta.earned.amount, .pool-meta.staked.amount {
   justify-content: space-between;
   align-items    : center;
 }
 
-.pool-meta.earned.amount div:nth-child(1) {
+.pool-meta.earned.amount div:nth-child(1), .pool-meta.staked.amount div:nth-child(1){ 
   font-size  : 20px;
   font-weight: 600;
   line-height: 1.1;
   color      : rgb(6, 55, 103);
 }
 
-.pool-meta.earned.amount div button {
+.pool-meta.earned.amount div button, .pool-meta.staked.amount div button {
   margin    : 0;
   background: rgb(68, 196, 226);
   color     : white;
@@ -288,7 +295,7 @@ div {
   -moz-box-align: center;         /* Mozilla */
   -webkit-box-align: center;
   align-items      : center;
-  color            : rgb(15, 132, 248);
+  color            : rgb(6, 55, 103);
   display          : flex;
   font-size        : 14px;
   font-weight      : 700;
@@ -587,6 +594,16 @@ fieldset {
   padding-block-start: 0.75em;
 }
 
+#meta-stats h4 {
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  color: rgb(68, 196, 226);
+  text-align: center;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+
 .stat-line {
   display        : flex;
   flex-flow      : row;
@@ -595,8 +612,14 @@ fieldset {
   width          : 100%;
 }
 
+.stat-line span {
+  color: rgb(6, 55, 103);
+  font-size: 12px;
+  font-weight: 500;
+}
+
 .stat-line:not(:nth-child(1)) {
-  border-top: 1px dashed #D8DBE5;
+  /*border-top: 1px dashed #D8DBE5;*/
 }
 
 .stat-line dt {
@@ -727,11 +750,17 @@ small img {
   content    : "\24c3";
   transform  : scale(0.65);
   font-weight: 400;
-  margin-left: 2%;
 }
 
 .meta:after {
   content: "\24c2";
+}
+
+.cheddar:after {
+  display    : inline-block;
+  content    : "\24B8";
+  transform  : scale(0.65);
+  font-weight: 400;
 }
 
 .pct:after {
@@ -822,11 +851,20 @@ input[type="checkbox"]#terms-of-use + label:before {
 }
 
 input[type="checkbox"]#terms-of-use:disabled + label:before {
-    border-color: blue;
-    color: #fff;
-    background: blue;
+    border-color: #ccc;
+    color: blue;
+    background: #ddd;
 }
 
 input[type="checkbox"]#terms-of-use:checked + label:before {
     content: '✓';
+}
+
+.max {
+  color: blue;
+  font-size: 14px;
+}
+
+#near-balance a {
+  display: inline-block
 }

@@ -63,6 +63,17 @@ qs('nav #home').onclick =
     }
   }
 
+  qs('#logo').onclick =
+  async function (event) {
+    event.preventDefault()
+    if (wallet.isConnected()) {
+      signedInFlow()
+    }
+    else {
+      signedOutFlow();
+    }
+  }
+
 //generic nav handler
 function navClickHandler_ConnectFirst(event: Event) {
   event.preventDefault()
@@ -203,55 +214,6 @@ async function (event) {
     fieldset.disabled = false
   }
 
-// /// make same fee calculation as contract (linear curve from max to min on target)
-// function get_discount_basis_points(liquidity:bigint, sell:bigint):number {
-
-//   try {
-
-//     if (sell > liquidity) {
-//       //more asked than available => max discount
-//       return total_supply.nslp_max_discount_basis_points
-//     }
-
-//     const target = BigInt(total_supply.nslp_target);
-//     const liq_after = liquidity - sell;
-//     if (liq_after  >=  target) {
-//       //still >= target after swap => min discount
-//       return total_supply.nslp_min_discount_basis_points
-//     }
-
-//     let range = BigInt(total_supply.nslp_max_discount_basis_points - total_supply.nslp_min_discount_basis_points);
-//     //here 0<after<target, so 0<proportion<range
-//     const proportion:bigint = range * liq_after / target;
-//     return total_supply.nslp_max_discount_basis_points - Number(proportion);
-
-//   }
-//   catch(ex){
-//     console.error(ex);
-//     return total_supply.nslp_current_discount_basis_points;
-//   }
-
-// }
-
-// //while the user types in the unstake input-field
-// qs('input#unstakeAmount').oninput = 
-// function(event:Event) {
-//   let value = (event.target as HTMLInputElement).value ;
-//   let userSell = toNumber(value);
-//   let fee_bp;
-//   let extraMsg = "";
-//   if (isNaN(userSell) || userSell<=0 ) {
-//     fee_bp = total_supply.nslp_current_discount_basis_points;
-//   }
-//   else {
-//     const liquidity = BigInt(total_supply.nslp_liquidity)
-//     const sell = BigInt(ntoy(userSell))
-//     fee_bp = get_discount_basis_points( liquidity , sell);
-//     if (liquidity<sell) extraMsg=" - Not enough liquidity"
-//   }
-//   qs("section#unstake #liquidity-unstake-fee").innerText = (fee_bp/100).toString() + "%" + extraMsg ;
-// }
-
 //button stake max 
 qs('section#home-connected #max').onclick = stakeMaxClick;
 async function stakeMaxClick(event: MouseEvent) {
@@ -276,13 +238,24 @@ async function stakeMaxClick(event: MouseEvent) {
     showPopup("#terms.popup")
   }
 
-qs('a#wallet-available').onclick =
+qs('#wallet-available a .max').onclick =
   async function (event) {
     try {
       event.preventDefault()
       var amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
       console.log()
       qsi("#stakeAmount").value = parseInt(amountAvailable.replace(",", ""))
+    }
+    catch (ex) {
+      showErr(ex)
+    }
+  }
+
+  qs('#near-balance a .max').onclick =
+  async function (event) {
+    try {
+      event.preventDefault()
+      qsi("#stakeAmount").value = parseInt(yton(accountInfo[0]))
     }
     catch (ex) {
       showErr(ex)
@@ -364,123 +337,6 @@ function showRemoveLiquidityResult(yoctoCheddar: string) {
 }
 
 
-//add liquidity button
-// qs('button#add-liquidity').onclick =
-//   async function (event) {
-//     event.preventDefault()
-//     showPopup("#add-liquidity.popup")
-//   }
-//add liquidity popup-form
-// qs('form#add-liquidity').onsubmit =
-//   async function (event) {
-//     event.preventDefault()
-
-//     const form = event.target as HTMLFormElement
-//     // get elements from the form using their id attribute
-//     const { fieldset, amountElem } = form
-
-//     // disable the form while the call is made
-//     fieldset.disabled = true
-//     showWait("adding liquidity...")
-
-//     try {
-//       if (!contractParams.is_open) throw Error("pools are not open yet")
-
-//       //get amount
-//       const amount = toNumber(amountElem.value);
-//       //const MIN_ADD_LIQ = 2*yton(total_supply.min_deposit_amount)
-//       //if (amount < MIN_ADD_LIQ) throw Error(`add at least ${MIN_ADD_LIQ} NEAR`);
-
-//       // make a call to the smart contract
-//       //await contract.nslp_add_liquidity(amount)
-
-//       //clear form
-//       form.reset()
-
-//       //refresh acc info
-//       await refreshAccountInfo()
-
-//       showLiquidityOwned()
-
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//     // re-enable the form, whether the call succeeded or failed
-//     fieldset.disabled = false
-//   }
-
-// function showLiquidityOwned() {
-//   //showSuccess(`You own ${accountInfo.nslp_share_bp==0? "<0.01": toStringDecMin(accountInfo.nslp_share_bp/100)}% of the Liquidity Pool`,"Add liquidity")    
-// }
-
-//remove liquidity button
-// qs('button#remove-liquidity').onclick =
-//   async function (event) {
-//     event.preventDefault()
-//     showPopup("#remove-liquidity.popup")
-//   }
-//remove liquidity max button
-// qs('form#remove-liquidity #max').onclick =
-//   async function (event) {
-//     try {
-//       event.preventDefault()
-//       //qsi("form#remove-liquidity #amountElem").value = toStringDecMin(yton(accountInfo.nslp_share_value))
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//   }
-//remove liquidity popup-form
-// qs('form#remove-liquidity').onsubmit =
-//   async function (event) {
-//     event.preventDefault()
-
-//     const form = event.target as HTMLFormElement
-//     // get elements from the form using their id attribute
-//     const { fieldset, amountElem } = form
-
-//     // disable the form while the call is made
-//     fieldset.disabled = true
-//     showWait("removing liquidity...")
-
-//     try {
-//       //get amount
-//       const amount = toNumber(amountElem.value);
-//       if (amount <= 0) throw Error("amount should be greater than zero");
-
-//       // make a call to the smart contract
-//       let result = await contract.withdraw_crop()
-
-//       //clear form
-//       form.reset()
-
-//       //refresh acc info
-//       await refreshAccountInfo()
-
-//       //showRemoveLiquidityResult(result)
-
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//     // re-enable the form, whether the call succeeded or failed
-//     fieldset.disabled = false
-//   }
-
-//------ DELAYED UNSTAKE
-//delayed unstake max button
-// qs('form#delayed-unstake #max').onclick =
-//   async function (event) {
-//     try {
-//       event.preventDefault()
-//       //qsi("form#delayed-unstake #amountElem").value = toStringDecMin(yton(accountInfo.stnear))
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//   }
-
 //compute epoch info
 let epochCached: EpochInfo;
 let endOfEpochCached = new Date();
@@ -511,117 +367,6 @@ function checkMinUnstake(amountToUnstake: number) {
     if (amountToUnstake < MIN_UNSTAKE_NEAR) throw Error(`unstake at least ${MIN_UNSTAKE_NEAR} NEAR`);
   }
 }
-
-//delayed unstake warning -> withdraw now
-//qs('#delayed-unstake-warning #withdraw-now').onclick = withdrawUnstakedClickHandler;
-
-//delayed unstake initial form
-// qs('form#delayed-unstake').onsubmit =
-//   async function (event) {
-//     event.preventDefault()
-
-//     //do not start a new waiting period before withdrawing the last-one!
-//     // if (accountInfo.unstaked!="0" && accountInfo.can_withdraw) {
-//     //   showPopup("#delayed-unstake-warning");
-//     //   return;
-//     // }
-
-//     const form = event.target as HTMLFormElement
-//     // get elements from the form using their id attribute
-//     const { fieldset, amountElem } = event.target as HTMLFormElement
-
-//     // disable the form while the call is made
-//     fieldset.disabled = true
-
-//     try {
-
-//       //get amount
-//       const amount = toNumber(amountElem.value)
-//       checkMinUnstake(amount)
-
-//       qs("#delayed-unstake-confirm.popup #amount").innerText = toStringDec(amount);
-
-//       let computedMsg: string;
-//       try {
-//         showWait("Computing epoch info", "Delayed unstake")
-//         //compute delay according to contract state
-//         const wait_epochs = 0; //await contract.compute_current_unstaking_delay(amount);
-//         //compute from current epoch
-//         const epochEnds = await endOfEpoch(); //when the current epoch ends
-//         const ms_to_end_of_epoch = epochEnds.getTime() - new Date().getTime()
-//         const extra_time = (wait_epochs - 1) * epochDurationMs;
-//         computedMsg = `Funds will be available in approximately <b>${Math.round((ms_to_end_of_epoch + extra_time) / HOURS + 2)} hours.</b> You will <b>not</b> receive rewards during that period.`;
-//       }
-//       catch (ex) {
-//         computedMsg = ex.message;
-//       }
-//       finally {
-//         hideWaitKeepOverlay()
-//       }
-
-//       qs("#delayed-unstake-confirm.popup .header-note").innerHTML = computedMsg;
-
-//       //clear form
-//       form.reset()
-
-//       showPopup("#delayed-unstake-confirm.popup")
-
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//     // re-enable the form, whether the call succeeded or failed
-//     fieldset.disabled = false
-//   }
-
-//delayed unstake popup-form
-// qs('form#delayed-unstake-confirm').onsubmit =
-//   async function (event) {
-//     event.preventDefault()
-
-//     showWait("starting delayed unstake...")
-
-//     try {
-//       //get amount from div on screen 
-//       const amount = toNumber(qs("#delayed-unstake-confirm.popup #amount").innerText);
-//       if (amount <= 0) throw Error("amount should be greater than zero");
-
-//       // make a call to the smart contract
-//       let result = await contract.unstake(amount)
-
-//       //refresh acc info
-//       await refreshAccountInfo()
-
-//       showSuccess("Delayed Unstake process started")
-
-//     }
-//     catch (ex) {
-//       showErr(ex)
-//     }
-//   }
-
-//delayed unstake withdraw button
-// qs('button#delayed-withdraw-unstaked').onclick = withdrawUnstakedClickHandler;
-
-// async function withdrawUnstakedClickHandler(event: MouseEvent) {
-//   event.preventDefault()
-
-//   showWait("withdrawing unstaked...")
-
-//   try {
-//     // make a call to the smart contract
-//     //let result = await contract.withdraw_unstaked()
-
-//     //refresh acc info
-//     await refreshAccountInfo()
-
-//     showSuccess("unstaked transferred to you NEAR account")
-
-//   }
-//   catch (ex) {
-//     showErr(ex)
-//   }
-// }
 
 //--------------------------------------
 // AutoRefresh
@@ -750,11 +495,12 @@ async function refreshRealRewardsLoop() {
     if (isOpened && wallet.isConnected()) {
       accountInfo = await contract.status()
       staked = yton(accountInfo[0]);
-      qsaInnerText("#near-balance", toStringDec(staked))
+      qsaInnerText("#near-balance span.near.balance", toStringDec(staked))
       real = yton(accountInfo[1]);
       unixTimestamp = Number(accountInfo[2]);
       let now = unixTimestamp * 1000 //to milliseconds
       if (staked > 0) {
+        qs("#near-balance a .max").style.display = "block";
         if (previous_timestamp && real > previous_real) {
           //recompute speed
           let advanced = real - previous_real
@@ -814,8 +560,15 @@ async function refreshAccountInfo() {
     //show top-right-balance only if connected wallet
     //show(qs("#top-right-balance"), wallet.isConnected())
 
+    let walletAvailable = toStringDec(yton(await wallet.getAccountBalance()))
     //update shown wallet balance
-    qsaInnerText("#wallet-available", toStringDec(yton(await wallet.getAccountBalance())));
+    qsaInnerText("#wallet-available span.near.balance", walletAvailable);
+    qsaInnerText("span.bold.large.near#wallet-available", walletAvailable);
+
+
+    if(walletAvailable.replace(",", "") > 1 ){
+        qs("#wallet-available a .max").style.display = "block";
+    }
 
     //update account & contract stats
     if (wallet.isConnected()) {
@@ -826,6 +579,10 @@ async function refreshAccountInfo() {
       real = yton(accountInfo[1]);
       qs("#farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
       qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
+      console.log(contractParams)
+      qs("#total-near-staked").innerText = yton(contractParams.total_stake)
+      qs("#rewards-per-day").innerText = yton(contractParams.rewards_per_day)
+      qs("#total-rewards").innerText = yton(contractParams.total_rewards)
     }
     else {
       contractParams.rewards_per_day = ntoy(10);
@@ -838,44 +595,17 @@ async function refreshAccountInfo() {
     qsaInnerText("#cheddar-rate", cheddarPerWeekString)
     real_rewards_per_day = cheddarPerWeekThisUser / 7;
 
-    qsaInnerText("#near-balance", toStringDec(staked))
+    qsaInnerText("#near-balance span.near.balance", toStringDec(staked))
+    if(staked > 0 ){
+        qs("#near-balance a .max").style.display = "block";
+    }
     display_cheddar(real); // display real rewards so they can harvest
     computed = real;
     previous_timestamp = Date.now();
     previous_real = real;
-    // qs("#trip-rewards").innerText = toStringDec(yton(accountInfo.trip_rewards))
-    // qs("#trip-start").innerText = new Date(Number(accountInfo.trip_start)).toLocaleString()
-    // qsaInnerText("#your-share-value", toStringDec(yton(accountInfo.nslp_share_value)))
-    // qsaInnerText("#your-share", toStringDecMin(accountInfo.nslp_share_bp/100))
 
-    //contract state
-    //qsaInnerText("#historic-rewards", toStringDec(yton(contractState.accumulated_staked_rewards)))
     qsaInnerText("#total-cheddar-tokens", toStringDec(total_supply))
-    // qsaInnerText("#liquidity-balance", toStringDec(yton(contractState.nslp_liquidity)))
-    // qsaInnerText("#liquidity-cheddar-balance", toStringDec(yton(contractState.nslp_stnear_balance)))
-    // qsaInnerText("#target-liquidity", toStringDec(yton(contractState.nslp_target)))
-    // qsaInnerText("#liquidity-unstake-fee", (contractState.nslp_current_discount_basis_points/100).toString()+"%")
-    //qsaInnerText("#number-pools", total_supply.staking_pools_count?.toString());
 
-    //delayed-unstake
-    // qsaInnerText("#delayed-unstake-amount", toStringDec(yton(accountInfo.unstaked)))
-    // const hasUnstaked = (accountInfo.unstaked!="0")
-    // show(qs("#delayed-unstake-info-group"), hasUnstaked )
-    // if (hasUnstaked) {
-    //   qsi("button#delayed-withdraw-unstaked").disabled = !accountInfo.can_withdraw;
-    //   if (accountInfo.can_withdraw) {
-    //     qsaInnerText("#delayed-unstake-hours", "0")
-    //     hide(qs("#delayed-unstake-when-line"))
-    //   }
-    //   else  {
-    //     const epochEnds = await endOfEpoch(); //when the current epoch ends
-    //     const ms_to_end_of_epoch = Math.max(0,epochEnds.getTime() - new Date().getTime())
-    //     const extra_time = accountInfo.unstake_full_epochs_wait_left>0? (accountInfo.unstake_full_epochs_wait_left-1) * epochDurationMs : 0;
-    //     qsaInnerText("#delayed-unstake-hours", Math.trunc((ms_to_end_of_epoch+extra_time)/HOURS+2).toString())
-    //     qsaInnerText("#delayed-unstake-when", new Date(epochEnds.getTime()+extra_time+HOURS).toLocaleString())
-    //     show(qs("#delayed-unstake-when-line"))
-    //   }
-    // }
   }
   catch (ex) {
     showErr(ex)
@@ -952,6 +682,7 @@ window.onload = async function () {
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
       const { err, data, method } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
+      
       if (err) {
         showError(err, "Transaction - " + method || "");
       }

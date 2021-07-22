@@ -15,7 +15,7 @@
 <body>
 
   <header>
-    <div><img src="./assets/cheddar-logo.svg" width="175px;" /></div>
+    <div><a href="#" id="logo"><img src="./assets/cheddar-logo.svg" width="175px;" /></a></div>
     <nav>
       <a href="#" id="home">Home</a>
       <a href="#" id="unstake-m" class="hidden">Unstake</a>
@@ -63,18 +63,18 @@
           <div></div>
         </div>
         <div class="pool-meta earned">
-          <div class="">Cheddar</div>
-          <div class="">Earned</div>
+          <div class="">CHEDDAR</div>
+          <div class="">EARNED</div>
         </div>
         <div class="pool-meta earned amount">
           <div id="cheddar-balance">0</div>
           <div><button id="harvest-not-connected" type="submit">Harvest</button></div>
         </div>
-        <div class="pool-meta earned">
+        <div class="pool-meta staked">
           <div class="">NEAR</div>
-          <div class="">Staked</div>
+          <div class="">STAKED</div>
         </div>
-        <div class="pool-meta near amount">
+        <div class="pool-meta near staked">
           <div><span id="near-balance" class="near balance"></span></div>
           <div>&nbsp;</div>
         </div>
@@ -91,7 +91,7 @@
 
     <section id="home-connected" style="display:none">
 
-      <form id="stakeForm">
+      <form id="stakeForm" onkeydown="return event.key != 'Enter';">
         <div class="icon-header">
           <img src="./assets/stakin-cheddar.svg" width="50px" height="50px">
           <span>Cheddar</span>
@@ -113,24 +113,24 @@
           <div>Ends:</div>
           <div id="farming_end"></div>
         </div>
-        <div class="pool-meta">
+<!--         <div class="pool-meta">
           <div>Rate:</div>
           <div id="cheddar-rate"></div>
-        </div>
+        </div> -->
         <div class="pool-meta earned">
-          <div class="">Cheddar</div>
-          <div class="">Earned</div>
+          <div class="">CHEDDAR</div>
+          <div class="">EARNED</div>
         </div>
         <div class="pool-meta earned amount">
           <div id="cheddar-balance">0</div>
           <div><button id="harvest" type="submit">Harvest</button></div>
         </div>
-        <div class="pool-meta earned">
+        <div class="pool-meta staked">
           <div class="">NEAR</div>
           <div class="">Staked</div>
         </div>
-        <div class="pool-meta earned amount">
-          <div><span id="near-balance" class="near balance"></span></div>
+        <div class="pool-meta staked amount">
+          <div id="near-balance"><span class="near balance"></span><a href="#"><span class="max" style="display:none">max</span></a></div>
           <div>&nbsp;</div>
         </div>
         <fieldset id="fieldset">
@@ -142,37 +142,38 @@ onblur="this.placeholder = 'Enter Amount'"
             <span>Ⓝ NEAR</span>
           </div>
           <div class="pool-meta wallet-balance">
-            <div class="">Available to stake:&nbsp;<a href="#" id="wallet-available" class="near balance"></a></div>
+            <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span><a href="#"><span class="max" style="display:none">max</span></a></div>
           </div>
           <div class="pool-meta actions">
             <div class="hQrVZb">
-              <button id="stake" class="hwJKVX" type="submit">Stake</button>
               <button id="unstake" class="gAaTZf" type="submit">UnStake</button>
+              <button id="stake" class="hwJKVX" type="submit">Stake</button>
             </div>
           </div>
           <div class="disclaimer">
             <input type="checkbox" id="terms-of-use" name="terms-of-use" value="true" checked="checked" disabled disabled="disabled" onclick="return true;" onkeydown="return true;">
               <label>&nbsp;By staking, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
           </div>
-
         </fieldset>
+
       </form>
 
-      <article id="meta-stats" style="display:none">
-        <h4>Cheddar Token Stats</h4>
+
+      <article id="meta-stats" style="">
+        <h4>Cheddar Farm Stats</h4>
         <div class="stat-line">
-          <dt>Total Cheddar Tokens</dt>
-          <dd id="total-cheddar-tokens" class="near balance"></dd>
+          <span>Total NEAR Staked</span>
+          <span id="total-near-staked" class="near balance"></span>
         </div>
-        <!--<div class="stat-line">
-      <dt>Historic Rewards</dt>
-      <dd id="historic-rewards" class="near balance"></dd>
-    </div>
-    <div class="stat-line">
-      <dt>Cheddar/NEAR Liquidity</dt>
-      <dd id="liquidity-balance" class="near balance"></dd>
-    </div>
-  -->
+        <div class="stat-line">
+          <span>Cheddar per NEAR (per day)</span>
+          <span id="rewards-per-day" class="cheddar balance"></span>
+        </div>
+        <div class="stat-line">
+          <span>Total Cheddar Harvested</span>
+          <span id="total-rewards" class="cheddar balance"></span>
+        </div>
+
       </article>
 
     </section>
@@ -241,10 +242,7 @@ onblur="this.placeholder = 'Enter Amount'"
             <span class="arrow"></span>
             What is cheddar?
           </div>
-          <div class="collapsed"><b>Cheddar</b> is a NEP-141 loyalty token that rewards users of the NEAR ecosystem of
-            dApps. Our vision is to help create a thriving ecosystem of NEAR dApps and DeFi through strategic
-            partnerships that promote the use of NEAR while rewarding users.<br /><br />Use NEAR dApps to Farm, Stake,
-            LP and stack Cheddar!
+          <div class="collapsed"><b>Cheddar</b> is a NEP-141 loyalty token that rewards users of the NEAR ecosystem of dApps. Our vision is to help create a thriving ecosystem of NEAR dApps and DeFi through strategic partnerships that promote the use of NEAR while rewarding users.<br /><br />Use NEAR dApps to Farm, Stake, LP and stack Cheddar!
           </div>
         </label>
 
@@ -254,10 +252,9 @@ onblur="this.placeholder = 'Enter Amount'"
             <span class="arrow"></span>
             Does Cheddar have an airdrop?
           </div>
-          <div class="collapsed">No, instead of an airdrop we opted to allow everyone in the NEAR ecosystem the
-            opportunity to stack some Cheddar.<ul>
-              <li>1.5M Cheddar</li>
-              <li>3 Weeks of farming</li>
+          <div class="collapsed">No, instead of an airdrop we opted to allow everyone in the NEAR ecosystem the opportunity to stack some Cheddar.<ul>
+              <li>Unlimited Cheddar</li>
+              <li>20 days of farming</li>
               <li>Stake NEAR to Farm Cheddar</li>
             </ul>
           </div>
@@ -269,8 +266,7 @@ onblur="this.placeholder = 'Enter Amount'"
             <span class="arrow"></span>
             What happens to my staked NEAR?
           </div>
-          <div class="collapsed">It is solely for the purpose of farming Cheddar. We don't transfer, leverage or lock
-            your NEAR.
+          <div class="collapsed">It is solely for the purpose of farming Cheddar. We don't transfer, leverage or lock your NEAR.
           </div>
         </label>
 
@@ -279,8 +275,7 @@ onblur="this.placeholder = 'Enter Amount'"
           <div class="collapser">
             <span class="arrow"></span>How long do I have to leave my NEAR staked?
           </div>
-          <div class="collapsed">That's completely up to you at this stage. The longer you stake, the more Cheddar you
-            earn.
+          <div class="collapsed">That's completely up to you at this stage. The longer you stake, the more Cheddar you earn.
           </div>
         </label>
 
@@ -289,9 +284,7 @@ onblur="this.placeholder = 'Enter Amount'"
           <div class="collapser">
             <span class="arrow"></span>Is there a Liquidity Pool (LP)?
           </div>
-          <div class="collapsed">As a loyalty token Cheddar is meant to be used in the NEAR ecosystem of apps. The team
-            does not have an active plan to launch liquidity pools (LP's). We will however provide Cheddar as a loyalty
-            token for LP's the community or other AMM / DEXes launch in a future phase.
+          <div class="collapsed">As a loyalty token Cheddar is meant to be used in the NEAR ecosystem of dApps. The team does not have an active plan to launch liquidity pools (LP's). The Cheddar DAO however can vote to provide Cheddar as a loyalty token for LP's the community or other AMM / DEXes launch in a future phase.
           </div>
         </label>
 
@@ -315,8 +308,8 @@ onblur="this.placeholder = 'Enter Amount'"
       <article>
         <div class="stat-line">
           <div class="line-left">
-            <span id="cheddar-balance" class="bold large near"></span>
-            <span>cheddar Tokens/Staked</span>
+            <span id="cheddar-balance" class="bold large cheddar"></span>
+            <span>Your Farmed/Unharvested Cheddar</span>
           </div>
           <!--<div class="line-right"><button type="button" id="unstake-from-my-account">Liquid Unstake</button> </div>-->
         </div>
@@ -343,21 +336,21 @@ onblur="this.placeholder = 'Enter Amount'"
       <h3 id="title">Confirmed</h3>
       <img class="confirmed"></img>
       <p id="msg">Confirmed</p>
-      <button type="button" id="cancel" class="hollow close-popup">close</button>
+      <button type="button" id="cancel" class="hollow close-popup">Close</button>
     </div>
 
     <div id="message-box" class="box popup" style="display:none">
       <h3 id="title">Cheddar Token</h3>
       <img class="icon" src='assets/info.svg' />
       <p id="msg">Information</p>
-      <button type="button" id="cancel" class="hollow close-popup">close</button>
+      <button type="button" id="cancel" class="hollow close-popup">Close</button>
     </div>
 
     <div id="error-box" class="box popup" style="display:none">
       <h3 id="title">Error</h3>
       <img class="icon" src="assets/warning.svg"></img>
       <p id="msg">message</p>
-      <button type="button" id="cancel" class="hollow close-popup">close</button>
+      <button type="button" id="cancel" class="hollow close-popup">Close</button>
     </div>
 
     <div id="terms" class="box popup" style="display:none">
