@@ -11,7 +11,7 @@ import { StakingPoolP1 } from './contracts/p1-staking';
 import type { ContractParams } from './contracts/contract-structs';
 
 //qs/qsa are shortcut for document.querySelector/All
-import { qs, qsa, qsi, qso, ge, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup } from './util/document';
+import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup } from './util/document';
 import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { computeCurrentEpoch, EpochInfo } from './util/near-epoch';
 import { NEP141Trait } from './contracts/NEP141';
@@ -28,7 +28,16 @@ let tokenContract: NEP141Trait;
 
 let accountInfo: string[];
 let total_supply: number;
-let contractParams: ContractParams = { owner_id: "", token_contract: "cheddar.token", rewards_per_day: ntoy(10), is_open: false, farming_start: 0, farming_end: 0 }
+let contractParams: ContractParams = {
+  owner_id: "",
+  token_contract: "cheddar.token",
+  rewards_per_day: ntoy(10),
+  is_open: false,
+  farming_start: 0,
+  farming_end: 0,
+  total_rewards: "0",
+  total_stake: "0"
+}
 
 let nearWebWalletConnection: WalletConnection;
 
@@ -63,7 +72,7 @@ qs('nav #home').onclick =
     }
   }
 
-  qs('#logo').onclick =
+qs('#logo').onclick =
   async function (event) {
     event.preventDefault()
     if (wallet.isConnected()) {
@@ -120,99 +129,99 @@ qs('#sign-out').onclick =
   }
 
 
-//Stake button. Workaround for Safari emmitter issue.
+//Stake button. Workaround for Safari emitter issue.
 qs('button#stake').onclick =
-async function (event) {
-  event.preventDefault()
-  var buttonId = 'button#' + event.target.id
-  var button = qs(buttonId)
+  async function (event: Event) {
+    event.preventDefault()
+    var buttonId = 'button#' + (event.target as HTMLElement).id
+    var button = qs(buttonId) as HTMLButtonElement
 
-  submitForm(event.target.id, button.form)
-}
+    submitForm((event.target as HTMLElement).id, button.form)
+  }
 
-//UnStake button. Workaround for Safari emmitter issue.
+//UnStake button. Workaround for Safari emitter issue.
 qs('button#unstake').onclick =
-async function (event) {
-  event.preventDefault()
-  var buttonId = 'button#' + event.target.id
-  var button = qs(buttonId)
+  async function (event: Event) {
+    event.preventDefault()
+    var buttonId = 'button#' + (event.target as HTMLElement).id
+    var button = qs(buttonId) as HTMLButtonElement
 
-  submitForm(event.target.id, button.form)
-}
+    submitForm((event.target as HTMLElement).id, button.form)
+  }
 
-//Harvest button. Workaround for Safari emmitter issue.
+//Harvest button. Workaround for Safari emitter issue.
 qs('button#harvest').onclick =
-async function (event) {
-  event.preventDefault()
-  var buttonId = 'button#' + event.target.id
-  var button = qs(buttonId)
-  console.log(button)
-  submitForm(event.target.id, button.form)
-}
+  async function (event) {
+    event.preventDefault()
+    var buttonId = 'button#' + (event.target as HTMLElement).id
+    var button = qs(buttonId) as HTMLButtonElement
+    console.log(button)
+    submitForm((event.target as HTMLElement).id, button.form)
+  }
 
 //Form submission
 //qs('form#stake').onsubmit =
-  async function submitForm(action: string, form: any) {
-    event.preventDefault()
+async function submitForm(action: string, form: any) {
+  event?.preventDefault()
 
-    //const form = event.target as HTMLFormElement
-    // get elements from the form using their id attribute
-    const { fieldset, stakeAmount } = form
+  //const form = event.target as HTMLFormElement
+  // get elements from the form using their id attribute
+  const { fieldset, stakeAmount } = form
 
-    // disable the form while the call is made
-    fieldset.disabled = true
-    const isStaking = (action == "stake")
-    const isHarvest = (action == "harvest")
-    const isUnstaking = (action == "harvest")
-    showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
+  // disable the form while the call is made
+  fieldset.disabled = true
+  const isStaking = (action == "stake")
+  const isHarvest = (action == "harvest")
+  const isUnstaking = (action == "harvest")
+  showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
 
-    try {
-      if (!contractParams.is_open) throw Error("pools are not open yet")
-      //get amount
-      const min_deposit_amount = 1;
-      let amount = toNumber(stakeAmount.value);
-      if (isStaking) {
-        if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} NEAR`);
-        // make a call to the smart contract
-        await contract.stake(amount)
-      }
-      else if (isHarvest) {
-        if (cheddar_displayed <= 0) throw Error("no cheddar to harvest :(")
-        amount = cheddar_displayed;
-        await contract.withdraw_crop()
-      }
-      else {
-        if (amount <= 0) throw Error(`Unstake a positive amount`);
-        await contract.unstake(amount)
-      }
-
-      //clear form
-      form.reset()
-
-      //refresh acc info
-      await refreshAccountInfo()
-
-      showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount) + (isHarvest ? " CHEDDAR" : " NEAR"))
-      if (isHarvest) {
-        computed = 1;
-        real = 1;
-        display_cheddar(0);
-      }
-      else if (isStaking) {
-        staked += amount
-      }
-      else {
-        staked -= amount
-      }
-
+  try {
+    if (!contractParams.is_open) throw Error("pools are not open yet")
+    //get amount
+    const min_deposit_amount = 1;
+    let amount = toNumber(stakeAmount.value);
+    if (isStaking) {
+      if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} NEAR`);
+      // make a call to the smart contract
+      await contract.stake(amount)
     }
-    catch (ex) {
-      showErr(ex)
+    else if (isHarvest) {
+      if (cheddar_displayed <= 0) throw Error("no cheddar to harvest :(")
+      amount = cheddar_displayed;
+      await contract.withdraw_crop()
+    }
+    else {
+      if (amount <= 0) throw Error(`Unstake a positive amount`);
+      await contract.unstake(amount)
     }
 
-    // re-enable the form, whether the call succeeded or failed
-    fieldset.disabled = false
+    //clear form
+    form.reset()
+
+    //refresh acc info
+    await refreshAccountInfo()
+
+    showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount) + (isHarvest ? " CHEDDAR" : " NEAR"))
+    if (isHarvest) {
+      computed = 1;
+      real = 1;
+      display_cheddar(0);
+    }
+    else if (isStaking) {
+      staked += amount
+    }
+    else {
+      staked -= amount
+    }
+
   }
+  catch (ex) {
+    showErr(ex)
+  }
+
+  // re-enable the form, whether the call succeeded or failed
+  fieldset.disabled = false
+}
 
 //button stake max 
 qs('section#home-connected #max').onclick = stakeMaxClick;
@@ -232,7 +241,7 @@ async function stakeMaxClick(event: MouseEvent) {
   }
 }
 
- qs('a#terms-of-use').onclick =
+qs('a#terms-of-use').onclick =
   async function (event) {
     event.preventDefault()
     showPopup("#terms.popup")
@@ -244,18 +253,18 @@ qs('#wallet-available a .max').onclick =
       event.preventDefault()
       var amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
       console.log()
-      qsi("#stakeAmount").value = parseInt(amountAvailable.replace(",", ""))
+      qsi("#stakeAmount").value = parseInt(amountAvailable.replace(",", "")).toString()
     }
     catch (ex) {
       showErr(ex)
     }
   }
 
-  qs('#near-balance a .max').onclick =
+qs('#near-balance a .max').onclick =
   async function (event) {
     try {
       event.preventDefault()
-      qsi("#stakeAmount").value = parseInt(yton(accountInfo[0]))
+      qsi("#stakeAmount").value = (yton(accountInfo[0]) - 0.001).toString()
     }
     catch (ex) {
       showErr(ex)
@@ -566,8 +575,8 @@ async function refreshAccountInfo() {
     qsaInnerText("span.bold.large.near#wallet-available", walletAvailable);
 
 
-    if(walletAvailable.replace(",", "") > 1 ){
-        qs("#wallet-available a .max").style.display = "block";
+    if (Number(walletAvailable.replace(",", "")) > 1) {
+      qs("#wallet-available a .max").style.display = "block";
     }
 
     //update account & contract stats
@@ -580,9 +589,9 @@ async function refreshAccountInfo() {
       qs("#farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
       qs("#farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
       console.log(contractParams)
-      qs("#total-near-staked").innerText = yton(contractParams.total_stake)
-      qs("#rewards-per-day").innerText = yton(contractParams.rewards_per_day)
-      qs("#total-rewards").innerText = yton(contractParams.total_rewards)
+      qs("#total-near-staked").innerText = yton(contractParams.total_stake).toString()
+      qs("#rewards-per-day").innerText = yton(contractParams.rewards_per_day).toString()
+      qs("#total-rewards").innerText = yton(contractParams.total_rewards).toString()
     }
     else {
       contractParams.rewards_per_day = ntoy(10);
@@ -596,8 +605,8 @@ async function refreshAccountInfo() {
     real_rewards_per_day = cheddarPerWeekThisUser / 7;
 
     qsaInnerText("#near-balance span.near.balance", toStringDec(staked))
-    if(staked > 0 ){
-        qs("#near-balance a .max").style.display = "block";
+    if (staked > 0) {
+      qs("#near-balance a .max").style.display = "block";
     }
     display_cheddar(real); // display real rewards so they can harvest
     computed = real;
@@ -682,7 +691,7 @@ window.onload = async function () {
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
       const { err, data, method } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
-      
+
       if (err) {
         showError(err, "Transaction - " + method || "");
       }
@@ -691,7 +700,7 @@ window.onload = async function () {
       }
       if (method == "unstake" && data == null) {
         showSuccess("Unstaked All and Harvested Cheddar")
-      } 
+      }
       else if (data) {
         switch (method) {
           case "liquid_unstake": {
