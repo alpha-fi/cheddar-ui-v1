@@ -1,5 +1,5 @@
-const CONTRACT_NAME = 'p1.cheddar.testnet'
-const TOKEN_CONTRACT_NAME = 'token.cheddar.testnet'
+const CONTRACT_NAME = 'p1-v3.cheddar.testnet'
+const TOKEN_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 
 type GetConfigResult = {
   networkId:string;

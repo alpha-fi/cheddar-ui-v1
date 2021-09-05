@@ -269,6 +269,7 @@ div {
 .pool-meta.earned.amount, .pool-meta.staked.amount {
   justify-content: space-between;
   align-items    : center;
+  padding-top: 0;
 }
 
 .pool-meta.earned.amount div:nth-child(1), .pool-meta.staked.amount div:nth-child(1){ 
@@ -301,7 +302,7 @@ div {
   font-weight      : 700;
   height           : 22px;
   -webkit-box-pack : end;
-  justify-content  : flex-end;
+  justify-content  : center;
   margin-bottom    : 10px;
 }
 

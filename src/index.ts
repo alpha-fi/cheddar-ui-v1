@@ -562,7 +562,7 @@ async function refreshAccountInfo() {
 
     let walletAvailable = toStringDec(yton(await wallet.getAccountBalance()))
     //update shown wallet balance
-    qsaInnerText("#wallet-available span.near.balance", walletAvailable);
+    qsaInnerText("#wallet-available span.near.balance", walletAvailable.split(".")[0]);
     qsaInnerText("span.bold.large.near#wallet-available", walletAvailable);
 
 
@@ -713,7 +713,7 @@ window.onload = async function () {
             break;
           }
           case "stake": {
-            showSuccess(`Staked ${yton(data)} NEAR`)
+            showSuccess(`Total Staked ${yton(data)} NEAR`)
             break;
           }
           default:
