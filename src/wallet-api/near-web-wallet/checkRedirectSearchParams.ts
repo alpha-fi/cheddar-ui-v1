@@ -11,11 +11,20 @@ import { FinalExecutionOutcome, getTransactionLastResult } from "near-api-js/lib
 import { FunctionCall } from 'near-api-js/lib/transaction'
 import { parseRpcError } from 'near-api-js/lib/utils/rpc_errors'
 
+function removeQueryString(){
+  var uri = window.location.toString();
+  if (uri.indexOf("?") > 0) {
+      var clean_uri = uri.substring(0, uri.indexOf("?"));
+      window.history.replaceState({}, document.title, clean_uri);
+  }    
+}
+
 export async function checkRedirectSearchParams( walletConnection:WalletConnection, nearExplorerUrl:string ): 
   Promise<{err?:string, data?:any, method?:string, finalExecutionOutcome?:FinalExecutionOutcome }> {
 
   try {
     const urlParams = new URLSearchParams(window.location.search)
+    removeQueryString()
     const txHash = urlParams.get('transactionHashes')
     const errorCode = urlParams.get('errorCode')
 
