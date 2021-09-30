@@ -4,8 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" href="./assets/favicon.ico" />
-  <link rel="apple-touch-icon" href="./assets/favicon.ico" />
+  <link rel="icon" href="./assets/cheddar.ico" />
+  <link rel="apple-touch-icon" href="./assets/cheddar.ico" />
   <title>Cheddar Token</title>
   <link rel="stylesheet" href="global.css">
   <link rel="stylesheet" href="font-face.css">
@@ -39,17 +39,19 @@
         </div>
         <div id="narwallets-wallet-box" class="box wallet-box">
           <div class="narwallets-logo wallet-logo" id="narwallets-logo-div"></div>
-          <p>Narwallets<br>chrome-extension</p>
+          <p>Download<br>Narwallets</p>
         </div>
       </div>
 
+      <h2>2. Stake and Farm Cheddar</h2>
 
       <form id="stake-form-not-connected">
+        <br><div id="timer-non"></div>
+        <div><br><strong style="color:#222">This is BETA software, use at your own risk.</strong><br><br></div>
         <div class="icon-header">
           <img src="./assets/stakin-cheddar.svg" width="50px" height="50px">
           <span>Cheddar</span>
         </div>
-        <h2>2. Stake and Farm Cheddar</h2>
         <div class="pool-meta">
           <div>Deposit Fee:</div>
           <div>0%</div>
@@ -74,16 +76,18 @@
           <div class="">NEAR</div>
           <div class="">STAKED</div>
         </div>
-        <div class="pool-meta near staked">
-          <div><span id="near-balance" class="near balance"></span></div>
+        <div class="pool-meta staked amount">
+          <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
           <div>&nbsp;</div>
         </div>
         <fieldset id="fieldset">
           <div class="input-group">
-            <input class="near amount input-box" inputmode="numeric" placeholder="0" autocomplete="off" disabled>
-            <span>NEAR Ⓝ</span>
+            <input class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''"
+onblur="this.placeholder = 'Enter Amount'"
+              autocomplete="off" disabled>
+            <span>Ⓝ NEAR</span>
           </div>
-          <button type="submit" id="connect-wallet" disabled>Stake</button>
+          <button class="hwJKVX" type="submit" disabled>Stake</button>
         </fieldset>
       </form>
 
@@ -92,6 +96,8 @@
     <section id="home-connected" style="display:none">
 
       <form id="stakeForm" onkeydown="return event.key != 'Enter';">
+        <div id="timer"></div>
+        <div><br><strong style="color:#222">This is BETA software, use at your own risk.</strong><br><br></div>
         <div class="icon-header">
           <img src="./assets/stakin-cheddar.svg" width="50px" height="50px">
           <span>Cheddar</span>
@@ -155,6 +161,7 @@ onblur="this.placeholder = 'Enter Amount'"
 
               <label>✅&nbsp;&nbsp;By staking, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
           </div>
+
         </fieldset>
 
       </form>
