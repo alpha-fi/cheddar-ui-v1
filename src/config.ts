@@ -1,5 +1,6 @@
-const CONTRACT_NAME = 'p1-farm.cheddar.near'
-const TOKEN_CONTRACT_NAME = 'token.cheddar.near'
+const CONTRACT_NAME = 'p2-v1-tt.cheddar.testnet'
+const CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+const TOKEN_CONTRACT_NAME = 'test-token.cheddar.testnet'
 
 type GetConfigResult = {
   networkId:string;
@@ -22,6 +23,7 @@ export function getConfig(env:string):GetConfigResult {
       networkId: 'mainnet',
       nodeUrl: 'https://rpc.mainnet.near.org',
       contractName: CONTRACT_NAME,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       walletUrl: 'https://wallet.near.org',
       helperUrl: 'https://helper.mainnet.near.org',
@@ -35,6 +37,7 @@ export function getConfig(env:string):GetConfigResult {
       networkId: 'testnet',
       nodeUrl: 'https://rpc.testnet.near.org',
       contractName: CONTRACT_NAME,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       walletUrl: 'https://wallet.testnet.near.org',
       helperUrl: 'https://helper.testnet.near.org',
@@ -46,6 +49,7 @@ export function getConfig(env:string):GetConfigResult {
     return {
       networkId: 'betanet',
       nodeUrl: 'https://rpc.betanet.near.org',
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       contractName: CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       walletUrl: 'https://wallet.betanet.near.org',
@@ -61,6 +65,7 @@ export function getConfig(env:string):GetConfigResult {
       keyPath: `${process.env.HOME}/.near/validator_key.json`,
       walletUrl: 'http://localhost:4000/wallet',
       contractName: CONTRACT_NAME,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       helperUrl:undefined,
       masterAccount:undefined,
@@ -71,6 +76,7 @@ export function getConfig(env:string):GetConfigResult {
       networkId: 'shared-test',
       nodeUrl: 'https://rpc.ci-testnet.near.org',
       contractName: CONTRACT_NAME,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       masterAccount: 'test.near',
       keyPath: undefined,
@@ -81,6 +87,7 @@ export function getConfig(env:string):GetConfigResult {
       networkId: 'shared-test-staging',
       nodeUrl: 'https://rpc.ci-betanet.near.org',
       contractName: CONTRACT_NAME,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       masterAccount: 'test.near',
       keyPath: undefined,

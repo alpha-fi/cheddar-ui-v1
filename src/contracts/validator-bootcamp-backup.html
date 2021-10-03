@@ -1,0 +1,1131 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<link rel="profile" href="https://gmpg.org/xfn/11">
+	<title>NEAR Validator Bootcamp &#8211; Learn the ropes to become a NEAR Validator</title>
+<meta name='robots' content='max-image-preview:large' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<link rel='dns-prefetch' href='//s.w.org' />
+<link href='https://fonts.gstatic.com' crossorigin rel='preconnect' />
+<link rel="alternate" type="application/rss+xml" title="NEAR Validator Bootcamp &raquo; Feed" href="https://bootcamp.openshards.io/feed/" />
+<link rel="alternate" type="application/rss+xml" title="NEAR Validator Bootcamp &raquo; Comments Feed" href="https://bootcamp.openshards.io/comments/feed/" />
+		<script>
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.1.0\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/13.1.0\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/bootcamp.openshards.io\/wp-includes\/js\/wp-emoji-release.min.js?ver=5.8.1"}};
+			!function(e,a,t){var n,r,o,i=a.createElement("canvas"),p=i.getContext&&i.getContext("2d");function s(e,t){var a=String.fromCharCode;p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,e),0,0);e=i.toDataURL();return p.clearRect(0,0,i.width,i.height),p.fillText(a.apply(this,t),0,0),e===i.toDataURL()}function c(e){var t=a.createElement("script");t.src=e,t.defer=t.type="text/javascript",a.getElementsByTagName("head")[0].appendChild(t)}for(o=Array("flag","emoji"),t.supports={everything:!0,everythingExceptFlag:!0},r=0;r<o.length;r++)t.supports[o[r]]=function(e){if(!p||!p.fillText)return!1;switch(p.textBaseline="top",p.font="600 32px Arial",e){case"flag":return s([127987,65039,8205,9895,65039],[127987,65039,8203,9895,65039])?!1:!s([55356,56826,55356,56819],[55356,56826,8203,55356,56819])&&!s([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]);case"emoji":return!s([10084,65039,8205,55357,56613],[10084,65039,8203,55357,56613])}return!1}(o[r]),t.supports.everything=t.supports.everything&&t.supports[o[r]],"flag"!==o[r]&&(t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&t.supports[o[r]]);t.supports.everythingExceptFlag=t.supports.everythingExceptFlag&&!t.supports.flag,t.DOMReady=!1,t.readyCallback=function(){t.DOMReady=!0},t.supports.everything||(n=function(){t.readyCallback()},a.addEventListener?(a.addEventListener("DOMContentLoaded",n,!1),e.addEventListener("load",n,!1)):(e.attachEvent("onload",n),a.attachEvent("onreadystatechange",function(){"complete"===a.readyState&&t.readyCallback()})),(n=t.source||{}).concatemoji?c(n.concatemoji):n.wpemoji&&n.twemoji&&(c(n.twemoji),c(n.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script>
+		<style>
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+	<link rel='stylesheet' id='dashicons-css'  href='https://bootcamp.openshards.io/wp-includes/css/dashicons.min.css?ver=5.8.1' media='all' />
+<link rel='stylesheet' id='admin-bar-css'  href='https://bootcamp.openshards.io/wp-includes/css/admin-bar.min.css?ver=5.8.1' media='all' />
+<link rel='stylesheet' id='generate-fonts-css'  href='//fonts.googleapis.com/css?family=Ubuntu:300,300italic,regular,italic,500,500italic,700,700italic' media='all' />
+<link rel='stylesheet' id='wp-block-library-css'  href='https://bootcamp.openshards.io/wp-includes/css/dist/block-library/style.min.css?ver=5.8.1' media='all' />
+<link rel='stylesheet' id='prismatic-blocks-css'  href='https://bootcamp.openshards.io/wp-content/plugins/prismatic/css/styles-blocks.css?ver=5.8.1' media='all' />
+<link rel='stylesheet' id='prismatic-highlight-css'  href='https://bootcamp.openshards.io/wp-content/plugins/prismatic/lib/highlight/css/dark.css?ver=2.9.1' media='all' />
+<link rel='stylesheet' id='generate-style-css'  href='https://bootcamp.openshards.io/wp-content/themes/generatepress/assets/css/main.min.css?ver=3.0.4' media='all' />
+<style id='generate-style-inline-css'>
+body{background-color:#f7f8f9;color:#222222;}a{color:#1e73be;}a:hover, a:focus, a:active{color:#000000;}.wp-block-group__inner-container{max-width:1200px;margin-left:auto;margin-right:auto;}.generate-back-to-top{font-size:20px;border-radius:3px;position:fixed;bottom:30px;right:30px;line-height:40px;width:40px;text-align:center;z-index:10;transition:opacity 300ms ease-in-out;}body, button, input, select, textarea{font-family:"Ubuntu", sans-serif;}body{line-height:1.5;}.entry-content > [class*="wp-block-"]:not(:last-child){margin-bottom:1.5em;}.main-navigation .main-nav ul ul li a{font-size:14px;}.sidebar .widget, .footer-widgets .widget{font-size:17px;}@media (max-width:768px){h1{font-size:31px;}h2{font-size:27px;}h3{font-size:24px;}h4{font-size:22px;}h5{font-size:19px;}}.top-bar{background-color:#636363;color:#ffffff;}.top-bar a{color:#ffffff;}.top-bar a:hover{color:#303030;}.site-header{background-color:#ffffff;}.main-title a,.main-title a:hover{color:#222222;}.site-description{color:#757575;}.mobile-menu-control-wrapper .menu-toggle,.mobile-menu-control-wrapper .menu-toggle:hover,.mobile-menu-control-wrapper .menu-toggle:focus,.has-inline-mobile-toggle #site-navigation.toggled{background-color:rgba(0, 0, 0, 0.02);}.main-navigation,.main-navigation ul ul{background-color:#ffffff;}.main-navigation .main-nav ul li a,.menu-toggle, .main-navigation .menu-bar-items{color:#515151;}.main-navigation .main-nav ul li:hover > a,.main-navigation .main-nav ul li:focus > a, .main-navigation .main-nav ul li.sfHover > a, .main-navigation .menu-bar-item:hover > a, .main-navigation .menu-bar-item.sfHover > a{color:#7a8896;background-color:#ffffff;}button.menu-toggle:hover,button.menu-toggle:focus{color:#515151;}.main-navigation .main-nav ul li[class*="current-menu-"] > a{color:#7a8896;background-color:#ffffff;}.main-navigation .main-nav ul li[class*="current-menu-"] > a:hover,.main-navigation .main-nav ul li[class*="current-menu-"].sfHover > a{color:#7a8896;background-color:#ffffff;}.navigation-search input[type="search"],.navigation-search input[type="search"]:active, .navigation-search input[type="search"]:focus, .main-navigation .main-nav ul li.search-item.active > a, .main-navigation .menu-bar-items .search-item.active > a{color:#7a8896;background-color:#ffffff;}.main-navigation ul ul{background-color:#eaeaea;}.main-navigation .main-nav ul ul li a{color:#515151;}.main-navigation .main-nav ul ul li:hover > a,.main-navigation .main-nav ul ul li:focus > a,.main-navigation .main-nav ul ul li.sfHover > a{color:#7a8896;background-color:#eaeaea;}.main-navigation .main-nav ul ul li[class*="current-menu-"] > a{color:#7a8896;background-color:#eaeaea;}.main-navigation .main-nav ul ul li[class*="current-menu-"] > a:hover,.main-navigation .main-nav ul ul li[class*="current-menu-"].sfHover > a{color:#7a8896;background-color:#eaeaea;}.separate-containers .inside-article, .separate-containers .comments-area, .separate-containers .page-header, .one-container .container, .separate-containers .paging-navigation, .inside-page-header{background-color:#ffffff;}.entry-title a{color:#222222;}.entry-title a:hover{color:#55555e;}.entry-meta{color:#595959;}.sidebar .widget{background-color:#ffffff;}.footer-widgets{background-color:#ffffff;}.footer-widgets .widget-title{color:#000000;}.site-info{color:#ffffff;background-color:#55555e;}.site-info a{color:#ffffff;}.site-info a:hover{color:#d3d3d3;}.footer-bar .widget_nav_menu .current-menu-item a{color:#d3d3d3;}input[type="text"],input[type="email"],input[type="url"],input[type="password"],input[type="search"],input[type="tel"],input[type="number"],textarea,select{color:#666666;background-color:#fafafa;border-color:#cccccc;}input[type="text"]:focus,input[type="email"]:focus,input[type="url"]:focus,input[type="password"]:focus,input[type="search"]:focus,input[type="tel"]:focus,input[type="number"]:focus,textarea:focus,select:focus{color:#666666;background-color:#ffffff;border-color:#bfbfbf;}button,html input[type="button"],input[type="reset"],input[type="submit"],a.button,a.wp-block-button__link:not(.has-background){color:#ffffff;background-color:#55555e;}button:hover,html input[type="button"]:hover,input[type="reset"]:hover,input[type="submit"]:hover,a.button:hover,button:focus,html input[type="button"]:focus,input[type="reset"]:focus,input[type="submit"]:focus,a.button:focus,a.wp-block-button__link:not(.has-background):active,a.wp-block-button__link:not(.has-background):focus,a.wp-block-button__link:not(.has-background):hover{color:#ffffff;background-color:#3f4047;}a.generate-back-to-top{background-color:rgba( 0,0,0,0.4 );color:#ffffff;}a.generate-back-to-top:hover,a.generate-back-to-top:focus{background-color:rgba( 0,0,0,0.6 );color:#ffffff;}@media (max-width:768px){.main-navigation .menu-bar-item:hover > a, .main-navigation .menu-bar-item.sfHover > a{background:none;color:#515151;}}.nav-below-header .main-navigation .inside-navigation.grid-container, .nav-above-header .main-navigation .inside-navigation.grid-container{padding:0px 20px 0px 20px;}.site-main .wp-block-group__inner-container{padding:40px;}.separate-containers .paging-navigation{padding-top:20px;padding-bottom:20px;}.entry-content .alignwide, body:not(.no-sidebar) .entry-content .alignfull{margin-left:-40px;width:calc(100% + 80px);max-width:calc(100% + 80px);}.rtl .menu-item-has-children .dropdown-menu-toggle{padding-left:20px;}.rtl .main-navigation .main-nav ul li.menu-item-has-children > a{padding-right:20px;}@media (max-width:768px){.separate-containers .inside-article, .separate-containers .comments-area, .separate-containers .page-header, .separate-containers .paging-navigation, .one-container .site-content, .inside-page-header{padding:30px;}.site-main .wp-block-group__inner-container{padding:30px;}.inside-top-bar{padding-right:30px;padding-left:30px;}.inside-header{padding-right:30px;padding-left:30px;}.widget-area .widget{padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px;}.footer-widgets-container{padding-top:30px;padding-right:30px;padding-bottom:30px;padding-left:30px;}.inside-site-info{padding-right:30px;padding-left:30px;}.entry-content .alignwide, body:not(.no-sidebar) .entry-content .alignfull{margin-left:-30px;width:calc(100% + 60px);max-width:calc(100% + 60px);}.one-container .site-main .paging-navigation{margin-bottom:20px;}}/* End cached CSS */.is-right-sidebar{width:30%;}.is-left-sidebar{width:30%;}.site-content .content-area{width:70%;}@media (max-width:768px){.main-navigation .menu-toggle,.sidebar-nav-mobile:not(#sticky-placeholder){display:block;}.main-navigation ul,.gen-sidebar-nav,.main-navigation:not(.slideout-navigation):not(.toggled) .main-nav > ul,.has-inline-mobile-toggle #site-navigation .inside-navigation > *:not(.navigation-search):not(.main-nav){display:none;}.nav-align-right .inside-navigation,.nav-align-center .inside-navigation{justify-content:space-between;}.has-inline-mobile-toggle .mobile-menu-control-wrapper{display:flex;flex-wrap:wrap;}.has-inline-mobile-toggle .inside-header{flex-direction:row;text-align:left;flex-wrap:wrap;}.has-inline-mobile-toggle .header-widget,.has-inline-mobile-toggle #site-navigation{flex-basis:100%;}.nav-float-left .has-inline-mobile-toggle #site-navigation{order:10;}}
+</style>
+<link rel='stylesheet' id='vc_plugin_table_style_css-css'  href='https://bootcamp.openshards.io/wp-content/plugins/easy-tables-vc/assets/css/style.min.css?ver=2.0.1' media='all' />
+<link rel='stylesheet' id='vc_plugin_themes_css-css'  href='https://bootcamp.openshards.io/wp-content/plugins/easy-tables-vc/assets/css/themes.min.css?ver=2.0.1' media='all' />
+<link rel='stylesheet' id='js_composer_front-css'  href='https://bootcamp.openshards.io/wp-content/plugins/js_composer/assets/css/js_composer.min.css?ver=6.7.0' media='all' />
+<link rel="https://api.w.org/" href="https://bootcamp.openshards.io/wp-json/" /><link rel="alternate" type="application/json" href="https://bootcamp.openshards.io/wp-json/wp/v2/pages/6" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://bootcamp.openshards.io/xmlrpc.php?rsd" />
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://bootcamp.openshards.io/wp-includes/wlwmanifest.xml" /> 
+<meta name="generator" content="WordPress 5.8.1" />
+<link rel="canonical" href="https://bootcamp.openshards.io/" />
+<link rel='shortlink' href='https://bootcamp.openshards.io/' />
+<link rel="alternate" type="application/json+oembed" href="https://bootcamp.openshards.io/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fbootcamp.openshards.io%2F" />
+<link rel="alternate" type="text/xml+oembed" href="https://bootcamp.openshards.io/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fbootcamp.openshards.io%2F&#038;format=xml" />
+<meta name="viewport" content="width=device-width, initial-scale=1"><meta name="generator" content="Powered by WPBakery Page Builder - drag and drop page builder for WordPress."/>
+<style media="print">#wpadminbar { display:none; }</style>
+	<style media="screen">
+	html { margin-top: 32px !important; }
+	* html body { margin-top: 32px !important; }
+	@media screen and ( max-width: 782px ) {
+		html { margin-top: 46px !important; }
+		* html body { margin-top: 46px !important; }
+	}
+</style>
+	<link rel="icon" href="https://bootcamp.openshards.io/wp-content/uploads/2021/09/cropped-cropped-openshards-favicon-32x32.png" sizes="32x32" />
+<link rel="icon" href="https://bootcamp.openshards.io/wp-content/uploads/2021/09/cropped-cropped-openshards-favicon-192x192.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://bootcamp.openshards.io/wp-content/uploads/2021/09/cropped-cropped-openshards-favicon-180x180.png" />
+<meta name="msapplication-TileImage" content="https://bootcamp.openshards.io/wp-content/uploads/2021/09/cropped-cropped-openshards-favicon-270x270.png" />
+<noscript><style> .wpb_animate_when_almost_visible { opacity: 1; }</style></noscript></head>
+
+<body class="home page-template-default page page-id-6 logged-in admin-bar no-customize-support wp-embed-responsive left-sidebar nav-float-right separate-containers header-aligned-left dropdown-hover featured-image-active wpb-js-composer js-comp-ver-6.7.0 vc_responsive" itemtype="https://schema.org/WebPage" itemscope>
+		<script>
+		(function() {
+			var request, b = document.body, c = 'className', cs = 'customize-support', rcs = new RegExp('(^|\\s+)(no-)?'+cs+'(\\s+|$)');
+
+				request = true;
+	
+			b[c] = b[c].replace( rcs, ' ' );
+			// The customizer requires postMessage and CORS (if the site is cross domain).
+			b[c] += ( window.postMessage && request ? ' ' : ' no-' ) + cs;
+		}());
+	</script>
+			<div id="wpadminbar" class="nojq nojs">
+						<div class="quicklinks" id="wp-toolbar" role="navigation" aria-label="Toolbar">
+				<ul id='wp-admin-bar-root-default' class="ab-top-menu"><li id='wp-admin-bar-wp-logo' class="menupop"><a class='ab-item' aria-haspopup="true" href='https://bootcamp.openshards.io/wp-admin/about.php'><span class="ab-icon" aria-hidden="true"></span><span class="screen-reader-text">About WordPress</span></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-wp-logo-default' class="ab-submenu"><li id='wp-admin-bar-about'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/about.php'>About WordPress</a></li></ul><ul id='wp-admin-bar-wp-logo-external' class="ab-sub-secondary ab-submenu"><li id='wp-admin-bar-wporg'><a class='ab-item' href='https://wordpress.org/'>WordPress.org</a></li><li id='wp-admin-bar-documentation'><a class='ab-item' href='https://wordpress.org/support/'>Documentation</a></li><li id='wp-admin-bar-support-forums'><a class='ab-item' href='https://wordpress.org/support/forums/'>Support</a></li><li id='wp-admin-bar-feedback'><a class='ab-item' href='https://wordpress.org/support/forum/requests-and-feedback'>Feedback</a></li></ul></div></li><li id='wp-admin-bar-site-name' class="menupop"><a class='ab-item' aria-haspopup="true" href='https://bootcamp.openshards.io/wp-admin/'>NEAR Validator Bootcamp</a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-site-name-default' class="ab-submenu"><li id='wp-admin-bar-dashboard'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/'>Dashboard</a></li></ul><ul id='wp-admin-bar-appearance' class="ab-submenu"><li id='wp-admin-bar-themes'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/themes.php'>Themes</a></li><li id='wp-admin-bar-widgets'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/widgets.php'>Widgets</a></li><li id='wp-admin-bar-menus'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/nav-menus.php'>Menus</a></li></ul></div></li><li id='wp-admin-bar-customize' class="hide-if-no-customize"><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/customize.php?url=https%3A%2F%2Fbootcamp.openshards.io%2F'>Customize</a></li><li id='wp-admin-bar-updates'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/update-core.php'><span class="ab-icon" aria-hidden="true"></span><span class="ab-label" aria-hidden="true">2</span><span class="screen-reader-text updates-available-text">2 updates available</span></a></li><li id='wp-admin-bar-comments'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/edit-comments.php'><span class="ab-icon" aria-hidden="true"></span><span class="ab-label awaiting-mod pending-count count-0" aria-hidden="true">0</span><span class="screen-reader-text comments-in-moderation-text">0 Comments in moderation</span></a></li><li id='wp-admin-bar-new-content' class="menupop"><a class='ab-item' aria-haspopup="true" href='https://bootcamp.openshards.io/wp-admin/post-new.php'><span class="ab-icon" aria-hidden="true"></span><span class="ab-label">New</span></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-new-content-default' class="ab-submenu"><li id='wp-admin-bar-new-post'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/post-new.php'>Post</a></li><li id='wp-admin-bar-new-media'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/media-new.php'>Media</a></li><li id='wp-admin-bar-new-page'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/post-new.php?post_type=page'>Page</a></li><li id='wp-admin-bar-new-user'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/user-new.php'>User</a></li></ul></div></li><li id='wp-admin-bar-edit' class="menupop"><a class='ab-item' aria-haspopup="true" href='https://bootcamp.openshards.io/wp-admin/post.php?post=6&#038;action=edit'>Edit Page</a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-edit-default' class="ab-submenu"><li id='wp-admin-bar-duplicate_this'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/admin.php?action=dt_duplicate_post_as_draft&#038;post=6&#038;nonce=6465902e6a'>Duplicate This as draft</a></li></ul></div></li><li id='wp-admin-bar-vc_inline-admin-bar-link' class="vc_inline-link"><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/post.php?vc_action=vc_inline&#038;post_id=6&#038;post_type=page'>Edit with WPBakery Page Builder</a></li></ul><ul id='wp-admin-bar-top-secondary' class="ab-top-secondary ab-top-menu"><li id='wp-admin-bar-search' class="admin-bar-search"><div class="ab-item ab-empty-item" tabindex="-1"><form action="https://bootcamp.openshards.io/" method="get" id="adminbarsearch"><input class="adminbar-input" name="s" id="adminbar-search" type="text" value="" maxlength="150" /><label for="adminbar-search" class="screen-reader-text">Search</label><input type="submit" class="adminbar-button" value="Search" /></form></div></li><li id='wp-admin-bar-my-account' class="menupop with-avatar"><a class='ab-item' aria-haspopup="true" href='https://bootcamp.openshards.io/wp-admin/profile.php'>Howdy, <span class="display-name">bootadm</span><img alt='' src='https://secure.gravatar.com/avatar/b3675e9f818995d84b457b4523aebb13?s=26&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/b3675e9f818995d84b457b4523aebb13?s=52&#038;d=mm&#038;r=g 2x' class='avatar avatar-26 photo' height='26' width='26' loading='lazy'/></a><div class="ab-sub-wrapper"><ul id='wp-admin-bar-user-actions' class="ab-submenu"><li id='wp-admin-bar-user-info'><a class='ab-item' tabindex="-1" href='https://bootcamp.openshards.io/wp-admin/profile.php'><img alt='' src='https://secure.gravatar.com/avatar/b3675e9f818995d84b457b4523aebb13?s=64&#038;d=mm&#038;r=g' srcset='https://secure.gravatar.com/avatar/b3675e9f818995d84b457b4523aebb13?s=128&#038;d=mm&#038;r=g 2x' class='avatar avatar-64 photo' height='64' width='64' loading='lazy'/><span class='display-name'>bootadm</span></a></li><li id='wp-admin-bar-edit-profile'><a class='ab-item' href='https://bootcamp.openshards.io/wp-admin/profile.php'>Edit Profile</a></li><li id='wp-admin-bar-logout'><a class='ab-item' href='https://bootcamp.openshards.io/wp-login.php?action=logout&#038;_wpnonce=4080736636'>Log Out</a></li></ul></div></li></ul>			</div>
+						<a class="screen-reader-shortcut" href="https://bootcamp.openshards.io/wp-login.php?action=logout&#038;_wpnonce=4080736636">Log Out</a>
+					</div>
+
+		<a class="screen-reader-text skip-link" href="#content" title="Skip to content">Skip to content</a>		<header id="masthead" class="site-header has-inline-mobile-toggle" itemtype="https://schema.org/WPHeader" itemscope>
+			<div class="inside-header grid-container">
+				<div class="site-branding">
+						<p class="main-title" itemprop="headline">
+					<a href="https://bootcamp.openshards.io/" rel="home">
+						NEAR Validator Bootcamp
+					</a>
+				</p>
+						
+					</div>	<nav id="mobile-menu-control-wrapper" class="main-navigation mobile-menu-control-wrapper">
+				<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false" data-nav="site-navigation">
+			<span class="gp-icon icon-menu-bars"><svg viewBox="0 0 512 512" aria-hidden="true" role="img" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1em" height="1em">
+						<path d="M0 96c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24z" />
+					</svg><svg viewBox="0 0 512 512" aria-hidden="true" role="img" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1em" height="1em">
+						<path d="M71.029 71.029c9.373-9.372 24.569-9.372 33.942 0L256 222.059l151.029-151.03c9.373-9.372 24.569-9.372 33.942 0 9.372 9.373 9.372 24.569 0 33.942L289.941 256l151.03 151.029c9.372 9.373 9.372 24.569 0 33.942-9.373 9.372-24.569 9.372-33.942 0L256 289.941l-151.029 151.03c-9.373 9.372-24.569 9.372-33.942 0-9.372-9.373-9.372-24.569 0-33.942L222.059 256 71.029 104.971c-9.372-9.373-9.372-24.569 0-33.942z" />
+					</svg></span><span class="screen-reader-text">Menu</span>		</button>
+	</nav>
+			<nav id="site-navigation" class="main-navigation sub-menu-right" itemtype="https://schema.org/SiteNavigationElement" itemscope>
+			<div class="inside-navigation grid-container">
+								<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+					<span class="gp-icon icon-menu-bars"><svg viewBox="0 0 512 512" aria-hidden="true" role="img" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1em" height="1em">
+						<path d="M0 96c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24z" />
+					</svg><svg viewBox="0 0 512 512" aria-hidden="true" role="img" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1em" height="1em">
+						<path d="M71.029 71.029c9.373-9.372 24.569-9.372 33.942 0L256 222.059l151.029-151.03c9.373-9.372 24.569-9.372 33.942 0 9.372 9.373 9.372 24.569 0 33.942L289.941 256l151.03 151.029c9.372 9.373 9.372 24.569 0 33.942-9.373 9.372-24.569 9.372-33.942 0L256 289.941l-151.029 151.03c-9.373 9.372-24.569 9.372-33.942 0-9.372-9.373-9.372-24.569 0-33.942L222.059 256 71.029 104.971c-9.372-9.373-9.372-24.569 0-33.942z" />
+					</svg></span><span class="mobile-menu">Menu</span>				</button>
+						<div id="primary-menu" class="main-nav">
+			<ul class="menu sf-menu">
+				<li class="page_item page-item-6 current-menu-item"><a href="https://bootcamp.openshards.io/">Home</a></li>
+			</ul>
+		</div>
+					</div>
+		</nav>
+					</div>
+		</header>
+				<div class="featured-image page-header-image grid-container grid-parent">
+			<img width="1400" height="700" src="https://bootcamp.openshards.io/wp-content/uploads/2021/09/sharding-chunk-blog.png" class="attachment-full size-full wp-post-image" alt="" loading="lazy" itemprop="image" srcset="https://bootcamp.openshards.io/wp-content/uploads/2021/09/sharding-chunk-blog.png 1400w, https://bootcamp.openshards.io/wp-content/uploads/2021/09/sharding-chunk-blog-300x150.png 300w, https://bootcamp.openshards.io/wp-content/uploads/2021/09/sharding-chunk-blog-1024x512.png 1024w, https://bootcamp.openshards.io/wp-content/uploads/2021/09/sharding-chunk-blog-768x384.png 768w" sizes="(max-width: 1400px) 100vw, 1400px" />		</div>
+		
+	<div id="page" class="site grid-container container hfeed">
+				<div id="content" class="site-content">
+			
+	<div id="primary" class="content-area">
+		<main id="main" class="site-main">
+			
+<article id="post-6" class="post-6 page type-page status-publish has-post-thumbnail" itemtype="https://schema.org/CreativeWork" itemscope>
+	<div class="inside-article">
+		
+		<div class="entry-content" itemprop="text">
+			<div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h1 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" >NEAR Validator Bootcamp</h1>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>The NEAR validator boot camp provides the training and tools necessary to run and maintain a validator on NEAR MainNet. It is organized and facilitated by the Open Shards Alliance (OSA), a guild of validators, who also run the GuildNet network (A community governed TestNet).</p>
+<p style="text-align: center;"><i><span style="font-weight: 400;">The mission of the Open Shards Alliance is to provide training and support to validators.</span></i></p>
+
+		</div>
+	</div>
+<h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" >Overview</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>NEAR Protocol, a decentralized L1 blockchain, plans to expand the number of validator seats through sharding in the Fall-Winter of 2021. This will provide opportunities for greater decentralization by adding additional seats and lowering the “seat price”, which is the amount of NEAR needed to become a validator. With the increase in seats and a lower seat price, NEAR is looking to onboard 400+ new validators. This validator boot camp will run on a consistent basis to support this goal and will run for 4 weeks at a time.</p>
+<p><b>Duration: </b>4 Weeks</p>
+<p><b>Course Type: </b>Self-Paced</p>
+<p>Check-in points twice a week to answer questions and remove roadblocks. Scheduled voice chat in Discord. Support is available anytime in the OSA Discord.</p>
+<p><b>You will need the following to participate:</b></p>
+<ul>
+<li>A Discord Account
+<ul>
+<li>Join The Open Shards Alliance:<br />
+<a href="https://discord.gg/t9Kgbvf">https://discord.gg/t9Kgbvf</a></li>
+</ul>
+</li>
+<li>A GuildNet Wallet</li>
+<li>Basic Linux Skills</li>
+<li>Hardware or VPS (Minimal Specs)</li>
+</ul>
+
+		</div>
+	</div>
+<div class="wpb_vc_table wpb_content_element"><table class="vc-table-plugin-theme-simple"><tr class="vc-th"><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">CHUNK ONLY PRODUCER</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">BLOCK PRODUCER</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">CPU</span></td><td class="vc_table_cell"><span class="vc_table_content">4-Core CPU  with AVX support</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">CPU</span></td><td class="vc_table_cell"><span class="vc_table_content">8-Core (16-Thread) Intel i7/Xeon or equivalent with AVX support</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">RAM</span></td><td class="vc_table_cell"><span class="vc_table_content">8GB DDR4</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">RAM</span></td><td class="vc_table_cell"><span class="vc_table_content">16GB DDR4</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">Space</span></td><td class="vc_table_cell"><span class="vc_table_content">250GB SSD</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">Space</span></td><td class="vc_table_cell"><span class="vc_table_content">250GB SSD (HDD will be enough for localnet only)</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td></tr></table></div><div class="vc_row wpb_row vc_inner vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-6"><div class="vc_column-inner"><div class="wpb_wrapper"><h3 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" >Lessons</h3>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<ul>
+<li>1. <a href="#near-overview">OVERVIEW OF NEAR</a></li>
+<li>2. <a href="#near-cli">USING NEAR-CLI</a></li>
+<li>3. <a href="#validator-setup">SETUP A VALIDATOR</a></li>
+<li>4. <a href="#staking-pools">DEPLOY A STAKING POOL</a></li>
+<li>5. <a href="#monitoring">SETUP MONITORING</a></li>
+<li>6. <a href="#troubleshooting">TROUBLESHOOTING</a></li>
+<li>7. NODE FAILOVER</li>
+</ul>
+
+		</div>
+	</div>
+</div></div></div><div class="wpb_column vc_column_container vc_col-sm-6"><div class="vc_column-inner"><div class="wpb_wrapper"><h3 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" >Skills Gained</h3>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>During the course of this boot camp, you will gain the skills necessary to setup, run, recover, monitor, and maintain a NEAR validator.</p>
+<ul>
+<li>Knowledge of NEAR Blockchain</li>
+<li>Understanding of NEAR software</li>
+<li>Node Failover</li>
+<li>Monitoring &amp; Reporting</li>
+<li>Troubleshooting and Diagnosis</li>
+</ul>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" id="near-overview">LESSON 1 - OVERVIEW OF NEAR</h2><div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1631729242404-4395f42a-cd17" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631729242404-4395f42a-cd17" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Blockchain Technology</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>Blockchain is a new technology originally developed by Bitcoin. The term most often used to describe blockchain technology is “public ledger”. Any easy way to describe it is that it’s similar to your banking statement that keeps track of balances, debits and credits, with several key differences:</p>
+<ul>
+<li>Limitless &#8211; Transactions can be added as long as the network is running</li>
+<li>Unchangeable &#8211; Immutable once written (validated), it can not be modified</li>
+<li>Decentralized &#8211; Maintained by individual nodes (validators) worldwide</li>
+<li>Verifiable &#8211; Transactions are verified via consensus by decentralized validators via a Proof of Work (POW) vs Proof of Stake (POS) algorithm</li>
+</ul>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631729242414-2d28a026-2237" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631729242414-2d28a026-2237" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Smart Contracts</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>Not all blockchains are equal. While some only allow the processing of transactions (balances, debits, credits), blockchains like Ethereum and NEAR offer another layer of functionality that enables programs to run on the blockchain known as smart contracts.</p>
+<p>An easy way to think about it is that “smart contract” enabled blockchains are like supercomputers: they allow for users and developers to pay a fee to use CPU/Memory (resources), and Disk (storage) on a global scale.</p>
+<p>However it does not make sense to store everything on the blockchain as it would be too expensive. Web front-ends (html, css, js) are served from web hosting, Github or Skynet and images are often stored on InterPlanetary File Systems (IPFS) like Filecoin or Arweave.</p>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631729688511-8f2e332d-6e28" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631729688511-8f2e332d-6e28" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Sharding</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>As the founding blockchains Bitcoin and Ethereum began to grow limitations presented themselves. They could only manage to process a specific number of transactions in a block/space of time. This created severe bottlenecks with processing, wait times,  and also significantly increased the transaction fee required to have transactions processed.</p>
+<p>Sharding is a technological advancement that allows blockchains to scale and provide more throughput, while decreasing wait times and keeping transaction fees low. It accomplishes this by creating additional shards as the use of the network grows.</p>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631729795047-5d21fcdf-6943" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631729795047-5d21fcdf-6943" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">About NEAR</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>NEAR Protocol was designed with a best-of-breed approach in mind. It focuses on fixing the bottlenecks of the founding blockchains while also increasing the user experience to enable broader adoption of blockchain technology by existing web2 users and developers.</p>
+<blockquote>
+<p style="text-align: center;"><b><i>NEAR is a sharded Proof of Stake (POS) blockchain</i></b></p>
+</blockquote>
+<h3>Key Features</h3>
+<ul>
+<li>Award-Winning Team &#8211; Top Programmers in the world</li>
+<li>Proof of Stake (POS)</li>
+<li>Unlimited Shards</li>
+<li>User Experience (UX)</li>
+<li>Developer Experience (DX)</li>
+<li>Rainbow Bridge to ETH &#8211; Bridge assets to and from ETH</li>
+<li>Aurora &#8211; Run native ETH apps built-in solidity</li>
+</ul>
+<h3>Technology Stack</h3>
+<ul>
+<li>Rust &#8211; Primary Smart Contract Language</li>
+<li>Assembly Script &#8211; Alternant Smart Contract Language (similar to TypeScript)</li>
+<li>NodeJs &#8211; Tooling</li>
+<li>Javascript / React / Angular &#8211; Frontends</li>
+</ul>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" id="near-cli">LESSON 2 - USING NEAR-CLI</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>NEAR-CLI is a command-line interface that communicates with the NEAR blockchain via remote procedure calls (RPC):</p>
+<ul>
+<li>Transfer NEAR</li>
+<li>Create/Manage Accounts</li>
+<li>Deploy/Interact Contracts</li>
+<li>View validator Stats</li>
+<li>Setup and Installation</li>
+</ul>
+<blockquote><p>
+Note: For security reasons, it is recommended that NEAR-CLI be installed on a different computer than your validator node and that no full access keys be kept on your validator node.
+</p></blockquote>
+
+		</div>
+	</div>
+<div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1631731914297-e2e7db65-a93e" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631731914297-e2e7db65-a93e" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Setup &amp; Installation</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>Github Repository: https://github.com/near/near-cli</p>
+<h4>Prerequisites:</h4>
+<ul>
+<li>NodeJs, Npm, Root or Sudo access</li>
+</ul>
+<h4>Install Node Version 14.x and npm</h4>
+<p>Nodes.js and NPM can be installed by:</p>
+<ol>
+<li>
+<pre><code class="language-">curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -</code></pre>
+</li>
+<li>
+<pre><code class="language-">sudo apt install build-essential nodejs</code></pre>
+</li>
+<li>
+<pre><code class="language-">PATH=&quot;$PATH&quot;</code></pre>
+</li>
+</ol>
+<h4>Check Node.js and npm version</h4>
+<ol>
+<li>node -v
+<ul>
+<li>Should be v14.X.X</li>
+</ul>
+</li>
+<li>npm -v
+<ul>
+<li>Should be 7.X.X</li>
+</ul>
+</li>
+</ol>
+<h4>Install near-cli</h4>
+<p>Once NodeJs and NPM are installed you can now install NEAR-Cli.</p>
+<p>Unless you are logged in as root, which is not recommended you will need to use `sudo` to install NEAR-Cli so that the near binary to /usr/local/bin</p>
+<pre><code class="language-">sudo npm install -g near-cli</code></pre>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631731875566-23295d74-f468" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631731875566-23295d74-f468" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Validator Stats</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<h4>Validator Stats</h4>
+<p>Now that NEAR-Cli is installed, you can run commands to interact with the blockchain as well as to view validator stats. There are three reports used to monitor validator status:</p>
+<h5>Environment</h5>
+<p>The environment will need to be set each time a new shell is launched to select the correct network.</p>
+<p>Networks:</p>
+<ul>
+<li>TestNet</li>
+<li>GuildNet</li>
+<li>MainNet</li>
+</ul>
+<p>Command:</p>
+<pre><code class="language-">export NEAR_ENV=&lt;network&gt;</code></pre>
+<h5>Proposals</h5>
+<p>A proposal by a validator indicates they would like to enter the validator set, in order for a proposal to be accepted it must meet the minimum seat price.</p>
+<p>Command:</p>
+<pre><code class="language-">near proposals</code></pre>
+<h5>Validators Current</h5>
+<p>Shows a list of active validators in the current epoch, the number of blocks produced, number of blocks expected, and online rate. Used to monitor if a validator is having issues.</p>
+<p>Command:</p>
+<pre><code class="language-">near validators current</code></pre>
+<h5>Validators Next</h5>
+<p>Show validators whose proposal was accepted one epoch ago, and that will enter the validator set in the next epoch.</p>
+<p>Command:</p>
+<pre><code class="language-">near validators next</code></pre>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" id="validator-setup">LESSON 3 - SETUP UP A VALIDATOR</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>In this lesson you will learn about:</p>
+<ul>
+<li>Genesis.json</li>
+<li>Config.json</li>
+<li>Setting up a Node</li>
+<li>Difference between MainNet and TestNet</li>
+<li>Compiling NEARCore for MainNet</li>
+</ul>
+<h4>Server Requirements</h4>
+
+		</div>
+	</div>
+<div class="wpb_vc_table wpb_content_element"><table class="vc-table-plugin-theme-simple"><tr class="vc-th"><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">CHUNK ONLY PRODUCER</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">BLOCK PRODUCER</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">CPU</span></td><td class="vc_table_cell"><span class="vc_table_content">4-Core CPU  with AVX support</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">CPU</span></td><td class="vc_table_cell"><span class="vc_table_content">8-Core (16-Thread) Intel i7/Xeon or equivalent with AVX support</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">RAM</span></td><td class="vc_table_cell"><span class="vc_table_content">8GB DDR4</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">RAM</span></td><td class="vc_table_cell"><span class="vc_table_content">16GB DDR4</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content">Space</span></td><td class="vc_table_cell"><span class="vc_table_content">250GB SSD</span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content">Space</span></td><td class="vc_table_cell"><span class="vc_table_content">250GB SSD (HDD will be enough for localnet only)</span></td></tr><tr><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td><td class="vc_table_cell"><span class="vc_table_content"></span></td></tr></table></div><div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1631733032740-bb9d9317-4f46" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631733032740-bb9d9317-4f46" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Genesis</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>The genesis.json file is a snapshot of the network state at a point in time. In contacts accounts, balances, active validators, and other information about the network. On MainNet it is the state of what the network looked like at launch. On testnet networks, it can include a more intermediate state if the network was hard-forked at one point.</p>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631733032751-51176bd4-665b" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631733032751-51176bd4-665b" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Config</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>The config.json contains needed information for a node to run on the network, how to communicate with peers, and how to reach consensus. Although some options are configurable in general validators have opted to use the default config.json provided.</p>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631733076593-f98cbaa8-2efa" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631733076593-f98cbaa8-2efa" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Setup using NEARUp (TestNet/GuildNet)</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p><strong>NOT RECOMMENDED FOR MAINNET</strong></p>
+<p>NearUp allows for easy setup and configuration of a validator node. It is the easiest way to get up and running on a TestNet network. However, it is not recommended or supported for MainNet.</p>
+<h4>Create a wallet</h4>
+<p>TestNet: <a href="https://wallet.testnet.near.org/">https://wallet.testnet.near.org/</a></p>
+<p>GuildNet: <a href="https://wallet.openshards.io/">https://wallet.openshards.io/</a></p>
+<h4>Authorize Wallet Locally</h4>
+<p>A full access key needs to be installed locally to be able transactions via NEAR-Cli.</p>
+<p>Command:</p>
+<pre><code class="language-">near login</code></pre>
+<pre>Note: This command launches a web browser allowing for the authorization of a full access key to be copied locally.</pre>
+<h4>Prerequisites</h4>
+<p>Commands:</p>
+<pre><code class="language-">pip3 install --user nearup</code></pre>
+<pre><code class="language-">pip3 install --user --upgrade nearup</code></pre>
+<pre><code class="language-">USER_BASE_BIN=$(python3 -m site --user-base)/bin</code></pre>
+<pre><code class="language-">export PATH=&quot;$USER_BASE_BIN:$PATH&quot;</code></pre>
+<h4>Start NearUp</h4>
+<p>NearUp will download the necessary binaries and files to get up and running quickly. You just need to provide the network to run and the staking pool id.</p>
+<h5>Networks:</h5>
+<ul>
+<li>TestNet</li>
+<li>Guildnet</li>
+</ul>
+<h5>Staking Pools Factories:</h5>
+<ul>
+<li><strong>GuildNet</strong>: stake.guildnet</li>
+<li><strong>TestNet</strong>: pool.f863973.m0</li>
+</ul>
+<p>Command:</p>
+<pre><code class="language-">export NEAR_ENV=&lt;network&gt;</code></pre>
+<pre><code class="language-">nearup run &lt;network&gt;</code></pre>
+<p>On the first run, NEARUp will ask you to enter a staking-pool id, provide the staking pool id set up previously in the form &lt;pool id&gt;.&lt;staking pool factory&gt;</p>
+<pre><strong>Note: This is the Chicken and the Egg. 
+You have not created the staking pool, but need to provide the name.</strong></pre>
+<h4>Verify your install</h4>
+<p>Check validator_key.json is generated for staking pool.</p>
+<p>Command:</p>
+<pre><code class="language-">ls ~/.near/&lt;network&gt;</code></pre>
+<p>validator_key.json  node_key.json  config.json  data  genesis.json</p>
+<p>Command:</p>
+<pre><code class="language-">cat ~/.near/&lt;network&gt;/validator_key.json | grep public_key</code></pre>
+<p>Take note of the validator public_key</p>
+<p>&#8220;public_key&#8221;: &#8220;ed25519:**TAKE-NOTE-OF-THIS**&#8221;</p>
+<p>Check running status of validator node. If &#8220;V/&#8221; is showing up, your pool is selected in the current validators list.<code class="language-"></code></p>
+<h4>Logs</h4>
+<p>Command:</p>
+<pre><code class="language-">nearup logs --follow</code></pre>
+<h4>Becoming a Validator</h4>
+<p>In order to become a validator and enter the validator set, a minimum set of success criteria must be met.</p>
+<ul>
+<li>The node must be fully synced</li>
+<li>The validator_key.json must be in place</li>
+<li>The contract must be initialized with the public_key in validtor_key.json</li>
+<li>NEARUp must be initialized with the account_id in validator_key.json</li>
+<li>There must be enough delegations to meet the minimum seat price</li>
+<li>A proposal must be submitted by pinging the contract</li>
+<li>Once a proposal is accepted a validator must wait 2-3 epoch to enter the validator set</li>
+<li>Once in the validator set the validator must produce great than 90% of assigned blocks</li>
+</ul>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1632999056058-e2ae876a-be77" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632999056058-e2ae876a-be77" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Setup using NEARCore (MainNet)</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<h4>RECOMMENDED FOR MAINNET</h4>
+<h4>Create a wallet</h4>
+<p>MainNet: <a href="https://wallet.near.org/">https://wallet.near.org/</a></p>
+<p>TestNet: <a href="https://wallet.testnet.near.org/">https://wallet.testnet.near.org/</a></p>
+<p>GuildNet: <a href="https://wallet.openshards.io/">https://wallet.openshards.io/</a></p>
+<h4>Authorize Wallet Locally</h4>
+<p>A full access key needs to be installed locally to be able transactions via NEAR-Cli.</p>
+<p>Command:</p>
+<pre><code class="language-">near login</code></pre>
+<pre>Note: This command launches a web browser allowing for the authorization of a full access key to be copied locally.</pre>
+<h4>Prerequisites</h4>
+<p>Commands:</p>
+<pre><code class="language-">sudo apt install python3 git curl</code></pre>
+<pre><code class="language-">sudo apt install clang build-essential make</code></pre>
+<h4>Install Rust &amp; Cargo</h4>
+<pre><code class="language-">curl --proto &#039;=https&#039; --tlsv1.2 -sSf https://sh.rustup.rs | sh</code></pre>
+<p>Hit enter to the prompt and source the environment</p>
+<pre><code class="language-">source $HOME/.cargo/env</code></pre>
+<p>Clone the NEARCore Repo</p>
+<pre><code class="language-">git clone https://github.com/nearprotocol/nearcore.git</code></pre>
+<p>Set environment to the latest release tag</p>
+<pre><code class="language-">export NEAR_RELEASE_VERSION=$(curl -s https://github.com/near/nearcore/releases/latest | tr &#039;/&quot; &#039; &#039;\n&#039; | grep &quot;[0-9]\.[0-9]*\.[0-9]&quot; | head -n 1)</code></pre>
+<pre><code class="language-">cd nearcore</code></pre>
+<pre><code class="language-">git checkout $NEAR_RELEASE_VERSION</code></pre>
+<pre><code class="language-">make release</code></pre>
+<h4>Initialize &amp; Start the Node</h4>
+<p>Command:</p>
+<pre><code class="language-">target/release/neard init --chain-id=&quot;&lt;network&gt;&quot; --account-id=&lt;staking pool id&gt;</code></pre>
+<p>After the build process is done, check that the configuration file located at ~/.near/config.json. In some cases the file may have a new version. Check the local version agains the s3 version:</p>
+<p>TestNet: <a href="https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json">https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/testnet/config.json</a><br />
+GuildNet: <a href="https://s3.us-east-2.amazonaws.com/build.openshards.io/nearcore-deploy/guildnet/config.json">https://s3.us-east-2.amazonaws.com/build.openshards.io/nearcore-deploy/guildnet/config.json</a><br />
+MainNet: <a href="https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/mainnet/config.json">https://s3-us-west-1.amazonaws.com/build.nearprotocol.com/nearcore-deploy/mainnet/config.json</a></p>
+<h5>Start the Node</h5>
+<pre><code class="language-">target/release/neard run</code></pre>
+<h5>Setup Systemd</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/systemd/system/neard.service</code></pre>
+<p>Paste:</p>
+<pre><code class="language-">[Unit]
+Description=NEARd Daemon Service
+
+[Service]
+Type=simple
+User=&lt;USER&gt;
+#Group=near
+WorkingDirectory=/home/&lt;USER&gt;/.near
+ExecStart=/home/&lt;USER&gt;/nearcore/target/release/neard run
+Restart=on-failure
+RestartSec=30
+KillSignal=SIGINT
+TimeoutStopSec=45
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<p><strong>Change &lt;USER&gt; to your paths</strong></p>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl enable neard</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl start neard</code></pre>
+<p>If you need to make a change to service because of an error in the file. It has to be reloaded:</p>
+<pre><code class="language-">sudo systemctl reload neard</code></pre>
+<h5>Watch logs</h5>
+<p>Command:</p>
+<pre><code class="language-">journalctl -n 100 -f -u neard</code></pre>
+<p>Make log output in pretty print</p>
+<p>Command:</p>
+<pre><code class="language-">sudo apt install ccze</code></pre>
+<p>View Logs with color</p>
+<p>Command:</p>
+<pre><code class="language-">journalctl -n 100 -f -u neard | ccze -A</code></pre>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" id="staking-pools">LESSON 4 - STAKING POOLS</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>NEAR uses a staking pool factory with a whitelisted staking contract to ensure delegators’ funds are safe. In order to run a validator on NEAR a staking pool must be deployed to a NEAR account and integrated into a NEAR validator node. Delegators must use a UI or the command line to stake to the pool. A staking pool is a smart contract that is deployed to a NEAR account.</p>
+
+		</div>
+	</div>
+<div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1632994097769-131bba14-f1d1" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632994097769-131bba14-f1d1" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Deploy a Staking Pool Contract</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<h5>Environment</h5>
+<p>The environment will need to be set each time a new shell is launched to select the correct network.</p>
+<p>Networks:</p>
+<ul>
+<li>TestNet</li>
+<li>GuildNet</li>
+<li>MainNet</li>
+</ul>
+<p>Command:</p>
+<pre><code class="language-">export NEAR_ENV=&lt;network&gt;</code></pre>
+<h5>Deploy a Staking Pool</h5>
+<p>Calls the staking pool factory, creates a new staking pool with the specified name, and deploys it to the indicated accountId.</p>
+<p>Staking Pools Factories:</p>
+<ul>
+<li><strong>GuildNet</strong>: stake.guildnet</li>
+<li><strong>TestNet</strong>: pool.f863973.m0</li>
+<li><strong>MainNet</strong>: poolv1.near</li>
+</ul>
+<p>Command:</p>
+<pre><code class="language-powershell">near call &lt;staking pool factory&gt; create_staking_pool &#039;{&quot;staking_pool_id&quot;: &quot;&lt;pool id&gt;&quot;, &quot;owner_id&quot;: &quot;&lt;accountId&gt;&quot;, &quot;stake_public_key&quot;: &quot;&lt;public key&gt;&quot;, &quot;reward_fee_fraction&quot;: {&quot;numerator&quot;: 5, &quot;denominator&quot;: 100}}&#039; --accountId=&quot;&lt;accountId&gt;&quot; --amount=30 --gas=300000000000000</code></pre>
+<p>From the example above, you need to replace:</p>
+<ul>
+<li><strong>Staking Pool Factory</strong> &#8211; See above for the correct network.</li>
+<li><strong>Pool ID: </strong>Staking pool name, the factory automatically adds its name to this parameter, creating &lt;pool id&gt;.&lt;staking pool factory&gt;
+<ul>
+<li>Example: nearkat.stake.guildnet</li>
+</ul>
+</li>
+<li><strong>Owner ID: </strong>The NEAR account that will manage the staking pool. Usually your main NEAR account.</li>
+<li><strong>Public Key: </strong>The public key in your <strong>validator_key.json</strong> file.</li>
+<li><strong>5: </strong>The fee the pool will charge (in this case 5 over 100 is 5% of fees)<br />
+<strong>Account Id:</strong> The NEAR account deploying the staking pool.</li>
+</ul>
+<blockquote>
+<p style="text-align: center;">Be sure to have at least 35 NEAR available, it is the minimum required for storage</p>
+</blockquote>
+<h5>Configure your staking pool contract</h5>
+<p>Replace:</p>
+<ul>
+<li><strong>Pool Name</strong> &#8211; &lt;pool id&gt;.&lt;staking pool factory&gt;</li>
+<li><strong>Owner Id</strong></li>
+<li><strong>Public Key</strong></li>
+<li><strong>Reward Fraction</strong></li>
+<li><strong>Account Id</strong></li>
+</ul>
+<pre><code class="language-bash">near call &lt;pool name&gt; new &#039;{&quot;owner_id&quot;: &quot;&lt;owner id&gt;&quot;, &quot;&lt;public key&gt;&quot;: &quot;&lt;public key&gt;&quot;, &quot;reward_fee_fraction&quot;: {&quot;numerator&quot;: &lt;reward fraction&gt;, &quot;denominator&quot;: 100}}&#039; --accountId &lt;accountId&gt;</code></pre>
+<h5>Manage your staking pool contract</h5>
+<blockquote><p>
+HINT: Copy/Paste everything after this line into a text editor and use search and replace<br />
+Once your pool is deployed, you can issue the commands below
+</p></blockquote>
+<h6>Owner Info</h6>
+<p>Retrieve the owner ID of the staking pool</p>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;pool id&gt;.&lt;staking pool factory&gt; get_owner_id &#039;{}&#039;</code></pre>
+<h6>Staking Key and validator name</h6>
+<p>Issue this command to retrieve the validators local name and public key</p>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;pool id&gt;.&lt;staking pool factory&gt; get_owner_id &#039;{}&#039;</code></pre>
+<p>Issue this command to retrieve the public key the network has for your validator<br />
+Command:</p>
+<pre><code class="language-">near view &lt;pool id&gt;.&lt;staking pool factory&gt; get_staking_key &#039;{}&#039;</code></pre>
+<p>If the public key does not match you can update the staking key like this (replace the pubkey below with the key in your validator.json file)</p>
+<pre><code class="language-">near call &lt;pool id&gt;.&lt;staking pool factory&gt; update_staking_key &#039;{&quot;stake_public_key&quot;: &quot;&lt;public key&gt;&quot;}&#039; --accountId &lt;accountId&gt;</code></pre>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1632994097833-71f76938-fd6d" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632994097833-71f76938-fd6d" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Working with Staking Pools</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<pre><strong>NOTE: Your validator must be fully synced before issuing a proposal or depositing funds.</strong></pre>
+<h4>Proposals</h4>
+<p>In order to get a validator seat you must first submit a proposal with an appropriate amount of stake. Proposals are sent for epoch +2. Meaning if you send a proposal now, if approved, you would get the seat in 3 epochs. You should submit a proposal every epoch to ensure your seat. To send a proposal we use the ping command. A proposal is also sent if a stake or unstake command is sent to the staking pool contract.</p>
+<h5>Networks:</h5>
+<ul>
+<li>TestNet</li>
+<li>Guildnet</li>
+<li>MainNet</li>
+</ul>
+<h5>Staking Pools Factories:</h5>
+<ul>
+<li><strong>GuildNet</strong>: stake.guildnet</li>
+<li><strong>TestNet</strong>: pool.f863973.m0</li>
+<li><strong><strong>MainNet: </strong></strong>poolv1.near</li>
+</ul>
+<h4>Transactions</h4>
+<p>Deposit and Stake NEAR.</p>
+<p>Command:</p>
+<pre><code class="language-">near call &lt;staking pool id&gt; deposit_and_stake --amount &lt;amount&gt; --accountId &lt;accountId&gt;</code></pre>
+<h4>Unstake</h4>
+<p>Amount in yoctoNEAR.</p>
+<p>Command:</p>
+<pre><code class="language-">near call &lt;staking pool id&gt; unstake &#039;{&quot;amount&quot;: &quot;&lt;amount yoctoNEAR&gt;&quot;}&#039; --accountId &lt;accountId&gt;</code></pre>
+<h4>Withdraw</h4>
+<p>Unstaking takes 2-3 epochs to complete, after that period you can withdraw in YoctoNEAR from pool.</p>
+<p>Command:</p>
+<pre><code class="language-">near call &lt;stakin pool id&gt; withdraw &#039;{&quot;amount&quot;: &quot;&lt;amount yoctoNEAR&gt;&quot;}&#039; --accountId &lt;accountId&gt;</code></pre>
+<h4>Ping</h4>
+<p>A ping issues a new proposal and updates the staking balances for your delegators. A ping should be issued each epoch to keep reported rewards current.</p>
+<p>Command:</p>
+<pre><code class="language-">near call &lt;staking pool id&gt; ping &#039;{}&#039; --accountId &lt;accountId&gt;</code></pre>
+<h4>Balances</h4>
+<h5>Total Balance</h5>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;staking pool id&gt; get_account_total_balance &#039;{&quot;account_id&quot;: &quot;&lt;accountId&gt;&quot;}&#039;</code></pre>
+<h5>Staked Balance</h5>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;staking pool id&gt; get_account_staked_balance &#039;{&quot;account_id&quot;: &quot;&lt;accountId&gt;&quot;}&#039;</code></pre>
+<h5>Unstaked Balance</h5>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;staking pool id&gt; get_account_unstaked_balance &#039;{&quot;account_id&quot;: &quot;&lt;accountId&gt;&quot;}&#039;</code></pre>
+<h5>Available for Withdrawl</h5>
+<p>You can only withdraw funds from a contract if they are unlocked.</p>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;staking pool id&gt; is_account_unstaked_balance_available &#039;{&quot;account_id&quot;: &quot;&lt;accountId&gt;&quot;}&#039;</code></pre>
+<h5>Pause / Resume Staking</h5>
+<h6>Pause</h6>
+<p>Command:</p>
+<pre><code class="language-shell">near call &lt;code class=&quot;language-&quot;&gt;&lt;staking pool id&gt;</code> pause_staking '{}' --accountId &lt;accountId&gt;</code></pre>
+<h6>Resume</h6>
+<p>Command:</p>
+<pre><code class="language-shell">near call &lt;code class=&quot;language-&quot;&gt;&lt;staking pool id&gt;</code> resume_staking '{}' --accountId &lt;accountId&gt;</code></pre>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" id="monitoring">LESSON 5 - MONITORING</h2><div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1631725563876-dbf5e5e2-3d28" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631725563876-dbf5e5e2-3d28" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Log Files</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>The log file is stored either in the ~/.nearup/logs directory or in systemd depending on your setup.</p>
+<p>NEARUp Command:</p>
+<pre><code class="language-">nearup logs --follow</code></pre>
+<p>Systemd Command:</p>
+<pre><code class="language-">journalctl -n 100 -f -u neard | ccze -A</code></pre>
+<h5>Log file sample:</h5>
+<p>INFO stats: #46199418 3 mSo7HtqLU8s5k8GGLRcKtD4kopUV681jNKvgX5bQeaz <strong>V</strong>/59 30/26/40 peers &#x2b07; 213.5kiB/s &#x2b06; 772.9kiB/s 1.00 bps 25.72 Tgas/s CPU: 177%, Mem: 8.6 GiB</p>
+<ul>
+<li><strong>V (Validator):</strong> A “V” will indicate you are an active validator</li>
+<li><strong>30 Peers:</strong> You need at least 3 peers to reach consensus and start validating</li>
+<li><strong>#46199418:</strong> Blocks &#8211; Look to ensure blocks are moving</li>
+</ul>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631725563907-714e48b4-029c" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631725563907-714e48b4-029c" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">RPC</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>Any node within the network offers RPC services on port 3030 as long as the port is open in the nodes firewall. The NEAR-CLI uses RPC calls behind the scenes. Common uses for RPC are to check on validator stats, node version and to see delegator stake, although it can be used to interact with the blockchain, accounts and contracts overall.</p>
+<p>Find many commands and how to use them in more detail here:</p>
+<p><a href="https://docs.near.org/docs/api/rpc">https://docs.near.org/docs/api/rpc</a></p>
+<p>&nbsp;</p>
+<p>Command:</p>
+<pre><code class="language-">sudo apt install curl jq</code></pre>
+<h5>Common Commands:</h5>
+<h6>Check your node version:</h6>
+<p>Command:</p>
+<pre><code class="language-">curl -s http://127.0.0.1:3030/status | jq .version</code></pre>
+<h6>Check Delegators and Stake</h6>
+<p>Command:</p>
+<pre><code class="language-">near view &lt;your pool&gt;.stake.guildnet get_accounts &#039;{&quot;from_index&quot;: 0, &quot;limit&quot;: 10}&#039; --accountId &lt;accountId&gt;.guildnet</code></pre>
+<h6>Check Reason Validator Kicked</h6>
+<p>Command:</p>
+<pre><code class="language-">curl -s -d &#039;{&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;validators&quot;, &quot;id&quot;: &quot;dontcare&quot;, &quot;params&quot;: [null]}&#039; -H &#039;Content-Type: application/json&#039; https://rpc.openshards.io | jq -c &quot;.result.prev_epoch_kickout[] | select(.account_id | contains (\&quot;&lt;POOL_ID&gt;\&quot;))&quot; | jq .reason</code></pre>
+<h6>Check Blocks Produced / Expected</h6>
+<p>Command:</p>
+<pre><code class="language-">curl -s -d &#039;{&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;validators&quot;, &quot;id&quot;: &quot;dontcare&quot;, &quot;params&quot;: [null]}&#039; -H &#039;Content-Type: application/json&#039; http://localhost:3030/ | jq -c &quot;.result.current_validators[] | select(.account_id | contains (\&quot;POOL_ID\&quot;))&quot;</code></pre>
+<h4></h4>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631725875891-6618b26c-3c73" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631725875891-6618b26c-3c73" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Prometheus</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>Monitoring disk, CPU, memory, network io, missed blocks, and peers is critically important to a healthy node. Prometheus and Granfana combined provide monitoring and visual reporting tools.</p>
+<h5>Installation</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo apt-get update</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo apt-get install prometheus prometheus-node-exporter prometheus-pushgateway prometheus-alertmanager</code></pre>
+<p>Check that Prometheus was installed and is in your path.</p>
+<pre><code class="language-">prometheus --version</code></pre>
+<h5>Start Services</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl status prometheus </code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl status prometheus-node-exporter</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/prometheus/prometheus.yml</code></pre>
+<h5>Update the targets and save</h5>
+<p>targets: [&#8216;localhost:9093&#8217;, &#8216;localhost:3030&#8217;]</p>
+<h5>Reference the rules file</h5>
+<pre># Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+
+<code class="language-">rule_files:
+
+- &quot;rules.yml&quot;</code></pre>
+<h5>Setup Postfix email</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo apt-get install mailutils</code></pre>
+<h5>Setup Responses</h5>
+<ul>
+<li>internet site</li>
+<li>enter a domain name (Used for the from email address)</li>
+</ul>
+<p>Command</p>
+<pre><code class="language-">sudo vi /etc/postfix/main.cf</code></pre>
+<h5>Update and save the config file</h5>
+<ul>
+<li>inet_interfaces = all to inet_interfaces = localhost</li>
+<li>inet_protocols = all to inet_protocols = ipv4</li>
+</ul>
+<h5>Restart postfix</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo service postfix restart</code></pre>
+<h5>Add the hostname used with Postfix</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/hostname</code></pre>
+<p>Command</p>
+<pre><code class="language-">sudo nano /etc/hosts</code></pre>
+<h5>Send a test email</h5>
+<pre><code class="language-">echo &quot;This is the body of the email&quot; | mail -s &quot;This is the subject line&quot; user@example.com</code></pre>
+<h5>Update rules.yml</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/prometheus/rules.yml</code></pre>
+<pre><code class="language-">groups:
+  - name: near
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: &quot;critical&quot;
+        annotations:
+          summary: &quot;Endpoint {{ $labels.instance }} down&quot;
+          description: &quot;{{ $labels.instance }} of job {{ $labels.job }} &quot;
+      - alert: NearVersionBuildNotMatched
+        expr: near_version_build{instance=&quot;yournode.io&quot;, job=&quot;near&quot;} != near_dev_version_build{instance=&quot;yournode.io&quot;, job=&quot;near&quot;}
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Near Node Version needs updated.&quot;
+          description: &quot;Your version is out of date and you risk getting kicked.&quot;
+      - alert: StakeBelowSeatPrice
+        expr: abs((near_current_stake / near_seat_price) * 100) &lt; 100
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          description: &#039;Pool is below the current seat price&#039;</code></pre>
+<h5>Restart services</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl restart prometheus</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl status prometheus</code></pre>
+<pre><code class="language-">sudo systemctl status prometheus</code></pre>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1631728516737-1dc7fba9-a35c" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1631728516737-1dc7fba9-a35c" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Grafana</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<h5>Download and add the package</h5>
+<p>Command:</p>
+<pre><code class="language-">wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo add-apt-repository &quot;deb https://packages.grafana.com/oss/deb stable main&quot;</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo apt-get install grafana</code></pre>
+<h5>Setup Rules</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/prometheus/rules.yml</code></pre>
+<pre><code class="language-">- job_name: validator
+  - static_configs:
+    - targets: [&#039;localhost:9093&#039;]</code></pre>
+<h5>Update alert manager</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/init.d/prometheus-alertmanager</code></pre>
+<pre><code class="language-">NAME=prometheus-alertmanager</code></pre>
+<h5>Set the command-line arguments</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/default/prometheus-alertmanager</code></pre>
+<pre><code class="language-">ARGS=&quot;--cluster.listen-address=&quot;</code></pre>
+<h5>Start &amp; Reload services</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo systemctl daemon-reload</code></pre>
+<pre><code class="language-">sudo systemctl enable grafana-server.service</code></pre>
+<pre><code class="language-">sudo systemctl start grafana-server</code></pre>
+<pre><code class="language-">sudo service grafana-server status</code></pre>
+<h5>Install additional plugins</h5>
+<pre><code class="language-">sudo grafana-cli plugins install simpod-json-datasource</code></pre>
+<pre><code class="language-">sudo grafana-cli plugins install ryantxu-ajax-panel</code></pre>
+<h5>Restart service and update password</h5>
+<pre><code class="language-">service grafana-server restart</code></pre>
+<pre><code class="language-">sudo grafana-cli admin reset-admin-password admin</code></pre>
+<h5>Open Ports to specific IP</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo iptables -L</code></pre>
+<p>Command:</p>
+<pre><code class="language-">sudo iptables -A INPUT -p tcp --dport 3000 -s 66.73.0.194 -j ACCEPT</code></pre>
+<pre><code class="language-">sudo netfilter-persistent save</code></pre>
+<pre><code class="language-">sudo netfilter-persistent reload</code></pre>
+<h5>Create Dashboard</h5>
+<ul>
+<li>Add datasource Prometheus</li>
+<li>Add Notification channel email</li>
+<li>Config grafana email</li>
+</ul>
+<p>Command</p>
+<pre><code class="language-">sudo vi /etc/grafana/grafana.ini</code></pre>
+<pre><code class="language-">enabled = true
+
+host = localhost:25
+
+skip_verify = true
+
+from_address = moinitor@yournode.com
+
+from_name = Validator</code></pre>
+<h5>Restart service</h5>
+<pre><code class="language-">service grafana-server restart</code></pre>
+<h5>Watch logs</h5>
+<pre><code class="language-">sudo tail -f /var/log/grafana/grafana.log</code></pre>
+<p>Install Prometheus Exporter</p>
+<p>Command:</p>
+<pre><code class="language-">sudo apt install golang-go</code></pre>
+<pre><code class="language-">git clone https://github.com/masknetgoal634/near-prometheus-exporter.git</code></pre>
+<pre><code class="language-">cd near-prometheus-exporter/</code></pre>
+<pre><code class="language-">go build -a -installsuffix cgo -ldflags=&quot;-w -s&quot; -o main .</code></pre>
+<h5>Start exporter</h5>
+<p>Command:</p>
+<pre><code class="language-">./main -accountId &lt;contract account id&gt;</code></pre>
+<pre><code class="language-">netstat -an | grep 9333</code></pre>
+<p>Update Promethues</p>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/prometheus/prometheus.yml</code></pre>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<pre><code class="language-">- job_name: near-node
+
+scrape_interval: 15s
+
+static_configs:
+
+- targets: [&#039;&lt;NODE_IP_ADDRESS&gt;:3030&#039;]</code></pre>
+<h5>Update AlertManager</h5>
+<pre><code class="language-">sudo vi /etc/prometheus/alertmanager.yml</code></pre>
+<pre><code class="language-">postqueue -p</code></pre>
+<pre><code class="language-">amtool alert</code></pre>
+<pre><code class="language-">promtool check rules /etc/prometheus/rules.yml</code></pre>
+<pre><code class="language-">promtool check config /etc/prometheus/prometheus.yml</code></pre>
+<pre><code class="language-">amtool check-config /etc/prometheus/alertmanager.yml</code></pre>
+<pre><code class="language-">cd near-prometheus-exporter/</code></pre>
+<pre><code class="language-">mv main near-exporter</code></pre>
+<pre><code class="language-">sudo vi /lib/systemd/system/near-exporter.service</code></pre>
+<p>&nbsp;</p>
+<pre><code class="language-">[Unit]
+
+Description=NEAR Prometheus Exporter
+
+[Service]
+
+Restart=always
+
+User=prometheus
+
+EnvironmentFile=/etc/default/near-exporter
+
+ExecStart=/opt/near-prometheus-exporter/near-exporter $ARGS
+
+ExecReload=/bin/kill -HUP $MAINPID
+
+TimeoutStopSec=20s
+
+SendSIGKILL=no
+
+[Install]
+
+WantedBy=multi-user.target</code></pre>
+<h5>Update exporter</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo vi /etc/default/near-exporter</code></pre>
+<pre><code class="language-"># Set the command-line arguments to pass to the server.
+
+# Set you contract name
+
+ARGS=&quot;-accountId yournode&quot;</code></pre>
+<h5>Copy config and start service</h5>
+<p>Command:</p>
+<pre><code class="language-">sudo cp /lib/systemd/system/near-exporter.service /etc/systemd/system/near-exporter.service</code></pre>
+<pre><code class="language-">sudo chmod 644 /etc/systemd/system/near-exporter.service</code></pre>
+<pre><code class="language-">sudo systemctl start near-exporter</code></pre>
+<pre><code class="language-">sudo systemctl status near-exporter</code></pre>
+<pre><code class="language-">ps -elf | grep near-exporter</code></pre>
+<pre><code class="language-">netstat -an | grep 9333</code></pre>
+<pre><code class="language-">sudo systemctl enable near-exporter</code></pre>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div id="troubleshooting" class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Ubuntu;font-weight:400;font-style:normal" class="vc_custom_heading" >LESSON 6 - TROUBLESHOOTING</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>In this lesson you will learn about:</p>
+<ul>
+<li>Keys</li>
+<li>Logs</li>
+<li>Common Errors</li>
+</ul>
+
+		</div>
+	</div>
+<div class="vc_tta-container" data-vc-action="collapse"><div class="vc_general vc_tta vc_tta-accordion vc_tta-color-grey vc_tta-style-classic vc_tta-shape-rounded vc_tta-o-shape-group vc_tta-controls-align-left"><div class="vc_tta-panels-container"><div class="vc_tta-panels"><div class="vc_tta-panel vc_active" id="1632414933212-cfc4dfa4-bcea" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632414933212-cfc4dfa4-bcea" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Keys</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>NEAR uses cryptographic keys to secure accounts and validators, each key has a public and matching private key pair.</p>
+<p>Find more detailed information about NEAR and keys:<br />
+https://docs.near.org/docs/videos/accounts-keys#docsNav</p>
+<h5>Validator Keys:</h5>
+<p>To manage and sign transactions a node_key and validator_key.</p>
+<p><strong>Node Key:</strong></p>
+<p>Used to communicate with other peers and is primarily responsible for syncing the blockchain.</p>
+<p>Location: ~/.near/&lt;network&gt;/node_key.json</p>
+<p>Common Issue:</p>
+<p>In a failure situation, both the node_key and validator_key must be copied over</p>
+<p><strong>Validator Key:</strong></p>
+<p>Used to sign and validate blocks.</p>
+<p>Location: ~/.near/&lt;network&gt;/validator_key.json</p>
+<p>Common Issues:</p>
+<ol>
+<li>The validator key used to initialize the staking contract is not the one listed in validator_key.json</li>
+<li>The account Id submitted when NEARUp was initialized is not the same as the one in validator_key.json</li>
+</ol>
+
+		</div>
+	</div>
+</div></div><div class="vc_tta-panel" id="1632415284036-3225212f-f339" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632415284036-3225212f-f339" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Logs</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body"></div></div><div class="vc_tta-panel" id="1632414933241-b2585ee2-23b1" data-vc-content=".vc_tta-panel-body"><div class="vc_tta-panel-heading"><h4 class="vc_tta-panel-title vc_tta-controls-icon-position-left"><a href="#1632414933241-b2585ee2-23b1" data-vc-accordion data-vc-container=".vc_tta-container"><span class="vc_tta-title-text">Common Errors &amp; Solutions</span><i class="vc_tta-controls-icon vc_tta-controls-icon-plus"></i></a></h4></div><div class="vc_tta-panel-body">
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<h5>Submitting a proposal before the validator is synced</h5>
+<p>A validator must be fully synced before submitting a proposal to enter the validator set. If you are not fully synced and you entered the validator set your log will be filled with errors.</p>
+<h6>Resolution</h6>
+<p>Wait until 4 epochs until you have been kicked from the validator set. Delete the data directory and resync. Be sure to be fully synced before staking actions or pings go to your pool.</p>
+<pre><code class="language-">1. Stop the node
+2. rm -Rf ~/.near/&lt;NETWORK_ID&gt;/data
+3. Start the node</code></pre>
+<h5>Starting the node when another instance is running</h5>
+<p>On occasion, a process will get disconnected from the shell or NEARUp. The common error seen when trying to start the node will be:</p>
+<pre><code class="language-">Err value: Os { code: 98, kind: AddrInUse, message: &quot;Address already in use&quot; }&#039;,</code></pre>
+<h5>Resolution</h5>
+<p>Find the pid of the running process</p>
+<pre><code class="language-">ps -elf | grep neard</code></pre>
+<h6>Kill the hung pid</h6>
+<pre><code class="language-">kill -9 &lt;PID&gt;</code></pre>
+<h5>Running out of Disk space</h5>
+<p>If you find <code>no space left on device</code> errors in the validator log files then you likely ran out of disk space.</p>
+<pre><code class="language-">1. Stop the node
+2. Failover to a backup node
+3. Cleanup files or resize disk
+4. Fail back over.</code></pre>
+<h5>Not enough stake to obtain a validator seat</h5>
+<p>You can check that your validator proposal was accepted by checking</p>
+<pre><code class="language-">near proposals</code></pre>
+<h5>Not producing any blocks</h5>
+<p>You can make sure that your validator is producing blocks with <code>near validators current</code>. If you are not producing blocks the validator node is likely signing transactions with a different public_key then your staking contract is initialized with. Here is the process to validate and update the staking key.</p>
+<h6>Get the staking pool key</h6>
+<pre><code class="language-">near view &lt;POOL_ID&gt; get_staking_key &#039;{}&#039;</code></pre>
+<h6>Get the key in validator_key.json</h6>
+<pre><code class="language-">cat ~/.near/&lt;network&gt;/validator_key.json | grep public_key</code></pre>
+<pre>Note: Both keys must match. If they do not update the staking pool key and wait 2 epochs before pinging.</pre>
+<h5>Update staking pool key</h5>
+<pre><code class="language-">near call &lt;POOL_ID&gt; update_staking_key &#039;{&quot;stake_public_key&quot;: &quot;&lt;PUBLIC_KEY&gt;&quot;}&#039; --accountId &lt;ACCOUNT_ID&gt;</code></pre>
+<h5>Not producing enough blocks or chunks</h5>
+<p>Missing blocks or chunks is the primary reason a validator is kicked from the validator pool. You can check the number of blocks expected/missed via NEAR-Cli and RPC.</p>
+<h6>NEAR-CLI</h6>
+<pre><code class="language-">near validators current | grep &lt;pool id&gt;</code></pre>
+<h6>RPC</h6>
+<pre><code class="language-">curl -s -d &#039;{&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;validators&quot;, &quot;id&quot;: &quot;dontcare&quot;, &quot;params&quot;: [null]}&#039; -H &#039;Content-Type: application/json&#039; http://localhost:3030/ | jq -c &quot;.result.current_validators[] | select(.account_id | contains (\&quot;&lt;POOL_ID&gt;\&quot;))&quot;</code></pre>
+<h6>Check the reason kicked</h6>
+<pre><code class="language-">curl -s -d &#039;{&quot;jsonrpc&quot;: &quot;2.0&quot;, &quot;method&quot;: &quot;validators&quot;, &quot;id&quot;: &quot;dontcare&quot;, &quot;params&quot;: [null]}&#039; -H &#039;Content-Type: application/json&#039; https://rpc.openshards.io | jq -c &quot;.result.prev_epoch_kickout[] | select(.account_id | contains (\&quot;&lt;POOL_ID&gt;\&quot;))&quot; | jq .reason</code></pre>
+<h5>Not exporting the correct environment</h5>
+<p>Be sure that you are using the correct environment each time you run NEAR-Cli</p>
+<pre><code class="language-">export NEAR_ENV=&lt;mainnet,testnet,guildnet&gt;</code></pre>
+<h5>Incompatible CPU without AVX support</h5>
+<p>One cause of missed blocks and nodes falling out of sync is running on a CPU without AVX support. AVX support is required, but not always used depending on the complexity of the transaction.</p>
+<h5>Not running on SSD drives</h5>
+<p>NEAR Requires a 1 second block time and HDD disks are just not fast enough. SDD drives are required and SSD NVME drives are recommended.</p>
+<h5>Inconsistent Internet connection</h5>
+<p>NEAR requires a 1 second block time, so any latency from your internet provider can cause you to miss blocks.</p>
+<h5>Inability to gain enough peers for consensus</h5>
+
+		</div>
+	</div>
+</div></div></div></div></div></div></div></div></div></div><div class="vc_row wpb_row vc_row-fluid"><div class="wpb_column vc_column_container vc_col-sm-12"><div class="vc_column-inner"><div class="wpb_wrapper"><h2 style="text-align: left;font-family:Abril Fatface;font-weight:400;font-style:normal" class="vc_custom_heading" >NODE FAILOVER</h2>
+	<div class="wpb_text_column wpb_content_element " >
+		<div class="wpb_wrapper">
+			<p>It is an unspoken requirement to maintain a secondary node in a different location in the event of a hardware or network failure on your primary node.</p>
+<p>You will need to set up a standard node (without a validator key) and a different node_key. The node will be set up using the normal process see <a href="#validator-setup">Setup a Validator Node</a>.</p>
+<pre><code class="language-">Note: The backup node must `track the shard` the same shard in the &lt;strong&gt;config.json&lt;/strong&gt; as the primary to be used as a failover node.
+
+&lt;span class=&quot;s1&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;tracked_shards&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&quot;: &lt;/span&gt;&lt;span class=&quot;s3&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s4&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;s3&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;,&lt;/span&gt;</code></pre>
+<h5>Failing Over</h5>
+<p>To failover you must copy the node_key.json and the validatory_key.json to the secondary node and restart.</p>
+<pre><code class="language-">1. Copy over node_key.json
+2. Copy over validator_key.json
+4. Stop the node primary node
+3. Stop the secondary node
+4. Restart the secondary node</code></pre>
+<p>When failing back over to the primary simply move the secondary node_key.json into place and restart the services in reverse order.</p>
+
+		</div>
+	</div>
+</div></div></div></div>
+		</div>
+
+			</div>
+</article>
+		</main>
+	</div>
+
+	<div id="left-sidebar" class="widget-area sidebar is-left-sidebar" itemtype="https://schema.org/WPSideBar" itemscope>
+	<div class="inside-left-sidebar">
+		<aside id="nav_menu-2" class="widget inner-padding widget_nav_menu"><h2 class="widget-title">Table of Contents</h2><div class="menu-left-nav-container"><ul id="menu-left-nav" class="menu"><li id="menu-item-141" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-141"><a href="#near-overview">1. Overview</a></li>
+<li id="menu-item-145" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-145"><a href="#near-cli">2. USING NEAR-CLI</a></li>
+<li id="menu-item-146" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-146"><a href="#validator-setup">3. SETUP A VALIDATOR</a></li>
+<li id="menu-item-147" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-147"><a href="#staking-pools">4. DEPLOY A STAKING POOL</a></li>
+<li id="menu-item-148" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-148"><a href="#monitoring">5. SETUP MONITORING</a></li>
+<li id="menu-item-149" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-149"><a href="#troubleshooting">6. TROUBLESHOOTING</a></li>
+<li id="menu-item-150" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-150"><a href="#failover">7. NODE FAILOVER</a></li>
+</ul></div></aside>	</div>
+</div>
+
+	</div>
+</div>
+
+
+<div class="site-footer">
+			<footer class="site-info" itemtype="https://schema.org/WPFooter" itemscope>
+			<div class="inside-site-info grid-container">
+								<div class="copyright-bar">
+					<span class="copyright">&copy; 2021 NEAR Validator Bootcamp</span> &bull; Built with <a href="https://generatepress.com" itemprop="url">GeneratePress</a>				</div>
+			</div>
+		</footer>
+		</div>
+
+<a title="Scroll back to top" aria-label="Scroll back to top" rel="nofollow" href="#" class="generate-back-to-top" style="opacity:0;visibility:hidden;" data-scroll-speed="400" data-start-scroll="300">
+					<span class="gp-icon icon-arrow-up"><svg viewBox="0 0 330 512" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.414">
+						<path d="M305.863 314.916c0 2.266-1.133 4.815-2.832 6.514l-14.157 14.163c-1.699 1.7-3.964 2.832-6.513 2.832-2.265 0-4.813-1.133-6.512-2.832L164.572 224.276 53.295 335.593c-1.699 1.7-4.247 2.832-6.512 2.832-2.265 0-4.814-1.133-6.513-2.832L26.113 321.43c-1.699-1.7-2.831-4.248-2.831-6.514s1.132-4.816 2.831-6.515L158.06 176.408c1.699-1.7 4.247-2.833 6.512-2.833 2.265 0 4.814 1.133 6.513 2.833L303.03 308.4c1.7 1.7 2.832 4.249 2.832 6.515z" fill-rule="nonzero"/>
+					</svg></span>
+				</a><div class="codecopy_tooltip" style="display: inline-block; background: #333; color: white; padding: 0 8px; font-size: 14px; border-radius: 2px; border: 1px solid #111; position:absolute; display: none;">Click to Copy</div>
+<script type="text/javascript">
+	function codecopy_get_element_position(el) {
+		var rect = el.getBoundingClientRect(),
+		scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+		scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+		return { top: rect.top + scrollTop - 30, left: rect.left + scrollLeft }
+	}
+
+	function codecopy_apply(element) {
+		element.addEventListener("click", function() {
+			event.stopPropagation();
+			const el = document.createElement('textarea');
+			el.value = element.textContent;
+			document.body.appendChild(el);
+			el.select();
+			document.execCommand('copy');
+			document.body.removeChild(el);
+			codecopy_tooltip.innerHTML = 'Copied!'
+		});
+		element.addEventListener("mouseover", function() {
+			event.stopPropagation();
+			var position = codecopy_get_element_position(element);
+			codecopy_tooltip.innerHTML = 'Click to Copy';
+			codecopy_tooltip.style.display = 'inline-block';
+			codecopy_tooltip.style.top = position.top + 'px';
+			codecopy_tooltip.style.left = position.left + 'px';
+		});
+		element.addEventListener("mouseout", function() {
+			event.stopPropagation();
+			var position = codecopy_get_element_position(element);
+			codecopy_tooltip.style.display = 'none';
+			codecopy_tooltip.style.top ='9999px';
+		});
+	}
+
+	var codecopy_tooltip = document.querySelector('.codecopy_tooltip');
+
+	document.querySelectorAll("code").forEach(function(element) {
+		codecopy_apply(element);
+	});
+</script>
+<script type="text/html" id="wpb-modifications"></script><link rel='stylesheet' id='vc_google_fonts_ubuntu300300italicregularitalic500500italic700700italic-css'  href='https://fonts.googleapis.com/css?family=Ubuntu%3A300%2C300italic%2Cregular%2Citalic%2C500%2C500italic%2C700%2C700italic&#038;ver=6.7.0' media='all' />
+<link rel='stylesheet' id='vc_tta_style-css'  href='https://bootcamp.openshards.io/wp-content/plugins/js_composer/assets/css/js_composer_tta.min.css?ver=6.7.0' media='all' />
+<link rel='stylesheet' id='vc_google_fonts_abril_fatfaceregular-css'  href='https://fonts.googleapis.com/css?family=Abril+Fatface%3Aregular&#038;ver=6.7.0' media='all' />
+<script src='https://bootcamp.openshards.io/wp-includes/js/hoverintent-js.min.js?ver=2.2.1' id='hoverintent-js-js'></script>
+<script src='https://bootcamp.openshards.io/wp-includes/js/admin-bar.min.js?ver=5.8.1' id='admin-bar-js'></script>
+<script src='https://bootcamp.openshards.io/wp-content/plugins/prismatic/lib/highlight/js/highlight-core.js?ver=2.9.1' id='prismatic-highlight-js'></script>
+<script id='prismatic-highlight-js-after'>
+hljs.initHighlightingOnLoad();
+</script>
+<!--[if lte IE 11]>
+<script src='https://bootcamp.openshards.io/wp-content/themes/generatepress/assets/js/classList.min.js?ver=3.0.4' id='generate-classlist-js'></script>
+<![endif]-->
+<script id='generate-main-js-extra'>
+var generatepressMenu = {"toggleOpenedSubMenus":"1","openSubMenuLabel":"Open Sub-Menu","closeSubMenuLabel":"Close Sub-Menu"};
+</script>
+<script src='https://bootcamp.openshards.io/wp-content/themes/generatepress/assets/js/main.min.js?ver=3.0.4' id='generate-main-js'></script>
+<script src='https://bootcamp.openshards.io/wp-content/themes/generatepress/assets/js/back-to-top.min.js?ver=3.0.4' id='generate-back-to-top-js'></script>
+<script src='https://bootcamp.openshards.io/wp-includes/js/wp-embed.min.js?ver=5.8.1' id='wp-embed-js'></script>
+<script src='https://bootcamp.openshards.io/wp-includes/js/jquery/jquery.min.js?ver=3.6.0' id='jquery-core-js'></script>
+<script src='https://bootcamp.openshards.io/wp-content/plugins/js_composer/assets/js/dist/js_composer_front.min.js?ver=6.7.0' id='wpb_composer_front_js-js'></script>
+<script src='https://bootcamp.openshards.io/wp-content/plugins/js_composer/assets/lib/vc_accordion/vc-accordion.min.js?ver=6.7.0' id='vc_accordion_script-js'></script>
+<script src='https://bootcamp.openshards.io/wp-content/plugins/js_composer/assets/lib/vc-tta-autoplay/vc-tta-autoplay.min.js?ver=6.7.0' id='vc_tta_autoplay_script-js'></script>
+
+</body>
+</html>

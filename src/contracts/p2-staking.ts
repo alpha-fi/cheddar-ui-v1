@@ -25,6 +25,16 @@ export class StakingPoolP1 extends SmartContract {
         return this.view("status", { account_id: accountId || this.wallet.getAccountId() })
     }
 
+    /// Checks to see if an account is registered.
+    storageBalance(accountId?: AccountId): Promise<[U128String, U128String]> {
+        return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
+    }
+
+    /// Registers a user with the farm.
+    storageDeposit(): Promise<[U128String, U128String]> {
+        return this.call("storage_deposit", {}, TGas(25), "50000000000000000000000")
+    }
+
     /// Stake attached &NEAR and returns total amount of stake.
     stake(amount: number): Promise<U128String> {
         return this.call("stake", {}, TGas(25), ntoy(amount))
@@ -48,7 +58,7 @@ export class StakingPoolP1 extends SmartContract {
     }
 
     withdraw_crop(): Promise<void> {
-        return this.call("withdraw_crop", { }, TGas(125), "1")
+        return this.call("withdraw_crop", {}, TGas(125))
     }
 
 }
