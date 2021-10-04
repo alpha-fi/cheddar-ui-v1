@@ -49,6 +49,39 @@ export function ytonFull(yoctoString: string): string {
 //-------------------------------------
 //--- conversions User-input <-> Number
 //-------------------------------------
+
+
+/** rebase a number based on decimal. Examples
+*   convertToDecimals("1",3) = 0.001
+*   convertToDecimals("0",3) = 0.0
+*   convertToDecimals("1000",3) = 1.0
+*   convertToDecimals("1000",3) = 1.0
+*   convertToDecimals("12345678",3) = 123.45678
+*   If truncate is provided, then the fractional part of the number is truncated to the
+*   `truncate` decimal digits. If `truncate == 0` then the fractional part is ommited.
+*   Example:
+*   convertToDecimals("12345678", 1, 1) = 123.4
+*/ 
+export function convertToDecimals(str, decimals, truncate) {
+  let decimals_n = Number(decimals);
+  if(decimals_n == 0) {
+    return str;
+  }
+  if(str == "0") return "0.0";
+
+  // we add 1 to make sure the integer digit is included as well)
+  let result = String(str).padStart(decimals_n + 1, "0");
+  result = result.slice(0, -decimals_n);
+  if (truncate == 0) {
+    return result;
+  }
+  let fractional = result.slice(-decimals_n);
+  if (truncate == undefined) {
+    return result + "." + fractional;
+  }
+  return result + "." + result.substring(0, truncate);
+} 
+
 /**
  * converts a string with and commas and decimal places into a number
  * @param {string} str

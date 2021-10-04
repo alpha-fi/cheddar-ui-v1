@@ -184,12 +184,13 @@ div {
   vertical-align: baseline;
 }
 
-.icon-header {
+#token-header {
   display: inline;
   padding: 1em 0 2em 0;
 }
 
-.icon-header img {
+#token-header span.icon, #token-header img.icon  {
+  display: inline-block;
   vertical-align : middle;
   box-shadow     : rgb(0 0 0 / 19%) 0px 2px 14px;
   width          : 35px;
@@ -199,7 +200,7 @@ div {
   justify-content: center;
 }
 
-.icon-header span {
+#token-header span.name {
   font-weight   : 600;
   font-size     : 22px;
   line-height   : 22px;
@@ -745,14 +746,14 @@ small img {
   white-space: nowrap;
 }
 
-.near:after,
+/*.near:after,
 .meta:after {
   display    : inline-block;
   content    : "\24c3";
   transform  : scale(0.65);
   font-weight: 400;
 }
-
+*/
 .meta:after {
   content: "\24c2";
 }
