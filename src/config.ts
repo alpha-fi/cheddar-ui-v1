@@ -2,6 +2,12 @@ const CONTRACT_NAME = 'p2-v1-tt.cheddar.testnet'
 const CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 const TOKEN_CONTRACT_NAME = 'test-token.cheddar.testnet'
 
+const TESTNET_NETWORKID = 'testnet'
+const TESTNET_NODEURL = 'https://rpc.testnet.near.org'
+const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
+const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
+const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
+
 type GetConfigResult = {
   networkId:string;
   nodeUrl:string;
@@ -34,16 +40,44 @@ export function getConfig(env:string):GetConfigResult {
   case 'development':
   case 'testnet':
     return {
-      networkId: 'testnet',
-      nodeUrl: 'https://rpc.testnet.near.org',
-      contractName: CONTRACT_NAME,
-      cheddarContractName: CHEDDAR_CONTRACT_NAME,
-      tokenContractName: TOKEN_CONTRACT_NAME,
-      walletUrl: 'https://wallet.testnet.near.org',
-      helperUrl: 'https://helper.testnet.near.org',
-      explorerUrl: 'https://explorer.testnet.near.org',
-      keyPath: undefined,
-      masterAccount:undefined,
+      "farms": [
+        {
+        networkId: TESTNET_NETWORKID,
+        nodeUrl: TESTNET_NODEURL,
+        contractName: CONTRACT_NAME,
+        cheddarContractName: CHEDDAR_CONTRACT_NAME,
+        tokenContractName: TOKEN_CONTRACT_NAME,
+        walletUrl: TESTNET_WALLETURL,
+        helperUrl: TESTNET_HELPERURL,
+        explorerUrl: TESTNET_EXPLORERURL,
+        keyPath: undefined,
+        masterAccount:undefined,
+        },
+        {
+        networkId: TESTNET_NETWORKID,
+        nodeUrl: TESTNET_NODEURL,
+        contractName: 'p2-ref.cheddar.testnet',
+        cheddarContractName: CHEDDAR_CONTRACT_NAME,
+        tokenContractName: 'ref.fakes.testnet',
+        walletUrl: TESTNET_WALLETURL,
+        helperUrl: TESTNET_HELPERURL,
+        explorerUrl: TESTNET_EXPLORERURL,
+        keyPath: undefined,
+        masterAccount:undefined,
+        },
+        {
+        networkId: TESTNET_NETWORKID,
+        nodeUrl: TESTNET_NODEURL,
+        contractName: 'p2-meta.cheddar.testnet',
+        cheddarContractName: CHEDDAR_CONTRACT_NAME,
+        tokenContractName: 'meta-v2.pool.testnet',
+        walletUrl: TESTNET_WALLETURL,
+        helperUrl: TESTNET_HELPERURL,
+        explorerUrl: TESTNET_EXPLORERURL,
+        keyPath: undefined,
+        masterAccount:undefined,
+        },
+      ]
     }
   case 'betanet':
     return {

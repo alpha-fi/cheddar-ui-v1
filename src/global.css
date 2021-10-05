@@ -184,6 +184,17 @@ div {
   vertical-align: baseline;
 }
 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-gap: 1rem;
+}
+.grid > div {
+
+  background: #EDE7F6;
+  padding: 1.5rem;
+}
+
 #token-header {
   display: inline;
   padding: 1em 0 2em 0;

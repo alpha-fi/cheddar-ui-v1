@@ -21,6 +21,8 @@ import { InvalidSignature } from 'near-api-js/lib/generated/rpc_error_types';
 //const nearConfig = getConfig(process.env.NODE_ENV || 'development')
 let nearConfig = getConfig('testnet'); //default testnet, can change according to URL on window.onload
 
+console.log(nearConfig.farms[0])
+
 // global variables used throughout
 let wallet: WalletInterface = disconnectedWallet;
 let contract: StakingPoolP1;
@@ -451,7 +453,7 @@ async function signedInFlow() {
 // Initialize contract & set global variables
 async function initNearWebWalletConnection() {
   // Initialize connection to the NEAR testnet
-  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig))
+  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig.farms[0]))
 
   // Initializing Wallet based Account. It can work with NEAR testnet wallet that
   // is hosted at https://wallet.testnet.near.org
@@ -483,7 +485,7 @@ function loginNearWebWallet() {
   // the private key in localStorage.
   //save what the user typed before navigating out
   localStorage.setItem("amount", qsi("#stake-form-not-connected input.near").value)
-  nearWebWalletConnection.requestSignIn(nearConfig.contractName)
+  nearWebWalletConnection.requestSignIn(nearConfig.farms[0].contractName)
 }
 
 function loginNarwallets() {
@@ -549,17 +551,14 @@ async function refreshRealRewardsLoop() {
   }
   finally {
 
-
     let timeRemaining = 60;
 
     if (isOpened && wallet.isConnected()) {
-    //console.log(isOpened)
-    //console.log(unixTimestamp*1000)
-    //console.log(Date.now())
-    let timePassed = (Date.now()-(unixTimestamp*1000))/1000
-    timeRemaining = 61.3 - timePassed;
-    timeRemaining = (timeRemaining > 0) ? timeRemaining : timeRemaining + 2
-    console.log(timeRemaining)
+
+      let timePassed = (Date.now()-(unixTimestamp*1000))/1000
+      timeRemaining = 61.3 - timePassed;
+      timeRemaining = (timeRemaining > 0) ? timeRemaining : timeRemaining + 2
+      console.log(timeRemaining)
     }
 
     setTimeout(refreshRealRewardsLoop, timeRemaining * 1000) // every 60 secs
@@ -602,6 +601,8 @@ async function refreshAccountInfo() {
 
     if (accName.length > 22) accName = accName.slice(0, 10) + ".." + accName.slice(-10);
 
+    console.log(await tokenContractName.ft_balance_of(accName))
+
 
     qs(".user-info #account-id").innerText = accName;
     //show top-right-balance only if connected wallet
@@ -609,7 +610,7 @@ async function refreshAccountInfo() {
 
     let walletAvailable = toStringDec(yton(await tokenContractName.ft_balance_of(accName)))
     //update shown wallet balance
-    qsaInnerText("#wallet-available span.near.balance", removeDecZeroes((walletAvailable));
+    qsaInnerText("#afiPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable));
     qsaInnerText("span.bold.large.near#wallet-available", walletAvailable);
 
 
@@ -755,7 +756,7 @@ window.onload = async function () {
     const parts = window.location.pathname.split("/")
     const i = parts.indexOf("DApp")
     if (i >= 0) { env = parts[i + 1] }
-    if (env != nearConfig.networkId) nearConfig = getConfig(env);
+    if (env != nearConfig.farms[0].networkId) nearConfig = getConfig(env);
 
     var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
@@ -793,13 +794,14 @@ window.onload = async function () {
     }, 1000);
 
     //init contract proxy
-    contract = new StakingPoolP1(nearConfig.contractName);
-    cheddarContractName = new NEP141Trait(nearConfig.cheddarContractName);
-    tokenContractName = new NEP141Trait(nearConfig.tokenContractName);
+    contract = new StakingPoolP1(nearConfig.farms[0].contractName);
+    cheddarContractName = new NEP141Trait(nearConfig.farms[0].cheddarContractName);
+    tokenContractName = new NEP141Trait(nearConfig.farms[0].tokenContractName);
 
+console.log(nearConfig.farms[0].networkId)
 
     //init narwallets listeners
-    narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
+    narwallets.setNetwork(nearConfig.farms[0].networkId); //tell the wallet which network we want to operate on
     addNarwalletsListeners(narwalletConnected, narwalletDisconnected) //listen to narwallets events
 
     //set-up auto-refresh loop (10 min)
@@ -824,7 +826,7 @@ window.onload = async function () {
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
-      const { err, data, method } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
+      const { err, data, method } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
 
       if (err) {
         showError(err, "Transaction - " + method || "");
