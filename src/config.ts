@@ -77,6 +77,18 @@ export function getConfig(env:string):GetConfigResult {
         keyPath: undefined,
         masterAccount:undefined,
         },
+        {
+        networkId: TESTNET_NETWORKID,
+        nodeUrl: TESTNET_NODEURL,
+        contractName: 'p2-meta.cheddar.testnet',
+        cheddarContractName: CHEDDAR_CONTRACT_NAME,
+        tokenContractName: 'meta-v2.pool.testnet',
+        walletUrl: TESTNET_WALLETURL,
+        helperUrl: TESTNET_HELPERURL,
+        explorerUrl: TESTNET_EXPLORERURL,
+        keyPath: undefined,
+        masterAccount:undefined,
+        },
       ]
     }
   case 'betanet':

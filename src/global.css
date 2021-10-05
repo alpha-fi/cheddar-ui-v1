@@ -197,7 +197,8 @@ div {
 .grid > div {
 
   background: #EDE7F6;
-  padding: 0.5rem;
+  padding: 0.25rem;
+  border-radius: 12px;
 }
 
 #token-header {
@@ -445,7 +446,7 @@ form,
   section,
   article,
   form {
-    min-width: 380px;
+    min-width: 280px;
   }
 }
 
