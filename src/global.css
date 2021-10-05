@@ -184,15 +184,20 @@ div {
   vertical-align: baseline;
 }
 
+#home-connected {
+  margin: 2rem;
+}
+
 .grid {
   display: grid;
+  align-items: center;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   grid-gap: 1rem;
 }
 .grid > div {
 
   background: #EDE7F6;
-  padding: 1.5rem;
+  padding: 0.5rem;
 }
 
 #token-header {
@@ -380,12 +385,12 @@ div {
 }
 
 main {
-  display    : flex;
+/*  display    : flex;
   flex-flow  : column;
-  align-items: center;
+  align-items: center;*/
 }
 
-section,
+
 article,
 form,
 .popup,
@@ -403,7 +408,7 @@ form,
   box-shadow   : 0px 0px 20px rgba(220, 226, 235, 0.7);
   border-radius: 12px;
   margin       : 1em;
-  max-width    : min-content;
+
 }
 
 /*phones*/
@@ -416,7 +421,7 @@ form,
   article,
   form {
     min-width: 280px;
-    max-width: min-content;
+
   }
 
   header div.title {
