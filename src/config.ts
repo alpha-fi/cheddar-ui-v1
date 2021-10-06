@@ -80,9 +80,9 @@ export function getConfig(env:string):GetConfigResult {
         {
         networkId: TESTNET_NETWORKID,
         nodeUrl: TESTNET_NODEURL,
-        contractName: 'p2-meta.cheddar.testnet',
+        contractName: 'p2-bananas.cheddar.testnet',
         cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        tokenContractName: 'meta-v2.pool.testnet',
+        tokenContractName: 'berryclub.testnet',
         walletUrl: TESTNET_WALLETURL,
         helperUrl: TESTNET_HELPERURL,
         explorerUrl: TESTNET_EXPLORERURL,

@@ -5,7 +5,7 @@ import { WalletInterface } from './wallet-api/wallet-interface';
 import { disconnectedWallet } from './wallet-api/disconnected-wallet';
 import { NearWebWallet } from './wallet-api/near-web-wallet/near-web-wallet';
 import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narwallets';
-import { toNumber, ntoy, yton, toStringDec, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes } from './util/conversions';
+import { toNumber, ntoy, yton, toStringDec, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 import { StakingPoolP1 } from './contracts/p2-staking';
 import type { ContractParams } from './contracts/contract-structs';
@@ -23,21 +23,27 @@ let nearConfig = getConfig('testnet'); //default testnet, can change according t
 
 // global variables used throughout
 let wallet: WalletInterface = disconnectedWallet;
+
 let contract1: StakingPoolP1;
 let cheddarContractName1: NEP141Trait;
 let tokenContractName1: NEP141Trait;
+let metaData: string[];
+
 
 let contract2: StakingPoolP1;
 let cheddarContractName2: NEP141Trait;
 let tokenContractName2: NEP141Trait;
+let metaData2: string[];
 
 let contract3: StakingPoolP1;
 let cheddarContractName3: NEP141Trait;
 let tokenContractName3: NEP141Trait;
+let metaData3: string[];
 
 let contract4: StakingPoolP1;
 let cheddarContractName4: NEP141Trait;
 let tokenContractName4: NEP141Trait;
+let metaData4: string[];
 
 let accountInfo: string[];
 let accountInfo2: string[];
@@ -204,8 +210,6 @@ qs('button#stake').onclick =
     var buttonId = 'button#' + (event.target as HTMLElement).id
     var button = qs(buttonId) as HTMLButtonElement
 
-    console.log(button.form)
-
     submitForm((event.target as HTMLElement).id, button.form)
   }
 
@@ -279,7 +283,7 @@ qs('button#harvest').onclick =
     event.preventDefault()
     var buttonId = 'button#' + (event.target as HTMLElement).id
     var button = qs(buttonId) as HTMLButtonElement
-    console.log(button)
+    //console.log(button)
     submitForm((event.target as HTMLElement).id, button.form)
   }
 
@@ -288,7 +292,7 @@ qs('button#harvestREF').onclick =
     event.preventDefault()
     var buttonId = 'button#' + (event.target as HTMLElement).id
     var button = qs(buttonId) as HTMLButtonElement
-    console.log(button)
+    //console.log(button)
     submitForm((event.target as HTMLElement).id, button.form)
   }
 
@@ -297,7 +301,7 @@ qs('button#harvestSTNEAR').onclick =
     event.preventDefault()
     var buttonId = 'button#' + (event.target as HTMLElement).id
     var button = qs(buttonId) as HTMLButtonElement
-    console.log(button)
+    //console.log(button)
     submitForm((event.target as HTMLElement).id, button.form)
   }
 
@@ -306,7 +310,7 @@ qs('button#harvestBananas').onclick =
     event.preventDefault()
     var buttonId = 'button#' + (event.target as HTMLElement).id
     var button = qs(buttonId) as HTMLButtonElement
-    console.log(button)
+    //console.log(button)
     submitForm((event.target as HTMLElement).id, button.form)
   }
 
@@ -333,27 +337,77 @@ async function submitForm(action: string, form: any) {
     //get amount
     const min_deposit_amount = 1;
     let amount = ntoy(stakeAmount.value);
-    console.log(stakeAmount.value)
-    console.log((convertToDecimals(amount,18)))
 
     if (isStaking) {
+
       if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} NEAR`);
-      
+
       // make a call to the smart contract
-      await tokenContractName2.ft_transfer_call("p2-ref.cheddar.testnet", ntoy(convertToDecimals(amount, 18)), "to farm")
+      switch (form.id) {
+          case "refPool": {
+            var decimalVal = convertToBase(stakeAmount.value, metaData2.decimals)
+            console.log(decimalVal)
+            await tokenContractName2.ft_transfer_call("p2-ref.cheddar.testnet", decimalVal, "to farm")
+            break;
+          }
+          case "stNEARPool": {
+            await tokenContractName3.ft_transfer_call("p2-meta.cheddar.testnet", (convertToDecimals(stakeAmount.value, 24)), "to farm")
+            break;
+          }
+          case "bananasPool": {
+            break;
+          }
+          case "afiPool": {
+            await tokenContractName1.ft_transfer_call("p2-v1-tt.cheddar.testnet", (convertToDecimals(stakeAmount.value, 18)), "to farm")
+            break;
+          }
+      }
+
     }
     else if (isHarvest) {
+
       if (cheddar_displayed <= 0) throw Error("no cheddar to harvest :(")
       amount = cheddar_displayed;
 
-      await contract2.withdraw_crop()
+      switch (form.id) {
+        case "refPool": {
+          await contract2.withdraw_crop()
+          break;
+        }
+        case "stNEARPool": {
+          await contract3.withdraw_crop()
+          break;
+        }
+        case "bananasPool": {
+          break;
+        }
+        case "afiPool": {
+          await contract1.withdraw_crop()
+          break;
+        }
+      }
 
     }
     else {
       if (amount <= 0) throw Error(`Unstake a positive amount`);
 
-      await contract2.unstake(amount)
-
+      switch (form.id) {
+        case "refPool": {
+          await contract2.unstake(convertToDecimals(amount, 18,0))
+          break;
+        }
+        case "stNEARPool": {
+          await contract3.unstake(convertToDecimals(amount, 24,0))
+          break;
+        }
+        case "bananasPool": {
+          break;
+        }
+        case "afiPool": {
+          await contract1.unstake(convertToDecimals(amount, 24,0))
+          break;
+        }
+      }
     }
 
     //clear form
@@ -413,7 +467,7 @@ qs('#wallet-available a .max').onclick =
     try {
       event.preventDefault()
       var amountAvailable = toStringDec(yton(await tokenContractName1.ft_balance_of(accName)))
-      console.log()
+      //console.log()
       qsi("#stakeAmount").value = parseInt(amountAvailable.replace(",", "")).toString()
     }
     catch (ex) {
@@ -463,13 +517,6 @@ qs('form#unstakeForm').onsubmit =
 
       checkMinUnstake(amountToUnstake)
 
-      // const liquidity = BigInt(contractState.nslp_liquidity)
-      // const sellAmount = BigInt(ntoy(amountToUnstake))
-      // if (sellAmount>liquidity) throw Error(`There's not enough liquidity. Max is ${toStringDecMin(yton(contractState.nslp_liquidity))} NEAR. You can use delayed-unstake for large amounts`);
-      // const fee_bp = get_discount_basis_points( liquidity , sellAmount);
-
-      // const expectedMin = amountToUnstake * (10000-fee_bp)/10000 * 99/100 //auto slippage 1%
-
       // make a call to the smart contract
       await contract1.unstake(amountToUnstake)
       await contract2.unstake(amountToUnstake)
@@ -494,8 +541,6 @@ qs('form#unstakeForm').onsubmit =
 
 function showUnstakeResult(unstaked: number) {
   showSuccess(
-    // `<div class="stat-line"> <dt>NEAR received</dt><dd>${toStringDec(yton(result.near))}</dd> </div>`+
-    // `<div class="stat-line"> <dt>$META received</dt><dd>${toStringDec(yton(result.meta))}</dd> </div>`+
     `<div class="stat-line"> <dt>Unstaked</dt><dd>${toStringDec(unstaked)}</dd> </div>`
     , "Unstake"
   )
@@ -503,12 +548,10 @@ function showUnstakeResult(unstaked: number) {
 
 function showRemoveLiquidityResult(yoctoCheddar: string) {
   showSuccess(
-    //`<div class="stat-line"> <dt>NEAR received</dt><dd>${toStringDec(yton(result.near))}</dd> </div>`+
     `<div class="stat-line"> <dt>cheddar received</dt><dd>${toStringDec(yton(yoctoCheddar))}</dd> </div>`
     , "Withdraw crop"
   )
 }
-
 
 //compute epoch info
 let epochCached: EpochInfo;
@@ -549,11 +592,11 @@ async function autoRefresh() {
       await refreshAccountInfo()
     }
     catch (ex) {
-      console.log("auto-refresh: " + ex.message)
+      //console.log("auto-refresh: " + ex.message)
     }
   }
   setTimeout(autoRefresh, 10 * MINUTES)
-  console.log("auto-refresh")
+  //console.log("auto-refresh")
 }
 
 //--------------------------------------
@@ -633,6 +676,7 @@ async function initNearWebWalletConnection() {
 }
 
 function logoutNearWebWallet() {
+
   nearWebWalletConnection.signOut()
   wallet = disconnectedWallet
 
@@ -742,8 +786,8 @@ async function refreshRealRewardsLoop() {
           let advanced = yton(real) - yton(previous_real)
           let elapsed_ms = now - previous_timestamp
           real_rewards_per_day = (advanced * 60 * 24)
-          console.log(`advanced:${advanced} real:${real} prev-real:${previous_real} rewards-per-day:${real_rewards_per_day}  comp:${computed} real-comp:${real - computed} eslapsed-ms:${elapsed_ms}`);
-          console.log(`real-adv:${advanced}, elapsed_ms:${elapsed_ms}, real rew x week :${real_rewards_per_day * 7}`);
+          //console.log(`advanced:${advanced} real:${real} prev-real:${previous_real} rewards-per-day:${real_rewards_per_day}  comp:${computed} real-comp:${real - computed} eslapsed-ms:${elapsed_ms}`);
+          //console.log(`real-adv:${advanced}, elapsed_ms:${elapsed_ms}, real rew x week :${real_rewards_per_day * 7}`);
         }
       }
       previous_real = real;
@@ -765,7 +809,7 @@ async function refreshRealRewardsLoop() {
       let timePassed = (Date.now()-(unixTimestamp*1000))/1000
       timeRemaining = 61.3 - timePassed;
       timeRemaining = (timeRemaining > 0) ? timeRemaining : timeRemaining + 2
-      console.log(timeRemaining)
+      //console.log(timeRemaining)
     }
 
     setTimeout(refreshRealRewardsLoop, timeRemaining * 1000) // every 60 secs
@@ -776,7 +820,6 @@ async function refreshRealRewardsLoop2() {
 
   let unixTimestamp2 = new Date().getTime() / 1000; //unix timestamp (seconds)
   let isOpened2 = (contractParams2.is_active && unixTimestamp2 >= contractParams2.farming_start && unixTimestamp2 <= contractParams2.farming_end);
-
  
   try {
 
@@ -784,7 +827,9 @@ async function refreshRealRewardsLoop2() {
 
       accountInfo2 = await contract2.status()
       staked2 = accountInfo2[0];
-      qsaInnerText("#afiPool #near-balance span.near.balance", toStringDecLong(yton(staked2)))
+      console.log(accountInfo2)
+      console.log(staked2)
+      qsaInnerText("#refPool #near-balance span.near.balance", (convertToDecimals(staked2, metaData2.decimals)))
       real2 = accountInfo2[1];
       unixTimestamp2 = Number(accountInfo2[2]);
       let now2 = unixTimestamp2 * 1000 //to milliseconds
@@ -795,14 +840,14 @@ async function refreshRealRewardsLoop2() {
       }
 
       if (staked2 > 0) {
-        qs("#afiPool #near-balance a .max").style.display = "block";
+        qs("#refPool #near-balance a .max").style.display = "block";
         if (previous_timestamp2 && real2 > previous_real2) {
           //recompute speed
           let advanced2 = yton(real2) - yton(previous_real2)
           let elapsed_ms2 = now2 - previous_timestamp2
           real_rewards_per_day2 = (advanced2 * 60 * 24)
-          console.log(`advanced:${advanced2} real:${real2} prev-real:${previous_real2} rewards-per-day:${real_rewards_per_day2}  comp:${computed2} real-comp:${real2 - computed2} eslapsed-ms:${elapsed_ms2}`);
-          console.log(`real-adv:${advanced2}, elapsed_ms:${elapsed_ms2}, real rew x week :${real_rewards_per_day2 * 7}`);
+          //console.log(`advanced:${advanced2} real:${real2} prev-real:${previous_real2} rewards-per-day:${real_rewards_per_day2}  comp:${computed2} real-comp:${real2 - computed2} eslapsed-ms:${elapsed_ms2}`);
+          //console.log(`real-adv:${advanced2}, elapsed_ms:${elapsed_ms2}, real rew x week :${real_rewards_per_day2 * 7}`);
         }
       }
       previous_real2 = real2;
@@ -810,6 +855,7 @@ async function refreshRealRewardsLoop2() {
       if (real2 > computed2 || (real2 > 0 && computed2 - real2 > real2 / 4)) { //if real is bigger or differ is >25%
         computed2 = real2
       }
+      console.log(computed2)
       display_cheddar((computed2);
     }
   } catch (ex) {
@@ -824,7 +870,7 @@ async function refreshRealRewardsLoop2() {
       let timePassed2 = (Date.now()-(unixTimestamp2*1000))/1000
       timeRemaining2 = 61.3 - timePassed2;
       timeRemaining2 = (timeRemaining2 > 0) ? timeRemaining2 : timeRemaining2 + 2
-      console.log(timeRemaining2)
+      //console.log(timeRemaining2)
     }
 
     setTimeout(refreshRealRewardsLoop2, timeRemaining2 * 1000) // every 60 secs
@@ -842,7 +888,7 @@ async function refreshRealRewardsLoop3() {
 
       accountInfo3 = await contract3.status()
       staked3 = accountInfo3[0];
-      qsaInnerText("#afiPool #near-balance span.near.balance", toStringDecLong(yton(staked3)))
+      qsaInnerText("#stNEARPool #near-balance span.near.balance", toStringDecLong(yton(staked3)))
       real3 = accountInfo3[1];
       unixTimestamp3 = Number(accountInfo3[2]);
       let now3 = unixTimestamp3 * 1000 //to milliseconds
@@ -853,14 +899,14 @@ async function refreshRealRewardsLoop3() {
       }
 
       if (staked3 > 0) {
-        qs("#afiPool #near-balance a .max").style.display = "block";
+        qs("#stNEARPool #near-balance a .max").style.display = "block";
         if (previous_timestamp3 && real3 > previous_real3) {
           //recompute speed
           let advanced3 = yton(real3) - yton(previous_real3)
           let elapsed_ms3 = now3 - previous_timestamp3
           real_rewards_per_day3 = (advanced3 * 60 * 24)
-          console.log(`advanced:${advanced3} real:${real3} prev-real:${previous_real3} rewards-per-day:${real_rewards_per_day3}  comp:${computed3} real-comp:${real3 - computed3} eslapsed-ms:${elapsed_ms3}`);
-          console.log(`real-adv:${advanced3}, elapsed_ms:${elapsed_ms3}, real rew x week :${real_rewards_per_day3 * 7}`);
+          //console.log(`advanced:${advanced3} real:${real3} prev-real:${previous_real3} rewards-per-day:${real_rewards_per_day3}  comp:${computed3} real-comp:${real3 - computed3} eslapsed-ms:${elapsed_ms3}`);
+          //console.log(`real-adv:${advanced3}, elapsed_ms:${elapsed_ms3}, real rew x week :${real_rewards_per_day3 * 7}`);
         }
       }
       previous_real3 = real3;
@@ -882,7 +928,7 @@ async function refreshRealRewardsLoop3() {
       let timePassed3 = (Date.now()-(unixTimestamp3*1000))/1000
       timeRemaining3 = 61.3 - timePassed3;
       timeRemaining3 = (timeRemaining3 > 0) ? timeRemaining3 : timeRemaining3 + 2
-      console.log(timeRemaining3)
+      //console.log(timeRemaining3)
     }
 
     setTimeout(refreshRealRewardsLoop3, timeRemaining3 * 1000) // every 60 secs
@@ -900,7 +946,7 @@ async function refreshRealRewardsLoop4() {
 
       accountInfo4 = await contract4.status()
       staked4 = accountInfo4[0];
-      qsaInnerText("#afiPool #near-balance span.near.balance", toStringDecLong(yton(staked4)))
+      qsaInnerText("#bananaPool #near-balance span.near.balance", toStringDecLong(yton(staked4)))
       real4 = accountInfo4[1];
       unixTimestamp4 = Number(accountInfo4[2]);
       let now4 = unixTimestamp4 * 1000 //to milliseconds
@@ -911,14 +957,14 @@ async function refreshRealRewardsLoop4() {
       }
 
       if (staked4 > 0) {
-        qs("#afiPool #near-balance a .max").style.display = "block";
+        qs("#bananaPool #near-balance a .max").style.display = "block";
         if (previous_timestamp4 && real4 > previous_real4) {
           //recompute speed
           let advanced4 = yton(real4) - yton(previous_real4)
           let elapsed_ms4 = now4 - previous_timestamp4
           real_rewards_per_day4 = (advanced4 * 60 * 24)
-          console.log(`advanced:${advanced4} real:${real4} prev-real:${previous_real4} rewards-per-day:${real_rewards_per_day4}  comp:${computed4} real-comp:${real4 - computed4} eslapsed-ms:${elapsed_ms4}`);
-          console.log(`real-adv:${advanced4}, elapsed_ms:${elapsed_ms4}, real rew x week :${real_rewards_per_day4 * 7}`);
+          //console.log(`advanced:${advanced4} real:${real4} prev-real:${previous_real4} rewards-per-day:${real_rewards_per_day4}  comp:${computed4} real-comp:${real4 - computed4} eslapsed-ms:${elapsed_ms4}`);
+          //console.log(`real-adv:${advanced4}, elapsed_ms:${elapsed_ms4}, real rew x week :${real_rewards_per_day4 * 7}`);
         }
       }
       previous_real4 = real4;
@@ -940,7 +986,7 @@ async function refreshRealRewardsLoop4() {
       let timePassed4 = (Date.now()-(unixTimestamp4*1000))/1000
       timeRemaining4 = 61.3 - timePassed4;
       timeRemaining4 = (timeRemaining4 > 0) ? timeRemaining4 : timeRemaining4 + 2
-      console.log(timeRemaining4)
+      //console.log(timeRemaining4)
     }
 
     setTimeout(refreshRealRewardsLoop4, timeRemaining4 * 1000) // every 60 secs
@@ -957,7 +1003,7 @@ async function refreshRewardsDisplayLoop() {
         if (staked != 0) {
           var rewards = (real_rewards_per_day * elapsed_ms / (1000 * 60 * 60 * 24));
           computed = (yton(previous_real) + rewards)
-          console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp}, rewards:${rewards}, computed:${computed}, previous_real:${yton(previous_real)}, real_rewards_per_day :${real_rewards_per_day}, elapsed_ms:${elapsed_ms}`);
+          //console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp}, rewards:${rewards}, computed:${computed}, previous_real:${yton(previous_real)}, real_rewards_per_day :${real_rewards_per_day}, elapsed_ms:${elapsed_ms}`);
           display_cheddar(computed);
         }
       }
@@ -980,7 +1026,8 @@ async function refreshRewardsDisplayLoop2() {
         if (staked2 != 0) {
           var rewards2 = (real_rewards_per_day2 * elapsed_ms2 / (1000 * 60 * 60 * 24));
           computed2 = (yton(previous_real2) + rewards2)
-          console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp2}, rewards:${rewards2}, computed:${computed2}, previous_real:${yton(previous_real2)}, real_rewards_per_day2 :${real_rewards_per_day2}, elapsed_ms:${elapsed_ms2}`);
+          //console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp2}, rewards:${rewards2}, computed:${computed2}, previous_real:${yton(previous_real2)}, real_rewards_per_day2 :${real_rewards_per_day2}, elapsed_ms:${elapsed_ms2}`);
+          console.log(computed2)
           display_cheddar(computed2);
         }
       }
@@ -1003,7 +1050,7 @@ async function refreshRewardsDisplayLoop3() {
         if (staked3 != 0) {
           var rewards3 = (real_rewards_per_day3 * elapsed_ms3 / (1000 * 60 * 60 * 24));
           computed3 = (yton(previous_real3) + rewards3)
-          console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp3}, rewards:${rewards3}, computed:${computed3}, previous_real:${yton(previous_real3)}, real_rewards_per_day2 :${real_rewards_per_day3}, elapsed_ms:${elapsed_ms3}`);
+          //console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp3}, rewards:${rewards3}, computed:${computed3}, previous_real:${yton(previous_real3)}, real_rewards_per_day2 :${real_rewards_per_day3}, elapsed_ms:${elapsed_ms3}`);
           display_cheddar(computed3);
         }
       }
@@ -1026,7 +1073,7 @@ async function refreshRewardsDisplayLoop4() {
         if (staked4 != 0) {
           var rewards4 = (real_rewards_per_day4 * elapsed_ms4 / (1000 * 60 * 60 * 24));
           computed4 = (yton(previous_real4) + rewards4)
-          console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp4}, rewards:${rewards4}, computed:${computed4}, previous_real:${yton(previous_real4)}, real_rewards_per_day :${real_rewards_per_day4}, elapsed_ms:${elapsed_ms4}`);
+          //console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp4}, rewards:${rewards4}, computed:${computed4}, previous_real:${yton(previous_real4)}, real_rewards_per_day :${real_rewards_per_day4}, elapsed_ms:${elapsed_ms4}`);
           display_cheddar(computed4);
         }
       }
@@ -1056,8 +1103,7 @@ async function refreshAccountInfo() {
 
     if (accName.length > 22) accName = accName.slice(0, 10) + ".." + accName.slice(-10);
 
-    //console.log(await tokenContractName1.ft_balance_of(accName))
-
+    ////console.log(await tokenContractName1.ft_balance_of(accName))
 
     qs(".user-info #account-id").innerText = accName;
     //show top-right-balance only if connected wallet
@@ -1075,7 +1121,7 @@ async function refreshAccountInfo() {
 
 
     let tokenBal2 = await tokenContractName2.ft_balance_of(accName);
-    let metaData2 = await tokenContractName2.ft_metadata();
+    metaData2 = await tokenContractName2.ft_metadata();
 
     let walletAvailable2 = toStringDec(convertToDecimals(tokenBal2,metaData2.decimals))
     //update shown wallet balance
@@ -1087,7 +1133,7 @@ async function refreshAccountInfo() {
 
 
     let tokenBal3 = await tokenContractName3.ft_balance_of(accName);
-    let metaData3 = await tokenContractName3.ft_metadata();
+    metaData3 = await tokenContractName3.ft_metadata();
     let walletAvailable3 = toStringDec(convertToDecimals(tokenBal3,metaData3.decimals))
     //update shown wallet balance
     qsaInnerText("#stNEARPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable3));
@@ -1098,7 +1144,7 @@ async function refreshAccountInfo() {
     }
 
     let tokenBal4 = await tokenContractName4.ft_balance_of(accName);
-    let metaData4 = await tokenContractName4.ft_metadata();
+    metaData4 = await tokenContractName4.ft_metadata();
     let walletAvailable4 = toStringDec(convertToDecimals(tokenBal4,metaData4.decimals))
     //update shown wallet balance
     qsaInnerText("#bananaPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable4));
@@ -1130,7 +1176,7 @@ async function refreshAccountInfo() {
       });
 
       accountInfo = await contract1.status(accName)
-      console.log(accountInfo)
+      //console.log(accountInfo)
 
       contractParams = await contract1.get_contract_params()
       total_supply = yton(await cheddarContractName1.ft_total_supply())
@@ -1162,7 +1208,7 @@ async function refreshAccountInfo() {
 
       qs("#afiPool #farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
       qs("#afiPool #farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
-      console.log(contractParams)
+      //console.log(contractParams)
 
       total_staked = BigInt(yton(contractParams.total_staked));
 
@@ -1170,9 +1216,8 @@ async function refreshAccountInfo() {
       qs("#afi-pool-stats #rewards-per-day").innerText = yton((contractParams.farming_rate * 60 * 24))
       qs("#afi-pool-stats #total-rewards").innerText = (ytonFull(contractParams.total_farmed))
 
-     
-      //REF
-
+      /*-------------------------/*
+      /*** REF ***/
 
       let accountRegistred2 = await contract2.storageBalance()
 
@@ -1182,13 +1227,14 @@ async function refreshAccountInfo() {
       }
 
       var tokenNames2 = qsa("#refPool .token-name");
-      //console.log(tokenNames2);
+      ////console.log(tokenNames2);
 
       [].forEach.call(tokenNames2, function(tokenNames2) {
         // do whatever
          tokenNames2.innerText = metaData2.symbol.toUpperCase();
       });
 
+      console.log(accName)
       accountInfo2 = await contract2.status(accName)
       console.log(accountInfo2)
 
@@ -1197,7 +1243,7 @@ async function refreshAccountInfo() {
       staked2 = accountInfo2[0];
       real2 = accountInfo2[1];
 
-      var iconObj2 = qs("#afiPool #token-header img");
+      var iconObj2 = qs("#refPool #token-header img");
       var iconVal2 = metaData2.icon;
 
       if(iconObj2 != null) {
@@ -1222,7 +1268,7 @@ async function refreshAccountInfo() {
 
       qs("#refPool #farming_start").innerText = new Date(contractParams2.farming_start * 1000).toLocaleString()
       qs("#refPool #farming_end").innerText = new Date(contractParams2.farming_end * 1000).toLocaleString()
-      console.log(contractParams2)
+      //console.log(contractParams2)
 
       total_staked2 = BigInt(yton(contractParams2.total_staked));
 
@@ -1230,8 +1276,10 @@ async function refreshAccountInfo() {
       qs("#ref-pool-stats #rewards-per-day").innerText = yton((contractParams2.farming_rate * 60 * 24))
       qs("#ref-pool-stats #total-rewards").innerText = (ytonFull(contractParams2.total_farmed))
 
+      /**********
+      * stNEAR
+      ***********/
 
-      //stNEAR
       var tokenNames3 = qsa("#stNEARPool .token-name");
 
       [].forEach.call(tokenNames3, function(tokenNames3) {
@@ -1247,7 +1295,7 @@ async function refreshAccountInfo() {
       staked3 = accountInfo3[0];
       real3 = accountInfo3[1];
 
-      var iconObj3= qs("#afiPool #token-header img");
+      var iconObj3= qs("#stNEARPool #token-header img");
       var iconVal3 = metaData3.icon;
 
       if(iconObj3 != null) {
@@ -1272,7 +1320,7 @@ async function refreshAccountInfo() {
 
       qs("#stNEARPool #farming_start").innerText = new Date(contractParams3.farming_start * 1000).toLocaleString()
       qs("#stNEARPool #farming_end").innerText = new Date(contractParams3.farming_end * 1000).toLocaleString()
-      console.log(contractParams3)
+      //console.log(contractParams3)
 
       total_staked3 = BigInt(yton(contractParams3.total_staked));
 
@@ -1281,9 +1329,9 @@ async function refreshAccountInfo() {
       qs("#stnear-pool-stats #total-rewards").innerText = (ytonFull(contractParams3.total_farmed))
 
 
-      //Bananas
+      /*** Bananas ***/
 
-      var tokenNames4 = qsa("#afiPool .token-name");
+      var tokenNames4 = qsa("#bananaPool .token-name");
 
       [].forEach.call(tokenNames4, function(tokenNames4) {
         // do whatever
@@ -1291,19 +1339,19 @@ async function refreshAccountInfo() {
       });
 
       accountInfo4 = await contract4.status(accName)
-      console.log(accountInfo4)
+      //console.log(accountInfo4)
 
       contractParams4 = await contract4.get_contract_params()
       total_supply4 = yton(await cheddarContractName4.ft_total_supply())
       staked4 = accountInfo4[0];
       real4 = accountInfo4[1];
-
-      var iconObj4 = qs("#afiPool #token-header img");
+      console.log(metaData4)
+      var iconObj4 = qs("#bananaPool #token-header img");
       var iconVal4 = metaData4.icon;
 
       if(iconObj4 != null) {
 
-        if(iconVal4 != null && iconVal.includes("data:image/svg+xml")) {
+        if(iconVal4 != null && iconVal4.includes("data:image/svg+xml")) {
 
           iconObj4.src = metaData4.icon;
 
@@ -1323,9 +1371,9 @@ async function refreshAccountInfo() {
 
       qs("#bananaPool #farming_start").innerText = new Date(contractParams4.farming_start * 1000).toLocaleString()
       qs("#bananaPool #farming_end").innerText = new Date(contractParams4.farming_end * 1000).toLocaleString()
-      console.log(contractParams4)
+      //console.log(contractParams4)
 
-      total_staked4 = BigInt(yton(contractParams4.total_staked));
+      total_staked4 = ((contractParams4.total_staked));
 
       qs("#banana-pool-stats #total-staked").innerText = total_staked4 + " " + metaData4.symbol.toUpperCase()
       qs("#banana-pool-stats #rewards-per-day").innerText = yton((contractParams4.farming_rate * 60 * 24))
@@ -1357,11 +1405,11 @@ async function refreshAccountInfo() {
 
     let bigNStaked = BigInt(yton(staked));
     let farmingRate = BigInt(contractParams.farming_rate)
-    console.log(bigNStaked)
-    console.log(farmingRate)
-    console.log(total_staked)
+    //console.log(bigNStaked)
+    //console.log(farmingRate)
+    //console.log(total_staked)
     real_rewards_per_day = yton( (farmingRate * 60n * 24n) / total_staked * bigNStaked).toString()
-    //console.log(real_rewards_per_day);
+    ////console.log(real_rewards_per_day);
 
     qsaInnerText("#afiPool #near-balance span.near.balance", (convertToDecimals(staked,tokenDecimals)))
 
@@ -1376,14 +1424,14 @@ async function refreshAccountInfo() {
 
     qsaInnerText("#afiPool #total-cheddar-tokens", toStringDec(total_supply))
 
-
-    // //REF
+    /* -------------------*/
+    /*** REF ***/
 
     let bigNStaked2 = BigInt(yton(staked2));
     let farmingRate2 = BigInt(contractParams2.farming_rate)
-    console.log(bigNStaked2)
-    console.log(farmingRate2)
-    console.log(total_staked2)
+    //console.log(bigNStaked2)
+    //console.log(farmingRate2)
+    //console.log(total_staked2)
 
     if(bigNStaked2 > 0 && total_staked2 > 0 ) {
       real_rewards_per_day2 = yton( (farmingRate2 * 60n * 24n) / total_staked2 * bigNStaked2).toString()
@@ -1391,14 +1439,15 @@ async function refreshAccountInfo() {
     else {
       real_rewards_per_day2 = yton( (farmingRate2 * 60n * 24n)).toString()
     }
-    //console.log(real_rewards_per_day);
+    ////console.log(real_rewards_per_day);
 
-    qsaInnerText("#refPool #near-balance span.near.balance", (convertToDecimals(staked2,tokenDecimals2)))
+    qsaInnerText("#refPool #near-balance span.near.balance", (convertToDecimals(staked2,metaData2.decimals,2)))
 
     if (staked2 > 0) {
       qs("#refPool #near-balance a .max").style.display = "block";
     }
 
+    console.log(real2)
     display_cheddar(real2); // display real rewards so they can harvest
     computed2 = real2;
     previous_timestamp2 = Date.now();
@@ -1407,21 +1456,22 @@ async function refreshAccountInfo() {
     qsaInnerText("#refPool #total-cheddar-tokens", toStringDec(total_supply2))
 
 
-    //STNEAR
+    /*** STNEAR ***/
+
     let bigNStaked3 = BigInt(yton(staked3));
     let farmingRate3 = BigInt(contractParams3.farming_rate)
-    console.log(bigNStaked3)
-    console.log(farmingRate3)
-    console.log(total_staked3)
+    //console.log(bigNStaked3)
+    //console.log(farmingRate3)
+    //console.log(total_staked3)
     if(bigNStaked3 > 0 && total_staked3 > 0 ) {
       real_rewards_per_day3 = yton( (farmingRate3 * 60n * 24n) / total_staked3 * bigNStaked3).toString()
     }
     else {
       real_rewards_per_day3 = yton( (farmingRate3 * 60n * 24n)).toString()
     }
-    //console.log(real_rewards_per_day);
+    ////console.log(real_rewards_per_day);
 
-    qsaInnerText("#stNEARPool #near-balance span.near.balance", (convertToDecimals(staked3,tokenDecimals3)))
+    qsaInnerText("#stNEARPool #near-balance span.near.balance", (convertToDecimals(staked3,metaData3.decimals,2)))
 
     if (staked3 > 0) {
       qs("#stNEARPool #near-balance a .max").style.display = "block";
@@ -1435,24 +1485,25 @@ async function refreshAccountInfo() {
     qsaInnerText("#stNEARPool #total-cheddar-tokens", toStringDec(total_supply3))
 
   
-    //Bananas
+    /*** Bananas ***/
+
     let bigNStaked4 = BigInt(yton(staked));
     let farmingRate4 = BigInt(contractParams4.farming_rate)
-    console.log(bigNStaked4)
-    console.log(farmingRate4)
-    console.log(total_staked4)
+    //console.log(bigNStaked4)
+    ////console.log(farmingRate4)
+    //console.log(total_staked4)
     if(bigNStaked4 > 0 && total_staked4 > 0 ) {
       real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n) / total_staked4 * bigNStaked4).toString()
     }
     else {
       real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n)).toString()
     }
-    //console.log(real_rewards_per_day);
+    ////console.log(real_rewards_per_day);
 
-    qsaInnerText("#bananasPool #near-balance span.near.balance", (convertToDecimals(staked4,tokenDecimals)))
+    qsaInnerText("#bananaPool #near-balance span.near.balance", (convertToDecimals(staked4,metaData4.decimals,2)))
 
     if (staked4 > 0) {
-      qs("#bananasPool #near-balance a .max").style.display = "block";
+      qs("#bananaPool #near-balance a .max").style.display = "block";
     }
 
     display_cheddar(real4); // display real rewards so they can harvest
@@ -1460,7 +1511,7 @@ async function refreshAccountInfo() {
     previous_timestamp4 = Date.now();
     previous_real4 = real4;
 
-    qsaInnerText("#bananasPool #total-cheddar-tokens", toStringDec(total_supply))
+    qsaInnerText("#bananaPool #total-cheddar-tokens", toStringDec(total_supply))
 
   }
   catch (ex) {
@@ -1493,11 +1544,7 @@ function narwalletConnected(ev: CustomEvent) {
 
 /// when the user chooses "disconnect from web-page" in the narwallets-chrome-extension
 function narwalletDisconnected(ev: CustomEvent) {
-  // const div = d.byId("connection-info")
-  // div.innerText = "Not connected";
-  // div.classList.remove("connected")
-  // d.showSuccess("wallet disconnected")
-  // InitialPage.show()
+
   wallet = disconnectedWallet;
   contract1.wallet = disconnectedWallet;
   cheddarContractName1.wallet = disconnectedWallet;
@@ -1517,14 +1564,6 @@ function narwalletDisconnected(ev: CustomEvent) {
 
   signedOutFlow()
 }
-
-//`nearInitPromise` gets called on page load
-// window.nearInitPromise = initContract()
-// .then(() => {
-// if (walletConnection.isSignedIn()) signedInFlow()
-// else signedOutFlow()
-// })
-// .catch(console.error)
 
 window.onload = async function () {
   try {
@@ -1589,7 +1628,7 @@ window.onload = async function () {
     cheddarContractName4 = new NEP141Trait(nearConfig.farms[3].cheddarContractName);
     tokenContractName4 = new NEP141Trait(nearConfig.farms[3].tokenContractName);
 
-    //console.log(nearConfig.farms[0].networkId)
+    ////console.log(nearConfig.farms[0].networkId)
 
     //init narwallets listeners
     narwallets.setNetwork(nearConfig.farms[0].networkId); //tell the wallet which network we want to operate on

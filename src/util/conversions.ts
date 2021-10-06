@@ -50,7 +50,6 @@ export function ytonFull(yoctoString: string): string {
 //--- conversions User-input <-> Number
 //-------------------------------------
 
-
 /** rebase a number based on decimal. Examples
 *   convertToDecimals("1",3) = 0.001
 *   convertToDecimals("0",3) = 0.0
@@ -63,24 +62,66 @@ export function ytonFull(yoctoString: string): string {
 *   convertToDecimals("12345678", 1, 1) = 123.4
 */ 
 export function convertToDecimals(str, decimals, truncate) {
-  let decimals_n = Number(decimals);
-  if(decimals_n == 0) {
-    return str;
-  }
-  if(str == "0") return "0.0";
+  str = str.toString() // convert numbers and bigint
+  // clear leading zeros
+  let i = 0
+  for(; i<str.length && str[i]=="0"; ++i) {}
+  if (i != 0)
+    str = str.substring(i);
+  if (str == 0 || str == "0")
+    return "0";
 
-  // we add 1 to make sure the integer digit is included as well)
-  let result = String(str).padStart(decimals_n + 1, "0");
-  result = result.slice(0, -decimals_n);
-  if (truncate == 0) {
-    return result;
-  }
-  let fractional = result.slice(-decimals_n);
+  let decimals_n = Number(decimals);
+  if(decimals_n == 0)
+    return str;
+
+  // Pad zeros at the beginning.
+  // We add 1 to make sure the integer digit is included as well)
+  str = String(str).padStart(decimals_n + 1, "0");
+
+  let integer = str.slice(0, -decimals_n);
+  let fractional = str.slice(integer.length);
+  if(integer == "")
+    integer = "0";
+
+  if(fractional == "")
+    return integer;
   if (truncate == undefined) {
-    return result + "." + fractional;
+    return integer + "." + fractional;
   }
-  return result + "." + result.substring(0, truncate);
-} 
+  return integer + "." + fractional.substring(0, truncate);
+}
+
+/** Takes a decimal number in string and returns
+* a number as a string rebased to given decimal base.
+* Examples
+*   convertToBase("1", 3) = "1000"
+*   convertToBase("1234", 3) =   "1234000"
+*   convertToBase("1.234", 3) =  "1234"
+*   convertToBase("1.2345", 3) = "1234"
+* convertToBase("0.12345", 3) = "123"
+*/ 
+export function convertToBase(n, decimals) {
+  let decimals_n = Number(decimals);
+  // clear leading zeros
+  let i = 0
+  for(; i<n.length && n[i]=="0"; ++i) {}
+  if (i != 0)
+    n = n.substring(i);
+
+  let dotIdx = n.indexOf(".");
+  if (dotIdx < 0)  // no decimal part
+    return n + "0".padEnd(decimals, "0");
+
+  let integer = n.substring(0, dotIdx);
+  if(decimals_n == 0)
+    return integer;
+
+  let fractional = n.substring(dotIdx + 1, dotIdx + 1 + decimals).padEnd(decimals, "0");
+  if (integer.length == 0)
+    return fractional;
+  return integer + fractional;
+}
 
 /**
  * converts a string with and commas and decimal places into a number
