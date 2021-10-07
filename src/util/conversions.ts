@@ -89,7 +89,10 @@ export function convertToDecimals(str, decimals, truncate) {
   if (truncate == undefined) {
     return integer + "." + fractional;
   }
-  return integer + "." + fractional.substring(0, truncate);
+  else if(fractional > 0) {
+    return integer + "." + fractional.substring(0, truncate);
+  }
+  return integer;
 }
 
 /** Takes a decimal number in string and returns

@@ -37,7 +37,7 @@ export class StakingPoolP1 extends SmartContract {
 
     /// Stake attached &NEAR and returns total amount of stake.
     stake(amount: number): Promise<U128String> {
-        return this.call("stake", {}, TGas(25), ntoy(amount))
+        return this.call("stake", {}, TGas(25), amount)
     }
 
     /// Unstakes given amount of $NEAR and transfers it back to the user.
@@ -45,7 +45,7 @@ export class StakingPoolP1 extends SmartContract {
     /// Panics if the caller doesn't stake anything or if he doesn't have enough staked tokens.
     /// Requires 1 yNEAR payment for wallet validation.
     unstake(amount: number): Promise<void> {
-        return this.call("unstake", { amount: ntoy(amount) }, TGas(125), "1")
+        return this.call("unstake", { amount: amount }, TGas(125), "1")
     }
 
     /// Unstakes everything and close the account. Sends all farmed CHEDDAR using a ft_transfer
