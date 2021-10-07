@@ -104,7 +104,7 @@ export function convertToDecimals(str, decimals, truncate) {
 *   convertToBase("1.2345", 3) = "1234"
 * convertToBase("0.12345", 3) = "123"
 */ 
-export function convertToBase(n, decimals) {
+export function convertToBase(n:string, decimals:string) {
   let decimals_n = Number(decimals);
   // clear leading zeros
   let i = 0

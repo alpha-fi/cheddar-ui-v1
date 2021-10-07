@@ -59,7 +59,7 @@ let contractParams: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
   rewards_per_day: ntoy(10),
-  is_open: false,
+  is_active: false,
   farming_start: 0,
   farming_end: 0,
   total_rewards: "0",
@@ -70,7 +70,7 @@ let contractParams2: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
   rewards_per_day: ntoy(10),
-  is_open: false,
+  is_active: false,
   farming_start: 0,
   farming_end: 0,
   total_rewards: "0",
@@ -81,7 +81,7 @@ let contractParams3: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
   rewards_per_day: ntoy(10),
-  is_open: false,
+  is_active: false,
   farming_start: 0,
   farming_end: 0,
   total_rewards: "0",
@@ -92,7 +92,7 @@ let contractParams4: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
   rewards_per_day: ntoy(10),
-  is_open: false,
+  is_active: false,
   farming_start: 0,
   farming_end: 0,
   total_rewards: "0",
@@ -862,7 +862,7 @@ async function refreshRealRewardsLoop() {
         computed = real
       }
       console.log(computed)
-      display_cheddar((computed, "afiPool");
+      display_cheddar(computed, "afiPool");
     }
   } catch (ex) {
     console.error(ex);
@@ -923,7 +923,7 @@ async function refreshRealRewardsLoop2() {
         computed2 = real2
       }
       //console.log(computed2)
-      display_cheddar((computed2, "refPool");
+      display_cheddar(computed2, "refPool");
     }
   } catch (ex) {
     console.error(ex);
@@ -982,7 +982,7 @@ async function refreshRealRewardsLoop3() {
       if (yton(real3) > computed3 || (real3 > 0 && computed3 - yton(real3) > yton(real3) / 2)) { //if real is bigger or differ is >25%
         computed3 = real3
       }
-      display_cheddar((computed3, "stNEARPool");
+      display_cheddar(computed3, "stNEARPool");
     }
   } catch (ex) {
     console.error(ex);
@@ -1040,7 +1040,7 @@ async function refreshRealRewardsLoop4() {
       if (real4 > computed4 || (real4 > 0 && computed4 - real4 > real4 / 2)) { //if real is bigger or differ is >25%
         computed4 = real4
       }
-      display_cheddar((computed4, "bananaPool");
+      display_cheddar(computed4, "bananaPool");
     }
   } catch (ex) {
     console.error(ex);
@@ -1142,7 +1142,7 @@ async function refreshRewardsDisplayLoop4() {
         if (staked4 != 0) {
           var rewards4 = (real_rewards_per_day4 * elapsed_ms4 / (1000 * 60 * 60 * 24));
           computed4 = (yton(previous_real4) + rewards4)
-          console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp4}, rewards:${rewards4}, computed:${computed4}, previous_real:${yton(previous_real4)}, real_rewards_per_day :${real_rewards_per_day4}, elapsed_ms:${elapsed_ms4}`);
+          //console.log(`date_now:${Date.now()}, round_timestamp:${previous_timestamp4}, rewards:${rewards4}, computed:${computed4}, previous_real:${yton(previous_real4)}, real_rewards_per_day :${real_rewards_per_day4}, elapsed_ms:${elapsed_ms4}`);
           display_cheddar(computed4, "bananaPool");
         }
       }
@@ -1164,23 +1164,22 @@ function display_cheddar(cheddar_amount: number, pool: string) {
 
   switch (pool) {
     case "refPool": {
-      qsaInnerText("#refPool #cheddar-balance", toStringDec(cheddar_amount)
-      cheddar_displayed2 = cheddar_amount // so they can harvest
+      qsaInnerText("#refPool #cheddar-balance", toStringDec(cheddar_amount));
+      cheddar_displayed2 = cheddar_amount;
       break;
     }
     case "stNEARPool": {
-      qsaInnerText("#stNEARPool #cheddar-balance", toStringDec(cheddar_amount)
-      cheddar_displayed3 = cheddar_amount // so they can harvest
+      qsaInnerText("#stNEARPool #cheddar-balance", toStringDec(cheddar_amount));
+      cheddar_displayed3 = cheddar_amount;
       break;
     }
     case "bananaPool": {
-      qsaInnerText("#bananaPool #cheddar-balance", toStringDec(cheddar_amount)
-      cheddar_displayed4 = cheddar_amount // so they can harvest
-      break;
+      qsaInnerText("#bananaPool #cheddar-balance", toStringDec(cheddar_amount));
+      cheddar_displayed4 = cheddar_amount;
     }
     case "afiPool": {
-      qsaInnerText("#afiPool #cheddar-balance", toStringDec(cheddar_amount)
-      cheddar_displayed = cheddar_amount // so they can harvest
+      qsaInnerText("#afiPool #cheddar-balance", toStringDec(cheddar_amount));
+      cheddar_displayed = cheddar_amount;
       break;
     }
   }
@@ -1202,7 +1201,7 @@ async function refreshAccountInfo() {
 
     let walletAvailable = toStringDec(yton(await tokenContractName1.ft_balance_of(accName)))
     //update shown wallet balance
-    qsaInnerText("#afiPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable));
+    qsaInnerText("#afiPool #wallet-available span.near.balance", removeDecZeroes(walletAvailable));
     qsaInnerText("span.bold.large.near#wallet-available", walletAvailable);
 
 
@@ -1216,7 +1215,7 @@ async function refreshAccountInfo() {
 
     let walletAvailable2 = toStringDec(convertToDecimals(tokenBal2,metaData2.decimals))
     //update shown wallet balance
-    qsaInnerText("#refPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable2));
+    qsaInnerText("#refPool #wallet-available span.near.balance", removeDecZeroes(walletAvailable2));
 
     if (Number(walletAvailable2.replace(",", "")) > 1) {
       qs("#wallet-available a .max").style.display = "block";
@@ -1227,7 +1226,7 @@ async function refreshAccountInfo() {
     metaData3 = await tokenContractName3.ft_metadata();
     let walletAvailable3 = toStringDec(convertToDecimals(tokenBal3,metaData3.decimals))
     //update shown wallet balance
-    qsaInnerText("#stNEARPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable3));
+    qsaInnerText("#stNEARPool #wallet-available span.near.balance", removeDecZeroes(walletAvailable3));
 
 
     if (Number(walletAvailable3.replace(",", "")) > 1) {
@@ -1238,7 +1237,7 @@ async function refreshAccountInfo() {
     metaData4 = await tokenContractName4.ft_metadata();
     let walletAvailable4 = toStringDec(convertToDecimals(tokenBal4,metaData4.decimals))
     //update shown wallet balance
-    qsaInnerText("#bananaPool #wallet-available span.near.balance", removeDecZeroes((walletAvailable4));
+    qsaInnerText("#bananaPool #wallet-available span.near.balance", removeDecZeroes(walletAvailable4));
 
 
     if (Number(walletAvailable4.replace(",", "")) > 1) {
@@ -1261,7 +1260,8 @@ async function refreshAccountInfo() {
 
       var tokenNames = qsa("#afiPool .token-name");
 
-      [].forEach.call(tokenNames, function(tokenName) {
+
+      tokenNames.forEach.call(tokenNames, function(tokenName) {
         // do whatever
          tokenName.innerText = metaData.symbol.toUpperCase();
       });
@@ -1321,14 +1321,14 @@ async function refreshAccountInfo() {
       var tokenNames2 = qsa("#refPool .token-name");
       ////console.log(tokenNames2);
 
-      [].forEach.call(tokenNames2, function(tokenNames2) {
+      tokenNames2.forEach.call(tokenNames2, function(tokenNames2) {
         // do whatever
          tokenNames2.innerText = metaData2.symbol.toUpperCase();
       });
 
-      console.log(accName)
+      //console.log(accName)
       accountInfo2 = await contract2.status(accName)
-      console.log(accountInfo2)
+      //console.log(accountInfo2)
 
       contractParams2 = await contract2.get_contract_params()
       total_supply2 = yton(await cheddarContractName2.ft_total_supply())
@@ -1374,13 +1374,13 @@ async function refreshAccountInfo() {
 
       var tokenNames3 = qsa("#stNEARPool .token-name");
 
-      [].forEach.call(tokenNames3, function(tokenNames3) {
+      tokenNames3.forEach.call(tokenNames3, function(tokenNames3) {
         // do whatever
          tokenNames3.innerText = metaData3.symbol.toUpperCase();
       });
 
       accountInfo3 = await contract3.status(accName)
-      console.log(accountInfo3)
+      //console.log(accountInfo3)
 
       contractParams3 = await contract3.get_contract_params()
       total_supply3 = yton(await cheddarContractName3.ft_total_supply())
@@ -1425,7 +1425,7 @@ async function refreshAccountInfo() {
 
       var tokenNames4 = qsa("#bananaPool .token-name");
 
-      [].forEach.call(tokenNames4, function(tokenNames4) {
+      tokenNames4.forEach.call(tokenNames4, function(tokenNames4) {
         // do whatever
          tokenNames4.innerText = metaData4.symbol.toUpperCase();
       });
@@ -1437,7 +1437,7 @@ async function refreshAccountInfo() {
       total_supply4 = yton(await cheddarContractName4.ft_total_supply())
       staked4 = accountInfo4[0];
       real4 = accountInfo4[1];
-      console.log(metaData4)
+      //console.log(metaData4)
       var iconObj4 = qs("#bananaPool #token-header img");
       var iconVal4 = metaData4.icon;
 
@@ -1477,7 +1477,7 @@ async function refreshAccountInfo() {
       contractParams.rewards_per_day = ntoy(10);
       accountInfo = ["0", "0"];
       staked = 0;
-      real = 0;
+      real = 0; 
 
       contractParams2.rewards_per_day = ntoy(10);
       accountInfo2 = ["0", "0"];
@@ -1592,16 +1592,16 @@ async function refreshAccountInfo() {
     let bigNStaked4 = BigInt(staked4);
     let farmingRate4 = BigInt(contractParams4.farming_rate);
     let total_staked4N = BigInt(total_staked4);
-    console.log(bigNStaked4)
-    console.log(farmingRate4)
-    console.log(total_staked4N)
+    //console.log(bigNStaked4)
+    //console.log(farmingRate4)
+    //console.log(total_staked4N)
     if(bigNStaked4 > 0 && total_staked4 > 0 ) {
       real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n) / total_staked4N * bigNStaked4).toString()
-      console.log(real_rewards_per_day4)
+      //console.log(real_rewards_per_day4)
     }
     else {
       real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n)).toString()
-      console.log(real_rewards_per_day4)
+      //console.log(real_rewards_per_day4)
     }
     ////console.log(real_rewards_per_day);
 

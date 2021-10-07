@@ -6,7 +6,7 @@
   "repository": "https://github.com/alpha-fi/cheddar-ui-v1",
   "scripts": {
     "build:tsc": "tsc --noEmit",
-    "build:prod": "parcel build src/index.html --public-url ./ -d dist-prod",
+    "build:prod": "parcel build src/index.html --log-level verbose --public-url ./ -d dist-prod",
     "deploy:pages": "gh-pages -d dist/",
     "start": "echo The app is starting! It will automatically open in your browser when ready && parcel src/index.html --open",
     "test": "npm run build:contract:debug && cd contract && npm run test && cd .. && jest test --runInBand",

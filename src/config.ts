@@ -13,6 +13,7 @@ type GetConfigResult = {
   nodeUrl:string;
   keyPath?:string;
   contractName:string;
+  cheddarContractName:string;
   tokenContractName:string;
   walletUrl:string;
   helperUrl?:string;
