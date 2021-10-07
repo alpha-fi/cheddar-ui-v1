@@ -887,3 +887,8 @@ input[type="checkbox"]#terms-of-use:checked + label:before {
 #near-balance a {
   display: inline-block
 }
+
+#stake-form-not-connected{
+  max-width:  320px;
+  margin: 0 auto;
+}

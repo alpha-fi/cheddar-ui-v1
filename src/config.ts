@@ -21,13 +21,20 @@ type GetConfigResult = {
   masterAccount?:string;
 }
 
-export function getConfig(env:string):GetConfigResult {
+type GetConfigResults = {
+  farms: {
+    [index: number]: GetConfigResult;
+  }
+}
+
+export function getConfig(env:string):GetConfigResults {
   switch (env) {
 
   case 'production':
   case 'mainnet':
     return {
-      networkId: 'mainnet',
+      "farms": [
+      {networkId: 'mainnet',
       nodeUrl: 'https://rpc.mainnet.near.org',
       contractName: CONTRACT_NAME,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
@@ -36,7 +43,8 @@ export function getConfig(env:string):GetConfigResult {
       helperUrl: 'https://helper.mainnet.near.org',
       explorerUrl: 'https://explorer.mainnet.near.org',
       keyPath: undefined,
-      masterAccount:undefined,
+      masterAccount:undefined}
+      ]
     }
   case 'development':
   case 'testnet':
@@ -94,7 +102,8 @@ export function getConfig(env:string):GetConfigResult {
     }
   case 'betanet':
     return {
-      networkId: 'betanet',
+      "farms": [
+      {networkId: 'betanet',
       nodeUrl: 'https://rpc.betanet.near.org',
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
       contractName: CONTRACT_NAME,
@@ -103,11 +112,13 @@ export function getConfig(env:string):GetConfigResult {
       helperUrl: 'https://helper.betanet.near.org',
       explorerUrl: 'https://explorer.betanet.near.org',
       keyPath: undefined,
-      masterAccount:undefined,
+      masterAccount:undefined}
+      ]
     }
   case 'local':
     return {
-      networkId: 'local',
+      "farms": [
+      {networkId: 'local',
       nodeUrl: 'http://localhost:3030',
       keyPath: `${process.env.HOME}/.near/validator_key.json`,
       walletUrl: 'http://localhost:4000/wallet',
@@ -115,30 +126,35 @@ export function getConfig(env:string):GetConfigResult {
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       helperUrl:undefined,
-      masterAccount:undefined,
+      masterAccount:undefined}
+      ]
     }
   case 'test':
   case 'ci':
     return {
-      networkId: 'shared-test',
+      "farms": [
+      {networkId: 'shared-test',
       nodeUrl: 'https://rpc.ci-testnet.near.org',
       contractName: CONTRACT_NAME,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       masterAccount: 'test.near',
       keyPath: undefined,
-      walletUrl: 'https://wallet.testnet.near.org',
+      walletUrl: 'https://wallet.testnet.near.org'}
+      ]
     }
   case 'ci-betanet':
     return {
-      networkId: 'shared-test-staging',
+      "farms": [
+      {networkId: 'shared-test-staging',
       nodeUrl: 'https://rpc.ci-betanet.near.org',
       contractName: CONTRACT_NAME,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
       tokenContractName: TOKEN_CONTRACT_NAME,
       masterAccount: 'test.near',
       keyPath: undefined,
-      walletUrl: 'https://wallet.betanet.near.org',
+      walletUrl: 'https://wallet.betanet.near.org'}
+      ]
     }
   default:
     throw Error(`Unknown environment '${env}'. Can be configured in src/config.js.`)

@@ -8,7 +8,7 @@ import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narw
 import { toNumber, ntoy, yton, toStringDec, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 import { StakingPoolP1 } from './contracts/p2-staking';
-import type { ContractParams } from './contracts/contract-structs';
+import type { ContractParams, TokenParams } from './contracts/contract-structs';
 
 //qs/qsa are shortcut for document.querySelector/All
 import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup } from './util/document';
@@ -27,23 +27,19 @@ let wallet: WalletInterface = disconnectedWallet;
 let contract1: StakingPoolP1;
 let cheddarContractName1: NEP141Trait;
 let tokenContractName1: NEP141Trait;
-let metaData: string[];
 
 
 let contract2: StakingPoolP1;
 let cheddarContractName2: NEP141Trait;
 let tokenContractName2: NEP141Trait;
-let metaData2: string[];
 
 let contract3: StakingPoolP1;
 let cheddarContractName3: NEP141Trait;
 let tokenContractName3: NEP141Trait;
-let metaData3: string[];
 
 let contract4: StakingPoolP1;
 let cheddarContractName4: NEP141Trait;
 let tokenContractName4: NEP141Trait;
-let metaData4: string[];
 
 let accountInfo: string[];
 let accountInfo2: string[];
@@ -58,46 +54,89 @@ let total_supply4: number;
 let contractParams: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
-  rewards_per_day: ntoy(10),
+  farming_rate: ntoy(10),
   is_active: false,
   farming_start: 0,
   farming_end: 0,
-  total_rewards: "0",
-  total_stake: "0"
+  total_farmed: "0",
+  total_staked: "0"
 }
 
 let contractParams2: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
-  rewards_per_day: ntoy(10),
+  farming_rate: ntoy(10),
   is_active: false,
   farming_start: 0,
   farming_end: 0,
-  total_rewards: "0",
-  total_stake: "0"
+  total_farmed: "0",
+  total_staked: "0"
 }
 
 let contractParams3: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
-  rewards_per_day: ntoy(10),
+  farming_rate: ntoy(10),
   is_active: false,
   farming_start: 0,
   farming_end: 0,
-  total_rewards: "0",
-  total_stake: "0"
+  total_farmed: "0",
+  total_staked: "0"
 }
 
 let contractParams4: ContractParams = {
   owner_id: "",
   token_contract: "cheddar.token",
-  rewards_per_day: ntoy(10),
+  farming_rate: ntoy(10),
   is_active: false,
   farming_start: 0,
   farming_end: 0,
-  total_rewards: "0",
-  total_stake: "0"
+  total_farmed: "0",
+  total_staked: "0"
 }
+
+let metaData: TokenParams = {
+  decimals: "24",
+  icon: "",
+  name: "",
+  reference: "",
+  reference_hash: "",
+  spec: "",
+  symbol: "",
+}
+
+let metaData2: TokenParams = {
+  decimals: "24",
+  icon: "",
+  name: "",
+  reference: "",
+  reference_hash: "",
+  spec: "",
+  symbol: "",
+}
+
+
+let metaData3: TokenParams = {
+  decimals: "24",
+  icon: "",
+  name: "",
+  reference: "",
+  reference_hash: "",
+  spec: "",
+  symbol: "",
+}
+
+
+let metaData4: TokenParams = {
+  decimals: "24",
+  icon: "",
+  name: "",
+  reference: "",
+  reference_hash: "",
+  spec: "",
+  symbol: "",
+}
+
 
 let nearWebWalletConnection: WalletConnection;
 
@@ -399,21 +438,21 @@ async function submitForm(action: string, form: any) {
 
       switch (form.id) {
         case "refPool": {
-          await contract2.unstake(convertToBase(amount,  metaData2.decimals))
+          await contract2.unstake(toNumber(convertToBase(amount, metaData2.decimals)))
           break;
         }
         case "stNEARPool": {
-          await contract3.unstake(convertToBase(amount,  metaData3.decimals))
+          await contract3.unstake(toNumber(convertToBase(amount, metaData3.decimals)))
           break;
         }
         case "bananaPool": {
           console.log(amount)
           console.log(convertToBase(amount, metaData4.decimals))
-          await contract4.unstake(convertToBase(amount, metaData4.decimals))
+          await contract4.unstake(toNumber(convertToBase(amount, metaData4.decimals)))
           break;
         }
         case "afiPool": {
-          await contract1.unstake(convertToBase(amount,  metaData.decimals))
+          await contract1.unstake(toNumber(convertToBase(amount, metaData.decimals)))
           break;
         }
       }
@@ -1256,6 +1295,7 @@ async function refreshAccountInfo() {
       }
 
       metaData = await tokenContractName1.ft_metadata();
+      console.log(metaData)
       tokenDecimals = metaData.decimals;
 
       var tokenNames = qsa("#afiPool .token-name");
@@ -1498,16 +1538,18 @@ async function refreshAccountInfo() {
     let bigNStaked = BigInt((staked));
     let farmingRate = BigInt(contractParams.farming_rate);
     let total_stakedN = BigInt(total_staked);
+    let minutesN = BigInt(60);
+    let hoursN = BigInt(24);
     // console.log(staked)
     // console.log(bigNStaked)
     // console.log(farmingRate)
     // console.log(total_stakedN)
     
     if(bigNStaked > 0 && total_staked > 0) {
-      real_rewards_per_day = yton( (farmingRate * 60n * 24n) / total_stakedN * bigNStaked).toString()
+      real_rewards_per_day = yton( (farmingRate * minutesN * hoursN) / total_stakedN * bigNStaked).toString()
     }
     else {
-      real_rewards_per_day = yton(farmingRate * 60n * 24n).toString();
+      real_rewards_per_day = yton(farmingRate * minutesN * hoursN).toString();
     }
     //console.log(real_rewards_per_day);
 
@@ -1535,10 +1577,10 @@ async function refreshAccountInfo() {
     //console.log(total_staked2)
 
     if(bigNStaked2 > 0 && total_staked2 > 0 ) {
-      real_rewards_per_day2 = yton( (farmingRate2 * 60n * 24n) / total_staked2N * bigNStaked2).toString()
+      real_rewards_per_day2 = yton( (farmingRate2 * minutesN * hoursN) / total_staked2N * bigNStaked2).toString()
     }
     else {
-      real_rewards_per_day2 = yton( (farmingRate2 * 60n * 24n)).toString()
+      real_rewards_per_day2 = yton( (farmingRate2 * minutesN * hoursN)).toString()
     }
 
     qsaInnerText("#refPool #near-balance span.near.balance", convertToDecimals(staked2,metaData2.decimals,2))
@@ -1565,11 +1607,11 @@ async function refreshAccountInfo() {
     // console.log(farmingRate3)
     //console.log(total_staked3)
     if(bigNStaked3 > 0 && total_staked3 > 0 ) {
-      real_rewards_per_day3 = yton( (farmingRate3 * 60n * 24n) / total_staked3N * bigNStaked3).toString()
+      real_rewards_per_day3 = yton( (farmingRate3 * minutesN * hoursN) / total_staked3N * bigNStaked3).toString()
       //console.log(real_rewards_per_day3)
     }
     else {
-      real_rewards_per_day3 = yton( (farmingRate3 * 60n * 24n)).toString()
+      real_rewards_per_day3 = yton( (farmingRate3 * minutesN * hoursN)).toString()
     }
     ////console.log(real_rewards_per_day);
 
@@ -1596,11 +1638,11 @@ async function refreshAccountInfo() {
     //console.log(farmingRate4)
     //console.log(total_staked4N)
     if(bigNStaked4 > 0 && total_staked4 > 0 ) {
-      real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n) / total_staked4N * bigNStaked4).toString()
+      real_rewards_per_day4 = yton( (farmingRate4 * minutesN * hoursN) / total_staked4N * bigNStaked4).toString()
       //console.log(real_rewards_per_day4)
     }
     else {
-      real_rewards_per_day4 = yton( (farmingRate4 * 60n * 24n)).toString()
+      real_rewards_per_day4 = yton( (farmingRate4 * minutesN * hoursN)).toString()
       //console.log(real_rewards_per_day4)
     }
     ////console.log(real_rewards_per_day);
@@ -1679,7 +1721,8 @@ window.onload = async function () {
     const parts = window.location.pathname.split("/")
     const i = parts.indexOf("DApp")
     if (i >= 0) { env = parts[i + 1] }
-    if (env != nearConfig.farms[0].networkId) nearConfig = getConfig(env);
+    if (env != nearConfig.farms[0].networkId)
+      nearConfig = getConfig(env);
 
     var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)

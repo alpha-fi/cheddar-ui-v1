@@ -61,7 +61,7 @@ export function ytonFull(yoctoString: string): string {
 *   Example:
 *   convertToDecimals("12345678", 1, 1) = 123.4
 */ 
-export function convertToDecimals(str, decimals, truncate) {
+export function convertToDecimals(str:string, decimals:string, truncate:number) {
   str = str.toString() // convert numbers and bigint
   // clear leading zeros
   let i = 0
