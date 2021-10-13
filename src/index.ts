@@ -264,7 +264,7 @@ qs('#near-balance a .max').onclick =
   async function (event) {
     try {
       event.preventDefault()
-      qsi("#stakeAmount").value = (yton(accountInfo[0]) - 0.001).toString()
+      qsi("#stakeAmount").value = (yton(accountInfo[0])).toString()
     }
     catch (ex) {
       showErr(ex)
@@ -661,40 +661,6 @@ window.onload = async function () {
     if (i >= 0) { env = parts[i + 1] }
     if (env != nearConfig.networkId) nearConfig = getConfig(env);
 
-    var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
-    var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
-  
-
-    var x = setInterval(function() {
-
-      // Get today's date and time
-      var now = new Date().getTime();
-      var d = new Date();
-      var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-
-      // Find the distance between now and the count down date
-      var distance = countDownDate.getTime() - d.getTime();
-
-      // Time calculations for days, hours, minutes and seconds
-      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-      // Display the result in the element with id="demo"
-      document.getElementById("timer").innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-      + minutes + "m : " + seconds + "s" + "</span></h2>";
-
-      document.getElementById("timer-non").innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-      + minutes + "m : " + seconds + "s" + "</span></h2>";
-      
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("timer").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-        document.getElementById("timer-non").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-      }
-    }, 1000);
 
     //init contract proxy
     contract = new StakingPoolP1(nearConfig.contractName);
@@ -722,6 +688,48 @@ window.onload = async function () {
       tokenContract.wallet = wallet;
 
       await signedInFlow()
+
+    var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
+    var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
+  
+
+    var x = setInterval(function() {
+
+      // Get today's date and time
+      var now = new Date().getTime();
+      var d = new Date();
+      var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+
+      // Find the distance between now and the count down date
+      var distance = countDownDate.getTime() - d.getTime();
+
+      // Time calculations for days, hours, minutes and seconds
+      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      // Display the result in the element with id="demo"
+      document.getElementById("timer").innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+      + minutes + "m : " + seconds + "s" + "</span></h2>";
+
+      document.getElementById("timer-non").innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+      + minutes + "m : " + seconds + "s" + "</span></h2>";
+      
+      console.log(now)
+      console.log(contractParams.farming_start*1000)
+      // If the count down is finished, write some text
+      if(now > (contractParams.farming_start * 1000)) {
+        clearInterval(x);
+        document.getElementById("timer").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS CLOSED!</h2>";
+        document.getElementById("timer-non").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS CLOSED!</h2>";
+      }
+      else if (distance < 0) {
+        clearInterval(x);
+        document.getElementById("timer").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
+        document.getElementById("timer-non").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
+      }
+    }, 1000);
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
