@@ -13,6 +13,11 @@ export function qsaInnerText(selector:string, innerText:string){
     });
 }
 
+///set innerText for first matching HTMLElement
+export function qsInnerText(selector:string, innerText:string){ 
+    document.querySelector(selector)!.innerHTML = innerText
+}
+
 
 export function show(el:Element, onOff:boolean=true){
     (el as HTMLElement).style.display= (onOff?"":"none");

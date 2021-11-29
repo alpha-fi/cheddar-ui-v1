@@ -61,25 +61,25 @@ export function ytonFull(yoctoString: string): string {
 *   Example:
 *   convertToDecimals("12345678", 1, 1) = 123.4
 */ 
-export function convertToDecimals(str:string, decimals:string, truncate:number) {
+export function convertToDecimals(str:string, decimals: number, truncate:number) {
   str = str.toString() // convert numbers and bigint
   // clear leading zeros
   let i = 0
   for(; i<str.length && str[i]=="0"; ++i) {}
   if (i != 0)
     str = str.substring(i);
-  if (str == 0 || str == "0")
+  if (str == "0")
     return "0";
 
-  let decimals_n = Number(decimals);
-  if(decimals_n == 0)
+  // let decimals_n = Number(decimals);
+  if(decimals == 0)
     return str;
 
   // Pad zeros at the beginning.
   // We add 1 to make sure the integer digit is included as well)
-  str = String(str).padStart(decimals_n + 1, "0");
+  str = String(str).padStart(decimals + 1, "0");
 
-  let integer = str.slice(0, -decimals_n);
+  let integer = str.slice(0, -decimals);
   let fractional = str.slice(integer.length);
   if(integer == "")
     integer = "0";
@@ -89,7 +89,7 @@ export function convertToDecimals(str:string, decimals:string, truncate:number) 
   if (truncate == undefined) {
     return integer + "." + fractional;
   }
-  else if(fractional > 0) {
+  else if(Number(fractional) > 0) {
     return integer + "." + fractional.substring(0, truncate);
   }
   return integer;

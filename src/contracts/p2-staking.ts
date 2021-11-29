@@ -21,7 +21,7 @@ export class StakingPoolP1 extends SmartContract {
     }
 
     /// Returns amount of staked NEAR and farmed CHEDDAR of given account.
-    status(accountId?: AccountId): Promise<[U128String, U128String]> {
+    status(accountId?: AccountId): Promise<[U128String, U128String, U128String]> {
         return this.view("status", { account_id: accountId || this.wallet.getAccountId() })
     }
 
@@ -44,7 +44,7 @@ export class StakingPoolP1 extends SmartContract {
     /// Returns amount of staked tokens left after the call.
     /// Panics if the caller doesn't stake anything or if he doesn't have enough staked tokens.
     /// Requires 1 yNEAR payment for wallet validation.
-    unstake(amount: number): Promise<void> {
+    unstake(amount: string): Promise<void> {
         return this.call("unstake", { amount: amount }, TGas(125), "1")
     }
 

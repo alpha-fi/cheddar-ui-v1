@@ -1,26 +1,29 @@
+import { ntoy } from "../util/conversions";
+
 type U128String = string;
 
 
 //JSON compatible struct returned from get_contract_state
-export type ContractParams = {
-    owner_id: string,
-    token_contract: string,
-    farming_rate: string, //yoctoCheddar per day per NEAR
-    is_active: boolean,
-    farming_start: number, //unix timestamp
-    farming_end: number, //unix timestamp
-    total_farmed: string, //yoctoCheddar
-    total_staked: string, //yoctoNEAR
+export class ContractParams {
+    owner_id: string = "";
+    token_contract: string = "cheddar.token";
+    farming_rate: string = ntoy(10); //yoctoCheddar per day per NEAR
+    is_active: boolean = false;
+    farming_start: number = 0; //unix timestamp
+    farming_end: number = 0; //unix timestamp
+    total_farmed: string = "0" //yoctoCheddar
+    total_staked: string = "0" //yoctoNEAR
+    rewards_per_day: string = "0"
 }
 
-export type TokenParams = {
-    decimals: string,
-    icon: string,
-    name: string,
-    reference: string,
-    reference_hash: string,
-    spec: string,
-    symbol: string,
+export class TokenParams {
+    decimals: string = "24";
+    icon: string = "";
+    name: string = "";
+    reference: string = "";
+    reference_hash: string = "";
+    spec: string = "";
+    symbol: string = "";
 }
 
 
