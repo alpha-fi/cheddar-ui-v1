@@ -36,6 +36,25 @@ export function yton(yoctos: string): number {
     return NaN;
   }
 }
+
+//yoctoNEAR amount -> number, rounded
+/**
+ * returns Near number with 5 decimal digits
+ * @param {string} yoctoNEAR amount 
+ */
+ export function ytonLong(yoctos: string): number {
+  try {
+    if (yoctos == undefined) return 0;
+    const decimals = 8
+    const bn = BigInt(yoctos) + BigInt(0.5 * 10 ** (24 - decimals)); //round 6th decimal
+    const truncated = ytonFull(bn.toString()).slice(0, (decimals - 24))
+    return Number(truncated)
+  }
+  catch (ex) {
+    console.log("ERR: yton(", yoctos, ")", ex)
+    return NaN;
+  }
+}
 /**
  * returns string with a decimal point and 24 decimal places
  * @param {string} yoctoString amount in yoctos
@@ -149,10 +168,21 @@ function toStringDecSimple(n: number) {
  * Formats a number in NEAR to a string with commas and 5 decimal places
  * @param {number} n 
  */
-export function toStringDecLong(n: number) {
-  const decimals = 7
+export function toStringDecLong(n: number): string {
+  const decimals = 8
   const textNoDec = Math.round(n * 10 ** decimals).toString().padStart(decimals + 1, "0");
   return addCommas(textNoDec.slice(0, -decimals) + "." + textNoDec.slice(-decimals));
+}
+
+/**
+ * Formats a bigint in NEAR to a string with commas and 5 decimal places
+ * @param {number} n 
+ */
+ export function bigintToStringDecLong(n: bigint): string {
+   const nString = n.toString()
+   const nyton = ytonLong(nString)
+   const output = toStringDecLong(nyton)
+    return output
 }
 /**
 * Formats a number in NEAR to a string with commas and 5 decimal places

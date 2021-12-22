@@ -1,5 +1,5 @@
 const CONTRACT_NAME = 'p2-v1-tt.cheddar.testnet'
-const CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+export const CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 const TOKEN_CONTRACT_NAME = 'test-token.cheddar.testnet'
 
 const TESTNET_NETWORKID = 'testnet'
@@ -9,6 +9,7 @@ const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
 type GetConfigResult = {
+  index?: number;
   poolName:string;
   networkId:string;
   nodeUrl:string;
@@ -52,19 +53,7 @@ export function getConfig(env:string):GetConfigResults {
     return {
       "farms": [
         {
-          poolName: "afi",
-          networkId: TESTNET_NETWORKID,
-          nodeUrl: TESTNET_NODEURL,
-          contractName: CONTRACT_NAME,
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
-          tokenContractName: TOKEN_CONTRACT_NAME,
-          walletUrl: TESTNET_WALLETURL,
-          helperUrl: TESTNET_HELPERURL,
-          explorerUrl: TESTNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
-        },
-        {
+          index: 0,
           poolName : 'ref',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
@@ -78,6 +67,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined,
         },
         {
+          index: 1,
           poolName : 'stNear',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
@@ -91,6 +81,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined,
         },
         {
+          index: 2,
           poolName : 'banana',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
