@@ -95,61 +95,11 @@
     </section>
 
     <section id="home-connected" style="display:none">
+      <div id="timer"></div>
       <div class="loader"></div>
       <div class="grid" id="pool_list" style="display:none">
       </div>
     </section>
-
-
-    <section id="unstake-old" style="display:none">
-
-      <h2>Liquid Unstake</h2>
-      <p></p>
-      <form id="unstakeForm">
-        <fieldset id="fieldset">
-          <div class="input-group">
-            <span>stⓃ</span>
-            <input id="unstakeAmount" class="near amount input-box" inputmode="numeric"
-              placeholder="cheddar amount to unstake" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
-          </div>
-          <p>Fee <span id="liquidity-unstake-fee">%</span></p>
-          <button type="submit">Liquid Unstake</button>
-          <div class="tooltip">info <span class='info'><span>
-                <div class="box tooltip-text">In order to skip the waiting period a fee is charged for Liquid Unstaking.
-                  The fee varies based on the amount of liquidity available and the amount you want to unstake.</div>
-          </div>
-        </fieldset>
-      </form>
-
-      <article id="user-stats">
-        <div class="stat-line">
-          <dt>Available NEAR wallet</dt>
-          <dd><button>id="wallet-available" class="near balance"</button></dd>
-        </div>
-        <div class="stat-line">
-          <dt>cheddar Tokens/Staked</dt>
-          <dd id="cheddar-balance" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>$META Tokens</dt>
-          <dd id="meta-balance" class="meta balance"></dd>
-        </div>
-      </article>
-
-      <h5>Liquidity Pool Stats</h5>
-      <article id="user-liquidity-pool-stats">
-        <div class="stat-line">
-          <dt>Current Liquidity</dt>
-          <dd id="liquidity-balance" class="near balance"></dd>
-        </div>
-        <div class="stat-line">
-          <dt>Target Liquidity</dt>
-          <dd id="target-liquidity" class="near balance"></dd>
-        </div>
-      </article>
-
-    </section>
-
 
     <section id="faq" style="display:none">
 
