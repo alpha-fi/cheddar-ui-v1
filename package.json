@@ -13,7 +13,7 @@
     "serve:design": "cd src && python3 -m http.server"
   },
   "devDependencies": {
-    "parcel-bundler": "~1.12.4",
+    "parcel": "^2.0.0",
     "typescript": "^4.2.3"
   },
   "dependencies": {

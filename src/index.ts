@@ -607,6 +607,8 @@ async function addPoolList(poolList: Array<PoolParams>) {
   for(let i = 0; i < poolList.length; i++) {
     await addPool(poolList[i]);
   }
+  qs("#pool_list").style.display = "grid"
+  qs(".loader").style.display = "none"
 }
 
 window.onload = async function () {
@@ -676,7 +678,9 @@ window.onload = async function () {
       const cheddarContract = new NEP141Trait(CHEDDAR_CONTRACT_NAME);
       cheddarContract.wallet = wallet;
       const cheddarBalance = await cheddarContract.ft_balance_of(accountName)
+      const amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
       // console.log("Cheddar balance: " , cheddarBalance)
+      qsInnerText("#my-account #wallet-available", amountAvailable)
       qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 
       //check if we're re-spawning after a wallet-redirect

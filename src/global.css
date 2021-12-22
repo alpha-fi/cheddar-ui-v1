@@ -21,7 +21,7 @@ html {
   /* identical to box height, or 123% */
   color                : var(--fg);
   font-feature-settings: 'case'on;
-  background     : url(assets/cheddar-farm-background.svg) no-repeat;
+  background     : url(assets/cheddar-farm-background.svg) top center / contain no-repeat;
   background-size: 100% auto;
   background-color: #5e8c01;
   /* Fill width, retain proportions */
@@ -763,14 +763,13 @@ small img {
   white-space: nowrap;
 }
 
-/*.near:after,
-.meta:after {
+.nearico:after {
   display    : inline-block;
   content    : "\24c3";
   transform  : scale(0.65);
   font-weight: 400;
 }
-*/
+
 .meta:after {
   content: "\24c2";
 }
@@ -811,6 +810,7 @@ small img {
 .box.popup button,
 .box.popup img {
   margin-top: 15px;
+  max-width: 25%;
 }
 
 .confirm-cancel-line {
@@ -890,5 +890,33 @@ input[type="checkbox"]#terms-of-use:checked + label:before {
 
 #stake-form-not-connected{
   max-width:  320px;
+  margin: 0 auto;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #fd941f;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  margin: 10% auto;
+  position: realative;
+  background-image: url(assets/cheddar.svg);
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+section#my-account, section#faq {
+  width: 65%;
   margin: 0 auto;
 }
