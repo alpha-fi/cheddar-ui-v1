@@ -136,7 +136,7 @@ function unstakeClicked(poolParams: PoolParams, pool: HTMLElement) {
 function harvestClicked(poolParams: PoolParams, pool: HTMLElement) {
   return async function(event: Event) {
     event.preventDefault()
-
+    console.log("PoolParmas: ", poolParams)
     submitForm("harvest", poolParams, pool.getElementsByTagName("form")[0])
   }  
 }
@@ -154,7 +154,6 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   fieldset.disabled = true
   const isStaking = (action == "stake")
   const isHarvest = (action == "harvest")
-  //const isUnstaking = (action == "harvest" || action == "harvestREF" || action == "harvestSTNEAR" || action == "harvestBanana")
   showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
 
   try {
@@ -687,9 +686,12 @@ window.onload = async function () {
       //show transaction result depending on method called
       const poolList = await getPoolList(wallet)
       const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
-      if(finalExecutionOutcome)
-        var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
       
+      if(finalExecutionOutcome) {
+        var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+        var message = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
+      }
+
       if (err) {
         showError(err, "Transaction - " + method || "");
       }
@@ -710,10 +712,15 @@ window.onload = async function () {
           }
         }
       } else if(method == "withdraw_crop") {
-        showSuccess(`Cheddar Successfully Harvested`)
+
+        if(finalExecutionOutcome) {
+          var log = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
+          message = yton(message[3]) + ' Cheddar Harvested!'
+          showSuccess(message)
+        }
+        
       }
       else if (data) {
-        
         
         switch (method) {
           case "liquid_unstake": {
@@ -727,7 +734,7 @@ window.onload = async function () {
             break;
           }
           case "withdraw_crop": {
-            showSuccess(`Harvested ${yton(data)} Cheddar`)
+            showSuccess(`${yton(data)} Cheddar Harvested!`)
             break;
           }
           case "unstake": {
