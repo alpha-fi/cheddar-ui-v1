@@ -187,7 +187,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     else if (isHarvest) {
       
       amount = poolParams.resultParams.getCurrentCheddarRewards()
-      if (amount <= 0) throw Error("No Cheddar to Harvest. 😞")
+      //if (BigInt(convertToBase(amount.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
       await poolParams.contract.withdraw_crop()
     }
     else {
@@ -396,12 +396,12 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
       let accountInfo = await poolParams.contract.status(accName)
       poolParams.setStatus(accountInfo)
       
-      let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 2)
+      let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 7)
       const walletAvailable = await poolParams.getWalletAvailable()
       let real = poolParams.resultParams.real
       let computed = poolParams.resultParams.computed
-      
-      if (convertToDecimals(poolParams.resultParams.staked.toString(), decimals, 2) > 0) {
+      //convertToBase(poolParams.resultParams.staked.toString(), decimals)
+      if (BigInt(convertToBase(poolParams.resultParams.staked.toString(), decimals)) > BigInt(0)) {
         qs("#" + poolParams.html.id + " #near-balance a .max").style.display = "block";
         if (poolParams.resultParams.previous_timestamp && real > poolParams.resultParams.previous_real) {
           poolParams.setTotalRewardsPerDay()
@@ -420,6 +420,9 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
       qsaInnerText("#" + poolParams.html.id + " #wallet-available span.near.balance", removeDecZeroes(walletAvailable.toString()))
       qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed())
     }
+    else {
+      qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.real)
+    }
   } catch (ex) {
     console.error(ex);
   }
@@ -435,14 +438,16 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
     if (isOpened && wallet.isConnected()) {
       let previousTimestamp = poolParams.resultParams.previous_timestamp;
       let elapsed_ms = Date.now() - previousTimestamp
-
-      if (convertToDecimals(poolParams.resultParams.staked.toString(), decimals, 2) > 0) {
+      if (BigInt(convertToBase(poolParams.resultParams.staked.toString(), decimals)) > BigInt(0)) {
         
         var rewards = (poolParams.resultParams.real_rewards_per_day / BigInt(10 ** 5) * BigInt(elapsed_ms) / (BigInt(1000 * 60 * 60 * 24)));
         poolParams.resultParams.computed = poolParams.resultParams.real + rewards
 
         qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed());
       }
+    }
+    else {
+      qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.real);
     }
   } catch (ex) {
     console.error(ex);
@@ -460,7 +465,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
   let accountInfo = await poolParams.contract.status(accName)
   let staked = BigInt(accountInfo[0]);
-  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 2)
+  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
   qsaInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", displayableStaked)
 
   const walletAvailable = await poolParams.getWalletAvailable()
@@ -543,7 +548,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelector("#farming_start")!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   newPool.querySelector("#farming_end")!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
-  const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 2)
+  const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 7)
   newPool.querySelector("#near-balance span.near.balance")!.innerHTML = stakedDisplayable
 
   if(Number(stakedDisplayable) > 0) {
