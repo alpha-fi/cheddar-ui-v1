@@ -140,6 +140,16 @@ function harvestClicked(poolParams: PoolParams, pool: HTMLElement) {
     submitForm("harvest", poolParams, pool.getElementsByTagName("form")[0])
   }  
 }
+
+function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
+  return async function (event) {
+    event.preventDefault()
+    let storageDeposit = await poolParams.contract.storageDeposit();
+    pool.querySelector("#deposit")!.style.display = "block"
+    pool.querySelector("#activated")!.style.display = "none"
+  }
+}
+
 //Form submission
 async function submitForm(action: string, poolParams: PoolParams, form: HTMLFormElement) {
   event?.preventDefault()
@@ -458,10 +468,6 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     let metaData = await poolParams.metaData;
     
     let contractParams = await poolParams.contract.get_contract_params()
-        
-    // Check later Calcifer
-    // qs("#afiPool #farming_start").innerText = new Date(contractParams.farming_start * 1000).toLocaleString()
-    // qs("#afiPool #farming_end").innerText = new Date(contractParams.farming_end * 1000).toLocaleString()
 
     const rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
     if(qs("#" + poolParams.html.id + " #pool-stats #total-staked")) {
@@ -529,12 +535,14 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelectorAll(".token-name").forEach(element => {
     element.innerHTML = metaData.symbol
   })
+
   // newPool.querySelectorAll("#" + poolParams.html.formId +  " .token-name")!.innerHTML = metaData.symbol;
   newPool.querySelector("#farming_start")!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   newPool.querySelector("#farming_end")!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
   const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 2)
   newPool.querySelector("#near-balance span.near.balance")!.innerHTML = stakedDisplayable
+
   if(Number(stakedDisplayable) > 0) {
     let elem = newPool.querySelector("#near-balance a .max") as HTMLElement
     elem.style.display = "block";
@@ -564,9 +572,22 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   // newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = yton(contractParams.total_farmed).toString();
   newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_farmed, metaData.decimals, 5)
   
-  newPool.querySelector("#harvest")?.addEventListener("click", harvestClicked(poolParams, newPool));
-  newPool.querySelector("#stake")?.addEventListener("click", stakeClicked(poolParams, newPool));
-  newPool.querySelector("#unstake")?.addEventListener("click", unstakeClicked(poolParams, newPool));
+
+  let accountRegistered = await poolParams.contract.storageBalance();
+
+  if(accountRegistered == null) {
+    newPool.querySelector("#deposit")!.style.display = "block"
+    newPool.querySelector("#activated")!.style.display = "none"
+    newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+  }
+  else{
+    newPool.querySelector("#deposit")!.style.display = "none"
+    newPool.querySelector("#activated")!.style.display = "block"
+    newPool.querySelector("#harvest")?.addEventListener("click", harvestClicked(poolParams, newPool));
+    newPool.querySelector("#stake")?.addEventListener("click", stakeClicked(poolParams, newPool));
+    newPool.querySelector("#unstake")?.addEventListener("click", unstakeClicked(poolParams, newPool));
+  }
+
 
   newPool.querySelector("#terms-of-use")?.addEventListener("click", termsOfUseListener())
 
@@ -689,7 +710,6 @@ window.onload = async function () {
       
       if(finalExecutionOutcome) {
         var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
-        var message = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
       }
 
       if (err) {
