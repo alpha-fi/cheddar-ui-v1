@@ -173,30 +173,31 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     //get amount
     const min_deposit_amount = 1;
     if(isNaN(stakeAmount.value)) {
-      throw Error("Please, input a number")
+      throw Error("Please Input a Number.")
     }
     let amount: number = stakeAmount.value;
     
     if (isStaking) {
-      if (!isDateInRange) throw Error("Pool is closed to staking.")
-      if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
+      if (!isDateInRange) throw Error("Pools is Closed.")
+      //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
       const walletAvailable = await poolParams.getWalletAvailable()
-      if(amount > walletAvailable) throw Error(`Stake at most ${walletAvailable} ${poolParams.metaData.symbol}`);
+      if(amount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
       await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId, convertToBase(stakeAmount.value, poolParams.metaData.decimals.toString()), "to farm")
     }
     else if (isHarvest) {
       
       amount = poolParams.resultParams.getCurrentCheddarRewards()
-      if (amount <= 0) throw Error("no cheddar to harvest :(")
+      if (amount <= 0) throw Error("No Cheddar to Harvest. 😞")
       await poolParams.contract.withdraw_crop()
     }
     else {
       console.log(amount.toString())
       console.log("Decimal: ", poolParams.metaData.decimals)
-      if (amount <= 0) throw Error(`Unstake a positive amount`);
+      if (amount <= 0) throw Error(`Unstake a Positive Amount.`);
       const staked = poolParams.resultParams.staked
       const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
-      if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+      //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+      if(amount > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
       // amount = 1000000000000000000000000
       await poolParams.contract.unstake(convertToBase(amount.toString(), poolParams.metaData.decimals.toString()))
     }
