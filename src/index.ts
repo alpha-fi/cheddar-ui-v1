@@ -381,7 +381,7 @@ function loginNarwallets() {
  * object) if it's greater than 4 times
  * @param poolParams 
  */
-async function refreshRealRewardsLoopGeneric(poolParams: PoolParams) {
+async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: number) {
 
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
   let contractParams = poolParams.contractParams
@@ -400,7 +400,7 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams) {
       let real = poolParams.resultParams.real
       let computed = poolParams.resultParams.computed
       
-      if (Number(poolParams.resultParams.staked) > 0) {
+      if (convertToDecimals(poolParams.resultParams.staked.toString(), decimals, 2) > 0) {
         qs("#" + poolParams.html.id + " #near-balance a .max").style.display = "block";
         if (poolParams.resultParams.previous_timestamp && real > poolParams.resultParams.previous_real) {
           poolParams.setTotalRewardsPerDay()
@@ -425,7 +425,7 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams) {
   
 }
 
-async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams) {
+async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals: number) {
 
   
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
@@ -434,10 +434,12 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams) {
     if (isOpened && wallet.isConnected()) {
       let previousTimestamp = poolParams.resultParams.previous_timestamp;
       let elapsed_ms = Date.now() - previousTimestamp
-      if (poolParams.resultParams.staked != BigInt(0)) {
+
+      if (convertToDecimals(poolParams.resultParams.staked.toString(), decimals, 2) > 0) {
         
         var rewards = (poolParams.resultParams.real_rewards_per_day / BigInt(10 ** 5) * BigInt(elapsed_ms) / (BigInt(1000 * 60 * 60 * 24)));
         poolParams.resultParams.computed = poolParams.resultParams.real + rewards
+
         qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed());
       }
     }
@@ -594,8 +596,8 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   qs("#pool_list").append(newPool);
 
   poolParams.setTotalRewardsPerDay()
-  setInterval(refreshRewardsDisplayLoopGeneric.bind(null, poolParams), 200);
-  setInterval(refreshRealRewardsLoopGeneric.bind(null, poolParams), 60 * 1000);
+  setInterval(refreshRewardsDisplayLoopGeneric.bind(null, poolParams, metaData.decimals), 200);
+  setInterval(refreshRealRewardsLoopGeneric.bind(null, poolParams, metaData.decimals), 60 * 1000);
 }
 
 function maxStakeClicked(pool: HTMLElement) {
@@ -613,9 +615,9 @@ function maxStakeClicked(pool: HTMLElement) {
 function maxUnstakeClicked(pool: HTMLElement) {
   return function(event: Event) {
     event.preventDefault()
-    const amonutContainer = pool.querySelector("#near-balance .near.balance")
-    if(amonutContainer) {
-      const amount = amonutContainer.innerHTML
+    const amountContainer = pool.querySelector("#near-balance .near.balance")
+    if(amountContainer) {
+      const amount = amountContainer.innerHTML
       let input = pool.querySelector("#stakeAmount") as HTMLInputElement
       input.value = amount.toString()
     }
@@ -709,7 +711,7 @@ window.onload = async function () {
       const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
       
       if(finalExecutionOutcome) {
-        var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+        var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args)) 
       }
 
       if (err) {
@@ -739,6 +741,8 @@ window.onload = async function () {
           showSuccess(message)
         }
         
+      } else if(method == "storage_deposit") {
+          showSuccess(`Storage Deposit Successful`)
       }
       else if (data) {
         
