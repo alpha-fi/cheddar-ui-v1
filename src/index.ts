@@ -742,8 +742,9 @@ window.onload = async function () {
       } else if(method == "withdraw_crop") {
 
         if(finalExecutionOutcome) {
+          console.log(finalExecutionOutcome.receipts_outcome[3].outcome.logs[0])
           var log = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
-          message = yton(message[3]) + ' Cheddar Harvested!'
+          message = yton(log[3]) + ' Cheddar Harvested!'
           showSuccess(message)
         }
         
