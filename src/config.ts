@@ -1,6 +1,12 @@
-const CONTRACT_NAME = 'p2-v1-tt.cheddar.testnet'
-export const CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
-const TOKEN_CONTRACT_NAME = 'test-token.cheddar.testnet'
+export const ENV = 'testnet'
+export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
+export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+
+const MAINNET_NETWORKID = 'mainnet'
+const MAINNET_NODEURL = 'https://rpc.mainnet.near.org'
+const MAINNET_WALLETURL = 'https://wallet.near.org'
+const MAINNET_HELPERURL = 'https://helper.mainnet.near.org'
+const MAINNET_EXPLORERURL = 'https://explorer.mainnet.near.org'
 
 const TESTNET_NETWORKID = 'testnet'
 const TESTNET_NODEURL = 'https://rpc.testnet.near.org'
@@ -34,18 +40,48 @@ export function getConfig(env:string):GetConfigResults {
   case 'mainnet':
     return {
       "farms": [
-      {
-        poolName : '',
-        networkId: 'mainnet',
-        nodeUrl: 'https://rpc.mainnet.near.org',
-        contractName: CONTRACT_NAME,
-        cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        tokenContractName: TOKEN_CONTRACT_NAME,
-        walletUrl: 'https://wallet.near.org',
-        helperUrl: 'https://helper.mainnet.near.org',
-        explorerUrl: 'https://explorer.mainnet.near.org',
-        keyPath: undefined,
-        masterAccount:undefined}
+        {
+          index: 0,
+          poolName : 'near',
+          networkId: MAINNET_NETWORKID,
+          nodeUrl: MAINNET_NODEURL,
+          contractName: 'p1-farm.cheddar.near',
+          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          walletUrl: MAINNET_WALLETURL,
+          helperUrl: MAINNET_HELPERURL,
+          explorerUrl: MAINNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined
+        },
+        {
+          index: 1,
+          poolName : 'cheddar',
+          networkId: MAINNET_NETWORKID,
+          nodeUrl: MAINNET_NODEURL,
+          contractName: 'p2-cheddar.cheddar.near',
+          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          walletUrl: MAINNET_WALLETURL,
+          helperUrl: MAINNET_HELPERURL,
+          explorerUrl: MAINNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined,
+        },
+        {
+          index: 2,
+          poolName : 'nearcon',
+          networkId: MAINNET_NETWORKID,
+          nodeUrl: MAINNET_NODEURL,
+          contractName: 'farm-nearcon.cheddar.near',
+          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          walletUrl: MAINNET_WALLETURL,
+          helperUrl: MAINNET_HELPERURL,
+          explorerUrl: MAINNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined,
+        },
       ]
     }
   case 'development':
@@ -58,7 +94,7 @@ export function getConfig(env:string):GetConfigResults {
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-ref.cheddar.testnet',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'ref.fakes.testnet',
           walletUrl: TESTNET_WALLETURL,
           helperUrl: TESTNET_HELPERURL,
@@ -72,7 +108,7 @@ export function getConfig(env:string):GetConfigResults {
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-meta.cheddar.testnet',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'meta-v2.pool.testnet',
           walletUrl: TESTNET_WALLETURL,
           helperUrl: TESTNET_HELPERURL,
@@ -86,7 +122,7 @@ export function getConfig(env:string):GetConfigResults {
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-bananas.cheddar.testnet',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'berryclub.testnet',
           walletUrl: TESTNET_WALLETURL,
           helperUrl: TESTNET_HELPERURL,
@@ -94,71 +130,6 @@ export function getConfig(env:string):GetConfigResults {
           keyPath: undefined,
           masterAccount:undefined,
         },
-      ]
-    }
-  case 'betanet':
-    return {
-      "farms": [
-      {
-        poolName : '',
-        networkId: 'betanet',
-        nodeUrl: 'https://rpc.betanet.near.org',
-        cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        contractName: CONTRACT_NAME,
-        tokenContractName: TOKEN_CONTRACT_NAME,
-        walletUrl: 'https://wallet.betanet.near.org',
-        helperUrl: 'https://helper.betanet.near.org',
-        explorerUrl: 'https://explorer.betanet.near.org',
-        keyPath: undefined,
-        masterAccount:undefined}
-      ]
-    }
-  case 'local':
-    return {
-      "farms": [
-      {
-        poolName : '',
-        networkId: 'local',
-        nodeUrl: 'http://localhost:3030',
-        keyPath: `${process.env.HOME}/.near/validator_key.json`,
-        walletUrl: 'http://localhost:4000/wallet',
-        contractName: CONTRACT_NAME,
-        cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        tokenContractName: TOKEN_CONTRACT_NAME,
-        helperUrl:undefined,
-        masterAccount:undefined
-      }
-      ]
-    }
-  case 'test':
-  case 'ci':
-    return {
-      "farms": [
-      {
-        poolName : '',
-        networkId: 'shared-test',
-        nodeUrl: 'https://rpc.ci-testnet.near.org',
-        contractName: CONTRACT_NAME,
-        cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        tokenContractName: TOKEN_CONTRACT_NAME,
-        masterAccount: 'test.near',
-        keyPath: undefined,
-        walletUrl: 'https://wallet.testnet.near.org'}
-      ]
-    }
-  case 'ci-betanet':
-    return {
-      "farms": [
-      {
-        poolName : '',
-        networkId: 'shared-test-staging',
-        nodeUrl: 'https://rpc.ci-betanet.near.org',
-        contractName: CONTRACT_NAME,
-        cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        tokenContractName: TOKEN_CONTRACT_NAME,
-        masterAccount: 'test.near',
-        keyPath: undefined,
-        walletUrl: 'https://wallet.betanet.near.org'}
       ]
     }
   default:

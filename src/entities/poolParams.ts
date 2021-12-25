@@ -1,7 +1,7 @@
 import { ContractParams } from "../contracts/contract-structs";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
-import { bigintToStringDecLong, convertToDecimals, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
+import { bigintToStringDecLong, convertToDecimals,convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 
 //JSON compatible struct returned from get_contract_state
@@ -30,7 +30,10 @@ export class PoolResultParams {
     total_staked: bigint = 0n;
 
     getDisplayableComputed() {
-        return bigintToStringDecLong(this.computed);
+        // console.log(this.tokenDecimals)
+        // console.log(convertToDecimals(this.computed.toString(), 24, 10))
+        return convertToDecimals(this.computed.toString(), 24, 7)
+        //return bigintToStringDecLong(this.computed);
     }
 
     getCurrentCheddarRewards() {
@@ -38,7 +41,8 @@ export class PoolResultParams {
     }
 
     getCurrentDisplayableCheddarRewards() {
-        return bigintToStringDecLong(this.computed)
+        return convertToDecimals(this.computed.toString(), 24, 7)
+        //return bigintToStringDecLong(this.computed)
     }
 
     getDisplayableAccountName() {
@@ -92,11 +96,56 @@ export class PoolParams {
     }
 
     setTotalRewardsPerDay() {
-        const totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
+
+
+        /*** Workaround Free Community Farm pool ***/
+        let totalRewardsPerDay = 0
+        let totalStaked = 0
+
+        if(this.contractParams.farming_rate){
+            totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
+            totalStaked = BigInt(this.contractParams.total_staked)
+        }
+        else {
+            totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
+            totalStaked = BigInt(this.contractParams.total_stake)
+        }
+
         const staked = this.resultParams.staked
-        const totalStaked = this.resultParams.total_staked
+        //const totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
+        //const totalStaked = this.resultParams.total_staked
+
+
         if(totalStaked > BigInt(0)) {
-            this.resultParams.real_rewards_per_day = totalRewardsPerDay * (staked / totalStaked)
+
+            /*** Workaround Free Community Farm pool ***/
+
+            if(this.contractParams.farming_rate) {
+                //real_rewards_per_day4 = yton( (farmingRate4 * minutesN * hoursN) / total_staked4N * bigNStaked4).toString()
+                //this.resultParams.real_rewards_per_day = totalRewardsPerDay * (staked / totalStaked)
+                //console.log(totalRewardsPerDay, " ", staked, " ", totalStaked)
+                let rewardsPerDay = yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
+                
+                this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), 24))
+                // console.log("Total Rewards Per Day ", yton(totalRewardsPerDay))
+                // console.log("Staked: ", convertToDecimals(staked, this.metaData.decimals, 10))
+                // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))
+                // console.log("Fraction of Stake ", convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
+                // console.log("Rewards Per Day ", yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10)))
+            } else {
+                this.resultParams.real_rewards_per_day = totalRewardsPerDay
+            }
+
+            // if(this.resultParams.real_rewards_per_day == BigInt(0))
+            //     this.resultParams.real_rewards_per_day = totalRewardsPerDay
+
+           // if(realRewardsPerDay== BigInt(0)) {
+           //      this.resultParams.real_rewards_per_day = realRewardsPerDay
+           //  }else {
+           //      this.resultParams.real_rewards_per_day = totalRewardsPerDay
+           //  }
+
+
         } else {
             // I think in this case, the real_rewards_per_day should be 0, since there is nothing in the pool,
             // there is no reward for anyone.
@@ -108,12 +157,27 @@ export class PoolParams {
     setStatus(accountInfo: [string, string, string]) {
         this.resultParams.staked =  BigInt(accountInfo[0]);
         this.resultParams.real = BigInt(accountInfo[1]);
+        //console.log(this.resultParams.real)
         this.resultParams.previous_timestamp = Number(accountInfo[2]) * 1000;
     }
 
     async getWalletAvailable() {
-        const balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
-        const walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-        return walletAvailable
+
+        /*** Workaround Free Community Farm pool ***/
+
+        let walletAvailable = 0
+
+        if(this.contractParams.farming_rate) {
+            let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
+            walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+            return walletAvailable
+
+        } else {
+            let balance =  await this.contract.wallet.getAccountBalance()
+            walletAvailable = Number(yton(balance))
+            return walletAvailable
+        }
+
+
     }
 }
