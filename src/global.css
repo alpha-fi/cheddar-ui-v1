@@ -191,7 +191,7 @@ div {
 .grid {
   display: grid;
   align-items: center;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   grid-gap: 1rem;
 }
 .grid > div {

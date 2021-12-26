@@ -169,7 +169,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   try {
     const contractParams = poolParams.contractParams
     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-    const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+    const isDateInRange = contractParams.farming_start > unixTimestamp && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
     if(isNaN(stakeAmount.value)) {
@@ -572,6 +572,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.setAttribute("id", poolParams.html.id);
   newPool.setAttribute("style", "");
   newPool.querySelector("form")?.setAttribute("id", poolParams.html.formId);
+  console.log(metaData)
   newPool.querySelector("#token-header span.name")!.innerHTML = metaData.name;
   newPool.querySelector(".pool-meta #percetage")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate/100 + "%" : "0%"
 
@@ -593,10 +594,15 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     } else if(poolParams.html.formId == 'nearcon') {
       element.innerHTML = 'CHEDDAR (NEARCON)'
     }else {
+      console.log(metaData)
       element.innerHTML = metaData.symbol
     }
     
   })
+
+  let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+  const isDateInRange = contractParams.farming_start > unixTimestamp && unixTimestamp < contractParams.farming_end
+  newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "Closed to Deposits" : "Open to Deposits"
 
   newPool.querySelectorAll(".token-name").forEach(element => {
 
@@ -729,16 +735,16 @@ async function addPoolList(poolList: Array<PoolParams>) {
 window.onload = async function () {
   try {
 
-    //let env = ENV //default
+    let env = ENV //default
     //change to mainnet if url contains /DApp/mainnet/
     //get from url: DApp/testnet/ or DApp/mainnet/
     const parts = window.location.pathname.split("/")
     const i = parts.indexOf("DApp")
-    if (i >= 0) { ENV = parts[i + 1] }
-    if (ENV != nearConfig.farms[0].networkId)
+    if (i >= 0) { env = parts[i + 1] }
+    if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
 
-    var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
+    var countDownDate = new Date("Dec 27, 2021 00:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
   
 
