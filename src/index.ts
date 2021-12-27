@@ -562,7 +562,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   var contractParams = poolParams.contractParams;
   var accountInfo = await poolParams.contract.status(accName);
 
-  console.log(poolParams)
+  //console.log(poolParams)
 
   //console.log(accountInfo)
   poolParams.resultParams.staked = BigInt(accountInfo[0])
@@ -673,7 +673,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
 
   if(contractParams.total_farmed){
-    console.log(metaData.decimals)
+    //console.log(metaData.decimals)
     newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_farmed, 24, 5)
   } else {
     newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_rewards, 24, 5)
@@ -690,10 +690,14 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   
   if(accountRegistered == null) {
 
-    if(isDateInRange) {
+    if(isDateInRange || poolParams.html.formId == "nearcon") {
       newPool.querySelector("#deposit")!.style.display = "block"
       newPool.querySelector("#activated")!.style.display = "none"
       newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+
+      if(poolParams.html.formId == 'nearcon') {
+        newPool.querySelector("#depositWarning")!.innerHTML = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
+      }
     }
     else{
       newPool.querySelector("#deposit")!.style.display = "none"
