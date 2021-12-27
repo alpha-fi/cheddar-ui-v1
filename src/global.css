@@ -2,6 +2,8 @@
   -webkit-font-smoothing: antialiased;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
+
 html {
   --bg                 : #F8F9FA;
   --fg                 : #333333;
@@ -55,7 +57,7 @@ header {
   display    : flex;
   flex-flow  : row;
   align-items: center;
-  margin     : 15px 15px 15px 15px;
+  margin     : 15px 15px 0px 15px;
 }
 
 h1 {
@@ -107,9 +109,8 @@ h4 {
   font-size  : 14px;
   line-height: 17px;
   /* identical to box height */
-
   text-align   : center;
-  margin-top   : 1em;
+  margin-top   : 0.25em;
   margin-bottom: 0;
 
   color: #333333;
@@ -203,7 +204,7 @@ div {
 
 #token-header {
   display: inline;
-  padding: 1em 0 2em 0;
+  padding: 1.2em 0 1.2em 0;
 }
 
 #token-header span.icon, #token-header img.icon  {
@@ -655,7 +656,7 @@ fieldset {
   display        : flex;
   flex-flow      : row;
   justify-content: space-between;
-  padding        : 10px 0px;
+  padding        : 5px 0px;
   width          : 100%;
 }
 
@@ -971,5 +972,22 @@ section#my-account, section#faq {
 }
 
 #poolOpen span {
+  font-size: 16px;
   font-weight: bold;
+  color: rgba(80,41,254,0.88);
+}
+
+#circulatingSupply {
+  display    : flex;
+  flex-flow  : row;
+  align-items: center;
+  margin     : 0px 15px 15px 15px;
+}
+
+#circulatingSupply span {
+  font-family: Bubblegum Sans !important;
+  font-weight: bold;
+  font-size:  13px;
+  width: 175px;
+  text-align: center;
 }

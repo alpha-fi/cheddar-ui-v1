@@ -5,7 +5,7 @@ import { WalletInterface } from './wallet-api/wallet-interface';
 import { disconnectedWallet } from './wallet-api/disconnected-wallet';
 import { NearWebWallet } from './wallet-api/near-web-wallet/near-web-wallet';
 import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narwallets';
-import { toNumber, ntoy, yton, toStringDec, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
+import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 import { StakingPoolP1 } from './contracts/p2-staking';
 import type { ContractParams, TokenParams } from './contracts/contract-structs';
@@ -395,6 +395,9 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
   let contractParams = poolParams.contractParams
   let isOpened = (contractParams.is_active && unixTimestamp >= contractParams.farming_start && unixTimestamp <= contractParams.farming_end);
   let accName = poolParams.resultParams.accName
+
+  let circulatingSupply = await poolParams.cheddarContract.ft_total_supply()
+  document.querySelector("#circulatingSupply span")!.innerHTML =  "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
   
   try {
 
@@ -423,7 +426,7 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
         poolParams.resultParams.computed = real
       }
       
-      console.log("Real " , poolParams.resultParams.getDisplayableComputed())
+      console.log(poolParams.html.id + " Real " , poolParams.resultParams.getDisplayableComputed())
       qsInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", stakedWithDecimals)
       qsaInnerText("#" + poolParams.html.id + " #wallet-available span.near.balance", removeDecZeroes(walletAvailable.toString()))
       qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed())
@@ -442,6 +445,7 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
   
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
   let isOpened = (poolParams.contractParams.is_active && unixTimestamp >= poolParams.contractParams.farming_start && unixTimestamp <= poolParams.contractParams.farming_end);
+
   try {
     if (isOpened && wallet.isConnected()) {
       let previousTimestamp = poolParams.resultParams.previous_timestamp;
@@ -613,14 +617,11 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
   const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-  newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "Deposits Closed" : "Deposits Open"
+  newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "CLOSED" : "OPEN"
 
   newPool.querySelectorAll("#stake").forEach(element => {
-
       element.disabled = (!isDateInRange) ? true : false
-
   })
-
 
   newPool.querySelectorAll(".token-name").forEach(element => {
 
@@ -666,8 +667,14 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   if(contractParams.total_staked){
     newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
   } else {
-    newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+    newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + "NEAR"
   }
+
+  // if(contractParams.accounts_registered) {
+  //   newPool.querySelector("#accounts")!.innerHTML = contractParams.accounts_registered
+  // } else {
+  //   newPool.querySelector("#accounts")!.innerHTML = "Not Available"
+  // }
 
   let rewardsPerDay = ""
 
@@ -686,14 +693,17 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_rewards, 24, 5)
   }
 
+
+
   let accountRegistered = null
 
   /*** Workaround Free Community Farm pool ***/
-  if(contractParams.farming_rate){
-    accountRegistered = await poolParams.contract.storageBalance();
-  }
-  else if(poolParams.html.formId == "nearcon") {
+  if(poolParams.html.formId == "nearcon") {
+    //console.log("NEARCON")
     accountRegistered = await poolParams.tokenContract.storageBalance();
+  }
+  else if(contractParams.farming_rate){
+    accountRegistered = await poolParams.contract.storageBalance();
   }
   else {
     accountRegistered = 0
@@ -701,7 +711,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   
   if(accountRegistered == null) {
 
-    console.log(poolParams.html.formId)
+    //console.log(poolParams.html.formId)
 
     if(isDateInRange) {
       newPool.querySelector("#deposit")!.style.display = "block"
@@ -850,6 +860,9 @@ window.onload = async function () {
       // console.log("Cheddar balance: " , cheddarBalance)
       qsInnerText("#my-account #wallet-available", amountAvailable)
       qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
+
+      let circulatingSupply = await cheddarContract.ft_total_supply()
+      document.querySelector("#circulatingSupply span")!.innerHTML =  "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
