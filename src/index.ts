@@ -524,7 +524,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     if(qs("#" + poolParams.html.id + " #pool-stats #total-staked")) {
       qs("#" + poolParams.html.id + " #pool-stats #total-staked").innerText = convertToDecimals(totalStaked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
       qs("#" + poolParams.html.id + " #pool-stats #rewards-per-day").innerText = yton(rewardsPerDay.toString()).toString()
-      qs("#" + poolParams.html.id + " #pool-stats #total-rewards").innerText = convertToDecimals(totalFarmed, metaData.decimals, 5);
+      qs("#" + poolParams.html.id + " #pool-stats #total-rewards").innerText = convertToDecimals(totalFarmed, 24, 5);
     }
 
   }
@@ -555,11 +555,15 @@ function narwalletDisconnected(ev: CustomEvent) {
 }
 
 async function addPool(poolParams: PoolParams): Promise<void> {
+
   var genericPoolElement = qs("#genericPool") as HTMLElement;
   let accName = poolParams.resultParams.accName
   var metaData = poolParams.metaData;
   var contractParams = poolParams.contractParams;
   var accountInfo = await poolParams.contract.status(accName);
+
+  console.log(poolParams)
+
   //console.log(accountInfo)
   poolParams.resultParams.staked = BigInt(accountInfo[0])
   poolParams.resultParams.real = BigInt(accountInfo[1])
@@ -669,9 +673,10 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
 
   if(contractParams.total_farmed){
-    newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_farmed, metaData.decimals, 5)
+    console.log(metaData.decimals)
+    newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_farmed, 24, 5)
   } else {
-    newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_rewards, metaData.decimals, 5)
+    newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_rewards, 24, 5)
   }
 
   let accountRegistered = null
