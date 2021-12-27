@@ -231,7 +231,7 @@ div {
   -moz-box-pack   : justify;
   -ms-flex-pack   : justify;
   justify-content : space-between;
-  min-width       : 75%;
+  min-width       : 80%;
 }
 
 .pool-meta div:nth-child(1) {
@@ -264,7 +264,7 @@ div {
 
 .pool-meta.earned, .pool-meta.staked {
   justify-content: left;
-  padding-top: 10px;
+  padding: 10px 1.7rem 0 1.7rem;
 }
 
 .pool-meta.earned div:nth-child(1), .pool-meta.staked div:nth-child(1) {
@@ -414,8 +414,36 @@ form,
 
 /*phones*/
 @media only screen and (max-width: 360px) {
+
   html {
     font-size: 11px;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+
+  #token-header span.name {
+    font-size: 20px;
+  }
+
+  #home-connected {
+    margin: 0.25rem;
+  }
+
+  .popup {
+    min-width: 300px!important;
+  }
+
+  .grid {
+    display: grid;
+    align-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-gap: 1rem;
+  }
+
+  .pool-meta {
+    min-width:  90%;
   }
 
   section,
