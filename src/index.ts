@@ -691,9 +691,8 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
     }
     else{
-      newPool.querySelector("#deposit")!.style.display = "block"
-      newPool.querySelector("#activated")!.style.display = "none"
-      newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+      newPool.querySelector("#deposit")!.style.display = "none"
+      newPool.querySelector("#activated")!.style.display = "block"
       newPool.querySelector("#harvest")?.addEventListener("click", harvestClicked(poolParams, newPool));
       newPool.querySelector("#unstake")?.addEventListener("click", unstakeClicked(poolParams, newPool));
     }
