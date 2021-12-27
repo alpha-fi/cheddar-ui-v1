@@ -144,7 +144,14 @@ function harvestClicked(poolParams: PoolParams, pool: HTMLElement) {
 function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
   return async function (event) {
     event.preventDefault()
-    let storageDeposit = await poolParams.contract.storageDeposit();
+
+    if(poolParams.html.formId == 'nearcon') {
+      let storageDeposit = await poolParams.tokenContract.storageDeposit();
+    }
+    else {
+      let storageDeposit = await poolParams.contract.storageDeposit();
+    }
+
     pool.querySelector("#deposit")!.style.display = "block"
     pool.querySelector("#activated")!.style.display = "none"
   }
@@ -684,20 +691,33 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   /*** Workaround Free Community Farm pool ***/
   if(contractParams.farming_rate){
     accountRegistered = await poolParams.contract.storageBalance();
-  } else {
+  }
+  else if(poolParams.html.formId == "nearcon") {
+    accountRegistered = await poolParams.tokenContract.storageBalance();
+  }
+  else {
     accountRegistered = 0
   }
   
   if(accountRegistered == null) {
 
-    if(isDateInRange || poolParams.html.formId == "nearcon") {
+    console.log(poolParams.html.formId)
+
+    if(isDateInRange) {
+      newPool.querySelector("#deposit")!.style.display = "block"
+      newPool.querySelector("#activated")!.style.display = "none"
+      newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+    }
+    else if(poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+
+      //console.log("IS NEARCON")
+
       newPool.querySelector("#deposit")!.style.display = "block"
       newPool.querySelector("#activated")!.style.display = "none"
       newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
 
-      if(poolParams.html.formId == 'nearcon') {
-        newPool.querySelector("#depositWarning")!.innerHTML = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
-      }
+      newPool.querySelector("#depositWarning")!.innerHTML = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
+
     }
     else{
       newPool.querySelector("#deposit")!.style.display = "none"

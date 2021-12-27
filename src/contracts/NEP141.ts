@@ -42,5 +42,14 @@ export class NEP141Trait extends SmartContract {
         return this.call("new",{owner_id:owner_id, owner_supply:owner_supply});
     }
 
+    /// Checks to see if an account is registered.
+    storageBalance(accountId?: AccountId): Promise<[U128String, U128String]> {
+      return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
+    }
+
+    /// Registers a user with the farm.
+    storageDeposit(): Promise<[U128String, U128String]> {
+      return this.call("storage_deposit", {}, TGas(25), "3000000000000000000000")
+    }
 
 }
