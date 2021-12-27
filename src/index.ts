@@ -169,7 +169,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   try {
     const contractParams = poolParams.contractParams
     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-    const isDateInRange = contractParams.farming_start > unixTimestamp && unixTimestamp < contractParams.farming_end
+    const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
     if(isNaN(stakeAmount.value)) {
@@ -572,7 +572,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.setAttribute("id", poolParams.html.id);
   newPool.setAttribute("style", "");
   newPool.querySelector("form")?.setAttribute("id", poolParams.html.formId);
-  console.log(metaData)
+  //console.log(metaData)
   newPool.querySelector("#token-header span.name")!.innerHTML = metaData.name;
   newPool.querySelector(".pool-meta #percetage")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate/100 + "%" : "0%"
 
@@ -594,15 +594,22 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     } else if(poolParams.html.formId == 'nearcon') {
       element.innerHTML = 'CHEDDAR (NEARCON)'
     }else {
-      console.log(metaData)
+      //console.log(metaData)
       element.innerHTML = metaData.symbol
     }
     
   })
 
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-  const isDateInRange = contractParams.farming_start > unixTimestamp && unixTimestamp < contractParams.farming_end
-  newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "Closed to Deposits" : "Open to Deposits"
+  const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+  newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "Deposits Closed" : "Deposits Open"
+
+  newPool.querySelectorAll("#stake").forEach(element => {
+
+      element.disabled = (!isDateInRange) ? true : false
+
+  })
+
 
   newPool.querySelectorAll(".token-name").forEach(element => {
 
@@ -677,9 +684,20 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   }
   
   if(accountRegistered == null) {
-    newPool.querySelector("#deposit")!.style.display = "block"
-    newPool.querySelector("#activated")!.style.display = "none"
-    newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+
+    if(isDateInRange) {
+      newPool.querySelector("#deposit")!.style.display = "block"
+      newPool.querySelector("#activated")!.style.display = "none"
+      newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool));
+    }
+    else{
+      newPool.querySelector("#deposit")!.style.display = "none"
+      newPool.querySelector("#activated")!.style.display = "block"
+      newPool.querySelector("#harvest")?.addEventListener("click", harvestClicked(poolParams, newPool));
+      newPool.querySelector("#stake")?.addEventListener("click", stakeClicked(poolParams, newPool));
+      newPool.querySelector("#unstake")?.addEventListener("click", unstakeClicked(poolParams, newPool));
+    }
+
   }
   else{
     newPool.querySelector("#deposit")!.style.display = "none"
