@@ -176,7 +176,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   try {
     const contractParams = poolParams.contractParams
     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-    const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp)  && unixTimestamp < contractParams.farming_end
+    const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
     if(isNaN(stakeAmount.value)) {
@@ -800,8 +800,9 @@ window.onload = async function () {
     if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
 
-    var countDownDate = new Date("Dec 27, 2021 00:00:00 UTC");
+    var countDownDate = new Date("Jan 2, 2022 06:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
+    //console.log(countDownDate)
   
 
     var x = setInterval(function() {
@@ -813,6 +814,7 @@ window.onload = async function () {
 
       // Find the distance between now and the count down date
       var distance = countDownDate.getTime() - d.getTime();
+      //console.log(distance)
 
       // Time calculations for days, hours, minutes and seconds
       var days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -821,10 +823,10 @@ window.onload = async function () {
       var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
       // Display the result in the element with id="demo"
-      document.getElementById("timer")!.innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+      document.getElementById("timer")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
       + minutes + "m : " + seconds + "s" + "</span></h2>";
 
-      document.getElementById("timer-non")!.innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+      document.getElementById("timer-non")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
       + minutes + "m : " + seconds + "s" + "</span></h2>";
       
       // If the count down is finished, write some text
