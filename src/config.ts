@@ -42,6 +42,34 @@ export function getConfig(env:string):GetConfigResults {
       "farms": [
         {
           index: 0,
+          poolName : 'pulse',
+          networkId: MAINNET_NETWORKID,
+          nodeUrl: MAINNET_NODEURL,
+          contractName: 'p2-pulse.cheddar.near',
+          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: '52a047ee205701895ee06a375492490ec9c597ce.factory.bridge.near',
+          walletUrl: MAINNET_WALLETURL,
+          helperUrl: MAINNET_HELPERURL,
+          explorerUrl: MAINNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined
+        },
+        {
+          index: 1,
+          poolName : 'nUSDO',
+          networkId: MAINNET_NETWORKID,
+          nodeUrl: MAINNET_NODEURL,
+          contractName: 'p2-nusd.cheddar.near',
+          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: 'v3.oin_finance.near',
+          walletUrl: MAINNET_WALLETURL,
+          helperUrl: MAINNET_HELPERURL,
+          explorerUrl: MAINNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined
+        },
+        {
+          index: 2,
           poolName : 'ref',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -55,7 +83,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined
         },
         {
-          index: 1,
+          index: 3  ,
           poolName : 'stNEAR',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -69,7 +97,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined
         },
         {
-          index: 2,
+          index: 4,
           poolName : 'banana',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -83,7 +111,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined
         },
         {
-          index: 3,
+          index: 5,
           poolName : 'near',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -97,7 +125,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined
         },
         {
-          index: 4,
+          index: 6,
           poolName : 'cheddar',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -111,7 +139,7 @@ export function getConfig(env:string):GetConfigResults {
           masterAccount:undefined,
         },
         {
-          index: 5,
+          index: 7,
           poolName : 'nearcon',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,

@@ -176,7 +176,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   try {
     const contractParams = poolParams.contractParams
     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-    const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+    const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp)  && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
     if(isNaN(stakeAmount.value)) {
@@ -616,7 +616,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   })
 
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-  const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+  const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp)  && unixTimestamp < contractParams.farming_end
   newPool.querySelector("#poolOpen span")!.innerHTML = (!isDateInRange) ? "CLOSED" : "OPEN"
 
   newPool.querySelectorAll("#stake").forEach(element => {
