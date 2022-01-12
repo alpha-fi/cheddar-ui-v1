@@ -29,6 +29,7 @@ export let wallet: WalletInterface = disconnectedWallet;
 
 let nearWebWalletConnection: WalletConnection;
 let accountName;
+let isPaused = false;
 
 //time in ms
 const SECONDS = 1000
@@ -115,6 +116,36 @@ qs('#sign-out').onclick =
     wallet = disconnectedWallet;
 
     signedOutFlow();
+  }
+
+//only staked
+qs('#switch').onclick =
+  async function (event) {
+
+    if(window.localStorage.getItem("onlyStaked")) {
+      isPaused = true;
+      window.localStorage.onlyStaked = event.target.checked
+      console.log(window.localStorage.getItem("onlyStaked"))
+      const poolList = await getPoolList(wallet);
+      //await refreshAccountInfoGeneric(poolList);
+      qs("#pool_list").replaceChildren();
+      qs("#pool_list").style.display = "none";
+      qs(".loader").style.display = "block";
+      await addPoolList(poolList);
+
+    }
+    else {
+      isPaused = true;
+      window.localStorage.setItem("onlyStaked", event.target.checked)
+      console.log(window.localStorage.getItem("onlyStaked"))
+      const poolList = await getPoolList(wallet);
+      //await refreshAccountInfoGeneric(poolList);
+      qs("#pool_list").replaceChildren();
+      qs("#pool_list").style.display = "none";
+      qs(".loader").style.display = "block";
+      await addPoolList(poolList);
+
+    }
   }
 
 function stakeClicked(poolParams: PoolParams, pool: HTMLElement) {
@@ -567,6 +598,7 @@ function narwalletDisconnected(ev: CustomEvent) {
 
 async function addPool(poolParams: PoolParams): Promise<void> {
 
+
   var genericPoolElement = qs("#genericPool") as HTMLElement;
   let accName = poolParams.resultParams.accName
   var metaData = poolParams.metaData;
@@ -623,16 +655,16 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       element.disabled = (!isDateInRange) ? true : false
   })
 
-  newPool.querySelectorAll(".token-name").forEach(element => {
+  // newPool.querySelectorAll(".token-name").forEach(element => {
 
-    /*** Workaround Free Community Farm pool ***/
-    if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
-      element.innerHTML = 'NEAR'
-    } else {
-      element.innerHTML = metaData.symbol
-    }
+  //   /*** Workaround Free Community Farm pool ***/
+  //   if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
+  //     element.innerHTML = 'NEAR'
+  //   } else {
+  //     element.innerHTML = metaData.symbol
+  //   }
     
-  })
+  // })
 
   // newPool.querySelectorAll("#" + poolParams.html.formId +  " .token-name")!.innerHTML = metaData.symbol;
   newPool.querySelector("#farming_start")!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
@@ -750,9 +782,12 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
   qs("#pool_list").append(newPool);
 
-  poolParams.setTotalRewardsPerDay()
-  setInterval(refreshRewardsDisplayLoopGeneric.bind(null, poolParams, metaData.decimals), 200);
-  setInterval(refreshRealRewardsLoopGeneric.bind(null, poolParams, metaData.decimals), 60 * 1000);
+  poolParams.setTotalRewardsPerDay();
+
+  if(!isPaused){
+    setInterval(refreshRewardsDisplayLoopGeneric.bind(null, poolParams, metaData.decimals), 200);
+    setInterval(refreshRealRewardsLoopGeneric.bind(null, poolParams, metaData.decimals), 60 * 1000);
+  }
 }
 
 function maxStakeClicked(pool: HTMLElement) {
@@ -782,10 +817,32 @@ function maxUnstakeClicked(pool: HTMLElement) {
 async function addPoolList(poolList: Array<PoolParams>) {
   qs("#pool_list").innerHTML = ""
   for(let i = 0; i < poolList.length; i++) {
-    await addPool(poolList[i]);
+
+    var accName = poolList[i].contract.wallet.getAccountId();
+    var accountInfo = await poolList[i].contract.status(accName);
+
+    if(window.localStorage.getItem("onlyStaked") === 'true' && accountInfo[0] > 0) {
+      await addPool(poolList[i]);
+    } else if(window.localStorage.getItem("onlyStaked") === 'false'){
+      await addPool(poolList[i]);
+    }
+    
   }
+
+
+
+
   qs("#pool_list").style.display = "grid"
+
+  console.log(qs("#pool_list").childElementCount)
+  if(qs("#pool_list").childElementCount == 0) {
+    qs("#pool_list").innerHTML = "<h2 style='color: #8542EB;text-shadow: white 0px 1px 5px;margin-top:5rem;'>You have No Staked Pools.</h2>"
+    //qs("#switch").click();
+  }
+
   qs(".loader").style.display = "none"
+
+  isPaused = false;
 }
 
 window.onload = async function () {
@@ -800,42 +857,42 @@ window.onload = async function () {
     if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
 
-    var countDownDate = new Date("Jan 2, 2022 06:00:00 UTC");
+    var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
     //console.log(countDownDate)
   
 
-    var x = setInterval(function() {
+    // var x = setInterval(function() {
 
-      // Get today's date and time
-      var now = new Date().getTime();
-      var d = new Date();
-      var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+    //   // Get today's date and time
+    //   var now = new Date().getTime();
+    //   var d = new Date();
+    //   var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
 
-      // Find the distance between now and the count down date
-      var distance = countDownDate.getTime() - d.getTime();
-      //console.log(distance)
+    //   // Find the distance between now and the count down date
+    //   var distance = countDownDate.getTime() - d.getTime();
+    //   //console.log(distance)
 
-      // Time calculations for days, hours, minutes and seconds
-      var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-      var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-      var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+    //   // Time calculations for days, hours, minutes and seconds
+    //   var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    //   var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    //   var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    //   var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      // Display the result in the element with id="demo"
-      document.getElementById("timer")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-      + minutes + "m : " + seconds + "s" + "</span></h2>";
+    //   // Display the result in the element with id="demo"
+    //   document.getElementById("timer")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+    //   + minutes + "m : " + seconds + "s" + "</span></h2>";
 
-      document.getElementById("timer-non")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-      + minutes + "m : " + seconds + "s" + "</span></h2>";
+    //   document.getElementById("timer-non")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
+    //   + minutes + "m : " + seconds + "s" + "</span></h2>";
       
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("timer")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-        document.getElementById("timer-non")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-      }
-    }, 1000);
+    //   // If the count down is finished, write some text
+    //   if (distance < 0) {
+    //     clearInterval(x);
+    //     document.getElementById("timer")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
+    //     document.getElementById("timer-non")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
+    //   }
+    // }, 1000);
 
     //init narwallets listeners
     narwallets.setNetwork(nearConfig.farms[0].networkId); //tell the wallet which network we want to operate on
@@ -846,6 +903,16 @@ window.onload = async function () {
 
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
+
+      if(window.localStorage.getItem("onlyStaked")) {
+        console.log(window.localStorage.getItem("onlyStaked"))
+        document.getElementById("switch").checked = window.localStorage.getItem("onlyStaked") === 'true';
+      }
+      else {
+        console.log(window.localStorage.getItem("onlyStaked"))
+        window.localStorage.setItem("onlyStaked", false)
+        document.getElementById("switch").checked = false;
+      }
 
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
