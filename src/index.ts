@@ -624,12 +624,15 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelector(".pool-meta #percetage")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate/100 + "%" : "0%"
 
   let iconElem = newPool.querySelector("#token-header img")
-  if(metaData.icon != null) {
+
+  /*** Workaround Free Community Farm pool ***/
+  if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
+    //Skip do nothing with icon use default NEAR icon
+  } else if(metaData.icon != null) {
     iconElem!.setAttribute("src", metaData.icon || "");
   } else {
     var iconImage = document.createElement('span');
     iconImage.classList.add('icon');
-
     iconElem?.parentNode?.replaceChild(iconImage, iconElem);
   }
 
@@ -637,7 +640,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
     /*** Workaround Free Community Farm pool ***/
     if(poolParams.html.formId == 'near') {
-      element.innerHTML = 'CHEDDAR (FREE FARM)'
+      element.innerHTML = 'NEAR (FREE FARM)'
     } else if(poolParams.html.formId == 'nearcon') {
       element.innerHTML = 'CHEDDAR (NEARCON)'
     }else {
@@ -655,16 +658,16 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       element.disabled = (!isDateInRange) ? true : false
   })
 
-  // newPool.querySelectorAll(".token-name").forEach(element => {
+  newPool.querySelectorAll(".token-name").forEach(element => {
 
-  //   /*** Workaround Free Community Farm pool ***/
-  //   if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
-  //     element.innerHTML = 'NEAR'
-  //   } else {
-  //     element.innerHTML = metaData.symbol
-  //   }
-    
-  // })
+    /*** Workaround Free Community Farm pool ***/
+    if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
+      element.innerHTML = 'NEAR'
+    } else {
+      element.innerHTML = metaData.symbol
+    }
+
+  })
 
   // newPool.querySelectorAll("#" + poolParams.html.formId +  " .token-name")!.innerHTML = metaData.symbol;
   newPool.querySelector("#farming_start")!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
@@ -730,7 +733,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   let accountRegistered = null
 
   /*** Workaround Free Community Farm pool ***/
-  if(poolParams.html.formId == "nearcon") {
+  if(poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
     //console.log("NEARCON")
     accountRegistered = await poolParams.tokenContract.storageBalance();
   }

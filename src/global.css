@@ -267,7 +267,7 @@ div {
 
 .pool-meta.earned, .pool-meta.staked {
   justify-content: left;
-  padding: 10px 1.7rem 0 1.7rem;
+  margin: 10px 1.7rem 0 1.7rem;
 }
 
 .pool-meta.earned div:nth-child(1), .pool-meta.staked div:nth-child(1) {

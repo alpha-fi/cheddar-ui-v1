@@ -19,13 +19,16 @@ async function generatePoolList(wallet: WalletInterface) {
         const poolParams = new PoolParams(index, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
         await poolParams.setAllExtraData();
 
-        poolList.push(poolParams);        
+        poolList.push(poolParams);
     }
 }
 
 export async function getPoolList(wallet: WalletInterface) {
     if(!poolList || poolList.length == 0) {
         await generatePoolList(wallet);
+
+        poolList = poolList.sort((a, b) => b.contractParams.farming_end - a.contractParams.farming_end)
+
     }
     return poolList;
 }
