@@ -1,4 +1,9 @@
-import { connect, Contract, keyStores, Near, WalletConnection } from 'near-api-js'
+import { baseDecode } from 'borsh';
+import BN from 'bn.js';
+import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount, RequestSignTransactionsOptions, utils } from 'near-api-js'
+import { Action, createTransaction, functionCall } from 'near-api-js/lib/transaction';
+import { PublicKey } from 'near-api-js/lib/utils'
+
 import { ENV, CHEDDAR_CONTRACT_NAME, TESTNET_CHEDDAR_CONTRACT_NAME, getConfig } from './config'
 
 import { WalletInterface } from './wallet-api/wallet-interface';
@@ -28,6 +33,8 @@ export let nearConfig = getConfig(ENV); //default testnet, can change according 
 export let wallet: WalletInterface = disconnectedWallet;
 
 let nearWebWalletConnection: WalletConnection;
+let nearConnectedWalletAccount: ConnectedWalletAccount
+let requestSignTransOptions: RequestSignTransactionsOptions;
 let accountName;
 let isPaused = false;
 
@@ -192,10 +199,12 @@ function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
 async function submitForm(action: string, poolParams: PoolParams, form: HTMLFormElement) {
   event?.preventDefault()
 
+  const ONE_YOCTO_NEAR = '0.000000000000000000000001';
+
   //const form = event.target as HTMLFormElement
   // get elements from the form using their id attribute
-  const { fieldset, stakeAmount } = form
-  //console.log("Stake amount: " , stakeAmount)
+  const { fieldset, stakeAmount1, stakeAmount2 } = form
+  //console.log("Stake amount: " , stakeAmount1)
   //const fieldset = form.querySelector("#fieldset") as HTMLFormElement
 
   // disable the form while the call is made
@@ -210,34 +219,217 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
-    if(isNaN(stakeAmount.value)) {
-      throw Error("Please Input a Number.")
-    }
-    let amount: number = stakeAmount.value;
+
+    //console.log(stakeAmount1.value)
+    //console.log(stakeAmount2.value)
+
+    let amount1: number = stakeAmount1.value;
+    let amount2: number = stakeAmount2.value;
+
+    /** TODO - make dynamic **/
+
+
+    let stakedSymbols = [poolParams.metaData, poolParams.metaData2]
+    const walletBalances = await poolParams.getWalletAvailable()
     
     if (isStaking) {
+
       if (!isDateInRange) throw Error("Pools is Closed.")
-      //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
-      const walletAvailable = await poolParams.getWalletAvailable()
-      if(amount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
-      await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId, convertToBase(stakeAmount.value, poolParams.metaData.decimals.toString()), "to farm")
-    }
-    else if (isHarvest) {
+
+      if(walletBalances) {
+
+        if(Array.isArray(walletBalances)){
+
+          // if(isNaN(parseFloat(amount1))) {
+          //   throw Error("Please Input a Number.")
+          // } else if(poolParams.type == "multiple" && isNaN(parseFloat(amount2))) {
+          //   throw Error("Please Input a Number.")
+          // }
+
+          /** TODO - make dynamic **/
+          if(amount1 > walletBalances[0]) throw Error(`Only ${walletBalances[0]} ${stakedSymbols[0].symbol} Available to Stake.`)
+          if(amount2 > walletBalances[1]) throw Error(`Only ${walletBalances[1]} ${stakedSymbols[1].symbol} Available to Stake.`)
+
+
+          if(isNaN(parseFloat(amount1)) && isNaN(parseFloat(amount2))) {
+
+            const transactions: Transaction[] = [];
+
+            transactions.unshift({
+              receiverId: poolParams.cheddarContract.contractId,
+              functionCalls: [
+                {
+                  methodName: 'ft_transfer_call',
+                  args: {
+                    receiver_id: poolParams.contract.contractId,
+                    amount: convertToBase(amount1, poolParams.metaData.decimals.toString()),
+                    msg: 'to farm',
+                  },
+                  amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+                  gas: new BN('100000000000000'),
+                },
+              ],
+            });
+
+            transactions.unshift({
+                receiverId: poolParams.tokenContract.contractId,
+                functionCalls: [
+                  {
+                    methodName: 'ft_transfer_call',
+                    args: {
+                      receiver_id: poolParams.contract.contractId,
+                      amount: convertToBase(amount2, poolParams.metaData2.decimals.toString()),
+                      msg: 'to farm',
+                    },
+                    amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+                    gas: new BN('100000000000000'),
+                  },
+                ],
+            });
+
+            const currentTransactions = await Promise.all(
+              transactions.map((t, i) => {
+                return setupTransaction({
+                    receiverId: t.receiverId,
+                    nonceOffset: i + 1,
+                    actions: t.functionCalls.map((fc) =>
+                      functionCall(
+                        fc.methodName,
+                        fc.args,
+                        fc.gas,
+                        fc.amount
+                      )
+                    ),
+                  });
+                })
+              );
+
+            requestSignTransOptions = currentTransactions
+
+            nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
+          } 
+
+        } else {
+
+        const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+
+        if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
+
+        if(amount1 > stakedDisplayable) throw Error(`Unstake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+
+        // amount = 1000000000000000000000000
+        await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+        }
+      }
+
+    } else if (isHarvest) {
       
       amount = poolParams.resultParams.getCurrentCheddarRewards()
-      //if (BigInt(convertToBase(amount.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
+      //if (BigInt(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
       await poolParams.contract.withdraw_crop()
-    }
-    else {
-      //console.log(amount.toString())
-      //console.log("Decimal: ", poolParams.metaData.decimals)
-      if (amount <= 0) throw Error(`Unstake a Positive Amount.`);
+
+    } else /** UNSTAKING **/ {
+
       const staked = poolParams.resultParams.staked
-      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
-      //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
-      if(amount > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
-      // amount = 1000000000000000000000000
-      await poolParams.contract.unstake(convertToBase(amount.toString(), poolParams.metaData.decimals.toString()))
+
+      /** TODO - make dynamic **/
+      if(Array.isArray(staked)){
+
+        console.log(walletBalances)
+        console.log(staked)
+
+
+        if(amount1 > staked[0]) throw Error(`Only ${staked[0]} ${stakedSymbols[0].symbol} Available to UnStake.`)
+        if(amount2 > staked[1]) throw Error(`Only ${staked[1]} ${stakedSymbols[1].symbol} Available to UnStake.`)
+
+        if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
+
+          const transactions: Transaction[] = [];
+
+          transactions.unshift({
+            receiverId: poolParams.contract.contractId,
+            functionCalls: [
+              {
+                methodName: 'unstake',
+                args: {
+                  token: poolParams.tokenContract.contractId,
+                  amount: convertToBase(amount1, poolParams.metaData.decimals.toString()),
+                  msg: 'unstake from farm',
+                },
+                amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+                gas: new BN('100000000000000'),
+              },
+            ],
+          });
+
+          transactions.unshift({
+              receiverId: poolParams.contract.contractId,
+              functionCalls: [
+                {
+                  methodName: 'unstake',
+                  args: {
+                    token: poolParams.cheddarContract.contractId,
+                    amount: convertToBase(amount2, poolParams.metaData2.decimals.toString()),
+                    msg: 'unstake from farm',
+                  },
+                  amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+                  gas: new BN('100000000000000'),
+                },
+              ],
+          });
+
+          const currentTransactions = await Promise.all(
+            transactions.map((t, i) => {
+              return setupTransaction({
+                  receiverId: t.receiverId,
+                  nonceOffset: i + 1,
+                  actions: t.functionCalls.map((fc) =>
+                    functionCall(
+                      fc.methodName,
+                      fc.args,
+                      fc.gas,
+                      fc.amount
+                    )
+                  ),
+                });
+              })
+            );
+
+          requestSignTransOptions = currentTransactions
+
+          nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
+
+        } else {
+
+          if(!isNaN(parseFloat(amount1))) {
+
+            if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
+
+            await poolParams.contract.unstake(poolParams.tokenContract.contractId, convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+
+          } else if(!isNaN(parseFloat(amount2))) {
+
+            if(isNaN(parseFloat(amount2))) throw Error("Please Input a Number.")
+
+            await poolParams.contract.unstake(poolParams.cheddarContract.contractId, convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()))
+          }
+        }
+
+      } else {
+        const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+
+        //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+
+        if(amount1 > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
+
+        if(isNaN(parseFloat(amount1)))
+                throw Error("Please Input a Number.")
+
+        // amount = 1000000000000000000000000
+        await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+
+      }
+
     }
 
     //clear form
@@ -246,8 +438,8 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     //refresh acc info
     // const poolList = await getPoolList(wallet);
     await refreshPoolInfo(poolParams)
-    //console.log("Amount: ", amount)
-    showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
+    //console.log("Amount: ", amount1)
+    showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount1) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
     
     if (isHarvest) {
       poolParams.resultParams.computed = 1n
@@ -256,10 +448,10 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
 
     }
     else if (isStaking) {
-      poolParams.resultParams.addStaked(ntoy(amount));
+      poolParams.resultParams.addStaked(ntoy(amount1));
     }
     else {
-      poolParams.resultParams.addStaked(ntoy(-amount));
+      poolParams.resultParams.addStaked(ntoy(-amount1));
     }
 
   }
@@ -383,12 +575,13 @@ async function signedInFlow(wallet: WalletInterface) {
 
 // Initialize contract & set global variables
 async function initNearWebWalletConnection() {
-  // Initialize connection to the NEAR testnet
-  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig.farms[0]))
 
-  // Initializing Wallet based Account. It can work with NEAR testnet wallet that
-  // is hosted at https://wallet.testnet.near.org
+  // Initialize connection to the NEAR network
+  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig.farms[0]))
+  // Initializing Wallet based Account.
   nearWebWalletConnection = new WalletConnection(near, null)
+  nearConnectedWalletAccount = new ConnectedWalletAccount(nearWebWalletConnection, near.connection, nearWebWalletConnection.getAccountId())
+  console.log(nearConnectedWalletAccount)
 }
 
 function logoutNearWebWallet() {
@@ -415,6 +608,51 @@ function loginNarwallets() {
   window.open("http://www.narwallets.com/help/connect-to-web-app")
 }
 
+
+async function setupTransaction({
+    receiverId,
+    actions,
+    nonceOffset = 1,
+  }: {
+    receiverId: string;
+    actions: Action[];
+    nonceOffset?: number;
+  }) {
+
+  console.log(nearConnectedWalletAccount)
+
+
+    const localKey = await nearConnectedWalletAccount.connection.signer.getPublicKey(
+      nearConnectedWalletAccount.accountId,
+      nearConnectedWalletAccount.connection.networkId
+    );
+    let accessKey = await nearConnectedWalletAccount.accessKeyForTransaction(
+      receiverId,
+      actions,
+      localKey
+    );
+    if (!accessKey) {
+      throw new Error(
+        `Cannot find matching key for transaction sent to ${receiverId}`
+      );
+    }
+
+    const block = await nearConnectedWalletAccount.connection.provider.block({ finality: 'final' });
+    const blockHash = baseDecode(block.header.hash);
+
+    const publicKey = PublicKey.from(accessKey.public_key);
+    const nonce = accessKey.access_key.nonce + nonceOffset;
+
+    return createTransaction(
+      nearConnectedWalletAccount.accountId,
+      publicKey,
+      receiverId,
+      nonce,
+      actions,
+      blockHash
+    );
+  }
+
 /**
  * Gets the actual values from the contract and replaces the computed values on the UI (and on the corresponding 
  * object) if it's greater than 4 times
@@ -436,9 +674,62 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
 
       let accountInfo = await poolParams.contract.status(accName)
       poolParams.setStatus(accountInfo)
-      
-      let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 7)
-      const walletAvailable = await poolParams.getWalletAvailable()
+
+      if(poolParams.type == "multiple") {
+
+        newPool.querySelectorAll(".pool-meta.staked").forEach((element,index) => {
+          element!.style.display = 'flex';
+        })
+
+        newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element,index) => {
+          element!.style.display = 'flex';
+          element!.innerText = convertToDecimals(poolParams.resultParams.stake_tokens[index].toString(), poolParams.metaData.decimals, 7)
+
+        })
+
+      } else {
+        let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 7)
+        qsInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", stakedWithDecimals)
+      }
+
+      //const walletAvailable = await poolParams.getWalletAvailable()
+
+      const walletBalances = await poolParams.getWalletAvailable()
+
+      if(Array.isArray(walletBalances)){
+
+        //console.log(walletBalances)
+
+        qsa("#wallet-available span.near.balance").forEach((element,index) => {
+
+          //console.log(index)
+          //console.log(walletBalances[index].toString())
+
+          if(walletBalances[index]) {
+
+            element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
+            //console.log(element!.innerHTML)
+
+            if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
+              let elems = qsa("#wallet-available a .max")
+              let elem = elems[index] as HTMLElement
+              //console.log(elem)
+              elem.style.display = "block";
+            }
+          }
+
+        })
+
+      } else {
+
+        qs("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
+
+        if (Number(walletBalances.toString().replace(".", "")) > 1) {
+          let elem = qs("#wallet-available a .max") as HTMLElement
+          elem.style.display = "block";
+        }
+      }
+
       let real = poolParams.resultParams.real
       let computed = poolParams.resultParams.computed
       //convertToBase(poolParams.resultParams.staked.toString(), decimals)
@@ -457,9 +748,6 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
         poolParams.resultParams.computed = real
       }
       
-      console.log(poolParams.html.id + " Real " , poolParams.resultParams.getDisplayableComputed())
-      qsInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", stakedWithDecimals)
-      qsaInnerText("#" + poolParams.html.id + " #wallet-available span.near.balance", removeDecZeroes(walletAvailable.toString()))
       qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed())
     }
     else {
@@ -478,25 +766,24 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
   let isOpened = (poolParams.contractParams.is_active && unixTimestamp >= poolParams.contractParams.farming_start && unixTimestamp <= poolParams.contractParams.farming_end);
 
   try {
+
     if (isOpened && wallet.isConnected()) {
+
       let previousTimestamp = poolParams.resultParams.previous_timestamp;
       let elapsed_ms = Date.now() - previousTimestamp
-      if (BigInt(convertToBase(poolParams.resultParams.staked.toString(), decimals)) > BigInt(0)) {
-        // console.log(poolParams.resultParams.real_rewards_per_day)
-        // console.log(BigInt(10 ** 5))
-        // console.log(poolParams.resultParams.real_rewards_per_day / BigInt(10 ** 5))
-        //console.log(BigInt(elapsed_ms))
-        //var rewards = (real_rewards_per_day * elapsed_ms / (1000 * 60 * 60 * 24));
-        var rewards = (poolParams.resultParams.real_rewards_per_day * BigInt(elapsed_ms) / (BigInt(1000 * 60 * 60 * 24)));
-        //console.log(poolParams.resultParams.real)
-        //console.log(rewards)
-        poolParams.resultParams.computed = poolParams.resultParams.real + rewards
-        //console.log(poolParams.resultParams.computed)
 
-        //console.log(poolParams.resultParams.computed)
-        //console.log("Computed " , poolParams.resultParams.getDisplayableComputed())
+      if(poolParams.type == "multiple") {
 
-        qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed());
+
+      } else {
+
+        if (BigInt(convertToBase(poolParams.resultParams.staked.toString(), decimals)) > BigInt(0)) {
+
+          var rewards = (poolParams.resultParams.real_rewards_per_day * BigInt(elapsed_ms) / (BigInt(1000 * 60 * 60 * 24)));
+          poolParams.resultParams.computed = poolParams.resultParams.real + rewards
+
+          qsInnerText("#" + poolParams.html.id + " #cheddar-balance", poolParams.resultParams.getDisplayableComputed());
+        }
       }
     }
     else {
@@ -511,6 +798,7 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
 async function refreshPoolInfo(poolParams: PoolParams) {
   poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId();
   var metaData = poolParams.metaData;
+  var metaData2 = poolParams.metaData2
   let accName = poolParams.resultParams.accName
   // Modify this so it's done only once
   qs(".user-info #account-id").innerText = poolParams.resultParams.getDisplayableAccountName();
@@ -518,12 +806,56 @@ async function refreshPoolInfo(poolParams: PoolParams) {
   //show(qs("#top-right-balance"), wallet.isConnected())
 
   let accountInfo = await poolParams.contract.status(accName)
-  let staked = BigInt(accountInfo[0]);
-  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
-  qsaInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", displayableStaked)
 
-  const walletAvailable = await poolParams.getWalletAvailable()
-  qsaInnerText("#" + poolParams.html.id + " #wallet-available span.near.balance", removeDecZeroes(walletAvailable.toString()))
+  if(poolParams.type == "multiple") {
+
+    let staked = (accountInfo) ? accountInfo.stake_tokens : 0;
+    let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
+    qsaInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", displayableStaked)
+
+  } else {
+
+    let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+    let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
+    qsaInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", displayableStaked)
+  }
+
+  // const walletAvailable = await poolParams.getWalletAvailable()
+  // qsaInnerText("#" + poolParams.html.id + " #wallet-available span.near.balance", removeDecZeroes(walletAvailable.toString()))
+
+  const walletBalances = await poolParams.getWalletAvailable()
+
+
+  if(walletBalances) {
+
+    if(Array.isArray(walletBalances)){
+
+      qsa("#wallet-available span.near.balance").forEach((element,index) => {
+
+        if(walletBalances[index]) {
+
+          element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
+          //console.log(element!.innerHTML)
+
+          if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
+            let elems = qsa("#wallet-available a .max")
+            let elem = elems[index] as HTMLElement
+            //console.log(elem)
+            elem.style.display = "block";
+          }
+        }
+      })
+
+    } else {
+
+      qs("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
+
+      if (Number(walletBalances.toString().replace(".", "")) > 1) {
+        let elem = qs("#wallet-available a .max") as HTMLElement
+        elem.style.display = "block";
+      }
+    }
+  }
   
   //update account & contract stats
   if (wallet.isConnected()) {
@@ -539,6 +871,9 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     if(contractParams.farming_rate){
       rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
     }
+    else if(contractParams.farm_token_rates) {
+        rewardsPerDay = BigInt(contractParams.farm_token_rates) * BigInt(60 * 24)
+    }
     else {
       rewardsPerDay = contractParams.rewards_per_day
     }
@@ -547,7 +882,18 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     let totalStaked = 0
 
     if(contractParams.total_staked){
-      totalStaked = contractParams.total_staked
+      if(Array.isArray(contractParams.total_staked)) {
+        totalStaked = contractParams.total_staked[0]
+        //console.log(totalStaked)
+      }
+      else if(contractParams.farm_token_rates) {
+        totalStaked = BigInt(contractParams.total_staked[0])
+        totalStaked1 = BigInt(contractParams.total_staked[1])
+      }
+      else {
+        totalStaked = contractParams.total_staked
+      }
+      
     }
     else {
       totalStaked = contractParams.total_stake
@@ -564,7 +910,16 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     }
 
     if(qs("#" + poolParams.html.id + " #pool-stats #total-staked")) {
-      qs("#" + poolParams.html.id + " #pool-stats #total-staked").innerText = convertToDecimals(totalStaked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+
+      if(Array.isArray(contractParams.total_staked)) {
+        qs("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked[0], metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+        qs("#pool-stats #total_staked_1")!.style.display = "flex"
+        qs("#pool-stats #total-staked1")!.innerHTML = convertToDecimals(contractParams.total_staked[1], metaData2.decimals, 5) + " " + metaData2.symbol.toUpperCase()
+      }
+      else {
+        qs("#" + poolParams.html.id + " #pool-stats #total-staked").innerText = convertToDecimals(totalStaked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+      }
+
       qs("#" + poolParams.html.id + " #pool-stats #rewards-per-day").innerText = yton(rewardsPerDay.toString()).toString()
       qs("#" + poolParams.html.id + " #pool-stats #total-rewards").innerText = convertToDecimals(totalFarmed, 24, 5);
     }
@@ -598,21 +953,41 @@ function narwalletDisconnected(ev: CustomEvent) {
 
 async function addPool(poolParams: PoolParams): Promise<void> {
 
-
   var genericPoolElement = qs("#genericPool") as HTMLElement;
+  let poolType = poolParams.type
   let accName = poolParams.resultParams.accName
   var metaData = poolParams.metaData;
+  var metaData2 = poolParams.metaData2;
   var contractParams = poolParams.contractParams;
   var accountInfo = await poolParams.contract.status(accName);
 
-  //console.log(poolParams)
+  //console.log(poolType)
 
   //console.log(accountInfo)
-  poolParams.resultParams.staked = BigInt(accountInfo[0])
-  poolParams.resultParams.real = BigInt(accountInfo[1])
-  poolParams.resultParams.previous_real = BigInt(accountInfo[1])
-  poolParams.resultParams.computed = BigInt(accountInfo[1])
-  poolParams.resultParams.previous_timestamp = Number(accountInfo[2])
+  if(accountInfo) {
+    //poolParams.resultParams.staked = BigInt(accountInfo[0])
+
+    if(poolParams.type == "multiple") {
+
+      poolParams.resultParams.staked = (accountInfo) ? accountInfo.stake_tokens : 0;
+      poolParams.resultParams.real = BigInt(accountInfo.farmed)
+      poolParams.resultParams.previous_real = BigInt(accountInfo.farmed)
+      poolParams.resultParams.computed = BigInt(accountInfo.farmed)
+      poolParams.resultParams.previous_timestamp = Number(accountInfo.timestamp)
+
+    } else {
+      
+      poolParams.resultParams.staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+      poolParams.resultParams.real = BigInt(accountInfo[1])
+      poolParams.resultParams.previous_real = BigInt(accountInfo[1])
+      poolParams.resultParams.computed = BigInt(accountInfo[1])
+      poolParams.resultParams.previous_timestamp = Number(accountInfo[2])
+    }
+
+    //poolParams.resultParams.staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+
+  }
+
   poolParams.resultParams.tokenDecimals = metaData.decimals
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement; 
@@ -643,7 +1018,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       element.innerHTML = 'NEAR (FREE FARM)'
     } else if(poolParams.html.formId == 'nearcon') {
       element.innerHTML = 'CHEDDAR (NEARCON)'
-    }else {
+    } else {
       //console.log(metaData)
       element.innerHTML = metaData.symbol
     }
@@ -660,9 +1035,14 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
   newPool.querySelectorAll(".token-name").forEach(element => {
 
+    // console.log(element?.parentNode?.id)
+    // console.log(element?.parentNode?.getAttribute('id'))
+
     /*** Workaround Free Community Farm pool ***/
     if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
       element.innerHTML = 'NEAR'
+    } else if(element.parentNode.id  == "secondStakeAmount") {
+      element.innerHTML = metaData2.symbol
     } else {
       element.innerHTML = metaData.symbol
     }
@@ -686,23 +1066,73 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   let humanReadableRealRewards = yton(poolParams.resultParams.real.toString()).toString()
   newPool.querySelector("#cheddar-balance")!.innerHTML = convertToDecimals(humanReadableRealRewards, metaData.decimals, 7);
 
-  const walletAvailable = await poolParams.getWalletAvailable()
+  const walletBalances = await poolParams.getWalletAvailable()
   //update shown wallet balance
   
-  newPool.querySelector("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletAvailable.toString());
-  // newPool.querySelector("span.bold.large.near#wallet-available")!.innerHTML = walletAvailable;
+  /** TODO - make dynamic **/
+  if(Array.isArray(walletBalances)){
 
-  if (Number(walletAvailable.toString().replace(".", "")) > 1) {
-    let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement
-    elem.style.display = "block";
+    if(poolParams.type == "multiple") {
 
-    elem.addEventListener("click", maxStakeClicked(newPool))
+      newPool.querySelectorAll(".pool-meta.staked").forEach((element,index) => {
+        element!.style.display = 'flex';
+      })
+
+      newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element,index) => { 
+        element!.style.display = 'flex';
+        element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
+
+      })
+
+    } else {
+      let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 7)
+      qsInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", stakedWithDecimals)
+    }
+
+    newPool.querySelectorAll(".input-group").forEach((element,index) => {
+      element!.style.display = 'flex';
+    })
+
+    newPool.querySelectorAll("#wallet-available span.near.balance").forEach((element,index) => {
+
+      element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
+      //console.log(element!.innerHTML)
+
+      if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
+        let elems = newPool.querySelectorAll("#wallet-available a .max")
+        let elem = elems[index] as HTMLElement
+        //console.log(elem)
+        elem.style.display = "block";
+
+        elem.addEventListener("click", maxStakeClicked(newPool))
+      }
+    })
+
+  } else {
+
+    newPool.querySelector("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
+
+    if (Number(walletBalances.toString().replace(".", "")) > 1) {
+      let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement
+      elem.style.display = "block";
+
+      elem.addEventListener("click", maxStakeClicked(newPool))
+    }
   }
 
   if(contractParams.total_staked){
-    newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+
+    if(Array.isArray(contractParams.total_staked)) {
+      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked[0], metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+      newPool.querySelector("#pool-stats #total_staked_1")!.style.display = "flex"
+      newPool.querySelector("#pool-stats #total-staked1")!.innerHTML = convertToDecimals(contractParams.total_staked[1], metaData2.decimals, 5) + " " + metaData2.symbol.toUpperCase()
+    }
+    else {
+      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+    }
+
   } else {
-    newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + "NEAR"
+      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + "NEAR"
   }
 
   // if(contractParams.accounts_registered) {
@@ -715,6 +1145,8 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
   if(contractParams.farming_rate) {
     rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
+  } else if(contractParams.farm_token_rates) {
+    rewardsPerDay = BigInt(contractParams.farm_token_rates)
   } else {
     rewardsPerDay = BigInt(contractParams.rewards_per_day)
   }
@@ -736,11 +1168,11 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   if(poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
     //console.log("NEARCON")
     accountRegistered = await poolParams.tokenContract.storageBalance();
-  }
-  else if(contractParams.farming_rate){
+  } else if(contractParams.farming_rate){
     accountRegistered = await poolParams.contract.storageBalance();
-  }
-  else {
+  } else if(contractParams.farm_token_rates){
+    accountRegistered = await poolParams.contract.storageBalance();
+  } else {
     accountRegistered = 0
   }
   
@@ -796,24 +1228,42 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 function maxStakeClicked(pool: HTMLElement) {
   return function(event: Event) {
     event.preventDefault()
-    const amonutContainer = pool.querySelector("#wallet-available .near.balance")
-    if(amonutContainer) {
-      const amount = amonutContainer.innerHTML
-      let input = pool.querySelector("#stakeAmount") as HTMLInputElement
+
+    const idIndex = event.path[0].id.split("max")
+    const parent = pool.querySelector("#" + event.path[0].id).parentNode.parentNode
+    const amountContainer = parent.querySelector("span.near.balance")
+
+    if(amountContainer) {
+      const amount = amountContainer.innerHTML
+      let input = pool.querySelector("#stakeAmount" + idIndex[1]) as HTMLInputElement
       input.value = amount.toString()
     }
+
   }
 }
 
 function maxUnstakeClicked(pool: HTMLElement) {
   return function(event: Event) {
     event.preventDefault()
-    const amountContainer = pool.querySelector("#near-balance .near.balance")
+
+    const idIndex = event.path[0].id.split("max")
+    const parent = pool.querySelector("#" + event.path[0].id).parentNode.parentNode
+    const amountContainer = parent.querySelector("span.near.balance")
+
     if(amountContainer) {
       const amount = amountContainer.innerHTML
-      let input = pool.querySelector("#stakeAmount") as HTMLInputElement
+      let input = pool.querySelector("#stakeAmount" + idIndex[1]) as HTMLInputElement
       input.value = amount.toString()
     }
+
+    // const amountContainer = pool.querySelector("#near-balance .near.balance")
+    // if(amountContainer) {
+    //   const amount = amountContainer.innerHTML
+    //   let input = pool.querySelector("#stakeAmount1") as HTMLInputElement
+    //   input.value = amount.toString()
+    // }
+
+
   }
 }
 
@@ -837,7 +1287,7 @@ async function addPoolList(poolList: Array<PoolParams>) {
 
   qs("#pool_list").style.display = "grid"
 
-  console.log(qs("#pool_list").childElementCount)
+  //console.log(qs("#pool_list").childElementCount)
   if(qs("#pool_list").childElementCount == 0) {
     qs("#pool_list").innerHTML = "<h2 style='color: #8542EB;text-shadow: white 0px 1px 5px;margin-top:5rem;'>You have No Staked Pools.</h2>"
     //qs("#switch").click();
@@ -852,19 +1302,19 @@ window.onload = async function () {
   try {
 
     let env = ENV //default
-    //change to mainnet if url contains /DApp/mainnet/
-    //get from url: DApp/testnet/ or DApp/mainnet/
-    const parts = window.location.pathname.split("/")
-    const i = parts.indexOf("DApp")
-    if (i >= 0) { env = parts[i + 1] }
+
+    // const parts = window.location.pathname.split("/")
+    // const i = parts.indexOf("DApp")
+    // if (i >= 0) { env = parts[i + 1] }
+
     if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
 
     var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
+
     //console.log(countDownDate)
   
-
     // var x = setInterval(function() {
 
     //   // Get today's date and time
@@ -872,7 +1322,7 @@ window.onload = async function () {
     //   var d = new Date();
     //   var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
 
-    //   // Find the distance between now and the count down date
+    //   // Find  distance between now and the count down date
     //   var distance = countDownDate.getTime() - d.getTime();
     //   //console.log(distance)
 
@@ -908,7 +1358,7 @@ window.onload = async function () {
     await initNearWebWalletConnection()
 
       if(window.localStorage.getItem("onlyStaked")) {
-        console.log(window.localStorage.getItem("onlyStaked"))
+        //console.log(window.localStorage.getItem("onlyStaked"))
         document.getElementById("switch").checked = window.localStorage.getItem("onlyStaked") === 'true';
       }
       else {
@@ -929,7 +1379,6 @@ window.onload = async function () {
       cheddarContract.wallet = wallet;
       const cheddarBalance = await cheddarContract.ft_balance_of(accountName)
       const amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
-      // console.log("Cheddar balance: " , cheddarBalance)
       qsInnerText("#my-account #wallet-available", amountAvailable)
       qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 

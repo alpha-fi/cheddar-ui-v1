@@ -32,7 +32,7 @@ export class StakingPoolP1 extends SmartContract {
 
     /// Registers a user with the farm.
     storageDeposit(): Promise<[U128String, U128String]> {
-        return this.call("storage_deposit", {}, TGas(25), "50000000000000000000000")
+        return this.call("storage_deposit", {}, TGas(25), "60000000000000000000000")
     }
 
     /// Stake attached &NEAR and returns total amount of stake.
@@ -46,6 +46,10 @@ export class StakingPoolP1 extends SmartContract {
     /// Requires 1 yNEAR payment for wallet validation.
     unstake(amount: string): Promise<void> {
         return this.call("unstake", { amount: amount }, TGas(125), "1")
+    }
+
+    unstake(token: string, amount: string): Promise<void> {
+        return this.call("unstake", { token: token, amount: amount }, TGas(125), "1")
     }
 
     /// Unstakes everything and close the account. Sends all farmed CHEDDAR using a ft_transfer

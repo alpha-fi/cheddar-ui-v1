@@ -98,11 +98,24 @@
           <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
           <div>&nbsp;</div>
         </div>
+        <div class="pool-meta staked" style="display:none">
+          <div class="token-name">NEAR</div>
+          <div class="">Staked</div>
+        </div>
+        <div id="stakedAmount1" class="pool-meta staked amount" style="display:none">
+          <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
+          <div>&nbsp;</div>
+        </div>
         <fieldset id="fieldset">
           <div class="input-group">
-            <input class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'"
+            <input id="stakeAmount" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'"
               autocomplete="off" disabled>
             <span>Ⓝ NEAR</span>
+          </div>
+          <div id="secondStakeAmount" class="input-group" style="display:none">
+            <input id="stakeAmount1" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'"
+              autocomplete="off" disabled>
+            <span class="token-name">NEAR</span>
           </div>
           <button class="hwJKVX" type="submit" disabled>Stake</button>
         </fieldset>
@@ -300,13 +313,30 @@
         <div id="near-balance"><span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
         <div>&nbsp;</div>
       </div>
+      <div class="pool-meta staked" style="display:none">
+        <div class="token-name">NEAR</div>
+        <div class="">Staked</div>
+      </div>
+      <div id="stakedAmount1" class="pool-meta staked amount" style="display:none">
+        <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
+        <div>&nbsp;</div>
+      </div>
       <fieldset id="fieldset">
         <div class="input-group">
-          <input id="stakeAmount" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
+          <input id="stakeAmount1" class="near amount input-box stake-amount" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
           <span class="token-name">NEAR</span>
         </div>
         <div class="pool-meta wallet-balance">
-          <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
+          <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span id="max1" class="max" style="display:none">max</span></a>
+        </div>
+        </div>
+        <div id="secondStakeAmount" class="input-group" style="display:none">
+          <input id="stakeAmount2" class="near amount input-box stake-amount" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
+          <span class="token-name">NEAR</span>
+        </div>
+        <div class="pool-meta wallet-balance">
+          <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span id="max2" class="max" style="display:none">max</span></a>
+        </div>
         </div>
         <div class="pool-meta actions">
           <div class="hQrVZb">
@@ -331,6 +361,10 @@
       <div class="stat-line">
         <span>Total Staked</span>
         <span id="total-staked" class="near balance"></span>
+      </div>
+      <div id="total_staked_1" class="stat-line" style="display:none">
+        <span>Total Staked</span>
+        <span id="total-staked1" class="near balance"></span>
       </div>
 <!--       <div class="stat-line">
         <span>Total Accounts</span>

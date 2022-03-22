@@ -12,11 +12,12 @@ async function generatePoolList(wallet: WalletInterface) {
     let size = nearConfig.farms.length
     for(let i = 0; i < size; i++) {
         const index = nearConfig.farms[i].index as number;
+        const type = nearConfig.farms[i].poolType as string;
         const poolHtml = new HtmlPoolParams(nearConfig.farms[i].poolName);
         const contract = new StakingPoolP1(nearConfig.farms[i].contractName);
         const cheddarContractName = new NEP141Trait(nearConfig.farms[i].cheddarContractName);
         const tokenContractName = new NEP141Trait(nearConfig.farms[i].tokenContractName);
-        const poolParams = new PoolParams(index, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+        const poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
         await poolParams.setAllExtraData();
 
         poolList.push(poolParams);

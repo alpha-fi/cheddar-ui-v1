@@ -1,4 +1,4 @@
-export const ENV = 'mainnet'
+export const ENV = 'testnet'
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 
@@ -42,6 +42,7 @@ export function getConfig(env:string):GetConfigResults {
       "farms": [
         {
           index: 0,
+          poolType: 'single',
           poolName : 'pulse',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -56,6 +57,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 1,
+          poolType: 'single',
           poolName : 'nUSDO',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -70,6 +72,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 2,
+          poolType: 'single',
           poolName : 'ref',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -84,6 +87,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 3  ,
+          poolType: 'single',
           poolName : 'stNEAR',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -98,6 +102,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 4,
+          poolType: 'single',
           poolName : 'banana',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -112,6 +117,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 5,
+          poolType: 'single',
           poolName : 'near',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -126,6 +132,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 6,
+          poolType: 'single',
           poolName : 'cheddar',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -140,6 +147,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 7,
+          poolType: 'single',
           poolName : 'nearcon',
           networkId: MAINNET_NETWORKID,
           nodeUrl: MAINNET_NODEURL,
@@ -160,12 +168,13 @@ export function getConfig(env:string):GetConfigResults {
       "farms": [
         {
           index: 0,
-          poolName : 'ref',
+          poolType: 'multiple',
+          poolName : 'tt',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
-          contractName: 'p2-ref.cheddar.testnet',
+          contractName: 'p3-tt.cheddar.testnet',
           cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
-          tokenContractName: 'ref.fakes.testnet',
+          tokenContractName: 'test-token.cheddar.testnet',
           walletUrl: TESTNET_WALLETURL,
           helperUrl: TESTNET_HELPERURL,
           explorerUrl: TESTNET_EXPLORERURL,
@@ -174,6 +183,7 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 1,
+          poolType: 'single',
           poolName : 'stNear',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
@@ -188,12 +198,28 @@ export function getConfig(env:string):GetConfigResults {
         },
         {
           index: 2,
+          poolType: 'single',
           poolName : 'banana',
           networkId: TESTNET_NETWORKID,
           nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-bananas.cheddar.testnet',
           cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'berryclub.testnet',
+          walletUrl: TESTNET_WALLETURL,
+          helperUrl: TESTNET_HELPERURL,
+          explorerUrl: TESTNET_EXPLORERURL,
+          keyPath: undefined,
+          masterAccount:undefined,
+        },
+        {
+          index: 3,
+          poolType: 'single',
+          poolName : 'ref',
+          networkId: TESTNET_NETWORKID,
+          nodeUrl: TESTNET_NODEURL,
+          contractName: 'p2-ref.cheddar.testnet',
+          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
+          tokenContractName: 'ref.fakes.testnet',
           walletUrl: TESTNET_WALLETURL,
           helperUrl: TESTNET_HELPERURL,
           explorerUrl: TESTNET_EXPLORERURL,

@@ -43,4 +43,9 @@ export interface WalletInterface {
      * ASYNC, low level generic access
      */
     queryChain(method: string, args: object): Promise<any>;
+
+    requestSignTransactions(transactions: Transaction[], callbackUrl?: string, meta?: string): Promise<void>
+
+    requestSignTransactions(options: RequestSignTransactionsOptions): Promise<void>
+
 }
