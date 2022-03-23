@@ -27,14 +27,9 @@ export class PoolResultParams {
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
-    total_staked: bigint = 0n;
-    total_staked1: bigint = 0n;
 
     getDisplayableComputed() {
-        // console.log(this.tokenDecimals)
-        // console.log(convertToDecimals(this.computed.toString(), 24, 10))
         return convertToDecimals(this.computed.toString(), 24, 7)
-        //return bigintToStringDecLong(this.computed);
     }
 
     getCurrentCheddarRewards() {
@@ -43,7 +38,6 @@ export class PoolResultParams {
 
     getCurrentDisplayableCheddarRewards() {
         return convertToDecimals(this.computed.toString(), 24, 7)
-        //return bigintToStringDecLong(this.computed)
     }
 
     getDisplayableAccountName() {
@@ -115,7 +109,9 @@ export class PoolParams {
             totalStaked = BigInt(this.contractParams.total_staked)
         }
         else if(this.contractParams.farm_token_rates) {
+            /** TODO - make dynamic **/
             totalRewardsPerDay = BigInt(this.contractParams.farm_token_rates) * BigInt(60 * 24)
+
             totalStaked = BigInt(this.contractParams.total_staked[0])
             totalStaked1 = BigInt(this.contractParams.total_staked[1])
         }
@@ -125,8 +121,6 @@ export class PoolParams {
         }
 
         const staked = this.resultParams.staked
-        //const totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
-        //const totalStaked = this.resultParams.total_staked
 
 
         if(totalStaked > BigInt(0)) {
@@ -134,9 +128,8 @@ export class PoolParams {
             /*** Workaround Free Community Farm pool ***/
 
             if(this.contractParams.farming_rate) {
-                //real_rewards_per_day4 = yton( (farmingRate4 * minutesN * hoursN) / total_staked4N * bigNStaked4).toString()
-                //this.resultParams.real_rewards_per_day = totalRewardsPerDay * (staked / totalStaked)
-                //console.log(totalRewardsPerDay, " ", staked, " ", totalStaked)
+
+                /** TODO - Rewrite  **/
                 let rewardsPerDay = yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
                 
                 this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), 24))
@@ -145,19 +138,11 @@ export class PoolParams {
                 // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))
                 // console.log("Fraction of Stake ", convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
                 // console.log("Rewards Per Day ", yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10)))
+            } else if(this.contractParams.farm_token_rates) {
+                /** TODO - Implement **/
             } else {
                 this.resultParams.real_rewards_per_day = totalRewardsPerDay
             }
-
-            // if(this.resultParams.real_rewards_per_day == BigInt(0))
-            //     this.resultParams.real_rewards_per_day = totalRewardsPerDay
-
-           // if(realRewardsPerDay== BigInt(0)) {
-           //      this.resultParams.real_rewards_per_day = realRewardsPerDay
-           //  }else {
-           //      this.resultParams.real_rewards_per_day = totalRewardsPerDay
-           //  }
-
 
         } else {
             // I think in this case, the real_rewards_per_day should be 0, since there is nothing in the pool,
@@ -173,20 +158,15 @@ export class PoolParams {
 
             if(this.type == "multiple") {
 
-              this.resultParams.staked = (accountInfo) ? BigInt(accountInfo.stake_tokens) : 0;
+              this.resultParams.staked = (accountInfo) ? accountInfo.stake_tokens : 0;
               this.resultParams.real = BigInt(accountInfo.farmed)
               this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
 
             } else {
-              
               this.resultParams.staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
               this.resultParams.real = BigInt(accountInfo[1])
               this.resultParams.previous_timestamp = Number(accountInfo[2])
             }
-
-            // this.resultParams.staked =  BigInt(accountInfo[0]);
-            // this.resultParams.real = BigInt(accountInfo[1]);
-            // this.resultParams.previous_timestamp = Number(accountInfo[2]) * 1000;
         }
     }
 
@@ -194,6 +174,7 @@ export class PoolParams {
 
         /*** Workaround Free Community Farm pool ***/
 
+        /** TODO - make dynamic **/
         let walletAvailable = 0
         let walletAvailable2 = 0
 
@@ -203,7 +184,7 @@ export class PoolParams {
             return walletAvailable
 
         } else if(this.contractParams.farm_token_rates) {
-
+            /** TODO - make dynamic **/
             let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
             walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
 

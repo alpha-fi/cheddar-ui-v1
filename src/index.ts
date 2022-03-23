@@ -220,16 +220,13 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     //get amount
     const min_deposit_amount = 1;
 
-    //console.log(stakeAmount1.value)
-    //console.log(stakeAmount2.value)
-
+    /** TODO - make dynamic **/
     let amount1: number = stakeAmount1.value;
     let amount2: number = stakeAmount2.value;
 
     /** TODO - make dynamic **/
-
-
     let stakedSymbols = [poolParams.metaData, poolParams.metaData2]
+
     const walletBalances = await poolParams.getWalletAvailable()
     
     if (isStaking) {
@@ -246,12 +243,13 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
           //   throw Error("Please Input a Number.")
           // }
 
-          /** TODO - make dynamic **/
+          //**TODO - Make Dynamic **/
           if(amount1 > walletBalances[0]) throw Error(`Only ${walletBalances[0]} ${stakedSymbols[0].symbol} Available to Stake.`)
           if(amount2 > walletBalances[1]) throw Error(`Only ${walletBalances[1]} ${stakedSymbols[1].symbol} Available to Stake.`)
 
 
-          if(isNaN(parseFloat(amount1)) && isNaN(parseFloat(amount2))) {
+          /** TODO - make dynamic **/
+          if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
 
             const transactions: Transaction[] = [];
 
@@ -307,7 +305,26 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
             requestSignTransOptions = currentTransactions
 
             nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
-          } 
+
+          } else {
+
+            /** TODO - make dynamic **/
+            if(!isNaN(parseFloat(amount1))) {
+
+              if(isNaN(parseFloat(amount1)))
+                throw Error("Please Input a Number.")
+
+              await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()), "to farm")
+
+            } else if(!isNaN(parseFloat(amount2))) {
+
+              if(isNaN(parseFloat(amount2)))
+              throw Error("Please Input a Number.")
+
+              await poolParams.cheddarContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()), "to farm")
+
+            }
+          }
 
         } else {
 
@@ -335,13 +352,11 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
       /** TODO - make dynamic **/
       if(Array.isArray(staked)){
 
-        console.log(walletBalances)
-        console.log(staked)
-
-
+        /** TODO - make dynamic **/
         if(amount1 > staked[0]) throw Error(`Only ${staked[0]} ${stakedSymbols[0].symbol} Available to UnStake.`)
         if(amount2 > staked[1]) throw Error(`Only ${staked[1]} ${stakedSymbols[1].symbol} Available to UnStake.`)
 
+        /** TODO - make dynamic **/
         if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
 
           const transactions: Transaction[] = [];
@@ -401,6 +416,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
 
         } else {
 
+          /** TODO - make dynamic **/
           if(!isNaN(parseFloat(amount1))) {
 
             if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
@@ -436,9 +452,9 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
     form.reset()
 
     //refresh acc info
-    // const poolList = await getPoolList(wallet);
     await refreshPoolInfo(poolParams)
-    //console.log("Amount: ", amount1)
+
+    //**TODO - Make Dynamic **/
     showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount1) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
     
     if (isHarvest) {
@@ -581,7 +597,7 @@ async function initNearWebWalletConnection() {
   // Initializing Wallet based Account.
   nearWebWalletConnection = new WalletConnection(near, null)
   nearConnectedWalletAccount = new ConnectedWalletAccount(nearWebWalletConnection, near.connection, nearWebWalletConnection.getAccountId())
-  console.log(nearConnectedWalletAccount)
+  //console.log(nearConnectedWalletAccount)
 }
 
 function logoutNearWebWallet() {
@@ -677,11 +693,13 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
 
       if(poolParams.type == "multiple") {
 
-        newPool.querySelectorAll(".pool-meta.staked").forEach((element,index) => {
+        qsa(".pool-meta.staked").forEach((element,index) => {
           element!.style.display = 'flex';
         })
 
-        newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element,index) => {
+        qsa(".pool-meta.staked.amount").forEach((element,index) => {
+
+          console.log(index)
           element!.style.display = 'flex';
           element!.innerText = convertToDecimals(poolParams.resultParams.stake_tokens[index].toString(), poolParams.metaData.decimals, 7)
 
@@ -732,7 +750,8 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
 
       let real = poolParams.resultParams.real
       let computed = poolParams.resultParams.computed
-      //convertToBase(poolParams.resultParams.staked.toString(), decimals)
+
+      /** TODO - make dynamic **/
       if (BigInt(convertToBase(poolParams.resultParams.staked.toString(), decimals)) > BigInt(0)) {
         qs("#" + poolParams.html.id + " #near-balance a .max").style.display = "block";
         if (poolParams.resultParams.previous_timestamp && real > poolParams.resultParams.previous_real) {
@@ -772,8 +791,9 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
       let previousTimestamp = poolParams.resultParams.previous_timestamp;
       let elapsed_ms = Date.now() - previousTimestamp
 
+      /** TODO - make dynamic **/
       if(poolParams.type == "multiple") {
-
+        /** TODO - Implement **/
 
       } else {
 
@@ -807,6 +827,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
   let accountInfo = await poolParams.contract.status(accName)
 
+  /** TODO - make dynamic **/
   if(poolParams.type == "multiple") {
 
     let staked = (accountInfo) ? accountInfo.stake_tokens : 0;
@@ -862,7 +883,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
     let metaData = await poolParams.metaData;
     
     let contractParams = await poolParams.contract.get_contract_params()
-    //console.log(contractParams)
+    console.log(contractParams)
 
 
     /*** Workaround Free Community Farm pool ***/
@@ -872,6 +893,15 @@ async function refreshPoolInfo(poolParams: PoolParams) {
       rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
     }
     else if(contractParams.farm_token_rates) {
+        /** TODO - Implement 
+         * 
+         * // calculate let emission = contract.farm_unit_emission * 24 * 3600
+         * // total rewards per day (globally, not per account):
+         * const base = 1e24;
+         * let rewards = contract.farm_token_rates.map( (r) => emission * r / base));
+         **/
+        //let emission = BigInt(contractParams.farm_unit_emission) * BigInt(24 * 3600)
+
         rewardsPerDay = BigInt(contractParams.farm_token_rates) * BigInt(60 * 24)
     }
     else {
@@ -887,6 +917,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
         //console.log(totalStaked)
       }
       else if(contractParams.farm_token_rates) {
+        /** TODO - make dynamic **/
         totalStaked = BigInt(contractParams.total_staked[0])
         totalStaked1 = BigInt(contractParams.total_staked[1])
       }
@@ -911,6 +942,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
     if(qs("#" + poolParams.html.id + " #pool-stats #total-staked")) {
 
+        /** TODO - make dynamic **/
       if(Array.isArray(contractParams.total_staked)) {
         qs("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked[0], metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
         qs("#pool-stats #total_staked_1")!.style.display = "flex"
@@ -991,6 +1023,32 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   poolParams.resultParams.tokenDecimals = metaData.decimals
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement; 
+
+
+ /** TODO - Add Dynamic HTML elements 
+  * 
+  *  <div class="pool-meta staked" style="display:none">
+  *    <div class="token-name">NEAR</div>
+  *    <div class="">Staked</div>
+  *  </div>
+  * 
+  *  <div id="stakedAmount1" class="pool-meta staked amount" style="display:none">
+  *    <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
+  *    <div>&nbsp;</div>
+  *  </div>
+  * 
+  *  <div id="secondStakeAmount" class="input-group" style="display:none">
+  *     <input id="stakeAmount1" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
+  *     <span class="token-name">NEAR</span>
+  *  </div>
+  * 
+  *  <div class="pool-meta wallet-balance">
+  *      <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
+  *  </div>
+  * 
+  * **/
+
+
   newPool.setAttribute("id", poolParams.html.id);
   newPool.setAttribute("style", "");
   newPool.querySelector("form")?.setAttribute("id", poolParams.html.formId);
@@ -1033,10 +1091,11 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       element.disabled = (!isDateInRange) ? true : false
   })
 
-  newPool.querySelectorAll(".token-name").forEach(element => {
+  newPool.querySelectorAll(".amount input-box nea").forEach(element => {
+      element.disabled = (!isDateInRange && poolParams.stak) ? true : false
+  })
 
-    // console.log(element?.parentNode?.id)
-    // console.log(element?.parentNode?.getAttribute('id'))
+  newPool.querySelectorAll(".token-name").forEach(element => {
 
     /*** Workaround Free Community Farm pool ***/
     if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
@@ -1458,6 +1517,7 @@ window.onload = async function () {
             break;
           }
           case "ft_transfer_call": {
+            /** TODO - Fix for mutliple transactions **/
             var receiver = finalExecutionOutcome?.transaction.receiver_id;
             for(let i = 0; i < poolList.length; i++) {
               if(poolList[i].tokenContract.contractId == receiver) {
