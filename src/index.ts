@@ -986,7 +986,6 @@ function narwalletDisconnected(ev: CustomEvent) {
 async function addPool(poolParams: PoolParams): Promise<void> {
 
   var genericPoolElement = qs("#genericPool") as HTMLElement;
-  let poolType = poolParams.type
   let accName = poolParams.resultParams.accName
   var metaData = poolParams.metaData;
   var metaData2 = poolParams.metaData2;
@@ -1001,7 +1000,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
     if(poolParams.type == "multiple") {
 
-      poolParams.resultParams.staked = (accountInfo) ? accountInfo.stake_tokens : 0;
+      poolParams.resultParams.staked = accountInfo.stake_tokens;
       poolParams.resultParams.real = BigInt(accountInfo.farmed)
       poolParams.resultParams.previous_real = BigInt(accountInfo.farmed)
       poolParams.resultParams.computed = BigInt(accountInfo.farmed)
@@ -1009,7 +1008,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
     } else {
       
-      poolParams.resultParams.staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+      poolParams.resultParams.staked = BigInt(accountInfo[0]);
       poolParams.resultParams.real = BigInt(accountInfo[1])
       poolParams.resultParams.previous_real = BigInt(accountInfo[1])
       poolParams.resultParams.computed = BigInt(accountInfo[1])
@@ -1068,7 +1067,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     iconImage.classList.add('icon');
     iconElem?.parentNode?.replaceChild(iconImage, iconElem);
   }
-
+  
   newPool.querySelectorAll(".name").forEach(element => {
 
     /*** Workaround Free Community Farm pool ***/
@@ -1080,7 +1079,6 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       //console.log(metaData)
       element.innerHTML = metaData.symbol
     }
-    
   })
 
   let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)

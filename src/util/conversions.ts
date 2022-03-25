@@ -23,8 +23,9 @@ export function ntoy(near: number): string {
  * returns Near number with 5 decimal digits
  * @param {string} yoctoNEAR amount 
  */
-export function yton(yoctos: string): number {
+export function yton(yoctos: string|BigInt): number {
   try {
+    yoctos = yoctos.toString()
     if (yoctos == undefined) return 0;
     const decimals = 5
     const bn = BigInt(yoctos) + BigInt(0.5 * 10 ** (24 - decimals)); //round 6th decimal
@@ -80,7 +81,7 @@ export function ytonFull(yoctoString: string): string {
 *   Example:
 *   convertToDecimals("12345678", 1, 1) = 123.4
 */ 
-export function convertToDecimals(str:string, decimals: number, truncate:number) {
+export function convertToDecimals(str:string|BigInt, decimals: number, truncate:number) {
   str = str.toString() // convert numbers and bigint
   // clear leading zeros
   let i = 0

@@ -100,9 +100,9 @@ export class PoolParams {
 
 
         /*** Workaround Free Community Farm pool ***/
-        let totalRewardsPerDay = 0
-        let totalStaked = 0
-        let totalStaked1 = 0
+        let totalRewardsPerDay = 0n
+        let totalStaked = 0n
+        let totalStaked1 = 0n
 
         if(this.contractParams.farming_rate){
             totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
@@ -130,9 +130,10 @@ export class PoolParams {
             if(this.contractParams.farming_rate) {
 
                 /** TODO - Rewrite  **/
-                let rewardsPerDay = yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
+                // QUESTION How to rewrite? So it doesn't throw any errors?
+                let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(totalStaked, this.metaData.decimals, 10)))
                 
-                this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), 24))
+                this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), "24"))
                 // console.log("Total Rewards Per Day ", yton(totalRewardsPerDay))
                 // console.log("Staked: ", convertToDecimals(staked, this.metaData.decimals, 10))
                 // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))
@@ -153,17 +154,18 @@ export class PoolParams {
         this.resultParams.previous_timestamp = Date.now()
     }
 
-    setStatus(accountInfo) {
+    setStatus(accountInfo: [string, string, string]) {
+        // QUESTION Why would accountInfo be undefined|false?
         if(accountInfo) {
 
             if(this.type == "multiple") {
-
-              this.resultParams.staked = (accountInfo) ? accountInfo.stake_tokens : 0;
+                // QUESTION Should we use indexes instead?
+              this.resultParams.staked = accountInfo.stake_tokens;
               this.resultParams.real = BigInt(accountInfo.farmed)
               this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
 
             } else {
-              this.resultParams.staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+              this.resultParams.staked = BigInt(accountInfo[0]);
               this.resultParams.real = BigInt(accountInfo[1])
               this.resultParams.previous_timestamp = Number(accountInfo[2])
             }
