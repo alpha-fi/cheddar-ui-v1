@@ -16,6 +16,7 @@ const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
 type GetConfigResult = {
   index?: number;
+  poolType: string;
   poolName:string;
   networkId:string;
   nodeUrl:string;

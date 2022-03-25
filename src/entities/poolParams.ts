@@ -131,9 +131,10 @@ export class PoolParams {
 
                 /** TODO - Rewrite  **/
                 // QUESTION How to rewrite? So it doesn't throw any errors?
-                let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(totalStaked, this.metaData.decimals, 10)))
+                // let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(totalStaked, this.metaData.decimals, 10)))
                 
-                this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), "24"))
+                // this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), "24"))
+
                 // console.log("Total Rewards Per Day ", yton(totalRewardsPerDay))
                 // console.log("Staked: ", convertToDecimals(staked, this.metaData.decimals, 10))
                 // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))

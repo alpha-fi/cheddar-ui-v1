@@ -18,7 +18,7 @@ export class ContractParams {
     farming_start: number = 0; //unix timestamp
     farming_end: number = 0; //unix timestamp
     total_farmed: string = "0" //yoctoCheddar
-    total_staked: string = "0" //yoctoNEAR
+    total_staked: string[] = [] //yoctoNEAR
     rewards_per_day: bigint;
     fee_rate: number = 0;
 

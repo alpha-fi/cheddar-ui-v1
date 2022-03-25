@@ -887,7 +887,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
 
     /*** Workaround Free Community Farm pool ***/
-    let rewardsPerDay = 0
+    let rewardsPerDay = 0n
 
     if(contractParams.farming_rate){
       rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
@@ -1137,7 +1137,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
       newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element,index) => { 
         element!.style.display = 'flex';
-        element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
+        // element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
 
       })
 
@@ -1177,20 +1177,21 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     }
   }
 
-  if(contractParams.total_staked){
+  // if(contractParams.total_staked){
 
-    if(Array.isArray(contractParams.total_staked)) {
-      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked[0], metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
-      newPool.querySelector("#pool-stats #total_staked_1")!.style.display = "flex"
-      newPool.querySelector("#pool-stats #total-staked1")!.innerHTML = convertToDecimals(contractParams.total_staked[1], metaData2.decimals, 5) + " " + metaData2.symbol.toUpperCase()
-    }
-    else {
-      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
-    }
+  //   if(Array.isArray(contractParams.total_staked)) {
+  //     console.log(newPool.querySelector("#pool-stats #total-staked"))
+  //     newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked[0], metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+  //     newPool.querySelector("#pool-stats #total_staked_1")!.style.display = "flex"
+  //     newPool.querySelector("#pool-stats #total-staked1")!.innerHTML = convertToDecimals(contractParams.total_staked[1], metaData2.decimals, 5) + " " + metaData2.symbol.toUpperCase()
+  //   }
+  //   else {
+  //     newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_staked, metaData.decimals, 5) + " " + metaData.symbol.toUpperCase()
+  //   }
 
-  } else {
-      newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + "NEAR"
-  }
+  // } else {
+  //     newPool.querySelector("#pool-stats #total-staked")!.innerHTML = convertToDecimals(contractParams.total_stake, metaData.decimals, 5) + " " + "NEAR"
+  // }
 
   // if(contractParams.accounts_registered) {
   //   newPool.querySelector("#accounts")!.innerHTML = contractParams.accounts_registered
