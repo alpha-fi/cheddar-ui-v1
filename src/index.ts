@@ -1092,19 +1092,27 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelectorAll(".amount input-box nea").forEach(element => {
       element.disabled = (!isDateInRange && poolParams.stak) ? true : false
   })
-
+  
   newPool.querySelectorAll(".token-name").forEach(element => {
-
-    /*** Workaround Free Community Farm pool ***/
-    if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
-      element.innerHTML = 'NEAR'
-    } else if(element.parentNode.id  == "secondStakeAmount") {
-      element.innerHTML = metaData2.symbol
-    } else {
-      element.innerHTML = metaData.symbol
-    }
-
+    element.innerHTML = metaData.symbol
   })
+
+  newPool.querySelectorAll(".second-token-name").forEach(element => {
+    element.innerHTML = metaData2.symbol
+  })
+
+  // newPool.querySelectorAll(".token-name").forEach(element => {
+
+  //   /*** Workaround Free Community Farm pool ***/
+  //   if(poolParams.html.formId == 'near' || poolParams.html.formId == 'nearcon') {
+  //     element.innerHTML = 'NEAR'
+  //   } else if(element.id  == "secondary-token") {
+  //     element.innerHTML = metaData2.symbol
+  //   } else {
+  //     element.innerHTML = metaData.symbol
+  //   }
+
+  // })
 
   // newPool.querySelectorAll("#" + poolParams.html.formId +  " .token-name")!.innerHTML = metaData.symbol;
   newPool.querySelector("#farming_start")!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
@@ -1130,6 +1138,10 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   if(Array.isArray(walletBalances)){
 
     if(poolParams.type == "multiple") {
+      newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "Tu vieja"
+      newPool.querySelectorAll(".multiple").forEach(element => {
+        element!.style.display = 'inherit';
+      })
 
       newPool.querySelectorAll(".pool-meta.staked").forEach((element,index) => {
         element!.style.display = 'flex';
@@ -1146,7 +1158,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
       qsInnerText("#" + poolParams.html.id + " #near-balance span.near.balance", stakedWithDecimals)
     }
 
-    newPool.querySelectorAll(".input-group").forEach((element,index) => {
+    newPool.querySelectorAll(".input-group-box").forEach((element,index) => {
       element!.style.display = 'flex';
     })
 

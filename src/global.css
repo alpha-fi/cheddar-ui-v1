@@ -414,6 +414,10 @@ form,
 
 }
 
+.input-group-box {
+  flex-direction: column;
+}
+
 .input-group {
   flex-flow    : row;
   background   : #F6F2FD;
