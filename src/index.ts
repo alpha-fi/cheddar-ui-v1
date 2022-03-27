@@ -1138,7 +1138,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   if(Array.isArray(walletBalances)){
 
     if(poolParams.type == "multiple") {
-      newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "Tu vieja"
+      newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "0"
       newPool.querySelectorAll(".multiple").forEach(element => {
         element!.style.display = 'inherit';
       })
