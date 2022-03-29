@@ -815,6 +815,13 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
   }
 }
 
+function showOrHideMaxButton(walletBalance:String, elem:HTMLElement){
+  if (Number(walletBalance.replace(".", "")) > 1) {
+    //console.log(elem)
+    elem.style.display = "block";
+  }
+}
+
 async function refreshPoolInfo(poolParams: PoolParams) {
   poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId();
   var metaData = poolParams.metaData;
@@ -846,44 +853,44 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
   const walletBalances = await poolParams.getWalletAvailable()
 
-
   if(walletBalances) {
 
     if(Array.isArray(walletBalances)){
 
-      qsa("#wallet-available span.near.balance").forEach((element,index) => {
+      qsa("#" + poolParams.html.id + " #wallet-available span.near.balance").forEach((element,index) => {
 
         if(walletBalances[index]) {
 
           element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
           //console.log(element!.innerHTML)
-
-          if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
-            let elems = qsa("#wallet-available a .max")
-            let elem = elems[index] as HTMLElement
-            //console.log(elem)
-            elem.style.display = "block";
-          }
+          let elems = qsa("#" + poolParams.html.id + " #wallet-available a .max")
+          showOrHideMaxButton(walletBalances[index].toString(), elems[index] as HTMLElement)
+          // if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
+          //   let elems = qsa("#wallet-available a .max")
+          //   let elem = elems[index] as HTMLElement
+          //   //console.log(elem)
+          //   elem.style.display = "block";
+          // }
         }
       })
 
     } else {
 
-      qs("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
+      qs("#" + poolParams.html.id + " #wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
 
-      if (Number(walletBalances.toString().replace(".", "")) > 1) {
-        let elem = qs("#wallet-available a .max") as HTMLElement
-        elem.style.display = "block";
-      }
+      let elem = qs("#wallet-available a .max") as HTMLElement
+
+      showOrHideMaxButton(walletBalances.toString(), elem)
     }
   }
+  
   
   //update account & contract stats
   if (wallet.isConnected()) {
     let metaData = await poolParams.metaData;
     
     let contractParams = await poolParams.contract.get_contract_params()
-    console.log(contractParams)
+    // console.log(contractParams)
 
 
     /*** Workaround Free Community Farm pool ***/
@@ -1159,7 +1166,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   newPool.querySelector("#near-balance span.near.balance")!.innerHTML = stakedDisplayable
 
   if(Number(stakedDisplayable) > 0) {
-    let elem = newPool.querySelector("#near-balance a .max") as HTMLElement
+    let elem = newPool.querySelector(`#near-balance a .max`) as HTMLElement
     elem.style.display = "block";
 
     elem.addEventListener("click", maxUnstakeClicked(newPool))
@@ -1205,28 +1212,26 @@ async function addPool(poolParams: PoolParams): Promise<void> {
     newPool.querySelectorAll("#wallet-available span.near.balance").forEach((element,index) => {
 
       element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
-      //console.log(element!.innerHTML)
 
-      if (Number(walletBalances[index].toString().replace(".", "")) > 1) {
-        let elems = newPool.querySelectorAll("#wallet-available a .max")
-        let elem = elems[index] as HTMLElement
-        //console.log(elem)
-        elem.style.display = "block";
-
-        elem.addEventListener("click", maxStakeClicked(newPool))
-      }
+      let elems = newPool.querySelectorAll(`#wallet-available a .max`)
+      showOrHideMaxButton(walletBalances[index].toString(), elems[index] as HTMLElement)
+      
+      let stakeAmountContainer = newPool.querySelector("#secondStakeAmount .near.balance") as HTMLElement
+      let input = newPool.querySelector("#stakeAmount2") as HTMLInputElement
+      elems[index].addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
+   
     })
-
   } else {
-
     newPool.querySelector("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
+    
+    let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement
 
-    if (Number(walletBalances.toString().replace(".", "")) > 1) {
-      let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement
-      elem.style.display = "block";
+    showOrHideMaxButton(walletBalances.toString(), elem) 
 
-      elem.addEventListener("click", maxStakeClicked(newPool))
-    }
+    let stakeAmountContainer = newPool.querySelector("#firstStakeAmount .near.balance") as HTMLElement
+    let input = newPool.querySelector("#stakeAmount1") as HTMLInputElement
+    
+    elem.addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
   }
 
   // if(contractParams.total_staked){
@@ -1335,19 +1340,22 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   }
 }
 
-function maxStakeClicked(pool: HTMLElement) {
+function maxStakeClicked(amountContainer: HTMLElement, input:HTMLInputElement) {
   return function(event: Event) {
     event.preventDefault()
 
-    const idIndex = event.path[0].id.split("max")
-    const parent = pool.querySelector("#" + event.path[0].id).parentNode.parentNode
-    const amountContainer = parent.querySelector("span.near.balance")
 
     if(amountContainer) {
       const amount = amountContainer.innerHTML
-      let input = pool.querySelector("#stakeAmount" + idIndex[1]) as HTMLInputElement
       input.value = amount.toString()
     }
+
+    let inputEvent = new Event ("input", {
+      bubbles : true,
+      cancelable : true
+    })
+
+    input.dispatchEvent(inputEvent)
 
   }
 }
@@ -1355,7 +1363,7 @@ function maxStakeClicked(pool: HTMLElement) {
 function maxUnstakeClicked(pool: HTMLElement) {
   return function(event: Event) {
     event.preventDefault()
-
+    
     const idIndex = event.path[0].id.split("max")
     const parent = pool.querySelector("#" + event.path[0].id).parentNode.parentNode
     const amountContainer = parent.querySelector("span.near.balance")
