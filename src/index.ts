@@ -983,6 +983,43 @@ function narwalletDisconnected(ev: CustomEvent) {
   signedOutFlow()
 }
 
+// function autoFillStakeAmount2= (e)=>{
+//   console.log("Hello im an event")
+//   qs("input.stake-amount") = e * 2
+// }
+
+function autoFillStakeAmount1(pool: HTMLElement){
+  return function (event:Event){
+    event.preventDefault()
+    let value1 = (event.target as HTMLInputElement).value
+    let input2 = pool.querySelector("#stakeAmount2") as HTMLInputElement
+    if (value1 == ""){
+      input2.value= ""
+    } else if(isNaN(parseFloat(value1))){
+      input2.value= "Please Input a Number"
+    }  else {
+      //Replace the "2" with proper variable
+      input2.value=(Number(value1)/2).toString()
+    }
+  }
+}
+
+function autoFillStakeAmount2(pool: HTMLElement){
+  return function (event:Event){
+    event.preventDefault()
+    let value2 = (event.target as HTMLInputElement).value
+    let input1 = pool.querySelector("#stakeAmount1") as HTMLInputElement
+    if (value2 == ""){
+      input1.value= ""
+    } else if(isNaN(parseFloat(value2))){
+      input1.value= "Please Input a Number"
+    }  else {
+      //Replace the "2" with proper variable
+      input1.value=(Number(value2)/2).toString()
+    }
+  }
+}
+
 async function addPool(poolParams: PoolParams): Promise<void> {
 
   var genericPoolElement = qs("#genericPool") as HTMLElement;
@@ -1136,7 +1173,7 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   
   /** TODO - make dynamic **/
   if(Array.isArray(walletBalances)){
-
+  
     if(poolParams.type == "multiple") {
       newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "0"
       newPool.querySelectorAll(".multiple").forEach(element => {
@@ -1152,6 +1189,9 @@ async function addPool(poolParams: PoolParams): Promise<void> {
         // element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
 
       })
+
+      newPool.querySelector("#stakeAmount2")!.addEventListener("input", autoFillStakeAmount2(newPool))
+      newPool.querySelector("#stakeAmount1")!.addEventListener("input", autoFillStakeAmount1(newPool))
 
     } else {
       let stakedWithDecimals = convertToDecimals(poolParams.resultParams.staked.toString(), poolParams.metaData.decimals, 7)
