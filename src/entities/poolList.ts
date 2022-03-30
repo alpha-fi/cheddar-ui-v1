@@ -1,11 +1,13 @@
 import { nearConfig } from "..";
 import { NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
+import { StakingPoolP3 } from "../contracts/p3-staking";
 import { HtmlPoolParams, PoolParams, PoolResultParams } from "../entities/poolParams";
 import { WalletInterface } from "../wallet-api/wallet-interface";
+import { PoolParamsP3 } from "./poolParamsP3";
 
 
-let poolList: Array<PoolParams>;
+let poolList: Array<PoolParams|PoolParamsP3>;
 
 async function generatePoolList(wallet: WalletInterface) {
     poolList = [];
@@ -14,10 +16,17 @@ async function generatePoolList(wallet: WalletInterface) {
         const index = nearConfig.farms[i].index as number;
         const type = nearConfig.farms[i].poolType as string;
         const poolHtml = new HtmlPoolParams(nearConfig.farms[i].poolName);
-        const contract = new StakingPoolP1(nearConfig.farms[i].contractName);
         const cheddarContractName = new NEP141Trait(nearConfig.farms[i].cheddarContractName);
         const tokenContractName = new NEP141Trait(nearConfig.farms[i].tokenContractName);
-        const poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+        let contract
+        let poolParams
+        if(nearConfig.farms[i].poolType == "multiple") {
+            contract = new StakingPoolP3(nearConfig.farms[i].contractName);
+            poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+        } else {
+            contract = new StakingPoolP1(nearConfig.farms[i].contractName);
+            poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+        }
         await poolParams.setAllExtraData();
 
         poolList.push(poolParams);

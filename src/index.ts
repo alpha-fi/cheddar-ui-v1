@@ -24,6 +24,7 @@ import { InvalidSignature } from 'near-api-js/lib/generated/rpc_error_types';
 import { PoolParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { stake } from 'near-api-js/lib/transaction';
+import { PoolParamsP3 } from './entities/poolParamsP3';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -196,7 +197,7 @@ function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
 }
 
 //Form submission
-async function submitForm(action: string, poolParams: PoolParams, form: HTMLFormElement) {
+async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, form: HTMLFormElement) {
   event?.preventDefault()
 
   const ONE_YOCTO_NEAR = '0.000000000000000000000001';
@@ -1027,7 +1028,37 @@ function autoFillStakeAmount2(pool: HTMLElement){
   }
 }
 
-async function addPool(poolParams: PoolParams): Promise<void> {
+async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
+
+}
+
+async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
+
+}
+
+/*
+  Proposed structure:
+  function addPool() {
+    // Initialize variables
+    // Create newPool
+    // Fill newPool with all the generic data
+    if(contractType == p2) {
+      addPoolSingle()
+    } else {
+      addPoolMultiple()
+    }
+  }
+
+  function addPoolSingle() {
+    // Fill newPool with all the data related only to single pools
+  }
+
+  function addPoolMultiple() {
+    // Fill newPool with all the data related only to multiple pools
+  }
+*/
+
+async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
 
   var genericPoolElement = qs("#genericPool") as HTMLElement;
   let accName = poolParams.resultParams.accName
@@ -1035,7 +1066,10 @@ async function addPool(poolParams: PoolParams): Promise<void> {
   var metaData2 = poolParams.metaData2;
   var contractParams = poolParams.contractParams;
   var accountInfo = await poolParams.contract.status(accName);
+  let singlePoolParams: PoolParams
+  let multiplePoolParams: PoolParamsP3
 
+  
   //console.log(poolType)
 
   //console.log(accountInfo)
@@ -1067,6 +1101,18 @@ async function addPool(poolParams: PoolParams): Promise<void> {
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement; 
 
+  if(poolParams instanceof PoolParams) {
+    singlePoolParams = poolParams 
+    await addPoolSingle(singlePoolParams, newPool)
+  } else {
+    multiplePoolParams = poolParams
+    let accountInfoMultiple = await poolParams.contract.status(accName);
+    let stakedTokens = multiplePoolParams.contractParams.stake_rates.map(elem => yton(elem))
+    let totalTokens = multiplePoolParams.contractParams.total_staked
+    console.log(`accName: ${accName}`)
+    console.log(`Total: ${totalTokens}`)
+    await addPoolMultiple(multiplePoolParams, newPool)
+  }
 
  /** TODO - Add Dynamic HTML elements 
   * 
