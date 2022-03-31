@@ -24,8 +24,8 @@ export class P3ContractParams {
     accounts_registered: number = 0;
 
     getRewardsPerDay() {
-        // this.rewards_per_day = this.farming_rate * 60n * 24n
-        // return this.rewards_per_day
+        //QUESTION is this correctly calculated
+        return BigInt(this.farm_token_rates[0]) * 60n * 24n
     }
 }
 

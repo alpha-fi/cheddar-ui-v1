@@ -23,6 +23,7 @@ export class ContractParams {
     fee_rate: number = 0;
 
     getRewardsPerDay() {
+        //QUESTION is this correctly calculated
         this.rewards_per_day = this.farming_rate * 60n * 24n
         return this.rewards_per_day
     }
