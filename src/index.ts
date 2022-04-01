@@ -1,6 +1,5 @@
 import { baseDecode } from 'borsh';
 import BN from 'bn.js';
-import bigDecimal from 'js-big-decimal';
 import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount, RequestSignTransactionsOptions, utils } from 'near-api-js'
 import { Action, createTransaction, functionCall } from 'near-api-js/lib/transaction';
 import { PublicKey } from 'near-api-js/lib/utils'
@@ -26,6 +25,7 @@ import { PoolParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { stake } from 'near-api-js/lib/transaction';
 import { PoolParamsP3 } from './entities/poolParamsP3';
+import { P3ContractParams } from './contracts/p3-structures';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -1019,7 +1019,7 @@ function autoFillStakeAmount(poolParams:PoolParamsP3, pool: HTMLElement, inputId
 }
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
-  const walletBalances: number[] = await poolParams.getWalletAvailable() as number[]
+  const walletBalances: number = await poolParams.getWalletAvailable()
   
   newPool.querySelector("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
   
@@ -1034,7 +1034,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  const walletBalances: number[] = await poolParams.getWalletAvailable() as number[]
+  const walletBalances = await poolParams.getWalletAvailable()
 
   newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "0"
   newPool.querySelectorAll(".multiple").forEach(element => {
@@ -1067,6 +1067,10 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelectorAll(".second-token-name").forEach(element => {
     element.innerHTML = poolParams.metaData2.symbol
   })
+
+  const rewardsPerDay = getRewardsPerDayMultiple(poolParams)
+  console.log(`Rewards per day: ${rewardsPerDay}`)
+  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
 }
 
 /*
@@ -1343,7 +1347,7 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
 
   //TODO review
   // let rewardsPerDay = contractParams.getRewardsPerDay()
-  let rewardsPerDay= 1n;
+  // let rewardsPerDay = 1n;
 
   // if(contractParams.farming_rate) {
   //   rewardsPerDay = BigInt(contractParams.farming_rate) * BigInt(60 * 24)
@@ -1353,7 +1357,7 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
   //   rewardsPerDay = BigInt(contractParams.rewards_per_day)
   // }
 
-  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
+  // newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
   //QUESTION in p3 total farm is an array. Why?
   if(contractParams.total_farmed){
     //console.log(metaData.decimals)
@@ -1425,6 +1429,15 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
     // setInterval(refreshRewardsDisplayLoopGeneric.bind(null, poolParams, metaData.decimals), 200);
     // setInterval(refreshRealRewardsLoopGeneric.bind(null, poolParams, metaData.decimals), 60 * 1000);
   }
+}
+
+function getRewardsPerDaySingle(poolParams: PoolParams) {
+  return poolParams.contractParams.farming_rate * 60n * 24n
+}
+
+function getRewardsPerDayMultiple(poolParams: PoolParamsP3) {
+  // QUESTION: How should this be calculated?
+  return BigInt(poolParams.contractParams.farm_token_rates[0]) * 60n * 24n
 }
 
 function maxStakeClicked(amountContainer: HTMLElement, input:HTMLInputElement) {
