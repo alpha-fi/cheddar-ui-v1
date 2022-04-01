@@ -102,25 +102,18 @@ export class PoolParams {
         /*** Workaround Free Community Farm pool ***/
         let totalRewardsPerDay = 0n
         let totalStaked = 0n
-        let totalStaked1 = 0n
 
-        if(this.contractParams.farming_rate){
-            totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
-            totalStaked = BigInt(this.contractParams.total_staked)
-        }
-        else if(this.contractParams.farm_token_rates) {
-            /** TODO - make dynamic **/
-            totalRewardsPerDay = BigInt(this.contractParams.farm_token_rates) * BigInt(60 * 24)
+       
+        totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
+        totalStaked = BigInt(this.contractParams.total_staked)
+        
+        //  QUESTION What is this for? (Used to be an else)
+        // else {
+        //     totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
+        //     totalStaked = BigInt(this.contractParams.total_stake)
+        // }
 
-            totalStaked = BigInt(this.contractParams.total_staked[0])
-            totalStaked1 = BigInt(this.contractParams.total_staked[1])
-        }
-        else {
-            totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
-            totalStaked = BigInt(this.contractParams.total_stake)
-        }
-
-        const staked = this.resultParams.staked
+        // const staked = this.resultParams.staked
 
 
         if(totalStaked > BigInt(0)) {
@@ -158,18 +151,9 @@ export class PoolParams {
     setStatus(accountInfo: [string, string, string]) {
         // QUESTION Why would accountInfo be undefined|false?
         if(accountInfo) {
-
-            if(this.type == "multiple") {
-                // QUESTION Should we use indexes instead?
-              this.resultParams.staked = accountInfo.stake_tokens;
-              this.resultParams.real = BigInt(accountInfo.farmed)
-              this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
-
-            } else {
               this.resultParams.staked = BigInt(accountInfo[0]);
               this.resultParams.real = BigInt(accountInfo[1])
-              this.resultParams.previous_timestamp = Number(accountInfo[2])
-            }
+              this.resultParams.previous_timestamp = Number(accountInfo[2])            
         }
     }
 
@@ -179,30 +163,17 @@ export class PoolParams {
 
         /** TODO - make dynamic **/
         let walletAvailable = 0
-        let walletAvailable2 = 0
+        // let walletAvailable2 = 0
+        
+        let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
+        walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+        return walletAvailable
 
-        if(this.contractParams.farming_rate) {
-            let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-            return walletAvailable
-
-        } else if(this.contractParams.farm_token_rates) {
-            /** TODO - make dynamic **/
-            let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-
-            let balance2 = await this.cheddarContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable2 = Number(convertToDecimals(balance2, this.metaData2.decimals, 5))
-
-            const walletBalances = [walletAvailable,walletAvailable2];   
-
-            return walletBalances
-        }
-        else {
-            let balance =  await this.contract.wallet.getAccountBalance()
-            walletAvailable = Number(yton(balance))
-            return walletAvailable
-        }
+        // else {
+        //     let balance =  await this.contract.wallet.getAccountBalance()
+        //     walletAvailable = Number(yton(balance))
+        //     return walletAvailable
+        // }
 
 
     }

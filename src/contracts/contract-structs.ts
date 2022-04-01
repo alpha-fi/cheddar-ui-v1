@@ -10,6 +10,7 @@ export class ContractParams {
         this.rewards_per_day = this.farming_rate * 60n * 24n
     }
 
+
     owner_id: string = "";
     token_contract: string = "cheddar.token";
     // This value comes from the contract with (metadata.decimals - 5) decimals
@@ -20,15 +21,8 @@ export class ContractParams {
     total_farmed: string = "0" //yoctoCheddar
     total_staked: string = "0" //yoctoNEAR
     rewards_per_day: bigint;
-    fee_rate: number = 0;
-
-    getRewardsPerDay() {
-        //QUESTION is this correctly calculated
-        this.rewards_per_day = this.farming_rate * 60n * 24n
-        return this.rewards_per_day
-    }
-
-
+    fee_rate: number = 0;   
+    
 }
 
 export class TokenParams {

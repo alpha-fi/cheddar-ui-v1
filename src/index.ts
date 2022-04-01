@@ -1103,6 +1103,8 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
   let multiplePoolParams: PoolParamsP3
 
   
+
+  
   //console.log(poolType)
 
   //console.log(accountInfo)
@@ -1119,7 +1121,6 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
       poolParams.resultParams.previous_timestamp = Number(accountInfo.timestamp)
 
     } else {
-      
       poolParams.resultParams.staked = BigInt(accountInfo[0]);
       poolParams.resultParams.real = BigInt(accountInfo[1])
       poolParams.resultParams.previous_real = BigInt(accountInfo[1])

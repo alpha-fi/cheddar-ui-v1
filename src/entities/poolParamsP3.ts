@@ -66,7 +66,7 @@ export class PoolParamsP3 {
         this.index = index;
         this.type = type;
         this.html = html;
-        this.contract = contract
+        this.contract = contract;
         this.contractParams = new P3ContractParams();
         this.cheddarContract= cheddarContract;
         this.tokenContract = tokenContract;
@@ -102,29 +102,24 @@ export class PoolParamsP3 {
 
         /*** Workaround Free Community Farm pool ***/
         let totalRewardsPerDay = 0n
-        let totalStaked = 0n
-        let totalStaked1 = 0n
+        let primaryStake = 0n
+        let secondaryStake = 0n
+        
+        /** TODO - make dynamic **/
+        totalRewardsPerDay = BigInt(this.contractParams.farm_token_rates[0]) * BigInt(60 * 24)
 
-        if(this.contractParams.farming_rate){
-            totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
-            totalStaked = BigInt(this.contractParams.total_staked)
-        }
-        else if(this.contractParams.farm_token_rates) {
-            /** TODO - make dynamic **/
-            totalRewardsPerDay = BigInt(this.contractParams.farm_token_rates) * BigInt(60 * 24)
+        primaryStake = BigInt(this.contractParams.total_staked[0])
+        secondaryStake = BigInt(this.contractParams.total_staked[1])
+        
+        // else {
+        //     totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
+        //     primaryStake = BigInt(this.contractParams.total_stake)
+        // }
 
-            totalStaked = BigInt(this.contractParams.total_staked[0])
-            totalStaked1 = BigInt(this.contractParams.total_staked[1])
-        }
-        else {
-            totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
-            totalStaked = BigInt(this.contractParams.total_stake)
-        }
-
-        const staked = this.resultParams.staked
+        // const staked = this.resultParams.staked
 
 
-        if(totalStaked > BigInt(0)) {
+        if(primaryStake > BigInt(0)) {
 
             /*** Workaround Free Community Farm pool ***/
 
@@ -132,15 +127,15 @@ export class PoolParamsP3 {
 
                 /** TODO - Rewrite  **/
                 // QUESTION How to rewrite? So it doesn't throw any errors?
-                // let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(totalStaked, this.metaData.decimals, 10)))
+                // let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(primaryStake, this.metaData.decimals, 10)))
                 
                 // this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), "24"))
 
                 // console.log("Total Rewards Per Day ", yton(totalRewardsPerDay))
                 // console.log("Staked: ", convertToDecimals(staked, this.metaData.decimals, 10))
-                // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))
-                // console.log("Fraction of Stake ", convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
-                // console.log("Rewards Per Day ", yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10)))
+                // console.log("Total Staked: ", convertToDecimals(primaryStake, this.metaData.decimals, 10))
+                // console.log("Fraction of Stake ", convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(primaryStake, this.metaData.decimals, 10))
+                // console.log("Rewards Per Day ", yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(primaryStake, this.metaData.decimals, 10)))
             } else if(this.contractParams.farm_token_rates) {
                 /** TODO - Implement **/
             } else {
@@ -158,19 +153,11 @@ export class PoolParamsP3 {
 
     setStatus(accountInfo: [string, string, string]) {
         // QUESTION Why would accountInfo be undefined|false?
-        if(accountInfo) {
-
-            if(this.type == "multiple") {
-                // QUESTION Should we use indexes instead?
-              this.resultParams.staked = accountInfo.stake_tokens;
-              this.resultParams.real = BigInt(accountInfo.farmed)
-              this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
-
-            } else {
-              this.resultParams.staked = BigInt(accountInfo[0]);
-              this.resultParams.real = BigInt(accountInfo[1])
-              this.resultParams.previous_timestamp = Number(accountInfo[2])
-            }
+        if(accountInfo) {            
+              // QUESTION Should we use indexes instead?
+            this.resultParams.staked = accountInfo.stake_tokens;
+            this.resultParams.real = BigInt(accountInfo.farmed)
+            this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
         }
     }
 
@@ -181,23 +168,19 @@ export class PoolParamsP3 {
         /** TODO - make dynamic **/
         let walletAvailable = 0
         let walletAvailable2 = 0
+        
+        /** TODO - make dynamic **/
+        let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
+        walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
 
-        if(this.type == "multiple") {
-            /** TODO - make dynamic **/
-            let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+        let balance2 = await this.cheddarContract.ft_balance_of(this.resultParams.accName)
+        walletAvailable2 = Number(convertToDecimals(balance2, this.metaData2.decimals, 5))
 
-            let balance2 = await this.cheddarContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable2 = Number(convertToDecimals(balance2, this.metaData2.decimals, 5))
+        const walletBalances = [walletAvailable,walletAvailable2];   
 
-            const walletBalances = [walletAvailable,walletAvailable2];   
-
-            return walletBalances
-        } else {
-            let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
-            walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-            return walletAvailable
-        }
+        return walletBalances
+        
+        
 
         // if(this.contractParams.farming_rate) {
             
