@@ -13,7 +13,7 @@ import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narw
 import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 import { StakingPoolP1 } from './contracts/p2-staking';
-import type { ContractParams, TokenParams } from './contracts/contract-structs';
+import { ContractParams, TokenParams } from './contracts/contract-structs';
 
 //qs/qsa are shortcut for document.querySelector/All
 import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText } from './util/document';
@@ -1029,8 +1029,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
     let stakeAmountContainer = newPool.querySelector("#firstStakeAmount .near.balance") as HTMLElement
     let input = newPool.querySelector("#stakeAmount1") as HTMLInputElement
-    
+
+    const rewardsPerDay = getRewardsPerDaySingle(poolParams)
+    newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
     elem.addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
+    newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = yton(poolParams.contractParams.total_staked.toString()).toString()
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1069,8 +1072,9 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   })
 
   const rewardsPerDay = getRewardsPerDayMultiple(poolParams)
-  console.log(`Rewards per day: ${rewardsPerDay}`)
-  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
+  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
+  newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[0].toString()).toString()
+  newPool.querySelector("#pool-stats #second-total-staked-container span.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[1].toString()).toString()
 }
 
 /*
@@ -1432,7 +1436,7 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
 }
 
 function getRewardsPerDaySingle(poolParams: PoolParams) {
-  return poolParams.contractParams.farming_rate * 60n * 24n
+  return BigInt(poolParams.contractParams.farming_rate) * 60n * 24n
 }
 
 function getRewardsPerDayMultiple(poolParams: PoolParamsP3) {
