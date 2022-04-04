@@ -134,7 +134,7 @@ qs('#switch').onclick =
     if(window.localStorage.getItem("onlyStaked")) {
       isPaused = true;
       window.localStorage.onlyStaked = event.target.checked
-      console.log(window.localStorage.getItem("onlyStaked"))
+      //console.log(window.localStorage.getItem("onlyStaked"))
       const poolList = await getPoolList(wallet);
       //await refreshAccountInfoGeneric(poolList);
       qs("#pool_list").replaceChildren();
@@ -146,7 +146,7 @@ qs('#switch').onclick =
     else {
       isPaused = true;
       window.localStorage.setItem("onlyStaked", event.target.checked)
-      console.log(window.localStorage.getItem("onlyStaked"))
+      //console.log(window.localStorage.getItem("onlyStaked"))
       const poolList = await getPoolList(wallet);
       //await refreshAccountInfoGeneric(poolList);
       qs("#pool_list").replaceChildren();
@@ -198,14 +198,12 @@ function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
 }
 
 //Form submission
-async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, form: HTMLFormElement) {
+async function submitForm(action: string, poolParams: PoolParams, form: HTMLFormElement) {
   event?.preventDefault()
-
-  const ONE_YOCTO_NEAR = '0.000000000000000000000001';
 
   //const form = event.target as HTMLFormElement
   // get elements from the form using their id attribute
-  const { fieldset, stakeAmount1, stakeAmount2 } = form
+  const { fieldset, stakeAmount1 } = form
   //console.log("Stake amount: " , stakeAmount1)
   //const fieldset = form.querySelector("#fieldset") as HTMLFormElement
 
@@ -214,250 +212,51 @@ async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, f
   const isStaking = (action == "stake")
   const isHarvest = (action == "harvest")
   showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
-
+  
   try {
     const contractParams = poolParams.contractParams
     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
     const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
     //get amount
     const min_deposit_amount = 1;
-
-    /** TODO - make dynamic **/
-    let amount1: number = stakeAmount1.value;
-    let amount2: number = stakeAmount2.value;
-
-    /** TODO - make dynamic **/
-    let stakedSymbols = [poolParams.metaData, poolParams.metaData2]
-
-    const walletBalances = await poolParams.getWalletAvailable()
+    if(isNaN(stakeAmount1.value)) {
+      throw Error("Please Input a Number.")
+    }
+    let amount: number = stakeAmount1.value;
     
     if (isStaking) {
-
       if (!isDateInRange) throw Error("Pools is Closed.")
-
-      if(walletBalances) {
-
-        if(Array.isArray(walletBalances)){
-
-          // if(isNaN(parseFloat(amount1))) {
-          //   throw Error("Please Input a Number.")
-          // } else if(poolParams.type == "multiple" && isNaN(parseFloat(amount2))) {
-          //   throw Error("Please Input a Number.")
-          // }
-
-          //**TODO - Make Dynamic **/
-          if(amount1 > walletBalances[0]) throw Error(`Only ${walletBalances[0]} ${stakedSymbols[0].symbol} Available to Stake.`)
-          if(amount2 > walletBalances[1]) throw Error(`Only ${walletBalances[1]} ${stakedSymbols[1].symbol} Available to Stake.`)
-
-
-          /** TODO - make dynamic **/
-          if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
-
-            const transactions: Transaction[] = [];
-
-            transactions.unshift({
-              receiverId: poolParams.cheddarContract.contractId,
-              functionCalls: [
-                {
-                  methodName: 'ft_transfer_call',
-                  args: {
-                    receiver_id: poolParams.contract.contractId,
-                    amount: convertToBase(amount1, poolParams.metaData.decimals.toString()),
-                    msg: 'to farm',
-                  },
-                  amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
-                  gas: new BN('100000000000000'),
-                },
-              ],
-            });
-
-            transactions.unshift({
-                receiverId: poolParams.tokenContract.contractId,
-                functionCalls: [
-                  {
-                    methodName: 'ft_transfer_call',
-                    args: {
-                      receiver_id: poolParams.contract.contractId,
-                      amount: convertToBase(amount2, poolParams.metaData2.decimals.toString()),
-                      msg: 'to farm',
-                    },
-                    amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
-                    gas: new BN('100000000000000'),
-                  },
-                ],
-            });
-
-            const currentTransactions = await Promise.all(
-              transactions.map((t, i) => {
-                return setupTransaction({
-                    receiverId: t.receiverId,
-                    nonceOffset: i + 1,
-                    actions: t.functionCalls.map((fc) =>
-                      functionCall(
-                        fc.methodName,
-                        fc.args,
-                        fc.gas,
-                        fc.amount
-                      )
-                    ),
-                  });
-                })
-              );
-
-            requestSignTransOptions = currentTransactions
-
-            nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
-
-          } else {
-
-            /** TODO - make dynamic **/
-            if(!isNaN(parseFloat(amount1))) {
-
-              if(isNaN(parseFloat(amount1)))
-                throw Error("Please Input a Number.")
-
-              await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()), "to farm")
-
-            } else if(!isNaN(parseFloat(amount2))) {
-
-              if(isNaN(parseFloat(amount2)))
-              throw Error("Please Input a Number.")
-
-              await poolParams.cheddarContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()), "to farm")
-
-            }
-          }
-
-        } else {
-
-        const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
-
-        if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
-
-        if(amount1 > stakedDisplayable) throw Error(`Unstake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
-
-        // amount = 1000000000000000000000000
-        await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
-        }
-      }
-
-    } else if (isHarvest) {
+      //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
+      const walletAvailable = await poolParams.getWalletAvailable()
+      if(amount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
+      await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId, convertToBase(stakeAmount1.value, poolParams.metaData.decimals.toString()), "to farm")
+    }
+    else if (isHarvest) {
       
       amount = poolParams.resultParams.getCurrentCheddarRewards()
-      //if (BigInt(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
+      //if (BigInt(convertToBase(amount.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
       await poolParams.contract.withdraw_crop()
-
-    } else /** UNSTAKING **/ {
-
+    }
+    else {
+      //console.log(amount.toString())
+      //console.log("Decimal: ", poolParams.metaData.decimals)
+      if (amount <= 0) throw Error(`Unstake a Positive Amount.`);
       const staked = poolParams.resultParams.staked
-
-      /** TODO - make dynamic **/
-      if(Array.isArray(staked)){
-
-        /** TODO - make dynamic **/
-        if(amount1 > staked[0]) throw Error(`Only ${staked[0]} ${stakedSymbols[0].symbol} Available to UnStake.`)
-        if(amount2 > staked[1]) throw Error(`Only ${staked[1]} ${stakedSymbols[1].symbol} Available to UnStake.`)
-
-        /** TODO - make dynamic **/
-        if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
-
-          const transactions: Transaction[] = [];
-
-          transactions.unshift({
-            receiverId: poolParams.contract.contractId,
-            functionCalls: [
-              {
-                methodName: 'unstake',
-                args: {
-                  token: poolParams.tokenContract.contractId,
-                  amount: convertToBase(amount1, poolParams.metaData.decimals.toString()),
-                  msg: 'unstake from farm',
-                },
-                amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
-                gas: new BN('100000000000000'),
-              },
-            ],
-          });
-
-          transactions.unshift({
-              receiverId: poolParams.contract.contractId,
-              functionCalls: [
-                {
-                  methodName: 'unstake',
-                  args: {
-                    token: poolParams.cheddarContract.contractId,
-                    amount: convertToBase(amount2, poolParams.metaData2.decimals.toString()),
-                    msg: 'unstake from farm',
-                  },
-                  amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
-                  gas: new BN('100000000000000'),
-                },
-              ],
-          });
-
-          const currentTransactions = await Promise.all(
-            transactions.map((t, i) => {
-              return setupTransaction({
-                  receiverId: t.receiverId,
-                  nonceOffset: i + 1,
-                  actions: t.functionCalls.map((fc) =>
-                    functionCall(
-                      fc.methodName,
-                      fc.args,
-                      fc.gas,
-                      fc.amount
-                    )
-                  ),
-                });
-              })
-            );
-
-          requestSignTransOptions = currentTransactions
-
-          nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
-
-        } else {
-
-          /** TODO - make dynamic **/
-          if(!isNaN(parseFloat(amount1))) {
-
-            if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
-
-            await poolParams.contract.unstake(poolParams.tokenContract.contractId, convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
-
-          } else if(!isNaN(parseFloat(amount2))) {
-
-            if(isNaN(parseFloat(amount2))) throw Error("Please Input a Number.")
-
-            await poolParams.contract.unstake(poolParams.cheddarContract.contractId, convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()))
-          }
-        }
-
-      } else {
-        const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
-
-        //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
-
-        if(amount1 > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
-
-        if(isNaN(parseFloat(amount1)))
-                throw Error("Please Input a Number.")
-
-        // amount = 1000000000000000000000000
-        await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
-
-      }
-
+      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+      //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+      if(amount > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
+      // amount = 1000000000000000000000000
+      await poolParams.contract.unstake(convertToBase(amount.toString(), poolParams.metaData.decimals.toString()))
     }
 
     //clear form
     form.reset()
 
     //refresh acc info
+    // const poolList = await getPoolList(wallet);
     await refreshPoolInfo(poolParams)
-
-    //**TODO - Make Dynamic **/
-    showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount1) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
+    //console.log("Amount: ", amount)
+    showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
     
     if (isHarvest) {
       poolParams.resultParams.computed = 1n
@@ -466,10 +265,10 @@ async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, f
 
     }
     else if (isStaking) {
-      poolParams.resultParams.addStaked(ntoy(amount1));
+      poolParams.resultParams.addStaked(ntoy(amount));
     }
     else {
-      poolParams.resultParams.addStaked(ntoy(-amount1));
+      poolParams.resultParams.addStaked(ntoy(-amount));
     }
 
   }
@@ -480,6 +279,290 @@ async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, f
   // re-enable the form, whether the call succeeded or failed
   fieldset.disabled = false
 }
+
+//Form submission
+// async function submitForm(action: string, poolParams: PoolParams|PoolParamsP3, form: HTMLFormElement) {
+//   event?.preventDefault()
+
+//   const ONE_YOCTO_NEAR = '0.000000000000000000000001';
+
+//   //const form = event.target as HTMLFormElement
+//   // get elements from the form using their id attribute
+//   const { fieldset, stakeAmount1, stakeAmount2 } = form
+//   //console.log("Stake amount: " , stakeAmount1)
+//   //const fieldset = form.querySelector("#fieldset") as HTMLFormElement
+
+//   // disable the form while the call is made
+//   fieldset.disabled = true
+//   const isStaking = (action == "stake")
+//   const isHarvest = (action == "harvest")
+//   showWait(isStaking ? "Staking..." : isHarvest ? "Harvesting..." : "Unstaking...")
+
+//   try {
+//     const contractParams = poolParams.contractParams
+//     let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+//     const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
+//     //get amount
+//     const min_deposit_amount = 1;
+
+//     /** TODO - make dynamic **/
+//     let amount1: number = stakeAmount1.value;
+//     let amount2: number = stakeAmount2.value;
+
+//     /** TODO - make dynamic **/
+//     let stakedSymbols = [poolParams.metaData, poolParams.metaData2]
+
+//     const walletBalances = await poolParams.getWalletAvailable()
+    
+//     if (isStaking) {
+
+//       if (!isDateInRange) throw Error("Pools is Closed.")
+
+//       if(walletBalances) {
+
+//         if(Array.isArray(walletBalances)){
+
+//           // if(isNaN(parseFloat(amount1))) {
+//           //   throw Error("Please Input a Number.")
+//           // } else if(poolParams.type == "multiple" && isNaN(parseFloat(amount2))) {
+//           //   throw Error("Please Input a Number.")
+//           // }
+
+//           //**TODO - Make Dynamic **/
+//           if(amount1 > walletBalances[0]) throw Error(`Only ${walletBalances[0]} ${stakedSymbols[0].symbol} Available to Stake.`)
+//           if(amount2 > walletBalances[1]) throw Error(`Only ${walletBalances[1]} ${stakedSymbols[1].symbol} Available to Stake.`)
+
+
+//           /** TODO - make dynamic **/
+//           if(!isNaN(parseFloat(amount1.toString())) && !isNaN(parseFloat(amount2.toString()))) {
+
+//             const transactions: Transaction[] = [];
+
+//             transactions.unshift({
+//               receiverId: poolParams.cheddarContract.contractId,
+//               functionCalls: [
+//                 {
+//                   methodName: 'ft_transfer_call',
+//                   args: {
+//                     receiver_id: poolParams.contract.contractId,
+//                     amount: convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()),
+//                     msg: 'to farm',
+//                   },
+//                   amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+//                   gas: new BN('100000000000000'),
+//                 },
+//               ],
+//             });
+
+//             transactions.unshift({
+//                 receiverId: poolParams.tokenContract.contractId,
+//                 functionCalls: [
+//                   {
+//                     methodName: 'ft_transfer_call',
+//                     args: {
+//                       receiver_id: poolParams.contract.contractId,
+//                       amount: convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()),
+//                       msg: 'to farm',
+//                     },
+//                     amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+//                     gas: new BN('100000000000000'),
+//                   },
+//                 ],
+//             });
+
+//             const currentTransactions = await Promise.all(
+//               transactions.map((t, i) => {
+//                 return setupTransaction({
+//                     receiverId: t.receiverId,
+//                     nonceOffset: i + 1,
+//                     actions: t.functionCalls.map((fc) =>
+//                       functionCall(
+//                         fc.methodName,
+//                         fc.args,
+//                         fc.gas,
+//                         fc.amount
+//                       )
+//                     ),
+//                   });
+//                 })
+//               );
+
+//             requestSignTransOptions = currentTransactions
+
+//             nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
+
+//           } else {
+
+//             /** TODO - make dynamic **/
+//             if(!isNaN(parseFloat(amount1.toString()))) {
+
+//               if(isNaN(parseFloat(amount1.toString())))
+//                 throw Error("Please Input a Number.")
+
+//               await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()), "to farm")
+
+//             } else if(!isNaN(parseFloat(amount2.toString()))) {
+
+//               if(isNaN(parseFloat(amount2.toString())))
+//               throw Error("Please Input a Number.")
+
+//               await poolParams.cheddarContract.ft_transfer_call(poolParams.contract.contractId,convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()), "to farm")
+
+//             }
+//           }
+
+//         } else {
+
+//         const stakedDisplayable = Number(convertToDecimals(poolParams.contractParams.total_staked , poolParams.metaData.decimals, 5))
+
+//         if(isNaN(parseFloat(amount1.toString()))) throw Error("Please Input a Number.")
+
+//         if(amount1 > stakedDisplayable) throw Error(`Unstake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+
+//         // amount = 1000000000000000000000000
+//         await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+//         }
+//       }
+
+//     } else if (isHarvest) {
+      
+//       amount = poolParams.resultParams.getCurrentCheddarRewards()
+//       //if (BigInt(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString())) <= BigInt(0)) throw Error("No Cheddar to Harvest. 😞")
+//       await poolParams.contract.withdraw_crop()
+
+//     } else /** UNSTAKING **/ {
+
+//       const staked = poolParams.resultParams.staked
+
+//       /** TODO - make dynamic **/
+//       if(Array.isArray(staked)){
+
+//         /** TODO - make dynamic **/
+//         if(amount1 > staked[0]) throw Error(`Only ${staked[0]} ${stakedSymbols[0].symbol} Available to UnStake.`)
+//         if(amount2 > staked[1]) throw Error(`Only ${staked[1]} ${stakedSymbols[1].symbol} Available to UnStake.`)
+
+//         /** TODO - make dynamic **/
+//         if(!isNaN(parseFloat(amount1)) && !isNaN(parseFloat(amount2))) {
+
+//           const transactions: Transaction[] = [];
+
+//           transactions.unshift({
+//             receiverId: poolParams.contract.contractId,
+//             functionCalls: [
+//               {
+//                 methodName: 'unstake',
+//                 args: {
+//                   token: poolParams.tokenContract.contractId,
+//                   amount: convertToBase(amount1, poolParams.metaData.decimals.toString()),
+//                   msg: 'unstake from farm',
+//                 },
+//                 amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+//                 gas: new BN('100000000000000'),
+//               },
+//             ],
+//           });
+
+//           transactions.unshift({
+//               receiverId: poolParams.contract.contractId,
+//               functionCalls: [
+//                 {
+//                   methodName: 'unstake',
+//                   args: {
+//                     token: poolParams.cheddarContract.contractId,
+//                     amount: convertToBase(amount2, poolParams.metaData2.decimals.toString()),
+//                     msg: 'unstake from farm',
+//                   },
+//                   amount: new BN(utils.format.parseNearAmount('0.000000000000000000000001')),
+//                   gas: new BN('100000000000000'),
+//                 },
+//               ],
+//           });
+
+//           const currentTransactions = await Promise.all(
+//             transactions.map((t, i) => {
+//               return setupTransaction({
+//                   receiverId: t.receiverId,
+//                   nonceOffset: i + 1,
+//                   actions: t.functionCalls.map((fc) =>
+//                     functionCall(
+//                       fc.methodName,
+//                       fc.args,
+//                       fc.gas,
+//                       fc.amount
+//                     )
+//                   ),
+//                 });
+//               })
+//             );
+
+//           requestSignTransOptions = currentTransactions
+
+//           nearWebWalletConnection.requestSignTransactions(requestSignTransOptions);
+
+//         } else {
+
+//           /** TODO - make dynamic **/
+//           if(!isNaN(parseFloat(amount1))) {
+
+//             if(isNaN(parseFloat(amount1))) throw Error("Please Input a Number.")
+
+//             await poolParams.contract.unstake(poolParams.tokenContract.contractId, convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+
+//           } else if(!isNaN(parseFloat(amount2))) {
+
+//             if(isNaN(parseFloat(amount2))) throw Error("Please Input a Number.")
+
+//             await poolParams.contract.unstake(poolParams.cheddarContract.contractId, convertToBase(amount2.toString(), poolParams.metaData2.decimals.toString()))
+//           }
+//         }
+
+//       } else {
+//         const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+
+//         //if(amount > stakedDisplayable) throw Error(`Stake at most ${stakedDisplayable} ${poolParams.metaData.symbol}`);
+
+//         if(amount1 > stakedDisplayable) throw Error(`No ${poolParams.metaData.symbol} Staked.`);
+
+//         if(isNaN(parseFloat(amount1)))
+//                 throw Error("Please Input a Number.")
+
+//         // amount = 1000000000000000000000000
+//         await poolParams.contract.unstake(convertToBase(amount1.toString(), poolParams.metaData.decimals.toString()))
+
+//       }
+
+//     }
+
+//     //clear form
+//     form.reset()
+
+//     //refresh acc info
+//     await refreshPoolInfo(poolParams)
+
+//     //**TODO - Make Dynamic **/
+//     showSuccess((isStaking ? "Staked " : isHarvest ? "Harvested " : "Unstaked ") + toStringDecMin(amount1) + (isHarvest ? " CHEDDAR" : " " + poolParams.metaData.symbol))
+    
+//     if (isHarvest) {
+//       poolParams.resultParams.computed = 1n
+//       poolParams.resultParams.real = 1n
+//       qsInnerText("#" + poolParams.html.id + " #cheddar-balance", "0")
+
+//     }
+//     else if (isStaking) {
+//       poolParams.resultParams.addStaked(ntoy(amount1));
+//     }
+//     else {
+//       poolParams.resultParams.addStaked(ntoy(-amount1));
+//     }
+
+//   }
+//   catch (ex) {
+//     showErr(ex)
+//   }
+
+//   // re-enable the form, whether the call succeeded or failed
+//   fieldset.disabled = false
+// }
 
 function termsOfUseListener() {
   return async function (event: Event) {
@@ -637,7 +720,7 @@ async function setupTransaction({
     nonceOffset?: number;
   }) {
 
-  console.log(nearConnectedWalletAccount)
+  //console.log(nearConnectedWalletAccount)
 
 
     const localKey = await nearConnectedWalletAccount.connection.signer.getPublicKey(
@@ -1020,20 +1103,21 @@ function autoFillStakeAmount(poolParams:PoolParamsP3, pool: HTMLElement, inputId
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
   const walletBalances: number = await poolParams.getWalletAvailable()
+  let totalStaked = poolParams.contractParams.total_staked.toString()
+  let metadata = poolParams.metaData
   
   newPool.querySelector("#wallet-available span.near.balance")!.innerHTML = removeDecZeroes(walletBalances.toString());
   
-    let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement
-
-    showOrHideMaxButton(walletBalances.toString(), elem) 
-
-    let stakeAmountContainer = newPool.querySelector("#firstStakeAmount .near.balance") as HTMLElement
-    let input = newPool.querySelector("#stakeAmount1") as HTMLInputElement
-
-    const rewardsPerDay = getRewardsPerDaySingle(poolParams)
-    newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
-    elem.addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
-    newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = yton(poolParams.contractParams.total_staked.toString()).toString()
+  let elem = newPool.querySelector("#wallet-available a .max") as HTMLElement    showOrHideMaxButton(walletBalances.toString(), elem) 
+  
+  let stakeAmountContainer = newPool.querySelector("#firstStakeAmount .near.balance") as HTMLElement
+    
+  let input = newPool.querySelector("#stakeAmount1") as HTMLInputElement
+  const rewardsPerDay = getRewardsPerDaySingle(poolParams)
+  
+  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
+  elem.addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
+  newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1266,7 +1350,8 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
   }
 
   let humanReadableRealRewards = yton(poolParams.resultParams.real.toString()).toString()
-  newPool.querySelector("#cheddar-balance")!.innerHTML = convertToDecimals(humanReadableRealRewards, metaData.decimals, 7);
+  let realRewards = poolParams.resultParams.real.toString()
+  newPool.querySelector("#cheddar-balance")!.innerHTML = convertToDecimals(realRewards, 24, 7);
 
   // const walletBalances = await poolParams.getWalletAvailable()
   //update shown wallet balance
