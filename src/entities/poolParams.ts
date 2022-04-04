@@ -149,12 +149,9 @@ export class PoolParams {
     }
 
     setStatus(accountInfo: [string, string, string]) {
-        // QUESTION Why would accountInfo be undefined|false?
-        if(accountInfo) {
-              this.resultParams.staked = BigInt(accountInfo[0]);
-              this.resultParams.real = BigInt(accountInfo[1])
-              this.resultParams.previous_timestamp = Number(accountInfo[2])            
-        }
+        this.resultParams.staked = BigInt(accountInfo[0]);
+        this.resultParams.real = BigInt(accountInfo[1])
+        this.resultParams.previous_timestamp = Number(accountInfo[2])            
     }
 
     async getWalletAvailable() {

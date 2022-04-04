@@ -1224,9 +1224,9 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
       element.disabled = !isDateInRange
   })
 
-  // QUESTION what do you wanna do here?
+  // QUESTION what do you wanna do here? (disable if farm closed and no tokens staked)
   // newPool.querySelectorAll(".amount input-box nea").forEach(element => {
-  //     element.disabled = (!isDateInRange && poolParams.stak) ? true : false
+  //     element.disabled = (!isDateInRange && poolParams.stak == 0) ? true : false
   // })
   
   newPool.querySelectorAll(".token-name").forEach(element => {
@@ -1362,7 +1362,6 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
   // }
 
   // newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString();
-  //QUESTION in p3 total farm is an array. Why?
   if(contractParams.total_farmed){
     //console.log(metaData.decimals)
     newPool.querySelector("#pool-stats #total-rewards")!.innerHTML = convertToDecimals(contractParams.total_farmed, 24, 5)
@@ -1382,10 +1381,9 @@ async function addPool(poolParams: PoolParams|PoolParamsP3): Promise<void> {
     accountRegistered = await poolParams.contract.storageBalance();
   } else if(contractParams.farm_token_rates){
     accountRegistered = await poolParams.contract.storageBalance();
-  } else {
-    accountRegistered = 0
   }
   //QUESTION What is this?
+  // If accountRegistered is null then the contract is not activated
   if(accountRegistered == null) {
 
     //console.log(poolParams.html.formId)
@@ -1440,7 +1438,7 @@ function getRewardsPerDaySingle(poolParams: PoolParams) {
 }
 
 function getRewardsPerDayMultiple(poolParams: PoolParamsP3) {
-  // QUESTION: How should this be calculated?
+  // QUESTION: How should this be calculated in the case that there is more than one?
   return BigInt(poolParams.contractParams.farm_token_rates[0]) * 60n * 24n
 }
 
