@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cheddar Token</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="newStyles.css">
+</head>
+<body>
+    <img class="cheddar-farm-logo" src="./assets/cheddar-logo.svg" alt="welcome to cheddar farm">
+    <h1 class="hide">Cheddar Farm</h1>
+    <main>
+        <div class="pool-filter-container">
+            <ul>
+               <li id="live-filter">Live</li>
+               <li id="ended-filter">Ended</li>
+               <li id="your-farms-filter">Your Farms</li>
+            </ul>
+        </div>
+        <!-- Repeated elements -->
+        <div id="pool-container">
+            <div id="generic-pool-container">
+                <div id="token-header">
+                    <div id="token-logo-container">
+                        <img class="first-token-logo" alt="token logo" src="./assets/near-logo-black.svg">
+                    </div>
+                    <div id="token-name-container">
+                        <h2 class="first-token-name">First token name</h2>
+                    </div>
+                    <div class="information-icon-container">
+                        <img src="./assets/info.svg" alt="information icon">
+                    </div>
+                </div>
+                <div id="token-pool-stats" class="hide">
+                    <h3 class="first-token">Token pool stats</h3>
+                    <div class="stats-container">
+                        <ul>
+                            <li><span class="staked-token">Staked Token</span><span class="total-staked-token-value">181184231</span></li>
+                            <li><span class="token-per-day">Per Day</span><span class="token-per-day-value">1234</span></li>
+                            <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr>
+                <div id="contract-information">
+                    <div class="main-contract-information">
+                        <ul>
+                            <li><span>Reward tokens</span><span class="reward-tokens-value"><img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon"></span></li>
+                            <li><span>Reward per week</span><span class="rewards-per-week-value">$24156</span></li>
+                            <li><span>Unclaimed rewards</span><span class="unclaimed-rewards-value">2131516</span></li>
+                        </ul>
+                    </div>
+                    <div class="main-contract-footer">
+                        <button id="harvest-button">Harvest</button>
+                        <div id="expanding-indicators">
+                            <p class="visual-tool-expanding-indication-hidden hide">Staking/Unstaking</p>
+                            <div class="hide-expand-buttons-container">
+                                <img class="hide-button hide" src="./assets/hide-button.svg" alt="hide button">
+                                <img class="expand-button" src="./assets/expand-button.svg" alt="expand button">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="stakin-unstaking-container">
+                <div class="show-type-container">
+                    <h2 class="staking-unstaking">UNSTAKE</h2>
+                    <h2 class="staking-unstaking">STAKE</h2>
+                </div>
+                <div class="main-staking">
+                    <input type="number" placeholder="Enter amount">
+                    <div class="available-info">
+                        <span>Available to stake</span>
+                        <div class="amaunt-available stake">
+                            <span class="value">123412412</span>
+                            <span class="max-buton">max</span>
+                        </div>
+                    </div>
+                    <button id="stake-button">STAKE</button>
+                </div>
+                <div class="main-unstaking">
+                    <input type="number" placeholder="Enter amount">
+                    <div class="available-info">
+                        <span>Available to unstake</span>
+                        <div class="amaunt-available unstake">
+                            <span class="value">123412412</span>
+                            <span class="max-buton">max</span>
+                        </div>
+                    </div>
+                    <button id="unstake-button">UNSTAKE</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+</body>
+</html>
