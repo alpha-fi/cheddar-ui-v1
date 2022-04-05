@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="newStyles.css">
 </head>
 <body>
+    <button>Conect wallet</button>
+    <!-- Mirar parte onload del index.ts para armar el botón para conectarse a la wallet -->
     <img class="cheddar-farm-logo" src="./assets/cheddar-logo.svg" alt="welcome to cheddar farm">
     <h1 class="hide">Cheddar Farm</h1>
     <main>
@@ -22,8 +24,8 @@
             </ul>
         </div>
         <!-- Repeated elements -->
-        <div id="pool-container">
-            <div id="generic-pool-container">
+        <div id="generic-pool-container">
+            <div id="pool-container">
                 <div id="token-header">
                     <div id="token-logo-container">
                         <img class="first-token-logo" alt="token logo" src="./assets/near-logo-black.svg">
@@ -55,7 +57,7 @@
                         </ul>
                     </div>
                     <div class="main-contract-footer">
-                        <button id="harvest-button">Harvest</button>
+                        <button id="harvest-button">HARVEST</button>
                         <div id="expanding-indicators">
                             <p class="visual-tool-expanding-indication-hidden hide">Staking/Unstaking</p>
                             <div class="hide-expand-buttons-container">
@@ -66,13 +68,13 @@
                     </div>
                 </div>
             </div>
-            <div id="stakin-unstaking-container">
+            <div id="staking-unstaking-container" class="hide">
                 <div class="show-type-container">
-                    <h2 class="staking-unstaking">UNSTAKE</h2>
-                    <h2 class="staking-unstaking">STAKE</h2>
+                    <h2 class="unstaking">UNSTAKE</h2>
+                    <h2 class="staking active">STAKE</h2>
                 </div>
                 <div class="main-staking">
-                    <input type="number" placeholder="Enter amount">
+                    <input type="text" placeholder="Enter amount">
                     <div class="available-info">
                         <span>Available to stake</span>
                         <div class="amaunt-available stake">
@@ -82,8 +84,8 @@
                     </div>
                     <button id="stake-button">STAKE</button>
                 </div>
-                <div class="main-unstaking">
-                    <input type="number" placeholder="Enter amount">
+                <div class="main-unstaking hide">
+                    <input type="text" placeholder="Enter amount">
                     <div class="available-info">
                         <span>Available to unstake</span>
                         <div class="amaunt-available unstake">
@@ -95,8 +97,7 @@
                 </div>
             </div>
         </div>
-
+        <script type="module" src="./newIndex.ts"></script>
     </main>
-
 </body>
 </html>

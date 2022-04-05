@@ -35,7 +35,7 @@ html {
 }
 
 .hide {
-  display: none;
+  display: none!important;
 }
 
 .show {
@@ -61,7 +61,7 @@ main {
   width: 175px;
 }
 
-#pool-container {
+#generic-pool-container {
     width: 400px;
     height: max-content;
     border-width: 12px;    
@@ -100,12 +100,12 @@ main {
     color: var(--bg);
 }
 
-#pool-container, #generic-pool-container{
+#generic-pool-container, #pool-container{
     border-color: var(--second-new-grey);
     border-style: solid;
 }
 
-#generic-pool-container {
+#pool-container {
     border-bottom-width: 12px;
     padding: 5px 25px;
 }
@@ -228,7 +228,7 @@ main {
     background-color: var(--light-gray);
 }
 
-#stakin-unstaking-container {
+#staking-unstaking-container {
     display: flex;
     flex-direction: column;
 }
@@ -244,11 +244,16 @@ main {
     border-style: solid;
 }
 
+.show-type-container h2.active {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
 .main-staking, .main-unstaking {
     padding: 10px;
 }
 
-#stakin-unstaking-container input {
+#staking-unstaking-container input {
     margin-top: 32px;
     height: 56px;
     width: 99%;
@@ -259,7 +264,7 @@ main {
     line-height: 24px;
 }
 
-#stakin-unstaking-container input::placeholder {
+#staking-unstaking-container input::placeholder {
     color: var(--primary)
 }
 
