@@ -72,16 +72,16 @@ h1 {
   color      : #272D36;
 }
 
-h2 {
+/* h2 {
   font-weight  : 600;
   font-size    : 20px;
-  line-height  : 20px;
+  line-height  : 20px; */
   /* identical to box height, or 109% */
-  color        : #fd941f;
+  /* color        : #fd941f;
   text-align   : center;
   margin-top   : 0px;
   margin-bottom: 15px;
-}
+} */
 
 h2 img {
   vertical-align : middle;
@@ -180,13 +180,13 @@ header nav a {
   font-size    : 14px;
 }
 
-div {
+/* div {
   margin: 0px;
   padding: 0px;
   border: 0px;
   font-size: 100%;
   vertical-align: baseline;
-}
+} */
 
 #home-connected {
   margin: 2rem;
@@ -194,7 +194,7 @@ div {
 
 .grid {
   display: grid;
-  align-items: center;
+  align-items: start;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-gap: 1rem;
   justify-items: center;
@@ -831,7 +831,7 @@ small img {
 }
 
 .hidden {
-  display: none;
+  display: none!important;
 }
 
 #max {
@@ -1179,14 +1179,13 @@ input:checked + .slider:before {
 
 }
 
-/* NEW CSS */
+/* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
 
-#generic-pool-container {
+.every-pool-container {
   width: 400px;
   height: max-content;
   border-width: 12px;    
-  border-radius: 8px;
-  background-color: var(--white);
+  border-radius: 8px!important;
 }
 
 .pool-filter-container {
@@ -1223,18 +1222,29 @@ input:checked + .slider:before {
 #generic-pool-container, #pool-container{
   border-color: var(--second-new-grey);
   border-style: solid;
+  background-color: var(--white);
 }
 
 #pool-container {
-  border-bottom-width: 12px;
-  padding: 5px 25px;
+  padding: 10px;
+  background: var(--white);
+  box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
+  border-radius: 12px;
+  margin: 1em;
+}
+
+#new-token-header {
+  display: flex;
+  justify-content: space-between;
 }
 
 #token-logo-container img {
-  width: 54.66px;
-  height: 44px;
-  background-image: url(./assets/Ellipse1.svg);
+  width: 50px;
+  height: 50px;
   background-size: cover;
+  border: 3px var(--white) solid;
+  border-radius: 100px;
+  box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
 }
 
 #token-name-container {
@@ -1245,14 +1255,11 @@ input:checked + .slider:before {
 }
 
 #token-pool-stats {
-  width: 346px;
-
+  width: 26.1em;
   position: absolute;
-  transform: translate(-37px, 5px);
-
+  transform: translate(-31px, 5px);
   background-color: var(--white);
   padding: 24px;
-
   border-top: 0px;
   border-right: 12px;
   border-bottom: 12px;
@@ -1317,7 +1324,6 @@ input:checked + .slider:before {
 #harvest-button, #stake-button, #unstake-button {
     background-color: var(--primary);
     color: var(--white);
-    width: 78px;
     height: 36px;
     margin-left: 4px;
     border: 1px solid rgba(0, 0, 0, 0.12);
@@ -1335,7 +1341,6 @@ input:checked + .slider:before {
 }
 
 #expanding-indicators img {
-  max-height: 10px;
   border: 5px var(--light-gray) solid;
   border-radius: 8px;
   background-color: var(--light-gray);
@@ -1344,6 +1349,10 @@ input:checked + .slider:before {
 #staking-unstaking-container {
   display: flex;
   flex-direction: column;
+}
+
+.show-type-container {
+  width: 100%;
 }
 
 .show-type-container h2{
