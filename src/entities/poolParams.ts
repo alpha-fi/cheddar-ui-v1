@@ -161,8 +161,8 @@ export class PoolParams {
         /** TODO - make dynamic **/
         let walletAvailable = 0
         // let walletAvailable2 = 0
-        
-        let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
+        console.log(this.contract.wallet.getAccountId())
+        let balance = await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
         walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
         return walletAvailable
 
