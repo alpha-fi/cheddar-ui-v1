@@ -1164,6 +1164,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
   let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
+  stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
   showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool
 
 
@@ -1178,6 +1179,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   let unstakeMaxButton = newPool.querySelector(`#staking-unstaking-container .unstake .max-button`) as HTMLElement
   unstakeMaxButton.addEventListener("click", maxUnstakeClicked(newPool))
+  showOrHideMaxButton(walletBalance.toString(), unstakeMaxButton)
 
   if (Number(stakedDisplayable) > 0) {
     unstakeMaxButton.classList.remove("hidden")
@@ -1685,7 +1687,18 @@ function getRewardsPerDayMultiple(poolParams: PoolParamsP3) {
   return BigInt(poolParams.contractParams.farm_token_rates[0]) * 60n * 24n
 }
 
-function maxStakeClicked(amountContainer: HTMLElement, input: HTMLInputElement) {
+function maxStakeClicked(pool: HTMLElement) {
+  return function (event: Event) {
+    event.preventDefault()
+
+    let input = pool.querySelector(".main-staking input") as HTMLInputElement
+    const amount = pool.querySelector(".stake .value")!.innerHTML
+
+    input.value = amount.toString()
+  }
+}
+
+function maxStakeClickedOld(amountContainer: HTMLElement, input: HTMLInputElement) {
   return function (event: Event) {
     event.preventDefault()
 
