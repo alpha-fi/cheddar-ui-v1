@@ -1380,7 +1380,7 @@ input:checked + .slider:before {
   padding: 10px;
 }
 
-.amout-available {
+.amount-available {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1407,4 +1407,8 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.available-info>* {
+  margin: 10px;
 }
