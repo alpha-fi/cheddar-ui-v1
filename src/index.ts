@@ -1173,8 +1173,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   })
 
   const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 7)
-  console.log(stakedDisplayable)
-  console.log(poolParams.resultParams.staked.toString())
+  
   newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
 
   let unstakeMaxButton = newPool.querySelector(`#staking-unstaking-container .unstake .max-button`) as HTMLElement
@@ -1189,7 +1188,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
+  newPool.querySelector(".stats-container .total-token-farmed-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 }
