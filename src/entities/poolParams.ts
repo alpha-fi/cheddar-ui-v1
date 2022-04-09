@@ -91,9 +91,22 @@ export class PoolParams {
         this.metaData2 = await this.cheddarContract.ft_metadata()
     }
 
+    async setResultParams() {
+        const accName = this.contract.wallet.getAccountId()
+        let accountInfo = await this.contract.status(accName)
+
+        this.resultParams.staked = BigInt(accountInfo[0])
+        this.resultParams.real = BigInt(accountInfo[1])
+        this.resultParams.previous_real = BigInt(accountInfo[1])
+        this.resultParams.computed = BigInt(accountInfo[1])
+        this.resultParams.previous_timestamp = Number(accountInfo[2])
+        this.resultParams.accName = accName
+    }
+
     async setAllExtraData() {
         await this.setContractParams();
         await this.setMetaData();
+        await this.setResultParams();
     }
 
     setTotalRewardsPerDay() {

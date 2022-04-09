@@ -197,10 +197,59 @@ function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
   }
 }
 
+function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
+  return async function (event: Event){
+    event?.preventDefault()
+    showWait("Staking...")
+    
+    let stakeInput = newPool.querySelector(".main-staking input") as HTMLInputElement
+    
+
+    try {
+      let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+      const contractParams = poolParams.contractParams
+      const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
+      if (!isDateInRange) throw Error("Pools is Closed.")
+      
+      stakeInput.setAttribute("disabled", "disabled")
+      let stakeAmount = parseFloat(stakeInput.value)
+      //get amount
+      const min_deposit_amount = 1;
+      if (isNaN(stakeAmount)) {
+        throw Error("Please Input a Number.")
+      }
+
+      
+      //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
+      const walletAvailable = await poolParams.getWalletAvailable()
+      if (stakeAmount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
+      await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId, convertToBase(stakeAmount.toString(), poolParams.metaData.decimals.toString()), "to farm")
+      
+
+      //clear form
+      stakeInput.value = ""
+
+      //refresh acc info
+      // const poolList = await getPoolList(wallet);
+      await refreshPoolInfo(poolParams)
+      //console.log("Amount: ", amount)
+      showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
+
+      poolParams.resultParams.addStaked(ntoy(stakeAmount))
+    }
+    catch (ex) {
+      showErr(ex as Error)
+    }
+
+    // re-enable the form, whether the call succeeded or failed
+    stakeInput.removeAttribute("disabled")
+  }
+}
+
 //Form submission
 async function submitForm(action: string, poolParams: PoolParams, form: HTMLFormElement) {
   event?.preventDefault()
-
+  
   //const form = event.target as HTMLFormElement
   // get elements from the form using their id attribute
   const { fieldset, stakeAmount1 } = form
@@ -275,7 +324,7 @@ async function submitForm(action: string, poolParams: PoolParams, form: HTMLForm
   catch (ex) {
     showErr(ex)
   }
-
+  
   // re-enable the form, whether the call succeeded or failed
   fieldset.disabled = false
 }
@@ -1065,7 +1114,7 @@ async function refreshAccountInfoGeneric(poolList: Array<PoolParams>) {
 
 /// when the user chooses "connect to web-page" in the narwallets-chrome-extension
 function narwalletConnected(ev: CustomEvent) {
-  wallet = narwallets;//DUDA
+  wallet = narwallets;
 
   signedInFlow(wallet)
 }
@@ -1073,7 +1122,7 @@ function narwalletConnected(ev: CustomEvent) {
 /// when the user chooses "disconnect from web-page" in the narwallets-chrome-extension
 function narwalletDisconnected(ev: CustomEvent) {
 
-  wallet = disconnectedWallet;//DUDA
+  wallet = disconnectedWallet;
 
   signedOutFlow()
 }
@@ -1107,11 +1156,42 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputI
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
   const walletBalance: number = await poolParams.getWalletAvailable()
 
+  var metaData = poolParams.metaData
+  let totalStaked = poolParams.contractParams.total_staked.toString()
+  let metadata = poolParams.metaData
+  const rewardsPerDay = getRewardsPerDaySingle(poolParams)
+
   newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
-  let elem = newPool.querySelector(".stake .max-button") as HTMLElement
-  showOrHideMaxButton(walletBalance.toString(), elem)
-  //DUDA
+  let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
+  showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool
+
+
+
+  newPool.querySelectorAll(".token-name").forEach(element => {
+    element.innerHTML = metaData.symbol
+  })
+
+  const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 7)
+  console.log(stakedDisplayable)
+  console.log(poolParams.resultParams.staked.toString())
+  newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
+
+  let unstakeMaxButton = newPool.querySelector(`#staking-unstaking-container .unstake .max-button`) as HTMLElement
+  unstakeMaxButton.addEventListener("click", maxUnstakeClicked(newPool))
+
+  if (Number(stakedDisplayable) > 0) {
+    unstakeMaxButton.classList.remove("hidden")
+  }
+
+  let totalFarmed = poolParams.contractParams.total_farmed.toString()
+  newPool.querySelector(".total-token-farmed-value")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
+
+  newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
+
+  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
+
+  newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
@@ -1232,6 +1312,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let unstakingButton = newPool.querySelector(".unstaking")! as HTMLElement;
   let staking = newPool.querySelector(".main-staking")! as HTMLElement;
   let unstaking = newPool.querySelector(".main-unstaking")! as HTMLElement;
+  var contractParams = poolParams.contractParams;
 
   newPool.addEventListener("mouseover", showOrHideElement(showAndHideVisibilityTool));
   newPool.addEventListener("mouseout", showOrHideElement(showAndHideVisibilityTool));
@@ -1258,30 +1339,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   qs("#pool_list").append(newPool)
 
-  newPool.querySelectorAll(".token-name").forEach(element => {
-    element.innerHTML = metaData.symbol
-  })
-
-  const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 7)
-  newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
-
-  let elem = newPool.querySelector(`#staking-unstaking-container .unstake .max-button`) as HTMLElement
-  elem.addEventListener("click", maxUnstakeClicked(newPool))
-
-  if (Number(stakedDisplayable) > 0) {
-    elem.classList.remove("hidden")
-  }
-
-  if (poolParams.contractParams.total_farmed) {
-    //console.log(metaData.decimals)
-    let totalFarmed = poolParams.contractParams.total_farmed as string
-
-    newPool.querySelector(".token-total-rewards-value")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
-  } else {
-    newPool.querySelector(".token-total-rewards-value")!.innerHTML = convertToDecimals(poolParams.contractParams.total_rewards, 24, 5)//DUDA
-  }
-
-  
+  newPool.querySelector("#contract-information .deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
 }
 
 async function addPoolOld(poolParams: PoolParams | PoolParamsP3): Promise<void> {

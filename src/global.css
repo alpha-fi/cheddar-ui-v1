@@ -194,7 +194,7 @@ header nav a {
 
 .grid {
   display: grid;
-  align-items: start;
+  align-items: center;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-gap: 1rem;
   justify-items: center;
@@ -1239,12 +1239,10 @@ input:checked + .slider:before {
 }
 
 #token-logo-container img {
-  width: 50px;
-  height: 50px;
+  width: 54.66px;
+  height: 44px;
+  background-image: url(./assets/Ellipse1.svg);
   background-size: cover;
-  border: 3px var(--white) solid;
-  border-radius: 100px;
-  box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
 }
 
 #token-name-container {
@@ -1255,9 +1253,9 @@ input:checked + .slider:before {
 }
 
 #token-pool-stats {
-  width: 26.1em;
+  width: 25.05em;
+  transform: translate(-22px, 10px);
   position: absolute;
-  transform: translate(-31px, 5px);
   background-color: var(--white);
   padding: 24px;
   border-top: 0px;
