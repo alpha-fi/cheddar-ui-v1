@@ -208,7 +208,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
       const contractParams = poolParams.contractParams
-      const isDateInRange = (contractParams.farming_start < unixTimestamp || contractParams.farming_start > unixTimestamp) && unixTimestamp < contractParams.farming_end
+      const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
       
       stakeInput.setAttribute("disabled", "disabled")
@@ -220,6 +220,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
       }
 
       
+      // console.log(poolParams.metaData.decimals.toString())
       //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
       const walletAvailable = await poolParams.getWalletAvailable()
       if (stakeAmount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
@@ -231,7 +232,10 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
 
       //refresh acc info
       // const poolList = await getPoolList(wallet);
-      await refreshPoolInfo(poolParams)
+
+
+      //TODO refactor refreshPoolInfo
+      // await refreshPoolInfo(poolParams)
       //console.log("Amount: ", amount)
       showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
 
@@ -243,6 +247,55 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
 
     // re-enable the form, whether the call succeeded or failed
     stakeInput.removeAttribute("disabled")
+  }
+}
+
+function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
+  return async function (event: Event){
+    event?.preventDefault()
+    showWait("Unstaking...")
+
+    let unstakeInput = newPool.querySelector(".main-unstaking input") as HTMLInputElement
+
+    try {
+      let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+      const contractParams = poolParams.contractParams
+      // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      // if (!isDateInRange) throw Error("Pools is Closed.")
+      
+      unstakeInput.setAttribute("disabled", "disabled")
+      let unstakeAmount = parseFloat(unstakeInput.value)
+      const staked = poolParams.resultParams.staked
+      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+      //get amount
+      const min_deposit_amount = 1;//DUDA esto al final nunca lo llamamos. Xq no me hiciste borrarlo?
+      if (isNaN(unstakeAmount)) {
+        throw Error("Please Input a Number.")
+      }
+
+      
+      //if (amount < min_deposit_amount) throw Error(`Stake at least ${min_deposit_amount} ${poolParams.metaData.symbol}`);
+      if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${poolParams.metaData.symbol} Available to Unstake.`);
+      await poolParams.contract.unstake(convertToBase(unstakeAmount.toString(), poolParams.metaData.decimals.toString()))
+      
+
+      //clear form
+      unstakeInput.value = ""
+
+      //refresh acc info
+      // const poolList = await getPoolList(wallet);
+      await refreshPoolInfo(poolParams)
+      //console.log("Amount: ", amount)
+      showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.metaData.symbol)
+
+      poolParams.resultParams.addStaked(ntoy(unstakeAmount))
+    }
+    catch (ex) {
+      showErr(ex as Error)
+    }
+
+    // re-enable the form, whether the call succeeded or failed
+    unstakeInput.removeAttribute("disabled")
   }
 }
 
@@ -950,7 +1003,7 @@ async function refreshRewardsDisplayLoopGeneric(poolParams: PoolParams, decimals
 }
 
 function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
-  if (Number(walletBalance.replace(".", "")) > 1) {
+  if (Number(walletBalance.replace(".", "")) > 0) {
     //console.log(elem)
     elem.classList.remove("hidden")
   }
@@ -1165,6 +1218,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
   stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
+  // console.log()
   showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool
 
 
@@ -1176,10 +1230,17 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   const stakedDisplayable = convertToDecimals(poolParams.resultParams.staked.toString(), metaData.decimals, 7)
   
   newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
+  
+  let unclaimedRewards = poolParams.contractParams.total_farmed//DUDA de dónde saco este dato? (Creo que por eso no lo habíamos hecho)
 
-  let unstakeMaxButton = newPool.querySelector(`#staking-unstaking-container .unstake .max-button`) as HTMLElement
+  // console.log(unclaimedRewards)
+
+  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards
+
+
+  let unstakeMaxButton = newPool.querySelector(`.unstake .max-button`) as HTMLElement
   unstakeMaxButton.addEventListener("click", maxUnstakeClicked(newPool))
-  showOrHideMaxButton(walletBalance.toString(), unstakeMaxButton)
+  showOrHideMaxButton(stakedDisplayable.toString(), unstakeMaxButton)
 
   if (Number(stakedDisplayable) > 0) {
     unstakeMaxButton.classList.remove("hidden")
@@ -1193,6 +1254,8 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector(".stats-container .total-token-farmed-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
+
+  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
