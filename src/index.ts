@@ -250,6 +250,25 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
   }
 }
 
+function harvestSingle (poolParams: PoolParams, newPool: HTMLElement){
+  return async function (event: Event) {
+    event?.preventDefault()
+    showWait("Harvesting...")
+    
+
+    let amount: number
+    amount = poolParams.resultParams.getCurrentCheddarRewards()
+
+    await poolParams.contract.withdraw_crop()
+
+    poolParams.resultParams.computed = 0n
+    poolParams.resultParams.real = 0n
+    newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
+
+    showSuccess("Harvested" + toStringDecMin(amount) + " CHEDDAR")
+  }
+}
+
 function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
   return async function (event: Event){
     event?.preventDefault()
@@ -1231,11 +1250,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
   
-  let unclaimedRewards = poolParams.contractParams.total_farmed//DUDA de dónde saco este dato? (Creo que por eso no lo habíamos hecho)
+  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()//DUDA de dónde saco este dato? (Creo que por eso no lo habíamos hecho)
 
   // console.log(unclaimedRewards)
 
-  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards
+  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
 
 
   let unstakeMaxButton = newPool.querySelector(`.unstake .max-button`) as HTMLElement
@@ -1256,6 +1275,10 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
   newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
+
+  newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool))
+
+  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
