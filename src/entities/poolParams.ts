@@ -33,7 +33,7 @@ export class PoolResultParams {
     }
 
     getCurrentCheddarRewards() {
-        return yton(this.computed.toString())
+        return convertToDecimals(this.real.toString(), 24, 7)
     }
 
     getCurrentDisplayableCheddarRewards() {
@@ -100,6 +100,8 @@ export class PoolParams {
         this.resultParams.previous_real = BigInt(accountInfo[1])
         this.resultParams.computed = BigInt(accountInfo[1])
         this.resultParams.previous_timestamp = Number(accountInfo[2])
+        // Contract saves previous_timestamp in seconds
+        this.resultParams.previous_timestamp = Date.now() / 1000
         this.resultParams.accName = accName
     }
 
@@ -174,7 +176,7 @@ export class PoolParams {
         /** TODO - make dynamic **/
         let walletAvailable = 0
         // let walletAvailable2 = 0
-        console.log(this.contract.wallet.getAccountId())
+        // console.log(this.contract.wallet.getAccountId())
         let balance = await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
         walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
         return walletAvailable

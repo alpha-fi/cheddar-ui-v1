@@ -1032,26 +1032,11 @@ function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
   }
 }
 
-function setComputedRewardsSingle(poolParams: PoolParams){
-  const metaData = poolParams.metaData
-  const now = Date.now()
-  const elapsedMs = now - poolParams.resultParams.previous_timestamp
-  const msInADay = 24 * 60 * 60 * 1000
-  const rewardsPerDay = yton(getRewardsPerDaySingle(poolParams))
-  const staked = Number(convertToDecimals(poolParams.resultParams.staked, metaData.decimals, 7))
-  const totalStaked = Number(convertToDecimals(poolParams.contractParams.total_staked, metaData.decimals, 7))
-  const percentageOfPool = staked / totalStaked
-  console.log("Staked " + staked)
-  console.log("TS " + totalStaked)
-
-  const computed = rewardsPerDay * percentageOfPool * (elapsedMs / msInADay)
-  console.log("RPD " + rewardsPerDay)
-  console.log("POP " + percentageOfPool)
-  console.log("EMS " + elapsedMs)
-  console.log(computed)
-
-  poolParams.resultParams.computed += BigInt(convertToBase(computed.toString(), metaData.decimals.toString()))
-  poolParams.resultParams.previous_timestamp = now
+function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
+  poolParams.resultParams.staked = BigInt(accountInfo[0])
+  poolParams.resultParams.real = BigInt(accountInfo[1])
+  poolParams.resultParams.computed = BigInt(accountInfo[1])
+  poolParams.resultParams.previous_timestamp = Number(accountInfo[2])
 }
 
 async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
@@ -1081,7 +1066,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
 
 
-  setComputedRewardsSingle(poolParams)
+  setAccountInfo(poolParams, accountInfo)
   let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
   newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
@@ -1284,16 +1269,15 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputI
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
   const walletBalance: number = await poolParams.getWalletAvailable()
 
-  var metaData = poolParams.metaData
+  const metaData = poolParams.metaData
   let totalStaked = poolParams.contractParams.total_staked.toString()
-  let metadata = poolParams.metaData
   const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
   newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
   let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
   stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
-  // console.log()
+  
   showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool
 
 
@@ -1326,7 +1310,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
+  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metaData.decimals, 5).toString()
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
@@ -1336,7 +1320,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
 
-  window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  if(isDateInRange) {
+    window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
+  }
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
