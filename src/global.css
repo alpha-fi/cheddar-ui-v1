@@ -1102,8 +1102,8 @@ input:checked + .slider:before {
 }
 
 .tools {
-  display: grid;
-  align-items: center;
+  display: flex;
+  align-items: flex-start;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   grid-gap: 1rem;
   justify-items: center;
@@ -1215,7 +1215,7 @@ input:checked + .slider:before {
   line-height: 42px;
 }
 
-.pool-filter-container li:hover {
+.pool-filter-container li:hover, .activeFilterButton {
   background-color: var(--primary);
   color: var(--bg);
 }
@@ -1326,7 +1326,7 @@ input:checked + .slider:before {
     height: 30px;
 }
 
-#harvest-button, #stake-button, #unstake-button, .activate{
+#harvest-button, #stake-button, #unstake-button, #activate{
     background-color: var(--primary);
     color: var(--white);
     height: 36px;

@@ -59,13 +59,22 @@
 
   <main>
     <div class="tools">
-      <div>
+      <!-- New filter -->
+      <div class="pool-filter-container">
+        <ul>
+          <li id="live-filter">Live</li>
+          <li id="ended-filter">Ended</li>
+          <li id="your-farms-filter">Your Farms</li>
+        </ul>
+      </div>
+      
+      <!-- <div>
         <span>Staked only&nbsp;</span>
         <label class="switch">
           <input id="switch" type="checkbox">
           <span class="slider round"></span>
         </label>
-      </div>
+      </div> -->
     </div>
     <section id="home" style="display:none">
 
@@ -302,15 +311,7 @@
   </div>
 
   <script type="module" src="./index.ts"></script>
-
-  <div class="pool-filter-container hidden">
-    <ul>
-      <li id="live-filter">Live</li>
-      <li id="ended-filter">Ended</li>
-      <li id="your-farms-filter">Your Farms</li>
-    </ul>
-  </div>
-  
+ 
   
   
   <!-- Repeated elements -->
@@ -350,7 +351,7 @@
         </div>
         <div class="main-contract-footer">
           <button id="harvest-button">HARVEST</button>
-          <button class="activate">Activate</button>
+          <button id="activate">Activate</button>
           <div id="expanding-indicators">
             <p class="visual-tool-expanding-indication-hidden hidden">Staking/Unstaking</p>
             <div class="hide-expand-buttons-container">

@@ -127,35 +127,69 @@ qs('#sign-out').onclick =
     signedOutFlow();
   }
 
+
+//New filters
+function hideAllPools() {
+  let allPools = document.querySelectorAll(".every-pool-container")
+  allPools.forEach(pool => {
+    pool.classList.add("hidden")
+  });
+}
+
+function showSelectedPools(selectedPools: [HTMLElement]) {
+  selectedPools.forEach(pool => {
+    pool.classList.remove("hidden")
+  });
+}
+
 //only staked
-qs('#switch').onclick =
-  async function (event) {
-
-    if (window.localStorage.getItem("onlyStaked")) {
-      isPaused = true;
-      window.localStorage.onlyStaked = event.target.checked
-      //console.log(window.localStorage.getItem("onlyStaked"))
-      const poolList = await getPoolList(wallet);
-      //await refreshAccountInfoGeneric(poolList);
-      qs("#pool_list").replaceChildren();
-      qs("#pool_list").style.display = "none";
-      qs(".loader").style.display = "block";
-      await addPoolList(poolList);
-
-    }
-    else {
-      isPaused = true;
-      window.localStorage.setItem("onlyStaked", event.target.checked)
-      //console.log(window.localStorage.getItem("onlyStaked"))
-      const poolList = await getPoolList(wallet);
-      //await refreshAccountInfoGeneric(poolList);
-      qs("#pool_list").replaceChildren();
-      qs("#pool_list").style.display = "none";
-      qs(".loader").style.display = "block";
-      await addPoolList(poolList);
-
-    }
+qs('#your-farms-filter').onclick= async function (event) {
+  isPaused = true
+  if (window.localStorage.getItem("onlyStaked") == "true"){
+    window.localStorage.setItem("onlyStaked", "false")
   }
+  else {
+    window.localStorage.setItem("onlyStaked", "true")
+  }
+
+  let buttonClicked = event.target as HTMLElement
+  buttonClicked.classList.toggle("activeFilterButton")
+  const poolList = await getPoolList(wallet);
+  //await refreshAccountInfoGeneric(poolList);
+  qs("#pool_list").replaceChildren();
+  qs("#pool_list").style.display = "none";
+  qs(".loader").style.display = "block";
+  await addPoolList(poolList);//DUDA q onda esto de q podía ser del p3 o del p2? Jodía esto?
+}
+
+// //Only Staked old
+//   async function (event) {
+
+//     if (window.localStorage.getItem("onlyStaked")) {
+//       isPaused = true;
+//       window.localStorage.onlyStaked = event.target.checked
+//       //console.log(window.localStorage.getItem("onlyStaked"))
+//       const poolList = await getPoolList(wallet);
+//       //await refreshAccountInfoGeneric(poolList);
+//       qs("#pool_list").replaceChildren();
+//       qs("#pool_list").style.display = "none";
+//       qs(".loader").style.display = "block";
+//       await addPoolList(poolList);
+
+//     }
+//     else {
+//       isPaused = true;
+//       window.localStorage.setItem("onlyStaked", event.target.checked)
+//       //console.log(window.localStorage.getItem("onlyStaked"))
+//       const poolList = await getPoolList(wallet);
+//       //await refreshAccountInfoGeneric(poolList);
+//       qs("#pool_list").replaceChildren();
+//       qs("#pool_list").style.display = "none";
+//       qs(".loader").style.display = "block";
+//       await addPoolList(poolList);
+
+//     }
+//   }
 
 function stakeClicked(poolParams: PoolParams, pool: HTMLElement) {
   return async function (event: Event) {
@@ -1316,7 +1350,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
 
-  newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool))
+  newPool.querySelector("#activate")?.addEventListener("click", depositClicked(poolParams, newPool))
 
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
 
@@ -1978,8 +2012,10 @@ window.onload = async function () {
 
     if (window.localStorage.getItem("onlyStaked")) {
       //console.log(window.localStorage.getItem("onlyStaked"))
-      let switchElement = document.getElementById("switch") as HTMLInputElement
-      switchElement.checked = window.localStorage.getItem("onlyStaked") === 'true'
+      // let switchElement = document.getElementById("switch") as HTMLInputElement
+      // switchElement.checked = window.localStorage.getItem("onlyStaked") === 'true'
+      window.localStorage.getItem("onlyStaked") === 'true'
+
     }
     else {
       console.log(window.localStorage.getItem("onlyStaked"))
