@@ -791,6 +791,7 @@ async function signedInFlow(wallet: WalletInterface) {
   const poolList = await getPoolList(wallet);
   await refreshAccountInfoGeneric(poolList)
   await addPoolList(poolList)
+  qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
 }
 
 
@@ -1031,7 +1032,62 @@ function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
   }
 }
 
-async function refreshPoolInfo(poolParams: PoolParams) {
+function setComputedRewardsSingle(poolParams: PoolParams){
+  const metaData = poolParams.metaData
+  const now = Date.now()
+  const elapsedMs = now - poolParams.resultParams.previous_timestamp
+  const msInADay = 24 * 60 * 60 * 1000
+  const rewardsPerDay = yton(getRewardsPerDaySingle(poolParams))
+  const staked = Number(convertToDecimals(poolParams.resultParams.staked, metaData.decimals, 7))
+  const totalStaked = Number(convertToDecimals(poolParams.contractParams.total_staked, metaData.decimals, 7))
+  const percentageOfPool = staked / totalStaked
+  console.log("Staked " + staked)
+  console.log("TS " + totalStaked)
+
+  const computed = rewardsPerDay * percentageOfPool * (elapsedMs / msInADay)
+  console.log("RPD " + rewardsPerDay)
+  console.log("POP " + percentageOfPool)
+  console.log("EMS " + elapsedMs)
+  console.log(computed)
+
+  poolParams.resultParams.computed += BigInt(convertToBase(computed.toString(), metaData.decimals.toString()))
+  poolParams.resultParams.previous_timestamp = now
+}
+
+async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
+  poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId()
+
+  
+}
+
+async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
+  var metaData = poolParams.metaData;
+  let accName = poolParams.resultParams.accName
+  
+  let accountInfo = await poolParams.contract.status(accName)
+  
+  let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
+  
+  let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
+  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
+  showOrHideMaxButton(displayableStaked.toString(), unstakeMaxButton)
+
+
+  const walletBalances = await poolParams.getWalletAvailable()
+  
+  let stakeMaxButton = qs(".stake .max-button") as HTMLElement
+  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
+  showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
+
+
+  setComputedRewardsSingle(poolParams)
+  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
+
+  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+}
+
+async function refreshPoolInfoOld(poolParams: PoolParams) {
   poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId();
   var metaData = poolParams.metaData;
   var metaData2 = poolParams.metaData2
@@ -1095,7 +1151,7 @@ async function refreshPoolInfo(poolParams: PoolParams) {
 
 
   //update account & contract stats
-  if (wallet.isConnected()) {
+  if (wallet.isConnected()) {//DUDA no es redundante preguntar esto en esta instancia?
     let metaData = await poolParams.metaData;
 
     let contractParams = await poolParams.contract.get_contract_params()
@@ -1250,7 +1306,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
   
-  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()//DUDA de dónde saco este dato? (Creo que por eso no lo habíamos hecho)
+  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
   // console.log(unclaimedRewards)
 
@@ -1270,7 +1326,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  newPool.querySelector(".stats-container .total-token-farmed-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
+  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metadata.decimals, 5).toString()
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
@@ -1279,6 +1335,8 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector(".activate")?.addEventListener("click", depositClicked(poolParams, newPool))
 
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
+
+  window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
@@ -1873,7 +1931,7 @@ async function addPoolList(poolList: Array<PoolParams>) {
 
 window.onload = async function () {
   try {
-
+    
     let env = ENV //default
 
     // const parts = window.location.pathname.split("/")
@@ -1945,7 +2003,7 @@ window.onload = async function () {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
       wallet = new NearWebWallet(nearWebWalletConnection);
-
+      
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)
       await signedInFlow(wallet)
