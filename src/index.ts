@@ -129,38 +129,42 @@ qs('#sign-out').onclick =
 
 
 //New filters
+function filterPools(className: string){
+  return function (event: Event){
+    filterButtonClicked(event)
+    hideAllPools()
+    let livePools = qsa(`.${className}`)
+    showSelectedPools(livePools)
+  }
+}
+
+function filterButtonClicked (event: Event){
+  let previousFilterClicked= qsa(".activeFilterButton")
+  previousFilterClicked.forEach(button => {
+    button.classList.remove("activeFilterButton")
+  })
+  let buttonClicked = event.target as HTMLElement
+  buttonClicked.classList.add("activeFilterButton")
+}
+
 function hideAllPools() {
-  let allPools = document.querySelectorAll(".every-pool-container")
+  let allPools = document.querySelectorAll(".pool-container")
   allPools.forEach(pool => {
     pool.classList.add("hidden")
   });
 }
 
-function showSelectedPools(selectedPools: [HTMLElement]) {
+function showSelectedPools(selectedPools: NodeListOf<Element>) {
   selectedPools.forEach(pool => {
     pool.classList.remove("hidden")
   });
 }
 
-//only staked
-qs('#your-farms-filter').onclick= async function (event) {
-  isPaused = true
-  if (window.localStorage.getItem("onlyStaked") == "true"){
-    window.localStorage.setItem("onlyStaked", "false")
-  }
-  else {
-    window.localStorage.setItem("onlyStaked", "true")
-  }
 
-  let buttonClicked = event.target as HTMLElement
-  buttonClicked.classList.toggle("activeFilterButton")
-  const poolList = await getPoolList(wallet);
-  //await refreshAccountInfoGeneric(poolList);
-  qs("#pool_list").replaceChildren();
-  qs("#pool_list").style.display = "none";
-  qs(".loader").style.display = "block";
-  await addPoolList(poolList);//DUDA q onda esto de q podía ser del p3 o del p2? Jodía esto?
-}
+//Events on filter buttons
+qs("#live-filter").onclick=filterPools("active-pool")
+qs("#ended-filter").onclick=filterPools("inactive-pool")
+qs('#your-farms-filter').onclick= filterPools("your-farms")
 
 // //Only Staked old
 //   async function (event) {
@@ -826,9 +830,13 @@ async function signedInFlow(wallet: WalletInterface) {
   await refreshAccountInfoGeneric(poolList)
   await addPoolList(poolList)
   qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
+  setDefaultFilter()
 }
 
-
+function setDefaultFilter (){
+  const event= new Event ("click")
+  qs("#your-farms-filter").dispatchEvent(event) 
+}
 
 // Initialize contract & set global variables
 async function initNearWebWalletConnection() {
@@ -1359,6 +1367,10 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   if(isDateInRange) {
     window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
   }
+
+  if(Number(stakedDisplayable) > 0){
+    newPool.classList.add("your-farms")
+  }
 }
 
 async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
@@ -1453,7 +1465,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
-  newPool.classList.add("every-pool-container")
+  newPool.classList.add("pool-container")
 
   let iconElem = newPool.querySelector("#token-logo-container img")
   
@@ -1503,6 +1515,13 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   unstakingButton.addEventListener("click", setActiveColor);
   unstakingButton.addEventListener("click", cancelActiveColor(stakingButton));
 
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  if(isDateInRange) {
+    newPool.classList.add("active-pool")
+  } else {
+    newPool.classList.add("inactive-pool")
+  }
 
   qs("#pool_list").append(newPool)
 

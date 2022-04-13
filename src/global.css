@@ -1182,7 +1182,7 @@ input:checked + .slider:before {
 
 /* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
 
-.every-pool-container {
+.pool-container {
   width: 400px;
   height: max-content;
   border-width: 12px;    
