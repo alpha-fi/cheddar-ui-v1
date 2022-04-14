@@ -1184,7 +1184,8 @@ input:checked + .slider:before {
 /* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
 .transparent {
   transition: all 0.5s linear;
-  transform: var(--light-gray);
+  opacity: 1;  
+  color: var(--light-gray);
 }
 
 #home-connected #pool_list {
@@ -1354,7 +1355,7 @@ input:checked + .slider:before {
 }
 
 .visual-tool-expanding-indication-hidden {
-  color: rgba(255, 255, 255, 0);
+  opacity: 0;
 }
 
 #expanding-indicators .hide-expand-buttons-container {
