@@ -316,6 +316,11 @@
   
   <!-- Repeated elements -->
   <div id="generic-pool-container" class="hidden">
+    <div id="contrat-period-container">
+      <span id="contract-start">03/04/2022 16:14:02</span>
+      <span>-</span>
+      <span id="contract-end">30/04/2022 16:14:02</span>
+    </div>
     <div id="pool-container">
       <div id="new-token-header">
         <div id="token-logo-container">
@@ -332,10 +337,15 @@
         <h3 class="first-token">Token pool stats</h3>
         <div class="stats-container">
           <ul>
-            <li><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span>
-            </li>
-            <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-            <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+            <li><span class="total-staked first">Total Staked</span><span class="total-staked-value">181184231</span></li>
+            <li><span class="total-staked second">Total Staked</span><span class="total-staked-value">181184231</span></li>
+            <li><span class="total-staked third">Total Staked</span><span class="total-staked-value">181184231</span></li>
+            <li><span class="token-total-rewards first">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+            <li><span class="token-total-rewards second">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+            <li><span class="token-total-rewards third">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+            <li><span class="total-token-farmed first">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+            <li><span class="total-token-farmed second">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+            <li><span class="total-token-farmed third">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
           </ul>
         </div>
       </div>
@@ -343,17 +353,22 @@
       <div id="contract-information">
         <div class="main-contract-information">
           <ul>
-            <li><span>Reward tokens</span><span class="reward-tokens-value"><img class="mini-icon"
-                  src="./assets/cheddar.svg" alt="cheddar icon"></span></li>
+            <li><span>Reward tokens</span><span class="reward-tokens-value">
+              <img class="mini-icon first" src="./assets/cheddar.svg" alt="cheddar icon">
+              <img class="mini-icon second" src="./assets/cheddar.svg" alt="cheddar icon">
+              <img class="mini-icon third" src="./assets/cheddar.svg" alt="cheddar icon">
+            </span></li>
             <li><span>Deposit Fee</span><span class="deposit-fee-value">$24156</span></li>
-            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value">2131516</span></li>
+            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value first">2131516</span></li>
+            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value second">2131516</span></li>
+            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value third">2131516</span></li>
           </ul>
         </div>
         <div class="main-contract-footer">
           <button id="harvest-button">HARVEST</button>
           <button id="activate">Activate</button>
           <div id="expanding-indicators">
-            <p class="visual-tool-expanding-indication-hidden hidden">Staking/Unstaking</p>
+            <p class="visual-tool-expanding-indication-hidden">Staking/Unstaking</p>
             <div class="hide-expand-buttons-container">
               <img class="hide-button hidden" src="./assets/hide-button.svg" alt="hide button">
               <img class="expand-button" src="./assets/expand-button.svg" alt="expand button">
@@ -368,7 +383,11 @@
         <h2 class="staking active">STAKE</h2>
       </div>
       <div class="main-staking">
-        <input type="text" placeholder="Enter amount">
+
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
+        </div>
         <div class="available-info">
           <span>Available to stake</span>
           <div class="amount-available stake">
@@ -376,10 +395,38 @@
             <span class="max-button hidden">max</span>
           </div>
         </div>
+
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="second-token-logo">
+        </div>
+        <div class="available-info">
+          <span>Available to stake</span>
+          <div class="amount-available stake">
+            <span class="value">0</span>
+            <span class="max-button hidden">max</span>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="third-token-logo">
+        </div>
+        <div class="available-info">
+          <span>Available to stake</span>
+          <div class="amount-available stake">
+            <span class="value">0</span>
+            <span class="max-button hidden">max</span>
+          </div>
+        </div>
+
         <button id="stake-button">STAKE</button>
       </div>
       <div class="main-unstaking hidden">
-        <input type="text" placeholder="Enter amount">
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
+        </div>
         <div class="available-info">
           <span>Available to unstake</span>
           <div class="amount-available unstake">
@@ -387,12 +434,37 @@
             <span class="max-button hidden">max</span>
           </div>
         </div>
+        
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
+        </div>
+        <div class="available-info">
+          <span>Available to unstake</span>
+          <div class="amount-available unstake">
+            <span class="value">0</span>
+            <span class="max-button hidden">max</span>
+          </div>
+        </div>
+
+        <div class="input-container">
+          <input type="text" placeholder="Enter amount">
+          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
+        </div>
+        <div class="available-info">
+          <span>Available to unstake</span>
+          <div class="amount-available unstake">
+            <span class="value">0</span>
+            <span class="max-button hidden">max</span>
+          </div>
+        </div>
+
         <button id="unstake-button">UNSTAKE</button>
       </div>
     </form>
   </div>
   <!-- Repeated elements -->
-  <div id="genericPool" style="display: none;" class="grid-item">
+  <div id="genericPool" style="display: none;">
     <form id="{id}" onkeydown="return event.key != 'Enter';">
       <div><br><strong style="color:#222">This is BETA software, use at your own risk.</strong></div>
       <div id="token-header" class="icon-header">

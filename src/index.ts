@@ -1493,8 +1493,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let unstaking = newPool.querySelector(".main-unstaking")! as HTMLElement;
   var contractParams = poolParams.contractParams;
 
-  newPool.addEventListener("mouseover", showOrHideElement(showAndHideVisibilityTool));
-  newPool.addEventListener("mouseout", showOrHideElement(showAndHideVisibilityTool));
+  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
+  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
 
   infoIcon.addEventListener("mouseover", showOrHideElement(poolStats));
   infoIcon.addEventListener("mouseout", showOrHideElement(poolStats));
@@ -1957,7 +1957,7 @@ async function addPoolList(poolList: Array<PoolParams>) {
 
 
 
-  qs("#pool_list").style.display = "grid"
+  qs("#pool_list").style.display = "flex"
 
   //console.log(qs("#pool_list").childElementCount)
   if (qs("#pool_list").childElementCount == 0) {
@@ -2167,6 +2167,14 @@ function showOrHideElement(elementToShow: HTMLElement) {
   return function (event: Event) {
     event.preventDefault();
     elementToShow.classList.toggle("hidden");
+  }
+}
+
+function paintOrUnPaintElement(previousColoringClass: string, elementToPaint: HTMLElement){
+  return function (event: Event){
+    event.preventDefault()
+    elementToPaint.classList.toggle("transparent")
+    elementToPaint.classList.toggle(previousColoringClass)
   }
 }
 

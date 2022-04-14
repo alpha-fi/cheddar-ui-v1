@@ -201,11 +201,12 @@ header nav a {
 }
 
 .grid > div {
-
-  background: #EDE7F6;
-  padding: 0.25rem;
-  border-radius: 12px;
-  max-width:  340px;
+  background-color: var(--second-new-grey);
+  display: flex;
+  align-items: center;
+  justify-items: start;
+  flex-direction: column;
+  justify-content: center;
 }
 
 #token-header {
@@ -1181,11 +1182,22 @@ input:checked + .slider:before {
 }
 
 /* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
+.transparent {
+  transition: all 0.5s linear;
+  transform: var(--light-gray);
+}
+
+#home-connected #pool_list {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
 
 .pool-container {
-  width: 400px;
+  width: 30%;
+  min-width: 350px;
   height: max-content;
-  border-width: 12px;    
+  border-width: 12px;
   border-radius: 8px!important;
 }
 
@@ -1227,6 +1239,7 @@ input:checked + .slider:before {
 }
 
 #pool-container {
+  width: 90%;
   padding: 10px;
   background: var(--white);
   box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
@@ -1335,9 +1348,13 @@ input:checked + .slider:before {
     border-radius: 4px;
 }
 
-.visual-tool-expanding-indication-hidden {
-  color: var(--light-gray);
+#expanding-indicators p {
   text-align: center;
+
+}
+
+.visual-tool-expanding-indication-hidden {
+  color: rgba(255, 255, 255, 0);
 }
 
 #expanding-indicators .hide-expand-buttons-container {
@@ -1354,6 +1371,7 @@ input:checked + .slider:before {
 #staking-unstaking-container {
   display: flex;
   flex-direction: column;
+  width: 90%;
 }
 
 .show-type-container {
