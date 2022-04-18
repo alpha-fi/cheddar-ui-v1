@@ -1,5 +1,7 @@
 * {
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
 }
 
 @import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
@@ -207,6 +209,8 @@ header nav a {
   justify-items: start;
   flex-direction: column;
   justify-content: center;
+  width: 90%;
+  max-width: 500px;
 }
 
 #token-header {
@@ -415,8 +419,7 @@ form,
   background   : #FFFFFF;
   box-shadow   : 0px 0px 20px rgba(220, 226, 235, 0.7);
   border-radius: 12px;
-  margin       : 1em;
-
+  /* margin       : 1em; */
 }
 
 .input-group-box {
@@ -1214,7 +1217,8 @@ input:checked + .slider:before {
 
   text-align: center;
   letter-spacing: 1.25px;
-  margin: 32px 0px;
+  margin-top: 32px;
+  margin-left: 2rem;
 }
 
 .pool-filter-container ul {
@@ -1241,16 +1245,22 @@ input:checked + .slider:before {
 
 #pool-container {
   width: 90%;
-  padding: 10px;
+  padding: 0px 10px;
   background: var(--white);
   box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
   border-radius: 12px;
-  margin: 1em;
+}
+
+#contrat-period-container {
+  margin: 9px;
+  font-size: 11px;
+  color: var(--new-gray);
 }
 
 #new-token-header {
   display: flex;
   justify-content: space-between;
+  padding-top: 14px;
 }
 
 #token-logo-container img {
@@ -1274,11 +1284,12 @@ input:checked + .slider:before {
 }
 
 #token-pool-stats {
-  width: 25.05em;
-  transform: translate(-22px, 10px);
+  width: 80vw;
+  max-width: 468px;
+  transform: translate(-22px, -60px);
   position: absolute;
   background-color: var(--white);
-  padding: 24px;
+  padding: 9.6px;
   border-top: 0px;
   border-right: 12px;
   border-bottom: 12px;
@@ -1286,6 +1297,10 @@ input:checked + .slider:before {
   border-color: var(--second-new-grey);
   border-style: solid;
   border-radius: 8px;
+}
+
+#token-pool-stats #new-token-header {
+  padding-top: 0px;
 }
 
 #token-pool-stats h3 {
@@ -1349,18 +1364,19 @@ input:checked + .slider:before {
     border-radius: 4px;
 }
 
-#expanding-indicators p {
-  text-align: center;
-
-}
-
 .visual-tool-expanding-indication-hidden {
+  text-align: center;
   opacity: 0;
 }
 
+#expanding-indicators {
+  height: 28px;
+}
+
 #expanding-indicators .hide-expand-buttons-container {
-  margin: 0px auto;
+  margin: 0 auto;
   width: max-content;
+  padding: 3px;
 }
 
 #expanding-indicators img {
