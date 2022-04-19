@@ -349,15 +349,16 @@
         <h3 class="first-token">Token pool stats</h3>
         <div class="stats-container">
           <ul>
-            <li><span class="total-staked first">Total Staked</span><span class="total-staked-value">181184231</span></li>
-            <li><span class="total-staked second">Total Staked</span><span class="total-staked-value">181184231</span></li>
-            <li><span class="total-staked third">Total Staked</span><span class="total-staked-value">181184231</span></li>
-            <li><span class="token-total-rewards first">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-            <li><span class="token-total-rewards second">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-            <li><span class="token-total-rewards third">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-            <li><span class="total-token-farmed first">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
-            <li><span class="total-token-farmed second">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
-            <li><span class="total-token-farmed third">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+            <div class="token-stats">
+              <li><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
+              <li><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
+              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+            </div>
           </ul>
         </div>
       </div>
@@ -365,20 +366,26 @@
       <div id="contract-information">
         <div class="main-contract-information">
           <ul>
-            <li><span>Reward tokens</span><span class="reward-tokens-value">
-              <img class="mini-icon first" src="./assets/cheddar.svg" alt="cheddar icon">
-              <img class="mini-icon second" src="./assets/cheddar.svg" alt="cheddar icon">
-              <img class="mini-icon third" src="./assets/cheddar.svg" alt="cheddar icon">
-            </span></li>
+            <li>
+              <span>Reward tokens</span>
+              <span class="reward-tokens-value">
+                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
+                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
+                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
+              </span>
+            </li>
             <li><span>Deposit Fee</span><span class="deposit-fee-value">$24156</span></li>
-            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value first">2131516</span></li>
-            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value second">2131516</span></li>
-            <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value third">2131516</span></li>
+            <div class="unclaimed-rewards-container">
+              <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value">2131516</span></li>
+            </div>
           </ul>
         </div>
         <div class="main-contract-footer">
           <button id="harvest-button">HARVEST</button>
-          <button id="activate">Activate</button>
+          <div id="activate">
+            <button class="activate">Activate</button>
+            <p id="depositWarning">0.05 NEAR storage deposit, gets refunded.</p>
+          </div>
         </div>
         <p class="visual-tool-expanding-indication-hidden">Staking/Unstaking</p>
       </div>
@@ -389,91 +396,52 @@
         <img class="expand-button" src="./assets/expand-button.svg" alt="expand button">
       </div>
     </div>
-    <form id="staking-unstaking-container" class="hidden">
-      <div class="show-type-container">
-        <h2 class="unstaking">UNSTAKE</h2>
-        <h2 class="staking active">STAKE</h2>
-      </div>
-      <div class="main-staking">
-
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
+    <div id="activated">
+      <form id="staking-unstaking-container" class="hidden">
+        <div class="show-type-container">
+          <button class="unstaking">UNSTAKE</button>
+          <button class="staking active">STAKE</button>
         </div>
-        <div class="available-info">
-          <span>Available to stake</span>
-          <div class="amount-available stake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
+        <div class="main-staking">
+  
+          <div class="token-input-container hidden">
+            <div class="input-container">
+              <input type="text" placeholder="Enter amount">
+              <div class="token-logo"></div>
+            </div>
+            <div class="available-info">
+              <span>Available to stake</span>
+              <div class="amount-available stake">
+                <span class="value">0</span>
+                <span class="max-button hidden">max</span>
+              </div>
+            </div>
           </div>
+  
         </div>
-
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="second-token-logo">
-        </div>
-        <div class="available-info">
-          <span>Available to stake</span>
-          <div class="amount-available stake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
-          </div>
-        </div>
-
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="third-token-logo">
-        </div>
-        <div class="available-info">
-          <span>Available to stake</span>
-          <div class="amount-available stake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
-          </div>
-        </div>
-
         <button id="stake-button">STAKE</button>
-      </div>
-      <div class="main-unstaking hidden">
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
-        </div>
-        <div class="available-info">
-          <span>Available to unstake</span>
-          <div class="amount-available unstake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
+  
+        <div class="main-unstaking hidden">
+  
+          <div class="token-input-container hidden">
+            <div class="input-container">
+              <input type="text" placeholder="Enter amount">
+              <div class="token-logo"></div>
+            </div>
+            <div class="available-info">
+              <span>Available to unstake</span>
+              <div class="amount-available unstake">
+                <span class="value">0</span>
+                <span class="max-button hidden">max</span>
+              </div>
+            </div>
           </div>
+  
         </div>
-        
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
-        </div>
-        <div class="available-info">
-          <span>Available to unstake</span>
-          <div class="amount-available unstake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
-          </div>
-        </div>
-
-        <div class="input-container">
-          <input type="text" placeholder="Enter amount">
-          <img src="./assets/near-logo-black.svg" alt="token logo" class="first-token-logo">
-        </div>
-        <div class="available-info">
-          <span>Available to unstake</span>
-          <div class="amount-available unstake">
-            <span class="value">0</span>
-            <span class="max-button hidden">max</span>
-          </div>
-        </div>
-
-        <button id="unstake-button">UNSTAKE</button>
-      </div>
-    </form>
+        <button id="unstake-button" class="hidden">UNSTAKE</button>
+  
+      </form>
+    </div>
   </div>
   <!-- Repeated elements -->
   <div id="genericPool" style="display: none;">

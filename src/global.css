@@ -197,7 +197,7 @@ header nav a {
 .grid {
   display: grid;
   align-items: center;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   grid-gap: 1rem;
   justify-items: start;
 }
@@ -1265,9 +1265,14 @@ input:checked + .slider:before {
 
 #token-logo-container img {
   width: 49.66px;
-    background-color: var(--white);
-    border-radius: 100%;
-    box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
+  background-color: var(--white);
+  border-radius: 100%;
+  box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
+}
+
+.token-stats {
+  margin: 3px;
+  padding: 7px;
 }
 
 .max-button {
@@ -1317,6 +1322,7 @@ input:checked + .slider:before {
 .stats-container li {
   display: flex;
   justify-content: space-between;
+  margin: 11px;
 }
 
 #contract-information {
@@ -1355,7 +1361,7 @@ input:checked + .slider:before {
     height: 30px;
 }
 
-#harvest-button, #stake-button, #unstake-button, #activate{
+#harvest-button, #stake-button, #unstake-button, #activate {
     background-color: var(--primary);
     color: var(--white);
     height: 36px;
@@ -1413,6 +1419,18 @@ input:checked + .slider:before {
 
 .main-staking, .main-unstaking {
   padding: 10px;
+  width: 100%;
+}
+
+.input-container {  
+  display: flex;
+  margin-top: 32px;
+  align-items: center;
+}
+
+.input-container .token-logo, .input-container .token-logo svg {
+  height: 56px;
+  background-color: var(--bg);
 }
 
 .amount-available {
@@ -1422,7 +1440,6 @@ input:checked + .slider:before {
 }
 
 #staking-unstaking-container input {
-  margin-top: 32px;
   height: 56px;
   width: 99%;
   background-color: var(--bg);

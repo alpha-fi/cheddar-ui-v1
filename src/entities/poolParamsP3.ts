@@ -1,8 +1,9 @@
 import { ContractParams } from "../contracts/contract-structs";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP3 } from "../contracts/p3-staking";
-import { P3ContractParams } from "../contracts/p3-structures";
+import { P3ContractParams, Status } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
+import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 
 //JSON compatible struct returned from get_contract_state
@@ -18,13 +19,10 @@ export class HtmlPoolParams {
 
 export class PoolResultParams {
     // All the numbers that are bigint are expected to be without any decimal points, and are converted when needed
-    real_rewards_per_day: bigint = 0n;
-    skip: Number = 0;
-    staked: bigint = 0n;
-    real: bigint = 0n;
+    staked: U128String[] = [];
+    farmedUnits: U128String = "";
+    farmed: U128String[] = [];
     // computed holds an integer number with no decimal places holding the info about the computed cheddar rewars calculated
-    computed: bigint = 0n;
-    previous_real: bigint = 0n;
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
@@ -92,9 +90,22 @@ export class PoolParamsP3 {
         this.metaData2 = await this.cheddarContract.ft_metadata()
     }
 
+    async setResultParams() {
+        const accName = this.contract.wallet.getAccountId()
+        let accountInfo: Status = await this.contract.status(accName)
+
+        this.resultParams.staked = accountInfo.stake_tokens
+        this.resultParams.farmedUnits = accountInfo.farmed_units
+        this.resultParams.farmed = accountInfo.farmed
+        this.resultParams.previous_timestamp = accountInfo.timestamp
+        // Contract saves previous_timestamp in seconds
+        this.resultParams.accName = accName
+    }
+
     async setAllExtraData() {
         await this.setContractParams();
         await this.setMetaData();
+        await this.setResultParams();
     }
 
     setTotalRewardsPerDay() {
@@ -162,38 +173,9 @@ export class PoolParamsP3 {
     }
 
     async getWalletAvailable() {
-
-        /*** Workaround Free Community Farm pool ***/
-
-        /** TODO - make dynamic **/
         let walletAvailable = 0
-        let walletAvailable2 = 0
-        
-        /** TODO - make dynamic **/
-        let balance = await this.tokenContract.ft_balance_of(this.resultParams.accName)
+        let balance = await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
         walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-
-        let balance2 = await this.cheddarContract.ft_balance_of(this.resultParams.accName)
-        walletAvailable2 = Number(convertToDecimals(balance2, this.metaData2.decimals, 5))
-
-        const walletBalances = [walletAvailable,walletAvailable2];   
-
-        return walletBalances
-        
-        
-
-        // if(this.contractParams.farming_rate) {
-            
-
-        // } else if(this.contractParams.farm_token_rates) {
-            
-        // }
-        // else {
-        //     let balance =  await this.contract.wallet.getAccountBalance()
-        //     walletAvailable = Number(yton(balance))
-        //     return walletAvailable
-        // }
-
-
+        return walletAvailable
     }
 }

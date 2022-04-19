@@ -219,7 +219,7 @@ function harvestClicked(poolParams: PoolParams, pool: HTMLElement) {
   }
 }
 
-function depositClicked(poolParams: PoolParams, pool: HTMLElement) {
+function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
   return async function (event) {
     event.preventDefault()
 
@@ -948,7 +948,7 @@ async function refreshRealRewardsLoopGeneric(poolParams: PoolParams, decimals: n
 
         qsa(".pool-meta.staked.amount").forEach((element, index) => {
 
-          console.log(index)
+          // console.log(index)
           element!.style.display = 'flex';
           element!.innerText = convertToDecimals(poolParams.resultParams.stake_tokens[index].toString(), poolParams.metaData.decimals, 7)
 
@@ -1178,7 +1178,7 @@ async function refreshPoolInfoOld(poolParams: PoolParams) {
 
 
   //update account & contract stats
-  if (wallet.isConnected()) {//DUDA no es redundante preguntar esto en esta instancia?
+  if (wallet.isConnected()) {
     let metaData = await poolParams.metaData;
 
     let contractParams = await poolParams.contract.get_contract_params()
@@ -1287,20 +1287,21 @@ function narwalletDisconnected(ev: CustomEvent) {
 //   qs("input.stake-amount") = e * 2
 // }
 
-function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputId: string, mul: boolean) {
+function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, mul: boolean) {
   return function (event: Event) {
     event.preventDefault()
     let value1 = (event.target as HTMLInputElement).value
-    let input2 = pool.querySelector(`#${inputId}`) as HTMLInputElement
+    let input2 = pool.querySelector(`${inputRoute}`) as HTMLInputElement
+    console.log("Dani no me mates " + value1)
     if (value1 == "") {
       input2.value = ""
-    } else if (isNaN(parseFloat(value1))) {
+    } 
+    //We use this || because we discovered the first option have issues recognizing if "number+string" is a number or not (example value1="1a")
+    else if (Number.isNaN(value1) || (value1 != parseFloat(value1).toString())) {
       input2.value = "Please Input a Number"
     } else {
       let rates = poolParams.contractParams.stake_rates
-      console.log(BigInt(rates[1]))
       const mulRate = Number(BigInt(rates[1]) * 100n / (BigInt(rates[0]))) / 100
-      console.log(mulRate.toString())
       const rate = mul ? mulRate : (mulRate ** -1)
       //Replace the "2" with proper variable
       input2.value = (Number(value1) * rate).toString()
@@ -1316,6 +1317,9 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
   newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
+
+  newPool.querySelector(".main-staking .token-input-container")?.classList.remove("hidden")
+  newPool.querySelector(".main-unstaking .token-input-container")?.classList.remove("hidden")
 
   let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
   stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
@@ -1394,44 +1398,103 @@ async function addPoolSingleOld(poolParams: PoolParams, newPool: HTMLElement): P
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  const walletBalances = await poolParams.getWalletAvailable()
 
-  newPool.querySelector("#second-near-balance span.near.balance")!.innerHTML = "0"
-  newPool.querySelectorAll(".multiple").forEach(element => {
-    element!.style.display = 'inherit';
-  })
-  newPool.querySelectorAll(".pool-meta.staked").forEach((element, index) => {
-    element!.style.display = 'flex';
-  })
-  newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element, index) => {
-    element!.style.display = 'flex';
-    // element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
-  })
-  newPool.querySelector("#stakeAmount1")!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, "stakeAmount2", true))
-  newPool.querySelector("#stakeAmount2")!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, "stakeAmount1", false))
-  newPool.querySelectorAll(".input-group-box").forEach((element, index) => {
-    element!.style.display = 'flex';
-  })
-  newPool.querySelectorAll("#wallet-available span.near.balance").forEach((element, index) => {
+  let stakingInputContainer= qs(".main-staking .token-input-container")
+  let unstakingInputContainer= qs(".main-unstaking .token-input-container")
+  console.log(unstakingInputContainer)
 
-    element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
+  let tokenSymbols = []
+  for(let i=0; i < poolParams.contractParams.stake_tokens.length; i++){
+    const stakeTokenContractName= poolParams.contractParams.stake_tokens[i]
+    const contract= new NEP141Trait(stakeTokenContractName)
+    contract.wallet= poolParams.contract.wallet
+    const walletAvailable= await contract.ft_balance_of(poolParams.resultParams.accName)
+    const metaData= await contract.ft_metadata()
+    const decimals= metaData.decimals
+    const walletAvailableDisplayable= convertToDecimals(walletAvailable, decimals, 7)
+    var newStakingInputContainer= stakingInputContainer.cloneNode(true) as HTMLElement
+    var newUnstakingInputContainer= unstakingInputContainer.cloneNode(true) as HTMLElement
 
-    let elems = newPool.querySelectorAll(`#wallet-available a .max`)
-    showOrHideMaxButton(walletBalances[index].toString(), elems[index] as HTMLElement)
 
-    let stakeAmountContainer = newPool.querySelector("#secondStakeAmount .near.balance") as HTMLElement
-    let input = newPool.querySelector("#stakeAmount2") as HTMLInputElement
-    elems[index].addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
+    newStakingInputContainer.classList.add(`${metaData.symbol}-input`)
+    newStakingInputContainer.classList.remove(`hidden`)
+    
+    newUnstakingInputContainer.classList.add(`${metaData.symbol}-input`)
+    newUnstakingInputContainer.classList.remove(`hidden`)
 
-  })
-  newPool.querySelectorAll(".second-token-name").forEach(element => {
-    element.innerHTML = poolParams.metaData2.symbol
-  })
+    let stakingInputLogoContainer= newStakingInputContainer.querySelector(".input-container .token-logo") as HTMLElement
+    let stakeAmountAvailableValue= newStakingInputContainer.querySelector(".amount-available .value")
+    let stakeMaxButton= newStakingInputContainer.querySelector(".stake .max-button") as HTMLElement
 
-  const rewardsPerDay = getRewardsPerDayMultiple(poolParams)
-  newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
-  newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[0].toString()).toString()
-  newPool.querySelector("#pool-stats #second-total-staked-container span.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[1].toString()).toString()
+    let unstakingInputLogoContainer= newUnstakingInputContainer.querySelector(".input-container .token-logo") as HTMLElement
+    let unstakeAmountAvailableValue= newUnstakingInputContainer.querySelector(".amount-available .value")
+    let unstakeMaxButton= newUnstakingInputContainer.querySelector(".unstake .max-button") as HTMLElement
+
+    // console.log(metaData.icon)
+
+    //This is made like this because metaData.icon is an <svg></svg>
+    if (metaData.icon != null){
+      stakingInputLogoContainer.innerHTML= `${metaData.icon}`
+      unstakingInputLogoContainer.innerHTML= `${metaData.icon}`
+    } else {
+      stakingInputLogoContainer.innerHTML= `${metaData.name}`
+      unstakingInputLogoContainer.innerHTML= `${metaData.name}`
+    }
+
+    stakeAmountAvailableValue!.innerHTML= walletAvailableDisplayable
+    unstakeAmountAvailableValue!.innerHTML= poolParams.resultParams.staked[i]
+
+    showOrHideMaxButton(walletAvailableDisplayable, stakeMaxButton)
+    showOrHideMaxButton(poolParams.resultParams.staked[i], unstakeMaxButton)
+
+
+    newPool.querySelector(".main-staking")!.append(newStakingInputContainer)
+    newPool.querySelector(".main-unstaking")!.append(newUnstakingInputContainer)
+    tokenSymbols.push(`${metaData.symbol}`)
+  }
+
+  // newPool.querySelectorAll(".pool-meta.staked").forEach((element, index) => {
+  //   element!.style.display = 'flex';
+  // })
+  // newPool.querySelectorAll(".pool-meta.staked.amount").forEach((element, index) => {
+  //   element!.style.display = 'flex';
+  //   // element!.innerText = convertToDecimals(poolParams.resultParams.staked[index].toString(), poolParams.metaData.decimals, 7)
+  // })
+
+  //I use this 2 for loops to match every combination of inputs without repeating itself
+  for (let i=0; i < tokenSymbols.length; i++){
+    for (let u=0; u < tokenSymbols.length; u++){
+      if (i != u){
+        newPool.querySelector(`.main-staking .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-staking .${tokenSymbols[u]}-input input`, true))
+        newPool.querySelector(`.main-unstaking .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstaking .${tokenSymbols[u]}-input input`, true))
+      }
+    }
+  }
+
+  // newPool.querySelector("#stakeAmount2")!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, "stakeAmount1", false))
+  // newPool.querySelectorAll(".input-group-box").forEach((element, index) => {
+  //   element!.style.display = 'flex';
+  // })
+  // newPool.querySelectorAll("#wallet-available span.near.balance").forEach((element, index) => {
+
+  //   element!.innerHTML = removeDecZeroes(walletBalances[index].toString());
+
+  //   let elems = newPool.querySelectorAll(`#wallet-available a .max`)
+  //   showOrHideMaxButton(walletBalances[index].toString(), elems[index] as HTMLElement)
+
+  //   let stakeAmountContainer = newPool.querySelector("#secondStakeAmount .near.balance") as HTMLElement
+  //   let input = newPool.querySelector("#stakeAmount2") as HTMLInputElement
+  //   elems[index].addEventListener("click", maxStakeClicked(stakeAmountContainer, input))
+
+  // })
+  // newPool.querySelectorAll(".second-token-name").forEach(element => {
+  //   element.innerHTML = poolParams.metaData2.symbol
+  // })
+
+  // const rewardsPerDay = getRewardsPerDayMultiple(poolParams)
+  // newPool.querySelector("#pool-stats #rewards-per-day")!.innerHTML = yton(rewardsPerDay.toString()).toString()
+  // newPool.querySelector("#pool-stats #total-staked-container span.near.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[0].toString()).toString()
+  // newPool.querySelector("#pool-stats #second-total-staked-container span.balance")!.innerHTML = yton(poolParams.contractParams.total_staked[1].toString()).toString()
 }
 
 /*
@@ -1460,23 +1523,30 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
   var metaData = poolParams.metaData;
   let singlePoolParams: PoolParams
+  let multiplePoolParams: PoolParamsP3
 
-  var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
+  var newPool = genericPoolElement.cloneNode(true) as HTMLElement;  
+
 
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
   newPool.classList.add("pool-container")
 
-  let iconElem = newPool.querySelector("#token-logo-container img")
+
+  let iconElem = newPool.querySelectorAll("#token-logo-container img")
   
-  iconElem!.setAttribute("src", metaData.icon || "");
+  iconElem.forEach(icon => {
+    icon!.setAttribute("src", metaData.icon || "");
+  });
+
+  // console.log("addPool: "+metaData.icon)
 
   if (poolParams instanceof PoolParams) {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
   } else {
-    //multiplePoolParams = poolParams
-    //await addPoolMultiple(multiplePoolParams, newPool)
+    multiplePoolParams = poolParams
+    await addPoolMultiple(multiplePoolParams, newPool)
   }
 
   // New code
@@ -1487,16 +1557,19 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   let stakingUnstakingContainer = newPool.querySelector("#staking-unstaking-container")! as HTMLElement;
-  let stakingButton = newPool.querySelector(".staking")! as HTMLElement;
-  let unstakingButton = newPool.querySelector(".unstaking")! as HTMLElement;
+  let openStakingSectionButton = newPool.querySelector(".staking")! as HTMLElement;
+  let openUnstakingSectionButton = newPool.querySelector(".unstaking")! as HTMLElement;
   let staking = newPool.querySelector(".main-staking")! as HTMLElement;
   let unstaking = newPool.querySelector(".main-unstaking")! as HTMLElement;
+  let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+  let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
   var contractParams = poolParams.contractParams;
 
   newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
   newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
 
   infoIcon.addEventListener("mouseover", showElement(poolStats));
+  poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
   expandPoolButton.addEventListener("click", showOrHideElement(expandPoolButton));
@@ -1507,16 +1580,66 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   hidePoolButton.addEventListener("click", showOrHideElement(hidePoolButton));
   hidePoolButton.addEventListener("click", showOrHideElement(stakingUnstakingContainer));
 
-  stakingButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-  stakingButton.addEventListener("click", setActiveColor);
-  stakingButton.addEventListener("click", cancelActiveColor(unstakingButton));
+  openStakingSectionButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+  openStakingSectionButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+  openStakingSectionButton.addEventListener("click", setActiveColor);
+  openStakingSectionButton.addEventListener("click", cancelActiveColor(openUnstakingSectionButton));
 
-  unstakingButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-  unstakingButton.addEventListener("click", setActiveColor);
-  unstakingButton.addEventListener("click", cancelActiveColor(stakingButton));
+  openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstaking, staking));
+  openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
+  openUnstakingSectionButton.addEventListener("click", setActiveColor);
+  openUnstakingSectionButton.addEventListener("click", cancelActiveColor(openStakingSectionButton));
 
+
+  let accountRegistered = null
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+
+  /*** Workaround Free Community Farm pool ***/
+  if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+    //console.log("NEARCON")
+    accountRegistered = await poolParams.tokenContract.storageBalance();
+  } else {
+    accountRegistered = await poolParams.contract.storageBalance();
+  }
+
+  let activateSection = newPool.querySelector("#activate") as HTMLElement
+  let activated = newPool.querySelector("#activated") as HTMLElement
+  let activateButton = newPool.querySelector(".activate") as HTMLElement
+  // console.log(activateSection)
+  // console.log(activated)
+  // console.log(activateButton)
+
+
+  console.log(accountRegistered)
+  if (accountRegistered == null) {
+    activateSection.classList.remove("hidden")
+    activated.classList.add("hidden")
+    activateButton.addEventListener("click", depositClicked(poolParams, newPool))
+    newPool.querySelector("#harvest-button")!.classList.add("hidden")
+    
+    if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+      newPool.querySelector("#depositWarning")!.innerHTML = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
+    
+    } else if (!isDateInRange){
+      activateButton.setAttribute("disabled", "disabled")
+      // activateSection.classList.add("hidden")
+      // activated.classList.remove("hidden")
+      // activateButton.classList.add("hidden")
+    }
+
+  } else {
+    console.log(!isDateInRange)
+    console.log("joputa")
+    activateSection.classList.add("hidden")
+    activated.classList.remove("hidden")
+    if (!isDateInRange) {
+      newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
+      const event= new Event ("click")
+      newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
+    }
+  }
+
   if(isDateInRange) {
     newPool.classList.add("active-pool")
   } else {
@@ -2037,7 +2160,7 @@ window.onload = async function () {
 
     }
     else {
-      console.log(window.localStorage.getItem("onlyStaked"))
+      // console.log(window.localStorage.getItem("onlyStaked"))
       window.localStorage.setItem("onlyStaked", "false")
       document.getElementById("switch").checked = false;
     }

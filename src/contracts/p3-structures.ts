@@ -28,7 +28,7 @@ export class P3ContractParams {
 export class Status {
     stake_tokens: U128String[] = [];
     farmed_units: U128String = "0";
-    farmed_tokens: U128String = "0";
+    farmed: U128String[] = [];
     timestamp: number = 0;
 }
 
