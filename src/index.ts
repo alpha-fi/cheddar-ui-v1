@@ -1292,7 +1292,6 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
     event.preventDefault()
     let value1 = (event.target as HTMLInputElement).value
     let input2 = pool.querySelector(`${inputRoute}`) as HTMLInputElement
-    console.log("Dani no me mates " + value1)
     if (value1 == "") {
       input2.value = ""
     } 
@@ -1366,6 +1365,19 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
 
+  let stakingInputLogoContainer= newPool.querySelector(".main-staking .token-logo") as HTMLElement
+  let unstakingInputLogoContainer= newPool.querySelector(".main-unstaking .token-logo") as HTMLElement
+
+  //DUDA este dato q onda? Cómo lo manejo?
+  // console.log(metaData.icon)
+  // if (metaData.icon != null){
+  //   stakingInputLogoContainer.innerHTML= `${metaData.icon}`
+  //   unstakingInputLogoContainer.innerHTML= `${metaData.icon}`
+  // } else {
+  //   stakingInputLogoContainer.innerHTML= `${metaData.name}`
+  //   unstakingInputLogoContainer.innerHTML= `${metaData.name}`
+  // }
+
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
   if(isDateInRange) {
@@ -1401,7 +1413,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
   let stakingInputContainer= qs(".main-staking .token-input-container")
   let unstakingInputContainer= qs(".main-unstaking .token-input-container")
-  console.log(unstakingInputContainer)
+  // console.log(unstakingInputContainer)
 
   let tokenSymbols = []
   for(let i=0; i < poolParams.contractParams.stake_tokens.length; i++){
@@ -1551,6 +1563,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   // New code
   // let poolContainer = newPool.querySelector("#generic-pool-container")! as HTMLElement;
+  let showContractStart = newPool.querySelector("#contract-start")
+  let showContractEnd = newPool.querySelector("#contract-end")
   let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
   let infoIcon = newPool.querySelector("#new-token-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
@@ -1567,6 +1581,9 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
   newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
+
+  showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
+  showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()//DUDA está bien cargado esto?
 
   infoIcon.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseover", showElement(poolStats));
@@ -1611,7 +1628,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   // console.log(activateButton)
 
 
-  console.log(accountRegistered)
   if (accountRegistered == null) {
     activateSection.classList.remove("hidden")
     activated.classList.add("hidden")
@@ -1629,8 +1645,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     }
 
   } else {
-    console.log(!isDateInRange)
-    console.log("joputa")
     activateSection.classList.add("hidden")
     activated.classList.remove("hidden")
     if (!isDateInRange) {

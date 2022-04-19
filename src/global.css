@@ -459,7 +459,7 @@ input,
   text-align: right;
 }
 
-button {
+.button {
   font-weight: 400;
   font-size: 16px;
   height: 48px;
@@ -1237,15 +1237,18 @@ input:checked + .slider:before {
   color: var(--bg);
 }
 
-#generic-pool-container, #pool-container{
+#generic-pool-container, #pool-container, #activated {
   border-color: var(--second-new-grey);
   border-style: solid;
   background-color: var(--white);
 }
 
 #pool-container {
-  width: 90%;
   padding: 0px 10px;
+}
+
+#pool-container, #activated {
+  width: 90%;
   background: var(--white);
   box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
   border-radius: 12px;
@@ -1261,6 +1264,10 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   padding-top: 14px;
+}
+
+#token-logo-container {
+  height: 50px;
 }
 
 #token-logo-container img {
@@ -1289,6 +1296,7 @@ input:checked + .slider:before {
 }
 
 #token-pool-stats {
+  z-index: 1;
   width: 80vw;
   max-width: 468px;
   transform: translate(-22px, -60px);
@@ -1361,7 +1369,7 @@ input:checked + .slider:before {
     height: 30px;
 }
 
-#harvest-button, #stake-button, #unstake-button, #activate {
+#harvest-button, #stake-button, #unstake-button, .activate {
     background-color: var(--primary);
     color: var(--white);
     height: 36px;
@@ -1377,6 +1385,7 @@ input:checked + .slider:before {
 
 #expanding-indicators {
   height: 28px;
+  transform: translateY(3px);
 }
 
 #expanding-indicators .hide-expand-buttons-container {
@@ -1394,25 +1403,25 @@ input:checked + .slider:before {
 #staking-unstaking-container {
   display: flex;
   flex-direction: column;
-  width: 90%;
 }
 
 .show-type-container {
   width: 100%;
 }
 
-.show-type-container h2{
+.show-type-container button {
   display: inline-block;
   width: 49%;
   text-align: center;
-  padding: 16px 0px;
+  font-weight: 600;
   color: var(--primary-low);
+  padding: 16px 0px;
   border-width: 0 1px 2px 0;
   border-color: var(--light-gray);
   border-style: solid;
 }
 
-.show-type-container h2.active {
+.show-type-container button.active {
   color: var(--primary);
   border-color: var(--primary);
 }

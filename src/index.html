@@ -118,7 +118,7 @@
         </div>
         <div class="pool-meta earned amount">
           <div id="cheddar-balance">0</div>
-          <div><button id="harvest-not-connected" type="submit">Harvest</button></div>
+          <div><button class="button" id="harvest-not-connected" type="submit">Harvest</button></div>
         </div>
         <div class="pool-meta staked">
           <div class="">NEAR</div>
@@ -147,7 +147,7 @@
               onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off" disabled>
             <span class="token-name">NEAR</span>
           </div>
-          <button class="hwJKVX" type="submit" disabled>Stake</button>
+          <button class="hwJKVX button" type="submit" disabled>Stake</button>
         </fieldset>
       </form>
 
@@ -240,7 +240,7 @@
             <span id="wallet-available" class="bold large nearico"></span>
             <span>Available NEAR wallet</span>
           </div>
-          <div class="line-right"><button type="button" id="sign-out">Sign Out</button> </div>
+          <div class="line-right"><button class="button" type="button" id="sign-out">Sign Out</button> </div>
       </article>
 
       <article>
@@ -265,28 +265,28 @@
       <h3 id="title">Sending transaction...</h3>
       <div class="spinner"></div>
       <p id="msg">wait...</p>
-      <!--<button type="button" id="cancel" class="hollow">close</button>-->
+      <!--<button type="button" id="cancel" class="hollow button">close</button>-->
     </div>
 
     <div id="success-box" class="box popup" style="display:none">
       <h3 id="title">Confirmed</h3>
       <img class="confirmed"></img>
       <p id="msg">Confirmed</p>
-      <button type="button" id="cancel" class="hollow close-popup">Close</button>
+      <button type="button" id="cancel" class="hollow close-popup button">Close</button>
     </div>
 
     <div id="message-box" class="box popup" style="display:none">
       <h3 id="title">Cheddar Token</h3>
       <img class="icon" src='assets/info.svg' />
       <p id="msg">Information</p>
-      <button type="button" id="cancel" class="hollow close-popup">Close</button>
+      <button type="button" id="cancel" class="hollow close-popup button">Close</button>
     </div>
 
     <div id="error-box" class="box popup" style="display:none">
       <h3 id="title">Error</h3>
       <img class="icon" src="assets/warning.svg"></img>
       <p id="msg">message</p>
-      <button type="button" id="cancel" class="hollow close-popup">Close</button>
+      <button type="button" id="cancel" class="hollow close-popup button">Close</button>
     </div>
 
     <div id="terms" class="box popup" style="display:none">
@@ -305,7 +305,7 @@
         </li>
       </ol>
       </p>
-      <button type="button" id="cancel" class="hollow close-popup">Close</button>
+      <button type="button" id="cancel" class="hollow close-popup button">Close</button>
     </div>
 
   </div>
@@ -381,9 +381,9 @@
           </ul>
         </div>
         <div class="main-contract-footer">
-          <button id="harvest-button">HARVEST</button>
+          <button class="button" id="harvest-button">HARVEST</button>
           <div id="activate">
-            <button class="activate">Activate</button>
+            <button class="activate button">Activate</button>
             <p id="depositWarning">0.05 NEAR storage deposit, gets refunded.</p>
           </div>
         </div>
@@ -419,7 +419,7 @@
           </div>
   
         </div>
-        <button id="stake-button">STAKE</button>
+        <button class="button" id="stake-button">STAKE</button>
   
         <div class="main-unstaking hidden">
   
@@ -438,7 +438,7 @@
           </div>
   
         </div>
-        <button id="unstake-button" class="hidden">UNSTAKE</button>
+        <button id="unstake-button" class="hidden button">UNSTAKE</button>
   
       </form>
     </div>
@@ -476,7 +476,7 @@
         </div>
         <div class="pool-meta earned amount">
           <div id="cheddar-balance">0</div>
-          <div><button id="harvest" type="submit">Harvest</button></div>
+          <div><button class="button" id="harvest" type="submit">Harvest</button></div>
         </div>
         <div class="pool-meta staked">
           <div class="token-name">NEAR</div>
@@ -524,8 +524,8 @@
           </div>
           <div class="pool-meta actions">
             <div class="hQrVZb">
-              <button id="unstake" class="gAaTZf" type="submit">UnStake</button>
-              <button id="stake" class="hwJKVX" type="submit">Stake</button>
+              <button id="unstake" class="gAaTZf button" type="submit">UnStake</button>
+              <button id="stake" class="hwJKVX button" type="submit">Stake</button>
             </div>
           </div>
           <div class="disclaimer">
@@ -535,7 +535,7 @@
       </div>
       <div id="deposit" style="">
         <br><br>
-        <button class="activate" type="submit">Activate</button>
+        <button class="activate button" type="submit">Activate</button>
         <p id="depositWarning">0.05 NEAR storage deposit, gets refunded.</p>
         <br>
       </div>
