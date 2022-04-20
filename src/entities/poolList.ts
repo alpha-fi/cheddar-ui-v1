@@ -22,7 +22,7 @@ async function generatePoolList(wallet: WalletInterface) {
         let poolParams
         if(nearConfig.farms[i].poolType == "multiple") {
             contract = new StakingPoolP3(nearConfig.farms[i].contractName);
-            poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+            poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, wallet);
         } else {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
             poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);

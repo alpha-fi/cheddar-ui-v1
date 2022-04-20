@@ -174,12 +174,12 @@ export class PoolParams {
         /*** Workaround Free Community Farm pool ***/
 
         /** TODO - make dynamic **/
-        let walletAvailable = 0
+        // let walletAvailable = 0
         // let walletAvailable2 = 0
         // console.log(this.contract.wallet.getAccountId())
-        let balance = await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
-        walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-        return walletAvailable
+        return await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
+        // walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+        // return walletAvailable
 
         // else {
         //     let balance =  await this.contract.wallet.getAccountBalance()

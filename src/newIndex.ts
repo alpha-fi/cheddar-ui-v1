@@ -24,8 +24,8 @@ let hidePoolButton = qs("#generic-pool-container .hide-button")! as HTMLElement;
 let stakingUnstakingContainer = qs("#generic-pool-container #staking-unstaking-container")! as HTMLElement;
 let stakingButton = qs("#generic-pool-container .staking")! as HTMLElement;
 let unstakingButton = qs("#generic-pool-container .unstaking")! as HTMLElement;
-let staking = qs("#generic-pool-container .main-staking")! as HTMLElement;
-let unstaking = qs("#generic-pool-container .main-unstaking")! as HTMLElement;
+let staking = qs("#generic-pool-container .main-stake")! as HTMLElement;
+let unstaking = qs("#generic-pool-container .main-unstake")! as HTMLElement;
 
 poolContainer.addEventListener("mouseover", showOrHideElement(showAndHideVisibilityTool));
 poolContainer.addEventListener("mouseout", showOrHideElement(showAndHideVisibilityTool));

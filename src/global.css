@@ -1430,7 +1430,7 @@ input:checked + .slider:before {
   border-color: var(--primary);
 }
 
-.main-staking, .main-unstaking {
+.main-stake, .main-unstake {
   padding: 10px;
   width: 100%;
 }

@@ -27,72 +27,79 @@ export class PoolResultParams {
     tokenDecimals: Number = 0;
     accName: string = '';
 
-    getDisplayableComputed() {
-        return convertToDecimals(this.computed.toString(), 24, 7)
-    }
-
-    getCurrentCheddarRewards() {
-        return yton(this.computed.toString())
-    }
-
-    getCurrentDisplayableCheddarRewards() {
-        return convertToDecimals(this.computed.toString(), 24, 7)
-    }
-
     getDisplayableAccountName() {
         return this.accName.length > 22 ? this.accName.slice(0, 10) + ".." + this.accName.slice(-10) : this.accName
     }
 
     addStaked(amount: string) {
-        this.staked = this.staked + BigInt(amount)
+        // this.staked = this.staked + BigInt(amount)
     }
 }
 
+export interface ContractData {
+    contract: NEP141Trait
+    metaData: FungibleTokenMetadata
+    balance: U128String
+}
+
 export class PoolParamsP3 {
+    wallet: WalletInterface
     index: number
     type: string
     html: HtmlPoolParams;
-    contract: StakingPoolP3
+    stakingContract: StakingPoolP3
     contractParams: P3ContractParams;
     cheddarContract: NEP141Trait;
-    tokenContract: NEP141Trait;
+    // tokenContract: NEP141Trait;
+    // stakeTokenContractList: NEP141Trait[] = [];
+    stakeTokenContractList: ContractData[] = [];
     metaData: FungibleTokenMetadata;
     metaData2: FungibleTokenMetadata;
     resultParams: PoolResultParams;
 
-    constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP3, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface) {
+    constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, wallet: WalletInterface) {
+        this.wallet = wallet
         this.index = index;
         this.type = type;
         this.html = html;
-        this.contract = contract;
+        this.stakingContract = stakingContract;
         this.contractParams = new P3ContractParams();
         this.cheddarContract= cheddarContract;
-        this.tokenContract = tokenContract;
-        this.resultParams = resultParams;
+        // this.tokenContract = tokenContract;
+        this.resultParams = new PoolResultParams();
         this.metaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
 
-        this.contract.wallet = wallet;
+        this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
-        this.tokenContract.wallet = wallet;
+        // this.tokenContract.wallet = wallet;
+    }
+
+    async setStakeTokenContractList() {
+        this.stakeTokenContractList = []
+        for(let i = 0; i < this.contractParams.stake_tokens.length; i++) {
+            const stakeTokenContractName= this.contractParams.stake_tokens[i]
+            let contract = new NEP141Trait(stakeTokenContractName)
+            contract.wallet = this.wallet
+            let metaData = await contract.ft_metadata()
+            if(metaData.symbol == "STNEAR") {
+                metaData.symbol = "stNEAR";
+            }
+            this.stakeTokenContractList.push({
+                contract,
+                metaData,
+                balance: "0"
+            })
+        }
     }
 
     async setContractParams() {
-        this.contractParams = await this.contract.get_contract_params();
-    }
-
-    async setMetaData() {
-        this.metaData = await this.tokenContract.ft_metadata()
-        if(this.metaData.symbol == "STNEAR") {
-            this.metaData.symbol = "stNEAR";
-        }
-
-        this.metaData2 = await this.cheddarContract.ft_metadata()
+        this.contractParams = await this.stakingContract.get_contract_params();
     }
 
     async setResultParams() {
-        const accName = this.contract.wallet.getAccountId()
-        let accountInfo: Status = await this.contract.status(accName)
+        const accName = this.stakingContract.wallet.getAccountId()
+        let accountInfo: Status = await this.stakingContract.status(accName)
 
         this.resultParams.staked = accountInfo.stake_tokens
         this.resultParams.farmedUnits = accountInfo.farmed_units
@@ -104,7 +111,7 @@ export class PoolParamsP3 {
 
     async setAllExtraData() {
         await this.setContractParams();
-        await this.setMetaData();
+        await this.setStakeTokenContractList();
         await this.setResultParams();
     }
 
@@ -172,10 +179,22 @@ export class PoolParamsP3 {
         }
     }
 
-    async getWalletAvailable() {
-        let walletAvailable = 0
-        let balance = await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
-        walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+    // async getWalletAvailableOLD() {
+    //     let walletAvailable = 0
+    //     let balance = await this.tokenContract.ft_balance_of(this.stakingContract.wallet.getAccountId())
+    //     walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
+    //     return walletAvailable
+    // }
+
+    async getWalletAvailable(): Promise<U128String[]> {
+        let walletAvailable: U128String[] = []
+        const accName = await this.wallet.getAccountId()
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const contractData = this.stakeTokenContractList[i]
+            let balance = await contractData.contract.ft_balance_of(accName)
+            contractData.balance = balance
+            walletAvailable.push(balance)
+        }
         return walletAvailable
     }
 }
