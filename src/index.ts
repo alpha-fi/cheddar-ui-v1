@@ -1570,7 +1570,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
-  let stakingUnstakingContainer = newPool.querySelector("#staking-unstaking-container")! as HTMLElement;
+  let stakingUnstakingContainer = newPool.querySelector("#activated")! as HTMLElement;
   let openStakingSectionButton = newPool.querySelector(".staking")! as HTMLElement;
   let openUnstakingSectionButton = newPool.querySelector(".unstaking")! as HTMLElement;
   let staking = newPool.querySelector(".main-staking")! as HTMLElement;

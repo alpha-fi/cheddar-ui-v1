@@ -1400,6 +1400,10 @@ input:checked + .slider:before {
   background-color: var(--light-gray);
 }
 
+#activated {
+  margin-bottom: 20px;
+}
+
 #staking-unstaking-container {
   display: flex;
   flex-direction: column;
