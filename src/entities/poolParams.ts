@@ -3,6 +3,7 @@ import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
+import { RewardTokenIconData } from "./genericData";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -27,6 +28,10 @@ export class PoolResultParams {
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
+
+    hasStakedTokens() {
+        return this.staked > 0n
+    }
 
     getDisplayableComputed() {
         return convertToDecimals(this.computed.toString(), 24, 7)
@@ -111,6 +116,16 @@ export class PoolParams {
         await this.setResultParams();
     }
 
+    async getRewardTokenIconData(): Promise<RewardTokenIconData[]> {
+        const cheddarMetaData = await this.cheddarContract.ft_metadata()
+        const src = cheddarMetaData.icon ? cheddarMetaData.icon : cheddarMetaData.name
+        return [{
+            isSvg: src.includes("<svg"),
+            src: src,
+            alt: cheddarMetaData.name 
+        }]
+    }
+
     setTotalRewardsPerDay() {
 
 
@@ -170,23 +185,11 @@ export class PoolParams {
     }
 
     async getWalletAvailable() {
-
-        /*** Workaround Free Community Farm pool ***/
-
-        /** TODO - make dynamic **/
-        // let walletAvailable = 0
-        // let walletAvailable2 = 0
-        // console.log(this.contract.wallet.getAccountId())
         return await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
-        // walletAvailable = Number(convertToDecimals(balance, this.metaData.decimals, 5))
-        // return walletAvailable
+    }
 
-        // else {
-        //     let balance =  await this.contract.wallet.getAccountBalance()
-        //     walletAvailable = Number(yton(balance))
-        //     return walletAvailable
-        // }
-
-
+    async getWalletAvailableDisplayable() {
+        const available = await this.getWalletAvailable()
+        return convertToDecimals(available, this.metaData.decimals, 7)
     }
 }

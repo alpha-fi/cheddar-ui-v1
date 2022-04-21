@@ -5,6 +5,7 @@ import { P3ContractParams, Status } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
+import { RewardTokenIconData } from "./genericData";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -26,6 +27,14 @@ export class PoolResultParams {
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
+
+    hasStakedTokens() {
+        let hasStakedTokens = false
+        for(let i = 0; i < this.staked.length; i++) {
+            hasStakedTokens ||= BigInt(this.staked[i]) > 0n
+        }
+        return hasStakedTokens
+    }
 
     getDisplayableAccountName() {
         return this.accName.length > 22 ? this.accName.slice(0, 10) + ".." + this.accName.slice(-10) : this.accName
@@ -53,6 +62,7 @@ export class PoolParamsP3 {
     // tokenContract: NEP141Trait;
     // stakeTokenContractList: NEP141Trait[] = [];
     stakeTokenContractList: ContractData[] = [];
+    farmTokenContractList: ContractData[] = [];
     metaData: FungibleTokenMetadata;
     metaData2: FungibleTokenMetadata;
     resultParams: PoolResultParams;
@@ -75,22 +85,31 @@ export class PoolParamsP3 {
         // this.tokenContract.wallet = wallet;
     }
 
-    async setStakeTokenContractList() {
-        this.stakeTokenContractList = []
-        for(let i = 0; i < this.contractParams.stake_tokens.length; i++) {
-            const stakeTokenContractName= this.contractParams.stake_tokens[i]
-            let contract = new NEP141Trait(stakeTokenContractName)
+    async getTokenContractList(contractNameArray: string[]): Promise<ContractData[]> {
+        let tokenContractList = []
+        for(let i = 0; i < contractNameArray.length; i++) {
+            const tokenContractName= contractNameArray[i]
+            let contract = new NEP141Trait(tokenContractName)
             contract.wallet = this.wallet
             let metaData = await contract.ft_metadata()
             if(metaData.symbol == "STNEAR") {
                 metaData.symbol = "stNEAR";
             }
-            this.stakeTokenContractList.push({
+            tokenContractList.push({
                 contract,
                 metaData,
                 balance: "0"
             })
         }
+        return tokenContractList
+    }
+
+    async setStakeTokenContractList() {
+        this.stakeTokenContractList = await this.getTokenContractList(this.contractParams.stake_tokens)
+    }
+
+    async setFarmTokenContractList() {
+        this.farmTokenContractList = await this.getTokenContractList(this.contractParams.farm_tokens)   
     }
 
     async setContractParams() {
@@ -110,9 +129,26 @@ export class PoolParamsP3 {
     }
 
     async setAllExtraData() {
-        await this.setContractParams();
-        await this.setStakeTokenContractList();
-        await this.setResultParams();
+        await this.setContractParams()
+        await this.setStakeTokenContractList()
+        await this.setFarmTokenContractList()
+        await this.setResultParams()
+    }
+
+    getRewardTokenIconData(): RewardTokenIconData[] {
+        let dataArray: RewardTokenIconData[] = []
+        for(let i = 0; i < this.farmTokenContractList.length; i++) {
+            const farmTokenContract = this.farmTokenContractList[i]
+            const src = farmTokenContract.metaData.icon ? farmTokenContract.metaData.icon : farmTokenContract.metaData.name
+            const data = {
+                isSvg: src.includes("<svg"),
+                src: src,
+                alt: this.metaData.name ? this.metaData.name : "NoName" 
+            }
+            dataArray.push(data)
+        }
+        return dataArray
+        
     }
 
     setTotalRewardsPerDay() {

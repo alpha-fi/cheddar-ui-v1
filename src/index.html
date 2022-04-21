@@ -315,6 +315,7 @@
   
   
   <!-- Repeated elements -->
+  <!-- Start generic pool container -->
   <div id="generic-pool-container" class="hidden">
     <div id="contrat-period-container">
       <span id="contract-start">03/04/2022 16:14:02</span>
@@ -368,11 +369,9 @@
           <ul>
             <li>
               <span>Reward tokens</span>
-              <span class="reward-tokens-value">
-                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
-                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
-                <img class="mini-icon" src="./assets/cheddar.svg" alt="cheddar icon">
-              </span>
+              <div class="reward-tokens-value" style="display: inline-block;">
+                <!-- Reward tokens value gets filled programmatically -->
+              </div>
             </li>
             <li><span>Deposit Fee</span><span class="deposit-fee-value">$24156</span></li>
             <div class="unclaimed-rewards-container">
@@ -415,7 +414,9 @@
       </form>
     </div>
   </div>
+  <!-- Ends generic pool container -->
 
+  <!-- Starts generic token input container -->
   <div class="generic-token-input-container hidden">
     <div class="input-container">
       <input type="text" placeholder="Enter amount">
@@ -430,6 +431,11 @@
       </div>
     </div>
   </div>
+  <!-- Ends generic token input container -->
+
+  <!-- Starts generic mini icon -->
+  <img class="generic-mini-icon hidden" src="./assets/cheddar.svg" alt="cheddar icon">
+  <!-- Ends generic mini icon -->
   
   <!-- DUDA ya borro esto? -->
   <!-- Repeated elements OLD -->
