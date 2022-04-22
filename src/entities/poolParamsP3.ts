@@ -40,8 +40,9 @@ export class PoolResultParams {
         return this.accName.length > 22 ? this.accName.slice(0, 10) + ".." + this.accName.slice(-10) : this.accName
     }
 
-    addStaked(amount: string) {
+    addStaked(amount: U128String[]) {
         // this.staked = this.staked + BigInt(amount)
+        // [2938742348, 912387912384] + [92382, 23746]
     }
 }
 

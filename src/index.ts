@@ -12,7 +12,7 @@ import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narw
 import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 //qs/qsa are shortcut for document.querySelector/All
-import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText } from './util/document';
+import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
 import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
 import { PoolParams, PoolResultParams } from './entities/poolParams';
@@ -183,35 +183,47 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       if (!isDateInRange) throw Error("Pools is Closed.")
       
       const walletAvailableList = await poolParams.getWalletAvailable()
+      const stakeTokenContractList = poolParams.stakeTokenContractList
+      let amountValues = []
+      let inputArray = []
+      let stakedAmountWithSymbol = []
       for(let i = 0; i < stakeContainerList.length; i++) {
-
-        // PATCH since there is one more input-container. Remove when that is removed
-        if(i != 0) {
-          let stakeContainer = stakeContainerList[i]
-          let stakeInput = stakeContainer.querySelector("input") as HTMLInputElement
-          stakeInput.setAttribute("disabled", "disabled")
-          let stakeAmount = parseFloat(stakeInput.value)
-          if (isNaN(stakeAmount)) {
-            throw Error("Please Input a Number.")
-          }
-
-
+        let stakeContainer = stakeContainerList[i]
+        let stakeInput = stakeContainer.querySelector("input") as HTMLInputElement
+        inputArray.push(stakeInput)
+        let stakeAmount = parseFloat(stakeInput.value)
+        if (isNaN(stakeAmount)) {
+          throw Error("Please Input a Number.")
         }
+        const metaData = stakeTokenContractList[i].metaData
+        const stakeAmountBN: BigInt = BigInt(convertToBase(stakeAmount.toString(), metaData.decimals.toString()))
+        if(BigInt(walletAvailableList[i]) < stakeAmountBN) {
+          const balanceDisplayable = convertToDecimals(walletAvailableList[i], metaData.decimals, 7)
+          throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to Stake.`)
+        }
+        amountValues.push(stakeAmountBN)
+        stakedAmountWithSymbol.push(`${stakeAmount} ${metaData.symbol}`)
       }
+      qsaAttribute("input", "disabled", "disabled")
       //get amount
       const min_deposit_amount = 1;
       
-
-      
-      if (stakeAmount > walletAvailable) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
-      await poolParams.tokenContract.ft_transfer_call(poolParams.stakingContract.contractId, convertToBase(stakeAmount.toString(), poolParams.metaData.decimals.toString()), "to farm")
+      let promises = []
+      for(let i = 0; i < amountValues.length; i++) {
+        promises.push(poolParams.stakingContract.stake(amountValues[i].toString()))
+      }
+      await Promise.all(promises)            
 
       //clear form
-      stakeInput.value = ""
-      poolParams.resultParams.addStaked(ntoy(stakeAmount))
-      await refreshPoolInfo(poolParams, newPool)
+      for(let i = 0; i < inputArray.length; i++) {
+        inputArray[i].value = ""  
+      }
+      
+      // TODO MARTIN
+      // poolParams.resultParams.addStaked(amountValues)
+      // await refreshPoolInfoMultiple(poolParams, newPool)
 
-      showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
+      showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
 
     }
     catch (ex) {

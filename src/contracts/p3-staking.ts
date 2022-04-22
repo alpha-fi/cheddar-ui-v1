@@ -37,7 +37,7 @@ export class StakingPoolP3 extends SmartContract {
 
     /// Stake attached &NEAR and returns total amount of stake.
     // QUESTION: is it implemented yet?
-    stake(amount: number): Promise<U128String> {
+    stake(amount: U128String): Promise<U128String> {
         return this.call("stake", {}, TGas(25), amount)
     }
 
