@@ -5,7 +5,7 @@ import { P3ContractParams, Status } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
-import { RewardTokenIconData } from "./genericData";
+import { RewardTokenIconData, UnclaimedRewardsData } from "./genericData";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -146,6 +146,22 @@ export class PoolParamsP3 {
                 alt: this.metaData.name ? this.metaData.name : "NoName" 
             }
             dataArray.push(data)
+        }
+        return dataArray
+        
+    }
+
+    getUnclaimedRewardsData(): UnclaimedRewardsData[] {
+        let dataArray: UnclaimedRewardsData[] = []
+        let iconDataArray = this.getRewardTokenIconData()
+        
+        for(let i = 0; i < iconDataArray.length; i++) {
+            const iconData = iconDataArray[i]
+        
+            dataArray.push({
+                amount: this.resultParams.farmedUnits[i],
+                iconData: iconData
+            })
         }
         return dataArray
         

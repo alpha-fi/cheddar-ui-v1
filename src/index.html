@@ -351,14 +351,13 @@
         <div class="stats-container">
           <ul>
             <div class="token-stats">
-              <li><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
-              <li><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
-              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-              <li><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
-              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
-              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
-              <li><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+
+              <li class="total-staked-row"><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
+
+              <li class="token-total-rewards-row"><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+
+              <li class="total-token-farmed-row"><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>              
+
             </div>
           </ul>
         </div>
@@ -375,7 +374,14 @@
             </li>
             <li><span>Deposit Fee</span><span class="deposit-fee-value">$24156</span></li>
             <div class="unclaimed-rewards-container">
-              <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-value">2131516</span></li>
+              <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-dollars-value">2131516</span></li>
+              <!--WIP-->
+              <div class="unclaimed-rewards-info-container hidden">
+                <div class="generic-unclaimed-rewards-row">
+                  <span class="amount">number</span>
+                  <span class="icon">icon</span>
+                </div>
+              </div>
             </div>
           </ul>
         </div>
@@ -391,8 +397,8 @@
     </div>
     <div id="expanding-indicators">
       <div class="hide-expand-buttons-container">
-        <img class="hide-button hidden" src="./assets/hide-button.svg" alt="hide button">
-        <img class="expand-button" src="./assets/expand-button.svg" alt="expand button">
+        <img class="toggle-display hide-button hidden" src="./assets/hide-button.svg" alt="hide button">
+        <img class="toggle-display expand-button hidden" src="./assets/expand-button.svg" alt="expand button">
       </div>
     </div>
     <div id="activated" class="hidden">
@@ -436,7 +442,29 @@
   <!-- Starts generic mini icon -->
   <img class="generic-mini-icon hidden" src="./assets/cheddar.svg" alt="cheddar icon">
   <!-- Ends generic mini icon -->
-  
+
+
+  <!-- Starts generic total-staked-row -->
+  <li class="generic-total-staked-row hidden"><span class="total-staked">Total Staked</span><span class="total-staked-value">181184231</span></li>
+  <!-- Ends generic total-staked-row -->
+
+
+  <!-- Starts generic token-total-row -->
+  <li class="generic-token-total-rewards-row hidden"><span class="token-total-rewards">Rewards per day</span><span class="token-total-rewards-value">1234</span></li>
+  <!-- Ends generic token-total-row -->
+
+
+  <!-- Starts generic total-token-farmed-row -->
+  <li class="generic-total-token-farmed-row hidden"><span class="total-token-farmed">Total Token Farmed</span><span class="total-token-farmed-value">21651</span></li>
+  <!-- Ends generic total-token-farmed-row -->
+
+  <!-- Starts generic unclaimed-rewards-hiden-row -->
+  <div class="generic-unclaimed-rewards-row hidden">
+    <span class="unclaimed-reward-token-amount"></span>
+    <span class="unclaimed-reward-token icon"><img class="generic-unclaimed-token-icon" src="./assets/cheddar.svg" alt="cheddar icon"></span>
+  </div>
+  <!-- Ends generic unclaimed-rewards-hiden-row -->
+
   <!-- DUDA ya borro esto? -->
   <!-- Repeated elements OLD -->
   <div id="genericPool" style="display: none;">

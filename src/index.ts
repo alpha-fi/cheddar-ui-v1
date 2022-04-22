@@ -15,11 +15,11 @@ import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStrin
 import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText } from './util/document';
 import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
-import { PoolParams } from './entities/poolParams';
+import { PoolParams, PoolResultParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
-import { RewardTokenIconData } from './entities/genericData';
+import { RewardTokenIconData, UnclaimedRewardsData } from './entities/genericData';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -277,7 +277,7 @@ function harvestMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
 
     // poolParams.resultParams.computed = 0n
     // poolParams.resultParams.real = 0n
-    newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
+    // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
 
     // showSuccess("Harvested" + toStringDecMin(parseFloat(amount)) + " CHEDDAR")
     showSuccess("Harvested successfully")
@@ -295,7 +295,7 @@ function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
 
     poolParams.resultParams.computed = 0n
     poolParams.resultParams.real = 0n
-    newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
+    // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
 
     showSuccess("Harvested" + toStringDecMin(parseFloat(amount)) + " CHEDDAR")
   }
@@ -581,7 +581,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   setAccountInfo(poolParams, accountInfo)
   let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
-  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
 }
 
 
@@ -672,7 +672,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   // console.log(unclaimedRewards)
 
-  newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
 
 
   // let unstakeMaxButton = newPool.querySelector(`.unstake .max-button`) as HTMLElement
@@ -751,7 +751,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
     // newPool.querySelector(".main-stake")!.append(newStakingInputContainer)
     // newPool.querySelector(".main-unstake")!.append(newUnstakingInputContainer)
-    tokenSymbols.push(`${metaData.symbol}`)
+    tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
 
     newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
   }
@@ -774,7 +774,7 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
   const metaData = contractData.metaData
   newInputContainer.classList.remove("generic-token-input-container")
   newInputContainer.classList.add("token-input-container")
-  newInputContainer.classList.add(`${metaData.symbol}-input`)
+  newInputContainer.classList.add(`${metaData.symbol.toLowerCase()}-input`)
   newInputContainer.classList.remove(`hidden`)
 
   newInputContainer.querySelector(".available-info span")!.innerHTML = `Available to ${action}`
@@ -838,7 +838,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   }
 
   // New code
-  // let poolContainer = newPool.querySelector("#generic-pool-container")! as HTMLElement;
+  // let poolContainer = newPool.querySelector("#generic-pool-container")! as HTMLElement;  
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
   let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
@@ -855,9 +855,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
   var contractParams = poolParams.contractParams;
 
-  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
-  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
-
+  
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
@@ -869,93 +867,77 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.classList.add("your-farms")
   }
   if(isDateInRange) {
-    console.log(`${poolParams.metaData.name} entré en el primer if`)
     newPool.classList.add("active-pool")
   } else {
-    console.log(`${poolParams.metaData.name} entré en el primer else`)
     newPool.classList.add("inactive-pool")
-    //DUDA esto conecta con la DUDA de arriba
-    // if (/*displayableStaked == 0*/) {
-    //   hideOrExpandButtonsContainer.forEach(img => {
-    //     img.classList.add("hidden")
-    //   });
-    // }
   }
 
   // TODO MARTIN
+  let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
+  let activateButton = newPool.querySelector(".activate") as HTMLElement
+  let activated = newPool.querySelector("#activated") as HTMLElement
+  let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
+
+  activated.classList.add("hidden")
+  activateButtonContainer.classList.add("hidden")
+  
   if(newPool.classList.contains("inactive-pool") && !newPool.classList.contains("your-farms")) {
     // Completely ended contract. Don't put listeners regarding stake/unstake/harvest
   } else {
-    // Live and ended contracts. 
+    newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
+    newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
+    // Live and ended contracts.
+    expandPoolButton.classList.remove("hidden")
+
+
+    newPool.addEventListener("click", await toggleActions(expandPoolButton));
+    newPool.addEventListener("click", await toggleActions(hidePoolButton));
+    newPool.addEventListener("click", await toggleActions(stakingUnstakingContainer));
+
+
+    openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstaking, staking));
+    openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
+    openUnstakingSectionButton.addEventListener("click", setActiveColor);
+    openUnstakingSectionButton.addEventListener("click", cancelActiveColor(openStakingSectionButton));
+    
+    if (!newPool.classList.contains("inactive-pool")) {
+      openStakingSectionButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+      openStakingSectionButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+      openStakingSectionButton.addEventListener("click", setActiveColor);
+      openStakingSectionButton.addEventListener("click", cancelActiveColor(openUnstakingSectionButton));      
+      
+      if (!newPool.classList.contains("your-farms")) {
+        activateButtonContainer.classList.remove("hidden")
+        activateButton.addEventListener("click", depositClicked(newPool))
+        harvestButton.classList.add("hidden")
+        
+        if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+          let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
+          newPool.querySelector("#depositWarning")!.innerHTML = warningText
+
+        }
+      } else {
+        activateButtonContainer.classList.add("hidden")
+        activateButton.setAttribute("disabled", "disabled")
+      }
+      
+    } else {
+      newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
+      const event= new Event ("click")
+      newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
+      
+
+    }
   }
 
-
-  expandPoolButton.addEventListener("click", showOrHideElement(expandPoolButton));
-  expandPoolButton.addEventListener("click", showOrHideElement(hidePoolButton));
-  expandPoolButton.addEventListener("click", showOrHideElement(stakingUnstakingContainer));
-
-  hidePoolButton.addEventListener("click", showOrHideElement(expandPoolButton));
-  hidePoolButton.addEventListener("click", showOrHideElement(hidePoolButton));
-  hidePoolButton.addEventListener("click", showOrHideElement(stakingUnstakingContainer));
-
-  openStakingSectionButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-  openStakingSectionButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-  openStakingSectionButton.addEventListener("click", setActiveColor);
-  openStakingSectionButton.addEventListener("click", cancelActiveColor(openUnstakingSectionButton));
-
-  openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-  openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
-  openUnstakingSectionButton.addEventListener("click", setActiveColor);
-  openUnstakingSectionButton.addEventListener("click", cancelActiveColor(openStakingSectionButton));
   
-  
-
-  let activateSection = newPool.querySelector("#activate") as HTMLElement
-  let activated = newPool.querySelector("#activated") as HTMLElement
-  let activateButton = newPool.querySelector(".activate") as HTMLElement
 
 
   let hideOrExpandButtonsContainer = newPool.querySelectorAll(".hide-expand-buttons-container img")
 
-  //DUDA así está bien traer este dato? Esto lo debería hacer en el simple y en el multiple por separado?
-  // let accountInfo = await poolParams.contract.status(accName)
-  
-  // let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
-  // let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
-  //DUDA Esto conecta con la DUDA de abajo
-  
-  activated.classList.add("hidden")
-  
-  if (isContractActivated == null) {
-    console.log(`${poolParams.metaData.name} entré en el último if`)
-    activateSection.classList.remove("hidden")
-    activateButton.addEventListener("click", depositClicked(newPool))
-    newPool.querySelector("#harvest-button")!.classList.add("hidden")
-    
-    if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
-      console.log(`${poolParams.metaData.name} entré en el segundo if`)
-      newPool.querySelector("#depositWarning")!.innerHTML = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
-    
-    } else if (!isDateInRange){
-      console.log(`${poolParams.metaData.name} entré en el segundo else`)
-      activateButton.setAttribute("disabled", "disabled")
-      // activateSection.classList.add("hidden")
-      // activated.classList.remove("hidden")
-      // activateButton.classList.add("hidden")
-    }
-
-  } else {
-    console.log(`${poolParams.metaData.name} entré en el último else`)
-    activateSection.classList.add("hidden")
-    if (!isDateInRange) {
-      console.log(`${poolParams.metaData.name} entré en el segundo if`)
-      newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
-      const event= new Event ("click")
-      newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
-    }
-  }
-
   await addRewardTokenIcons(poolParams, newPool)
+  await addUnclaimedRewards(poolParams, newPool)
+  // await addUnclaimedRewards(poolParams, newPool)
 
   qs("#pool_list").append(newPool)
 
@@ -981,6 +963,36 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
     }
     toggleGenericClass(newMiniIcon, "mini-icon")
     container.append(newMiniIcon)
+  }
+}
+
+async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  const rowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
+  const row = qs(".generic-unclaimed-rewards-row") as HTMLElement
+  const icon = qs(".generic-mini-icon")
+  const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
+  var parser = new DOMParser();
+  
+  for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
+    const newRow = row.cloneNode(true) as HTMLElement
+    let unclaimedRewardData = unclaimedRewardsDataArray[i]
+    newRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
+
+    const iconContainer = newRow.querySelector(".icon") as HTMLElement
+    
+    var newMiniIcon: HTMLElement
+    if(unclaimedRewardData.iconData.isSvg) {
+      var doc = parser.parseFromString(unclaimedRewardData.iconData.src, "image/svg+xml");
+      newMiniIcon = doc.documentElement
+    } else {
+      newMiniIcon = icon.cloneNode(true) as HTMLElement
+      newMiniIcon.setAttribute("src", unclaimedRewardData.iconData.src)
+      newMiniIcon.setAttribute("alt", unclaimedRewardData.iconData.alt)
+    }
+    toggleGenericClass(newMiniIcon, "mini-icon")
+    iconContainer.append(newMiniIcon)
+    toggleGenericClass(row, "unclaimed-rewards-row")
+    rowContainer.append(newRow)
   }
 }
 
@@ -1218,8 +1230,21 @@ window.onload = async function () {
 }
 
 // NEW CODE
+async function toggleActions(elementToShow: HTMLElement) {
+  return function (event: Event) {
+    event.preventDefault();
+    let element = event.target as HTMLElement
+    const tagName = element.tagName.toLowerCase()
+    const tagsToIgnore = ["button", "input", "span", "img"]
 
-function showOrHideElement(elementToShow: HTMLElement) {
+    if (!tagsToIgnore.includes(tagName) || element.classList.contains("toggle-display")) {
+      elementToShow.classList.toggle("hidden")
+    }    
+  }
+}
+
+
+function toggleElement(elementToShow: HTMLElement) {
   return function (event: Event) {
     event.preventDefault();
     elementToShow.classList.toggle("hidden");

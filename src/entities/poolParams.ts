@@ -3,7 +3,7 @@ import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
-import { RewardTokenIconData } from "./genericData";
+import { RewardTokenIconData, UnclaimedRewardsData } from "./genericData";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -123,6 +123,16 @@ export class PoolParams {
             isSvg: src.includes("<svg"),
             src: src,
             alt: cheddarMetaData.name 
+        }]
+    }
+
+
+    async getUnclaimedRewardsData(): Promise<UnclaimedRewardsData[]> {
+        const amount = this.resultParams.getCurrentCheddarRewards()
+        const rewardTokenIconData = await this.getRewardTokenIconData()
+        return [{
+            amount: amount,
+            iconData: rewardTokenIconData[0]
         }]
     }
 
