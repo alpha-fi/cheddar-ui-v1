@@ -175,6 +175,7 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     showWait("Staking...")
     
     let stakeContainerList = newPool.querySelectorAll(".input-container")  
+    let inputArray = []//DUDA movi esto fuera del try para que último forEach de esta función no traiga problemas
 
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
@@ -185,7 +186,6 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       const walletAvailableList = await poolParams.getWalletAvailable()
       const stakeTokenContractList = poolParams.stakeTokenContractList
       let amountValues = []
-      let inputArray = []
       let stakedAmountWithSymbol = []
       for(let i = 0; i < stakeContainerList.length; i++) {
         let stakeContainer = stakeContainerList[i]
@@ -205,6 +205,7 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
         stakedAmountWithSymbol.push(`${stakeAmount} ${metaData.symbol}`)
       }
       qsaAttribute("input", "disabled", "disabled")
+
       //get amount
       const min_deposit_amount = 1;
       
@@ -220,8 +221,12 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       }
       
       // TODO MARTIN
-      // poolParams.resultParams.addStaked(amountValues)
-      // await refreshPoolInfoMultiple(poolParams, newPool)
+      let amountValuesString = []
+      for (let i = 0; i < amountValues.length; i++){
+        amountValuesString.push(amountValues[i].toString())
+      }
+      poolParams.resultParams.addStaked(amountValuesString)
+      await refreshPoolInfoMultiple(poolParams, newPool)
 
       showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
 
@@ -231,7 +236,9 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     }
 
     // re-enable the form, whether the call succeeded or failed
-    stakeInput.removeAttribute("disabled")
+    inputArray.forEach(input => {
+      input.removeAttribute("disabled")
+    });
   }
 }
 
@@ -264,7 +271,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
       //clear form
       stakeInput.value = ""
       poolParams.resultParams.addStaked(ntoy(stakeAmount))
-      await refreshPoolInfo(poolParams, newPool)
+      await refreshPoolInfo(poolParams, newPool)//DUDA esto no debería ser refreshPoolInfoSingle?
 
       showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
 
@@ -564,9 +571,7 @@ function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
 }
 
 async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
-  poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId()
-
-  
+  poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId()  
 }
 
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
@@ -574,6 +579,33 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   let accName = poolParams.resultParams.accName
   
   let accountInfo = await poolParams.contract.status(accName)
+  
+  let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
+  
+  let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
+  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
+  showOrHideMaxButton(displayableStaked.toString(), unstakeMaxButton)
+
+
+  const walletBalances = await poolParams.getWalletAvailableDisplayable()
+  
+  let stakeMaxButton = qs(".stake .max-button") as HTMLElement
+  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
+  showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
+
+
+  setAccountInfo(poolParams, accountInfo)
+  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
+
+  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+}
+
+async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
+  var metaData = poolParams.metaData;
+  let accName = poolParams.resultParams.accName
+  
+  let accountInfo = await poolParams.stakingContract.status(accName)//DUDA xq stakingContract en simple devuelve un array de string y en multiple otro devuelve un "status"?
   
   let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
   let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
@@ -884,7 +916,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.classList.add("inactive-pool")
   }
 
-  // TODO MARTIN
+  // TODO MARTIN //DUDA tengo q hacer algo más acá o ya lo terminé y nunca borre el TODO?
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let activated = newPool.querySelector("#activated") as HTMLElement
@@ -906,17 +938,10 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.addEventListener("click", await toggleActions(hidePoolButton));
     newPool.addEventListener("click", await toggleActions(stakingUnstakingContainer));
 
-
-    openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-    openUnstakingSectionButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
-    openUnstakingSectionButton.addEventListener("click", setActiveColor);
-    openUnstakingSectionButton.addEventListener("click", cancelActiveColor(openStakingSectionButton));
+    switchBetweenStakingUnstaking(stakingUnstakingContainer, unstaking, staking, unstakeButton, stakeButton, openStakingSectionButton)
     
     if (!newPool.classList.contains("inactive-pool")) {
-      openStakingSectionButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-      openStakingSectionButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-      openStakingSectionButton.addEventListener("click", setActiveColor);
-      openStakingSectionButton.addEventListener("click", cancelActiveColor(openUnstakingSectionButton));      
+      switchBetweenStakingUnstaking(openStakingSectionButton, staking, unstaking, stakeButton, unstakeButton, openUnstakingSectionButton)
       
       if (!newPool.classList.contains("your-farms")) {
         activateButtonContainer.classList.remove("hidden")
@@ -1253,6 +1278,14 @@ async function toggleActions(elementToShow: HTMLElement) {
       elementToShow.classList.toggle("hidden")
     }    
   }
+}
+
+function switchBetweenStakingUnstaking(elementWithListener: HTMLElement, elementToShow: HTMLElement, elementToHide: HTMLElement, secondElementToShow: HTMLElement, secondElementToHide: HTMLElement, elementToDisplayAsNotActive: HTMLElement) {
+  elementWithListener.addEventListener("click", showElementHideAnother(elementToShow, elementToHide));
+  elementWithListener.addEventListener("click", showElementHideAnother(secondElementToShow, secondElementToHide));
+  elementWithListener.addEventListener("click", setActiveColor);
+  elementWithListener.addEventListener("click", cancelActiveColor(elementToDisplayAsNotActive));
+
 }
 
 
