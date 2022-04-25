@@ -415,6 +415,10 @@ async function autoRefresh() {
 function showSection(selector: string) {
   //hide all sections
   qsa("main section").forEach(hide);
+  
+  //hide or show pool filters
+  selector == "home" ? qs(".pool-filter-container").classList.remove("hidden") : qs(".pool-filter-container").classList.add("hidden")
+  
   //show section
   const section = qs("main").querySelector(selector)
   if (section) {
