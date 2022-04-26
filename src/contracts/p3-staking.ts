@@ -6,9 +6,14 @@
 import { ntoy, TGas } from "../util/conversions"
 import { SmartContract } from "../wallet-api/base-smart-contract"
 
-import type { ContractInfo } from "./NEP129"
-import { P3ContractParams, Status } from "./p3-structures"
+import { P3ContractParams, Status, TransferTokenData } from "./p3-structures"
 import { U128String } from "../wallet-api/util"
+
+import * as nearAPI from "near-api-js"
+import { BN } from "bn.js"
+import { baseDecode } from "borsh"
+import { near } from ".."
+import { Transaction } from "near-api-js/lib/transaction"
 
 type AccountId = string;
 
@@ -37,8 +42,38 @@ export class StakingPoolP3 extends SmartContract {
 
     /// Stake attached &NEAR and returns total amount of stake.
     // QUESTION: is it implemented yet?
-    stake(amount: U128String): Promise<U128String> {
-        return this.call("stake", {}, TGas(25), amount)
+    ft_transfer_call(amount: U128String): Promise<U128String> {
+        return this.call("ft_transfer_call", {}, TGas(25), amount)
+    }
+
+    async ft_transfer_call_multiple(txPromiseArray: {
+        promise: Promise<nearAPI.transactions.Action>,
+        contractName: string
+    }[]): Promise<void> {
+        let promises = []
+        for(let i = 0; i < txPromiseArray.length; i++) {
+            promises.push(txPromiseArray[i].promise)
+        }
+        const resultPromises = await Promise.all(promises)
+        let transactions: nearAPI.transactions.Transaction[] = []
+        for(let i = 0; i < resultPromises.length; i++) {
+            transactions.push(
+                await this.makeTransaction(
+                    txPromiseArray[i].contractName,
+                    [resultPromises[i]]
+                )
+            )
+        }
+        // const tx: nearAPI.transactions.Transaction[] = await Promise.all([this.makeTransaction(
+        //     this.contractId,
+        //     resultPromises
+        // )])
+        
+        await this.nearWallet.requestSignTransactions(
+            transactions,
+            window.location.href
+        )
+        // return transactions
     }
 
     /// Unstakes given amount of $NEAR and transfers it back to the user.
@@ -60,6 +95,35 @@ export class StakingPoolP3 extends SmartContract {
 
     withdraw_crop(): Promise<void> {
         return this.call("withdraw_crop", {}, TGas(125))
+    }
+
+    async makeTransaction(
+        receiverId: string,
+        actions: nearAPI.transactions.Action[],
+        nonceOffset = 1
+    ): Promise<nearAPI.transactions.Transaction> {
+        const [accessKey, block] = await Promise.all([
+            this.account.accessKeyForTransaction(receiverId, actions),
+            near.connection.provider.block({ finality: "final" })
+        ])
+
+        if (!accessKey) {
+            throw new Error(`Cannot find matching key for transaction sent to ${receiverId}`)
+        }
+
+        const blockHash = baseDecode(block.header.hash)
+
+        const publicKey = nearAPI.utils.PublicKey.from(accessKey.public_key)
+        const nonce = accessKey.access_key.nonce + nonceOffset
+
+        return nearAPI.transactions.createTransaction(
+            this.wallet.getAccountId(),
+            publicKey,
+            receiverId,
+            nonce,
+            actions,
+            blockHash
+        )
     }
 
 }

@@ -58,16 +58,7 @@
   </div>
 
   <main>
-    <div class="tools">
-      <!-- New filter -->
-      <div class="pool-filter-container">
-        <ul>
-          <li id="live-filter">Live</li>
-          <li id="ended-filter">Ended</li>
-          <li id="your-farms-filter">Your Farms</li>
-        </ul>
-      </div>
-      
+    <div class="tools">      
       <!-- <div>
         <span>Staked only&nbsp;</span>
         <label class="switch">
@@ -155,6 +146,14 @@
 
     <section id="home-connected" style="display:none">
       <!--       <div id="timer"></div> -->
+      <!-- New filter -->
+      <div class="pool-filter-container">
+        <ul>
+          <li id="live-filter">Live</li>
+          <li id="ended-filter">Ended</li>
+          <li id="your-farms-filter">Your Farms</li>
+        </ul>
+      </div>
       <div class="loader"></div>
       <div class="grid" id="pool_list" style="display:none">
       </div>
@@ -425,7 +424,7 @@
   <!-- Starts generic token input container -->
   <div class="generic-token-input-container hidden">
     <div class="input-container">
-      <input type="text" placeholder="Enter amount">
+      <input class="amount" type="text" placeholder="Enter amount">
       <img src="#" alt="logo" class="token-logo hidden"/>
       <div class="token-logo hidden"></div>
     </div>

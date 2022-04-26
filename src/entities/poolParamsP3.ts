@@ -40,11 +40,12 @@ export class PoolResultParams {
         return this.accName.length > 22 ? this.accName.slice(0, 10) + ".." + this.accName.slice(-10) : this.accName
     }
 
-    addStaked(amountArray: U128String[]) {
+    addStaked(amountArray: bigint[]) {
         //DUDA esto está bien verdad? Estás orgushozo?
-        this.staked = []
+        // this.staked = []
+        // TODO MARTIN
         for (let i = 0; i < amountArray.length; i++){
-            this.staked.push(this.staked[i] + BigInt(amountArray[i]))
+            this.staked[i] = (BigInt(this.staked[i]) + amountArray[i]).toString()
         }
     }
 }
@@ -137,6 +138,24 @@ export class PoolParamsP3 {
         await this.setStakeTokenContractList()
         await this.setFarmTokenContractList()
         await this.setResultParams()
+    }
+
+    async stake(amounts: bigint[]) {
+        let TXs = []
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const stakeContract = this.stakeTokenContractList[i]
+            const promise = stakeContract.contract.ft_transfer_call_without_send(
+                this.stakingContract.contractId, 
+                amounts[i].toString()
+            )
+            const promiseWithContract = {
+            promise,
+            contractName: stakeContract.contract.contractId
+            }
+
+            TXs.push(promiseWithContract)
+        }
+        await this.stakingContract.ft_transfer_call_multiple(TXs)   
     }
 
     getRewardTokenIconData(): RewardTokenIconData[] {

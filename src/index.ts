@@ -13,7 +13,7 @@ import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStrin
 
 //qs/qsa are shortcut for document.querySelector/All
 import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
-import { checkRedirectSearchParams } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
+import { checkRedirectSearchParams, checkRedirectSearchParamsMultiple } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
 import { PoolParams, PoolResultParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
@@ -21,10 +21,13 @@ import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
 import { RewardTokenIconData, UnclaimedRewardsData } from './entities/genericData';
 
+import * as nearAPI from "near-api-js"
+import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
+
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
 export let nearConfig = getConfig(ENV); //default testnet, can change according to URL on window.onload
-
+export let near: nearAPI.Near
 // global variables used throughout
 export let wallet: WalletInterface = disconnectedWallet;
 
@@ -174,7 +177,7 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     event?.preventDefault()
     showWait("Staking...")
     
-    let stakeContainerList = newPool.querySelectorAll(".input-container")  
+    let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
     let inputArray = []//DUDA movi esto fuera del try para que último forEach de esta función no traiga problemas
 
     try {
@@ -185,22 +188,24 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       
       const walletAvailableList = await poolParams.getWalletAvailable()
       const stakeTokenContractList = poolParams.stakeTokenContractList
-      let amountValues = []
+      let amountValues: bigint[] = []
       let stakedAmountWithSymbol = []
       for(let i = 0; i < stakeContainerList.length; i++) {
         let stakeContainer = stakeContainerList[i]
-        let stakeInput = stakeContainer.querySelector("input") as HTMLInputElement
+        let stakeInput = stakeContainer.querySelector(".amount") as HTMLInputElement
         inputArray.push(stakeInput)
         let stakeAmount = parseFloat(stakeInput.value)
         if (isNaN(stakeAmount)) {
           throw Error("Please Input a Number.")
         }
         const metaData = stakeTokenContractList[i].metaData
-        const stakeAmountBN: BigInt = BigInt(convertToBase(stakeAmount.toString(), metaData.decimals.toString()))
+
+        const stakeAmountBN: bigint = BigInt(convertToBase(stakeAmount.toString(), metaData.decimals.toString()))
         if(BigInt(walletAvailableList[i]) < stakeAmountBN) {
           const balanceDisplayable = convertToDecimals(walletAvailableList[i], metaData.decimals, 7)
           throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to Stake.`)
         }
+        
         amountValues.push(stakeAmountBN)
         stakedAmountWithSymbol.push(`${stakeAmount} ${metaData.symbol}`)
       }
@@ -209,24 +214,22 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       //get amount
       const min_deposit_amount = 1;
       
-      let promises = []
-      for(let i = 0; i < amountValues.length; i++) {
-        promises.push(poolParams.stakingContract.stake(amountValues[i].toString()))
-      }
-      await Promise.all(promises)            
-
+      // TODO DANI wait until transaction is confirmed
+      const tx = await poolParams.stake(amountValues)
       //clear form
       for(let i = 0; i < inputArray.length; i++) {
         inputArray[i].value = ""  
       }
       
-      // TODO MARTIN
-      let amountValuesString = []
-      for (let i = 0; i < amountValues.length; i++){
-        amountValuesString.push(amountValues[i].toString())
-      }
-      poolParams.resultParams.addStaked(amountValuesString)
-      await refreshPoolInfoMultiple(poolParams, newPool)
+      
+      
+      // let amountValuesString = []
+      // for (let i = 0; i < amountValues.length; i++){
+      //   amountValuesString.push(amountValues[i].toString())
+      // }
+      
+      poolParams.resultParams.addStaked(amountValues)
+      // await refreshPoolInfoMultiple(poolParams, newPool)
 
       showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
 
@@ -266,7 +269,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
 
       const walletAvailable = await poolParams.getWalletAvailable()
       if (stakeAmount > parseFloat(walletAvailable)) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
-      await poolParams.tokenContract.ft_transfer_call(poolParams.contract.contractId, convertToBase(stakeAmount.toString(), poolParams.metaData.decimals.toString()), "to farm")
+      await poolParams.stakeTokenContract.ft_transfer_call(poolParams.stakingContract.contractId, convertToBase(stakeAmount.toString(), poolParams.metaData.decimals.toString()), "to farm")
 
       //clear form
       stakeInput.value = ""
@@ -310,7 +313,7 @@ function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
     
     let amount = poolParams.resultParams.getCurrentCheddarRewards()
 
-    await poolParams.contract.withdraw_crop()
+    await poolParams.stakingContract.withdraw_crop()
 
     poolParams.resultParams.computed = 0n
     poolParams.resultParams.real = 0n
@@ -337,7 +340,7 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
       }
       
       if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${poolParams.metaData.symbol} Available to Unstake.`);
-      await poolParams.contract.unstake(convertToBase(unstakeAmount.toString(), poolParams.metaData.decimals.toString()))
+      await poolParams.stakingContract.unstake(convertToBase(unstakeAmount.toString(), poolParams.metaData.decimals.toString()))
       
 
       //clear form
@@ -415,9 +418,6 @@ async function autoRefresh() {
 function showSection(selector: string) {
   //hide all sections
   qsa("main section").forEach(hide);
-  
-  //hide or show pool filters
-  selector == "home" ? qs(".pool-filter-container").classList.remove("hidden") : qs(".pool-filter-container").classList.add("hidden")
   
   //show section
   const section = qs("main").querySelector(selector)
@@ -575,14 +575,14 @@ function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
 }
 
 async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
-  poolParams.resultParams.accName = poolParams.contract.wallet.getAccountId()  
+  poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()  
 }
 
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
   var metaData = poolParams.metaData;
   let accName = poolParams.resultParams.accName
   
-  let accountInfo = await poolParams.contract.status(accName)
+  let accountInfo = await poolParams.stakingContract.status(accName)
   
   let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
   let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
@@ -611,7 +611,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   
   let accountInfo = await poolParams.stakingContract.status(accName)//DUDA xq stakingContract en simple devuelve un array de string y en multiple otro devuelve un "status"?
   
-  let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+  let staked = (accountInfo) ? BigInt(accountInfo.stake_tokens) : 0;
   let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
   
   let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
@@ -667,14 +667,14 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
     if (value1 == "") {
       input2.value = ""
     } 
-    //We use this || because we discovered the first option have issues recognizing if "number+string" is a number or not (example value1="1a")
+    //We use this || because the first option have issues recognizing if "number+string" is a number or not (example value1="1a")
     else if (Number.isNaN(value1) || (value1 != parseFloat(value1).toString())) {
       input2.value = "Please Input a Number"
     } else {
       let rates = poolParams.contractParams.stake_rates
       const mulRate = Number(BigInt(rates[1]) * 100n / (BigInt(rates[0]))) / 100
       const rate = mul ? mulRate : (mulRate ** -1)
-      //Replace the "2" with proper variable
+      //Replace the "2" with proper variable name
       input2.value = (Number(value1) * rate).toString()
     }
   }
@@ -688,7 +688,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
   var contractData = {
-    contract: poolParams.tokenContract,
+    contract: poolParams.stakeTokenContract,
     metaData: poolParams.metaData,
     balance: walletBalance
   }
@@ -808,11 +808,13 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   for (let i=0; i < tokenSymbols.length; i++){
     for (let u=0; u < tokenSymbols.length; u++){
       if (i != u){
-        newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake .${tokenSymbols[u]}-input input`, true))
-        newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake .${tokenSymbols[u]}-input input`, true))
+        newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake .${tokenSymbols[u]}-input input`, i == 0))
+        newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake .${tokenSymbols[u]}-input input`, i == 0))
       }
     }
   }
+
+  newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
 }
 
 function addInput(newPool: HTMLElement, contractData: ContractData, action: string) {
@@ -878,7 +880,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   if (poolParams instanceof PoolParams) {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
-    isContractActivated = await poolParams.tokenContract.storageBalance();
+    isContractActivated = await poolParams.stakeTokenContract.storageBalance();
   } else {
     multiplePoolParams = poolParams
     await addPoolMultiple(multiplePoolParams, newPool)
@@ -895,8 +897,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   let stakingUnstakingContainer = newPool.querySelector("#activated")! as HTMLElement;
-  let openStakingSectionButton = newPool.querySelector(".staking")! as HTMLElement;
-  let openUnstakingSectionButton = newPool.querySelector(".unstaking")! as HTMLElement;
+  let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+  let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
   let staking = newPool.querySelector(".main-stake")! as HTMLElement;
   let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
   let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
@@ -942,10 +944,10 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.addEventListener("click", await toggleActions(hidePoolButton));
     newPool.addEventListener("click", await toggleActions(stakingUnstakingContainer));
 
-    switchBetweenStakingUnstaking(stakingUnstakingContainer, unstaking, staking, unstakeButton, stakeButton, openStakingSectionButton)
+    switchBetweenStakingUnstaking(unstakeTabButton, unstaking, staking, unstakeButton, stakeButton, stakeTabButton)
     
     if (!newPool.classList.contains("inactive-pool")) {
-      switchBetweenStakingUnstaking(openStakingSectionButton, staking, unstaking, stakeButton, unstakeButton, openUnstakingSectionButton)
+      switchBetweenStakingUnstaking(stakeTabButton, staking, unstaking, stakeButton, unstakeButton, unstakeTabButton)
       
       if (!newPool.classList.contains("your-farms")) {
         activateButtonContainer.classList.remove("hidden")
@@ -1102,6 +1104,17 @@ window.onload = async function () {
     if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
 
+    near = await nearAPI.connect(
+      Object.assign(
+          {
+              deps: {
+                  keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore()
+              }
+          },
+          nearConfig.farms[0]
+      )
+    )
+
     var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
 
@@ -1173,91 +1186,117 @@ window.onload = async function () {
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
       const poolList = await getPoolList(wallet)
-      const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
-
-      if (finalExecutionOutcome) {
-        var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
-      }
+      const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
+      let method: string = ""
+      let err
+      let args = []
+      searchParamsResultArray.forEach(searchParamsResult => {
+        const { err: errResult, data, method: methodResult, finalExecutionOutcome } = searchParamsResult
+        if(errResult) {
+          err = errResult
+          return
+        }
+        if(methodResult) {
+          method = methodResult  
+        }
+        
+        if (finalExecutionOutcome) {
+          const arg = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+          args.push(arg)
+        }
+        
+      });
 
       if (err) {
         showError(err, "Transaction - " + method || "");
+      } else if(method == "ft_transfer_call") {
+        // @ts-ignore
+        await stakeResult(args)
       }
-      else if (method == "deposit_and_stake") {
-        showSuccess("Deposit Successful")
-      }
-      if (method == "unstake" && data == null) {
-        showSuccess("Unstaked All and Harvested Cheddar")
-      } else if (method == "unstake" && args.amount != null) {
-        var receiver = finalExecutionOutcome?.transaction.receiver_id;
-        for (let i = 0; i < poolList.length; i++) {
-          //console.log("poolList[i].contract.contractId: ", poolList[i].contract.contractId)
-          if (poolList[i].stakingContract.contractId == receiver) {//DUDA q onda con esto?
-            const metaData = poolList[i].metaData
-            showSuccess(`Unstaked ${convertToDecimals(args.amount, metaData.decimals, 2)} ${metaData.symbol}`)
-            // showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-            break;
-          }
-        }
-      } else if (method == "withdraw_crop") {
+      // const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
+      // if (finalExecutionOutcome) {
+      //   var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+      // }
 
-        if (finalExecutionOutcome) {
-          var log = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
-          var message = yton(log[3]) + ' Cheddar Harvested!'
-          showSuccess(message)
-        }
+      // if (err) {
+      //   showError(err, "Transaction - " + method || "");
+      // }
+      // else if (method == "deposit_and_stake") {
+      //   showSuccess("Deposit Successful")
+      // }
+      // if (method == "unstake" && data == null) {
+      //   showSuccess("Unstaked All and Harvested Cheddar")
+      // } else if (method == "unstake" && args.amount != null) {
+      //   var receiver = finalExecutionOutcome?.transaction.receiver_id;
+      //   for (let i = 0; i < poolList.length; i++) {
+      //     //console.log("poolList[i].contract.contractId: ", poolList[i].contract.contractId)
+      //     if (poolList[i].stakingContract.contractId == receiver) {//DUDA q onda con esto?
+      //       const metaData = poolList[i].metaData
+      //       showSuccess(`Unstaked ${convertToDecimals(args.amount, metaData.decimals, 2)} ${metaData.symbol}`)
+      //       // showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
+      //       break;
+      //     }
+      //   }
+      // } else if (method == "withdraw_crop") {
 
-      } else if (method == "storage_deposit") {
-        showSuccess(`Storage Deposit Successful`)
-      }
-      else if (data) {
+      //   if (finalExecutionOutcome) {
+      //     var log = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
+      //     var message = yton(log[3]) + ' Cheddar Harvested!'
+      //     showSuccess(message)
+      //   }
 
-        switch (method) {
-          case "liquid_unstake": {
-            showSection("#unstake")
-            showUnstakeResult(data)
-            break;
-          }
-          case "nslp_add_liquidity": {
-            showSection("#liquidity")
-            //showLiquidityOwned();
-            break;
-          }
-          case "withdraw_crop": {
-            showSuccess(`${yton(data)} Cheddar Harvested!`)
-            break;
-          }
-          case "unstake": {
-            var receiver = finalExecutionOutcome?.transaction.receiver_id;
-            //console.log("Receiver: ", receiver)
-            //console.log("Length: ", poolList.length)
-            // if(receiver) {
-            for (let i = 0; i < poolList.length; i++) {
-              //console.log("poolList[i].tokenContract.contractId: ", poolList[i].tokenContract.contractId)
-              if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
-                const metaData = poolList[i].metaData
-                showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-                break;
-              }
-            }
-            // }
-            break;
-          }
-          case "ft_transfer_call": {
-            /** TODO - Fix for mutliple transactions **/
-            var receiver = finalExecutionOutcome?.transaction.receiver_id;
-            for (let i = 0; i < poolList.length; i++) {
-              if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
-                const metaData = poolList[i].metaData
-                showSuccess(`Staked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-                break;
-              }
-            }
-            break;
-          }
-          default:
-            showSuccess(data[0], "Transaction Result")
-        }
-      }
+      // } else if (method == "storage_deposit") {
+      //   showSuccess(`Storage Deposit Successful`)
+      // }
+      // else if (data) {
+
+      //   switch (method) {
+      //     case "liquid_unstake": {
+      //       showSection("#unstake")
+      //       showUnstakeResult(data)
+      //       break;
+      //     }
+      //     case "nslp_add_liquidity": {
+      //       showSection("#liquidity")
+      //       //showLiquidityOwned();
+      //       break;
+      //     }
+      //     case "withdraw_crop": {
+      //       showSuccess(`${yton(data)} Cheddar Harvested!`)
+      //       break;
+      //     }
+      //     case "unstake": {
+      //       var receiver = finalExecutionOutcome?.transaction.receiver_id;
+      //       //console.log("Receiver: ", receiver)
+      //       //console.log("Length: ", poolList.length)
+      //       // if(receiver) {
+      //       for (let i = 0; i < poolList.length; i++) {
+      //         //console.log("poolList[i].tokenContract.contractId: ", poolList[i].tokenContract.contractId)
+      //         if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
+      //           const metaData = poolList[i].metaData
+      //           showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
+      //           break;
+      //         }
+      //       }
+      //       // }
+      //       break;
+      //     }
+      //     case "ft_transfer_call": {
+      //       /** TODO - Fix for mutliple transactions **/
+      //       var receiver = finalExecutionOutcome?.transaction.receiver_id;
+      //       for (let i = 0; i < poolList.length; i++) {
+      //         if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
+      //           const metaData = poolList[i].metaData
+      //           showSuccess(`Staked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
+      //           break;
+      //         }
+      //       }
+      //       break;
+      //     }
+      //     default:
+      //       showSuccess(data[0], "Transaction Result")
+      //   }
+      // }
 
     }
     else {
@@ -1268,6 +1307,47 @@ window.onload = async function () {
   catch (ex) {
     showErr(ex)//DUDA q onda con esto?
   }
+}
+
+function showErrResult() {
+
+}
+
+async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id: string}]) {
+  let message = "Staked: "
+  let tokensStakedMessage: string[] = []
+  const poolList = await getPoolList(wallet)
+  let pool: PoolParams | PoolParamsP3 | undefined
+  for(let i = 0; i < poolList.length; i++) {
+    if(argsArray[0].receiver_id == poolList[i].stakingContract.contractId) {
+      pool = poolList[i]
+      break
+    }
+  }
+  if(!pool) {
+    throw new Error(`No pool found with contract id ${argsArray[0].receiver_id}`)
+  }
+
+  await Promise.all(argsArray.map(async (args, index) => {
+    console.log("Args:", args)
+    // const args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+    let metadata
+    if(pool instanceof PoolParams) {
+      metadata = await pool.stakeTokenContract.ft_metadata()
+    } else if(pool instanceof PoolParamsP3) {
+      metadata = await pool.stakeTokenContractList[index].contract.ft_metadata()
+    }
+    if(!metadata) {
+      // This if should never be true
+      throw new Error("Error obtaining metadata on stake result")
+    }
+    const amount = convertToDecimals(args.amount, metadata.decimals, 7)
+    tokensStakedMessage.push(
+      `${amount} ${metadata.symbol}`
+    )
+  }))
+  message += tokensStakedMessage.join(" - ")
+  showSuccess(message, "Stake")
 }
 
 // NEW CODE
@@ -1289,7 +1369,6 @@ function switchBetweenStakingUnstaking(elementWithListener: HTMLElement, element
   elementWithListener.addEventListener("click", showElementHideAnother(secondElementToShow, secondElementToHide));
   elementWithListener.addEventListener("click", setActiveColor);
   elementWithListener.addEventListener("click", cancelActiveColor(elementToDisplayAsNotActive));
-
 }
 
 

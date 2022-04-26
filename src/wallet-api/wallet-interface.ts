@@ -1,3 +1,4 @@
+import { Transaction } from "near-api-js/lib/transaction";
 import {BatchTransaction, FunctionCall, Transfer} from "./batch-transaction"
 import {U64String,U128String} from "./util"
 

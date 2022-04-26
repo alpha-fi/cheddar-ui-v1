@@ -58,10 +58,10 @@ export class PoolParams {
     index: number
     type: string
     html: HtmlPoolParams;
-    contract: StakingPoolP1;
+    stakingContract: StakingPoolP1;
     contractParams: ContractParams;
     cheddarContract: NEP141Trait;
-    tokenContract: NEP141Trait;
+    stakeTokenContract: NEP141Trait;
     metaData: FungibleTokenMetadata;
     metaData2: FungibleTokenMetadata;
     resultParams: PoolResultParams;
@@ -70,25 +70,25 @@ export class PoolParams {
         this.index = index;
         this.type = type;
         this.html = html;
-        this.contract = contract;
+        this.stakingContract = contract;
         this.contractParams = new ContractParams();
         this.cheddarContract= cheddarContract;
-        this.tokenContract = tokenContract;
+        this.stakeTokenContract = tokenContract;
         this.resultParams = resultParams;
         this.metaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
 
-        this.contract.wallet = wallet;
+        this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
-        this.tokenContract.wallet = wallet;
+        this.stakeTokenContract.wallet = wallet;
     }
 
     async setContractParams() {
-        this.contractParams = await this.contract.get_contract_params();
+        this.contractParams = await this.stakingContract.get_contract_params();
     }
 
     async setMetaData() {
-        this.metaData = await this.tokenContract.ft_metadata()
+        this.metaData = await this.stakeTokenContract.ft_metadata()
         if(this.metaData.symbol == "STNEAR") {
             this.metaData.symbol = "stNEAR";
         }
@@ -97,8 +97,8 @@ export class PoolParams {
     }
 
     async setResultParams() {
-        const accName = this.contract.wallet.getAccountId()
-        let accountInfo = await this.contract.status(accName)
+        const accName = this.stakingContract.wallet.getAccountId()
+        let accountInfo = await this.stakingContract.status(accName)
 
         this.resultParams.staked = BigInt(accountInfo[0])
         this.resultParams.real = BigInt(accountInfo[1])
@@ -195,7 +195,7 @@ export class PoolParams {
     }
 
     async getWalletAvailable() {
-        return await this.tokenContract.ft_balance_of(this.contract.wallet.getAccountId())
+        return await this.stakeTokenContract.ft_balance_of(this.stakingContract.wallet.getAccountId())
     }
 
     async getWalletAvailableDisplayable() {

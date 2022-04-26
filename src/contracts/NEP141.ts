@@ -1,7 +1,9 @@
 //JSON compatible struct ft_metadata
 import {SmartContract} from "../wallet-api/base-smart-contract"
+import * as nearAPI from "near-api-js"
 
 import {ntoy, TGas} from "../util/conversions"
+import { BN } from "bn.js";
 
 export type FungibleTokenMetadata = {
     spec: string;
@@ -22,8 +24,22 @@ export class NEP141Trait extends SmartContract {
         return this.call("ft_transfer",{receiver_id:receiver_id, amount:amount, memo:memo},TGas(200),"1"); //one-yocto attached
     }
 
-    async ft_transfer_call(receiver_id:string, amount:U128String, msg:string, memo?:string):Promise<void>{
+    async ft_transfer_call(receiver_id:string, amount:U128String, msg:string, memo?:string):Promise<any>{
         return this.call("ft_transfer_call",{receiver_id:receiver_id, amount:amount, memo:memo, msg:msg},TGas(200),"1"); //one-yocto attached
+    }
+
+    async ft_transfer_call_without_send(receiver_id:string, amount:U128String):Promise<nearAPI.transactions.Action>{
+        return nearAPI.transactions.functionCall(
+            "ft_transfer_call", 
+            {
+                receiver_id: receiver_id,
+                amount: amount,
+                msg: "to farm" 
+            }, 
+            new BN("200000000000000"), 
+            // new BN(gas), 
+            new BN(1)
+        )
     }
 
     async ft_total_supply() : Promise<U128String> {

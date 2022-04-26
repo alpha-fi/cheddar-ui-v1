@@ -42,4 +42,12 @@ export class TokenParams {
     symbol: string = "";
 }
 
+export class TransferTokenData {
+    contractName: string;
+    amount: bigint;
 
+    constructor(contractName: string, amount: bigint) {
+        this.contractName = contractName
+        this.amount = amount
+    }
+}

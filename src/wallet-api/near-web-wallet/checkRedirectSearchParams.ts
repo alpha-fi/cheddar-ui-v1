@@ -89,5 +89,93 @@ export async function checkRedirectSearchParams( walletConnection:WalletConnecti
     console.error(ex.message);
     return { err: ex.message};
   }
+}
+
+  export async function checkRedirectSearchParamsMultiple( walletConnection:WalletConnection, nearExplorerUrl:string ): 
+  Promise<{err?:string, data?:any, method?:string, finalExecutionOutcome?:FinalExecutionOutcome }[]> {
+
+  try {
+    const urlParams = new URLSearchParams(window.location.search)
+    removeQueryString()
+    const txHash: string|null = urlParams.get('transactionHashes')
+    const errorCode = urlParams.get('errorCode')
+
+    if (errorCode) {
+      // If errorCode, then the redirect succeeded but the tx was rejected/failed
+      const newError = 'Error from wallet: ' + errorCode
+      console.error(newError)
+      return [{
+        err: newError
+      }]
+    }
+
+    if (!txHash) return [];
+
+    let transactionArray: string[]
+
+    if (txHash.includes(',')) {
+      // NOTE: when a single tx is executed, transactionHashes is equal to that hash
+      transactionArray = txHash.split(",")
+      // const newError = 'Expected single txHash, got: ' + txHash
+      // console.error(newError)
+      // return {
+      //   err: newError
+      // }
+    } else {
+      transactionArray = [ txHash ]
+    }
+    // [1, 3, 6].map(i => i + 3) --> [4, 6, 9]
+    const decodedTxHashArray = transactionArray.map(hash => utils.serialize.base_decode(hash))   
+    const finalExecOutcomeArray = await Promise.all(decodedTxHashArray.map(async (decodedTxHash) => {
+      return await walletConnection.account().connection.provider.txStatus( decodedTxHash, walletConnection.getAccountId());
+    }))
+
+    let output = []
+
+    for(let i = 0; i < finalExecOutcomeArray.length; i++) {
+      let method:string|undefined = undefined;
+      const finalExecOutcome = finalExecOutcomeArray[i]
+      if (finalExecOutcome.transaction?.actions?.length){
+        const actions=finalExecOutcome.transaction.actions
+        //recover methodName of first FunctionCall action
+        for(let n=0;n<actions.length;n++) {
+          let item = actions[n]
+          if ("FunctionCall" in item) {
+            //@ts-ignore
+            method = item.FunctionCall.method_name
+            break;
+          }
+        }
+      }
+
+      //@ts-ignore
+      let failure:any=finalExecOutcome.status.Failure
+      if (failure) {
+        console.error('finalExecOutcome.status.Failure', failure)
+        const errorMessage = typeof failure === 'object' ? parseRpcError(failure).toString()
+            : `Transaction <a href="${nearExplorerUrl}/transactions/${finalExecOutcome.transaction.hash}">${finalExecOutcome.transaction.hash}</a> failed`
+        output.push(
+          {
+            err: errorMessage,
+            method:method,
+          }
+        )
+      } else {
+        output.push(
+          {
+            data: getTransactionLastResult(finalExecOutcome),
+            method:method,
+            finalExecutionOutcome: finalExecOutcome 
+          }
+        )
+      }
+    }
+    
+    return output
+  }
+  catch(ex){
+    console.error(ex.message);
+    return [{ err: ex.message}];
+  }
 
 }
