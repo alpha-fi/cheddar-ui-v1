@@ -19,7 +19,7 @@ import { PoolParams, PoolResultParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
-import { RewardTokenIconData, UnclaimedRewardsData } from './entities/genericData';
+import { HTMLTokenInputData, RewardTokenIconData, UnclaimedRewardsData } from './entities/genericData';
 
 import * as nearAPI from "near-api-js"
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
@@ -171,14 +171,13 @@ function depositClicked(pool: HTMLElement) {
   }
 }
 
-// TODO DANI
 function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
   return async function (event: Event){
     event?.preventDefault()
     showWait("Staking...")
     
-    let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
-    let inputArray = []//DUDA movi esto fuera del try para que último forEach de esta función no traiga problemas
+    // let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
+    let inputArray: HTMLInputElement[] = []
 
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
@@ -186,47 +185,20 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
       
-      const walletAvailableList = await poolParams.getWalletAvailable()
-      const stakeTokenContractList = poolParams.stakeTokenContractList
-      let amountValues: bigint[] = []
-      let stakedAmountWithSymbol = []
-      for(let i = 0; i < stakeContainerList.length; i++) {
-        let stakeContainer = stakeContainerList[i]
-        let stakeInput = stakeContainer.querySelector(".amount") as HTMLInputElement
-        inputArray.push(stakeInput)
-        let stakeAmount = parseFloat(stakeInput.value)
-        if (isNaN(stakeAmount)) {
-          throw Error("Please Input a Number.")
-        }
-        const metaData = stakeTokenContractList[i].metaData
-
-        const stakeAmountBN: bigint = BigInt(convertToBase(stakeAmount.toString(), metaData.decimals.toString()))
-        if(BigInt(walletAvailableList[i]) < stakeAmountBN) {
-          const balanceDisplayable = convertToDecimals(walletAvailableList[i], metaData.decimals, 7)
-          throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to Stake.`)
-        }
-        
-        amountValues.push(stakeAmountBN)
-        stakedAmountWithSymbol.push(`${stakeAmount} ${metaData.symbol}`)
-      }
+      const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: stakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "stake")
+      inputArray = htmlInputArray
+      
       qsaAttribute("input", "disabled", "disabled")
 
       //get amount
       const min_deposit_amount = 1;
-      
-      // TODO DANI wait until transaction is confirmed
-      const tx = await poolParams.stake(amountValues)
+            
+      // TODO DANI: está ejecutando cosas después del stake, cuando el stake no se terminó
+      await poolParams.stake(amountValues)
       //clear form
       for(let i = 0; i < inputArray.length; i++) {
         inputArray[i].value = ""  
       }
-      
-      
-      
-      // let amountValuesString = []
-      // for (let i = 0; i < amountValues.length; i++){
-      //   amountValuesString.push(amountValues[i].toString())
-      // }
       
       poolParams.resultParams.addStaked(amountValues)
       // await refreshPoolInfoMultiple(poolParams, newPool)
@@ -237,11 +209,89 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     catch (ex) {
       showErr(ex as Error)
     }
-
     // re-enable the form, whether the call succeeded or failed
     inputArray.forEach(input => {
       input.removeAttribute("disabled")
     });
+  }
+}
+
+function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  return async function (event: Event){
+    event?.preventDefault()
+    showWait("Unstaking...")
+    
+    // let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
+    let inputArray: HTMLInputElement[] = []
+
+    try {
+      let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+      const contractParams = poolParams.contractParams
+      const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      if (!isDateInRange) throw Error("Pools is Closed.")
+      
+      const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: unstakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "unstake")
+      inputArray = htmlInputArray
+      
+      qsaAttribute("input", "disabled", "disabled")
+
+      //get amount
+      const min_deposit_amount = 1;
+            
+      // TODO DANI: está ejecutando cosas después del stake, cuando el stake no se terminó
+      await poolParams.unstake(amountValues)
+      //clear form
+      for(let i = 0; i < inputArray.length; i++) {
+        inputArray[i].value = ""  
+      }
+      
+      poolParams.resultParams.addStaked(amountValues.map(value => -value))
+      // await refreshPoolInfoMultiple(poolParams, newPool)
+
+      showSuccess(`Staked ${unstakedAmountWithSymbol.join(" - ")}`)
+
+    }
+    catch (ex) {
+      showErr(ex as Error)
+    }
+    // re-enable the form, whether the call succeeded or failed
+    inputArray.forEach(input => {
+      input.removeAttribute("disabled")
+    });
+  }
+}
+
+async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLElement, action: string): Promise<HTMLTokenInputData> {
+  let htmlInputArray: HTMLInputElement[] = []
+  let amountValuesArray: bigint[] = []
+  let stakedAmountWithSymbolArray: string[] = []
+
+  let inputContainerList = newPool.querySelectorAll(`.main-${action} .input-container`)  
+  const stakeTokenContractList = poolParams.stakeTokenContractList
+  const walletAvailableList = await poolParams.getWalletAvailable()
+  for(let i = 0; i < inputContainerList.length; i++) {
+    let stakeContainer = inputContainerList[i]
+    let input = stakeContainer.querySelector(".amount") as HTMLInputElement
+    htmlInputArray.push(input)
+    let amount = parseFloat(input.value)
+    if (isNaN(amount)) {
+      throw Error("Please Input a Number.")
+    }
+    const metaData = stakeTokenContractList[i].metaData
+
+    const stakeAmountBN: bigint = BigInt(convertToBase(amount.toString(), metaData.decimals.toString()))
+    if(BigInt(walletAvailableList[i]) < stakeAmountBN) {
+      const balanceDisplayable = convertToDecimals(walletAvailableList[i], metaData.decimals, 7)
+      throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to ${action}.`)
+    }
+    
+    amountValuesArray.push(stakeAmountBN)
+    stakedAmountWithSymbolArray.push(`${amount} ${metaData.symbol}`)
+  }
+  return {
+    htmlInputArray,
+    amountValuesArray,
+    transferedAmountWithSymbolArray: stakedAmountWithSymbolArray,
   }
 }
 
@@ -694,7 +744,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   }
 
   addInput(newPool, contractData, "stake")
-  addInput(newPool, contractData, "unstake")
+  addInput(newPool, contractData, "unstake", poolParams.resultParams.staked.toString())
 
   // newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
@@ -763,42 +813,8 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     const metaData = contractData.metaData
 
     addInput(newPool, contractData, "stake")
-    addInput(newPool, contractData, "unstake")
-    // var newStakingInputContainer= inputContainer.cloneNode(true) as HTMLElement
-    // var newUnstakingInputContainer= unstakingInputContainer.cloneNode(true) as HTMLElement
-
-    // newStakingInputContainer.classList.add(`${metaData.symbol}-input`)
-    // newStakingInputContainer.classList.remove(`hidden`)
+    addInput(newPool, contractData, "unstake", poolParams.resultParams.staked[i])
     
-    // newUnstakingInputContainer.classList.add(`${metaData.symbol}-input`)
-    // newUnstakingInputContainer.classList.remove(`hidden`)
-
-    // let stakingInputLogoContainer= newStakingInputContainer.querySelector(".input-container .token-logo") as HTMLElement
-    // let stakeAmountAvailableValue= newStakingInputContainer.querySelector(".amount-available .value")
-    // let stakeMaxButton= newStakingInputContainer.querySelector(".stake .max-button") as HTMLElement
-
-    // let unstakingInputLogoContainer= newUnstakingInputContainer.querySelector(".input-container .token-logo") as HTMLElement
-    // let unstakeAmountAvailableValue= newUnstakingInputContainer.querySelector(".amount-available .value")
-    // let unstakeMaxButton= newUnstakingInputContainer.querySelector(".unstake .max-button") as HTMLElement
-
-    //This is made like this because metaData.icon is an <svg></svg>
-    // if (metaData.icon != null){
-    //   stakingInputLogoContainer.innerHTML= `${metaData.icon}`
-    //   unstakingInputLogoContainer.innerHTML= `${metaData.icon}`
-    // } else {
-    //   stakingInputLogoContainer.innerHTML= `${metaData.name}`
-    //   unstakingInputLogoContainer.innerHTML= `${metaData.name}`
-    // }
-
-    // stakeAmountAvailableValue!.innerHTML= walletAvailableDisplayable
-    // unstakeAmountAvailableValue!.innerHTML= poolParams.resultParams.staked[i]
-
-    // showOrHideMaxButton(walletAvailableDisplayable, stakeMaxButton)
-    // showOrHideMaxButton(poolParams.resultParams.staked[i], unstakeMaxButton)
-
-
-    // newPool.querySelector(".main-stake")!.append(newStakingInputContainer)
-    // newPool.querySelector(".main-unstake")!.append(newUnstakingInputContainer)
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
 
     newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
@@ -815,9 +831,11 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   }
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
+  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
+  
 }
 
-function addInput(newPool: HTMLElement, contractData: ContractData, action: string) {
+function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {
   let inputContainer = qs(".generic-token-input-container")
   var newInputContainer = inputContainer.cloneNode(true) as HTMLElement
   
@@ -848,7 +866,12 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
   }
   inputLogoContainer?.classList.remove("hidden")
 
-  amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+  if(action == "stake") {
+    amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+  } else if(action == "unstake") {
+    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount, contractData.metaData.decimals, 7)
+  }
+  
   showOrHideMaxButton(contractData.balance, maxButton)
 
   newPool.querySelector(`.main-${action}`)!.append(newInputContainer)
@@ -1212,6 +1235,9 @@ window.onload = async function () {
       } else if(method == "ft_transfer_call") {
         // @ts-ignore
         await stakeResult(args)
+      } else if(method == "unstake"){
+        // @ts-ignore
+        await unstakeResult(args)
       }
       // const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
       // if (finalExecutionOutcome) {
@@ -1347,6 +1373,25 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
     )
   }))
   message += tokensStakedMessage.join(" - ")
+  showSuccess(message, "Stake")
+}
+
+async function unstakeResult(argsArray: [{amount: string, token: string}]) {
+  let message = "Unstaked: "
+  let tokensUnstakedMessage: string[] = []
+  
+  for(let i = 0; i < argsArray.length; i++) {
+    const args = argsArray[i]
+    let contract = new NEP141Trait(args.token)
+    contract.wallet = wallet
+
+    const metaData = await contract.ft_metadata()
+    const amount = convertToDecimals(args.amount, metaData.decimals, 7)
+    tokensUnstakedMessage.push(
+      `${amount} ${metaData.symbol}`
+    )
+  }
+  message += tokensUnstakedMessage.join(" - ")
   showSuccess(message, "Stake")
 }
 

@@ -41,9 +41,6 @@ export class PoolResultParams {
     }
 
     addStaked(amountArray: bigint[]) {
-        //DUDA esto está bien verdad? Estás orgushozo?
-        // this.staked = []
-        // TODO MARTIN
         for (let i = 0; i < amountArray.length; i++){
             this.staked[i] = (BigInt(this.staked[i]) + amountArray[i]).toString()
         }
@@ -155,7 +152,25 @@ export class PoolParamsP3 {
 
             TXs.push(promiseWithContract)
         }
-        await this.stakingContract.ft_transfer_call_multiple(TXs)   
+        await this.stakingContract.callMulipleTransactions(TXs)   
+    }
+
+    async unstake(amounts: bigint[]) {
+        let TXs = []
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const stakeContract = this.stakeTokenContractList[i]
+            const promise = stakeContract.contract.unstake_without_send(
+                stakeContract.contract.contractId, 
+                amounts[i].toString()
+            )
+            const promiseWithContract = {
+            promise,
+            contractName: this.stakingContract.contractId
+            }
+
+            TXs.push(promiseWithContract)
+        }
+        await this.stakingContract.callMulipleTransactions(TXs)   
     }
 
     getRewardTokenIconData(): RewardTokenIconData[] {

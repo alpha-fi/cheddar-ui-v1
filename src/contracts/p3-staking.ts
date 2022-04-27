@@ -46,7 +46,7 @@ export class StakingPoolP3 extends SmartContract {
         return this.call("ft_transfer_call", {}, TGas(25), amount)
     }
 
-    async ft_transfer_call_multiple(txPromiseArray: {
+    async callMulipleTransactions(txPromiseArray: {
         promise: Promise<nearAPI.transactions.Action>,
         contractName: string
     }[]): Promise<void> {

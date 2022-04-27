@@ -38,7 +38,7 @@ export class SmartContract {
     callWithoutSend(method:string, args:any, gas?:U64String, attachedYoctos?:U128String) : Promise<any> {
         //console.log(this.contractId, method, args, gas, attachedYoctos)
         if (!this.nearWallet) throw Error(`contract-proxy not connected ${this.contractId} trying to call ${method}`)
-        return this.wallet.call(this.contractId, method, args, gas, attachedYoctos)
+        return this.nearWallet.call(this.contractId, method, args, gas, attachedYoctos)
     }
 
     disconnect(){

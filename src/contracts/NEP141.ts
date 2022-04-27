@@ -42,6 +42,19 @@ export class NEP141Trait extends SmartContract {
         )
     }
 
+    async unstake_without_send(token:string, amount:U128String):Promise<nearAPI.transactions.Action>{
+        return nearAPI.transactions.functionCall(
+            "unstake", 
+            {
+                token,
+                amount,
+            }, 
+            new BN("200000000000000"), 
+            // new BN(gas), 
+            new BN(1)
+        )
+    }
+
     async ft_total_supply() : Promise<U128String> {
         return this.view("ft_total_supply")
     }
