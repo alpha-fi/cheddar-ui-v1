@@ -23,6 +23,8 @@ import { HTMLTokenInputData, RewardTokenIconData, UnclaimedRewardsData } from '.
 
 import * as nearAPI from "near-api-js"
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
+import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
+import { RefTokenData } from './entities/refResponse';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -162,13 +164,43 @@ qs("#ended-filter").onclick=filterPools("inactive-pool")
 qs('#your-farms-filter').onclick= filterPools("your-farms")
 
 
-function depositClicked(pool: HTMLElement) {
+function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
   return async function (event: Event) {
     event.preventDefault()
-
+    await poolParams.stakingContract.storageDeposit();
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
   }
+}
+
+async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<number> {
+  const rewardToken = "cheddar"
+  const rewardTokenData: RefTokenData = await getTokenData(rewardToken)
+  const metaData = await poolParams.cheddarContract.ft_metadata()
+  const currentRewards: bigint = poolParams.resultParams.real
+  const currentRewardsDisplayable = convertToDecimals(currentRewards, metaData.decimals, 7)
+  return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
+}
+
+async function getUnclaimedRewardsInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
+  const farmTokenContractList = poolParams.farmTokenContractList
+  const rewardTokenArray = farmTokenContractList.map(farmTokenContract => farmTokenContract.metaData.symbol)
+  const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
+  let pendingRewards = 0
+  farmTokenContractList.forEach((farmTokenContract, index) => {
+    const metaData = farmTokenContract.metaData
+    const symbol = metaData.symbol
+    console.log("RESULT PARAMS:", poolParams.resultParams)
+    const unclaimedRewards = poolParams.resultParams.farmedUnits[index]
+    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
+    const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
+
+    console.log("tokenData!.price: ", tokenData!.price)
+    console.log("currentRewardsDisplayable ", unclaimedRewards)
+    pendingRewards += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
+  })
+  
+  return pendingRewards
 }
 
 function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
@@ -766,11 +798,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   // newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
   
-  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
-
+  let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
+  console.log(unclaimedRewards)
   // console.log(unclaimedRewards)
 
-  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
 
 
   // let unstakeMaxButton = newPool.querySelector(`.unstake .max-button`) as HTMLElement
@@ -792,7 +824,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
 
-  newPool.querySelector("#activate")?.addEventListener("click", depositClicked(newPool))
+  newPool.querySelector("#activate")?.addEventListener("click", depositClicked(poolParams, newPool))
 
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
 
@@ -818,8 +850,11 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
 
     newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
-  }
 
+    
+  }
+  const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
+  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
   //I use this 2 for loops to match every combination of inputs without repeating itself
   for (let i=0; i < tokenSymbols.length; i++){
     for (let u=0; u < tokenSymbols.length; u++){
@@ -991,7 +1026,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
       
       if (!newPool.classList.contains("your-farms")) {
         activateButtonContainer.classList.remove("hidden")
-        activateButton.addEventListener("click", depositClicked(newPool))
+        activateButton.addEventListener("click", depositClicked(poolParams, newPool))
         harvestButton.classList.add("hidden")
         
         if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
@@ -1133,7 +1168,6 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
 
 window.onload = async function () {
   try {
-    
     let env = ENV //default
 
     // const parts = window.location.pathname.split("/")

@@ -195,9 +195,10 @@ export class PoolParamsP3 {
         
         for(let i = 0; i < iconDataArray.length; i++) {
             const iconData = iconDataArray[i]
-        
+            // TODO Fix when Henry answeres how we should handle the unclaimed rewards
+            const amount = convertToDecimals(this.resultParams.farmedUnits, this.metaData.decimals, 7)
             dataArray.push({
-                amount: this.resultParams.farmedUnits[i],
+                amount: amount,
                 iconData: iconData
             })
         }
