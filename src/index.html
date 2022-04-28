@@ -20,12 +20,12 @@
       <a class="btn btn-outline-none" href="https://draw.cheddar.farm" target="_blank">Draw 🎨</a>
     </div>
     <nav>
-      <a href="#" id="home">Home</a>
-      <a href="#" id="unstake-m" class="hidden">Unstake</a>
-      <a href="#" id="liquidity" class="hidden">Pool</a>
-      <a href="#" id="delayed-unstake" class="hidden">Delayed-Unstake</a>
-      <a href="#" id="faq">FAQ</a>
-      <a href="#" id="my-account" class="user-info"><span id="account-id">not connected</span></a>
+      <a href="#" id="home" class="navButton">Home</a>
+      <a href="#" id="unstake-m" class="hidden navButton">Unstake</a>
+      <a href="#" id="liquidity" class="hidden navButton">Pool</a>
+      <a href="#" id="delayed-unstake" class="hidden navButton">Delayed-Unstake</a>
+      <a href="#" id="faq" class="navButton">FAQ</a>
+      <a href="#" id="my-account" class="user-info navButton"><span id="account-id">not connected</span></a>
     </nav>
   </header>
   <div id="circulatingSupply">
@@ -376,7 +376,7 @@
               <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-dollars-value">{unclaimed_rewards}</span></li>
               <!--WIP-->
               <div class="unclaimed-rewards-info-container hidden">
-                <div class="generic-unclaimed-rewards-row">
+                <div class="generic-unclaimed-rewards-row hidden">
                   <span class="amount">number</span>
                   <span class="icon">icon</span>
                 </div>
