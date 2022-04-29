@@ -34,7 +34,15 @@ html {
   /* Fill width, retain proportions */
 }
 
-*:focus {
+/* *:focus {
+  outline-style: none;
+  outline-color: (--primary);
+  outline-width: 1px;
+  box-shadow   : var(--primary-low) 0px 0px 0px 2px;
+  border-radius: 6px;
+} */
+
+.focused {
   outline-style: none;
   outline-color: (--primary);
   outline-width: 1px;
@@ -350,7 +358,8 @@ header nav a {
 }
 
 .user-info {
-  background-color: var(--yellow);
+  background-color: var(--second-new-grey);
+  color: var(--primary);
 }
 
 .pool-meta.actions {
@@ -368,7 +377,6 @@ header nav a {
 
 .user-info span {
   display     : inline-block;
-  color       : var(--fg);
   font-weight : 600;
   font-size   : 14px;
   line-height : 11px;
@@ -871,6 +879,10 @@ li {
   width: 100%;
 }
 
+.main-contract-footer p {
+  text-align: center;
+}
+
 input[type=checkbox][disabled]{
   outline:1px solid blue;
 }
@@ -1266,7 +1278,8 @@ input:checked + .slider:before {
 #contrat-period-container {
   margin: 9px;
   font-size: 11px;
-  color: var(--new-gray);
+  font-weight: 700;
+  color: black;
 }
 
 #new-token-header {
@@ -1371,27 +1384,29 @@ input:checked + .slider:before {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(22vw, -79px);
-  width: max-content;
-  background-color: grey;
-  align-items: flex-end;
+  transform: translate(19vw, -81px);
+  width: 88px;
+  background-color: var(--white);
+  align-items: center;
   justify-content: center;
-  border: 3px var(--light-gray) solid;
+  border: 1px solid var(--second-new-grey);
   border-radius: 12px;
+  align-content: space-around;
+  margin: 10px 40px;
 }
 
 .unclaimed-rewards-info-container > div {
+  width: 80%;
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
-  align-items: center;
   flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .unclaimed-rewards-info-container span {
   padding: 5px;
   border-width: 0px 1px;
-  background-color: lightgray;
   border-radius: 12px;
   margin: 1px;
 }
@@ -1403,6 +1418,11 @@ input:checked + .slider:before {
 
 .reward-tokens-value img {
   margin-left: 3px;
+}
+
+.unclaimed-rewards-row .mini-icon {
+  margin: -30% 0;
+  height: 18px;
 }
 
 .mini-icon {
@@ -1419,7 +1439,7 @@ button.activate {
     background-color: var(--primary);
     color: var(--white);
     height: 36px;
-    margin-left: 4px;
+    margin: 0 25%;
     border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 4px;
 }
@@ -1485,11 +1505,19 @@ button.activate {
   display: flex;
   margin-top: 32px;
   align-items: center;
+  background-color: var(--bg);
+  padding: 0 3px;
 }
 
-.input-container .token-logo, .input-container .token-logo svg {
-  height: 56px;
-  background-color: var(--bg);
+.input-container input:focus {
+  outline: none;
+}
+
+.input-container .token-logo, .input-container .token-logo-svg-container svg {
+  height: 40px;
+  padding-right: 10px;
+  background-color: var(--shadow);
+  border-radius: 50%;
 }
 
 .amount-available {
@@ -1509,7 +1537,8 @@ button.activate {
 }
 
 #staking-unstaking-container input::placeholder {
-  color: var(--primary)
+  color: var(--primary);
+  margin: 0 -8%;
 }
 
 .available-info {

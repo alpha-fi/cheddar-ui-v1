@@ -53,8 +53,8 @@ const ONE_NEAR = BigInt(10) ** BigInt(24);
 qsa('.popup button#cancel').forEach(f => (f as HTMLButtonElement).onclick = (event) => { event.preventDefault(); hideOverlay() })
 
 //connect wallet selection boxes
-qs('#near-web-wallet-box').onclick = loginNearWebWallet
-qs('#narwallets-wallet-box').onclick = loginNarwallets
+// qs('#near-web-wallet-box').onclick = loginNearWebWallet
+// qs('#narwallets-wallet-box').onclick = loginNarwallets
 
 //nav my-account "home"
 qs('nav #home').onclick =
@@ -107,11 +107,11 @@ function sayChoose() {
 }
 
 //button connect
-qs('#stake-form-not-connected').onsubmit =
-  async function (event) {
-    event.preventDefault()
-    sayChoose();
-  }
+// qs('#stake-form-not-connected').onsubmit =
+//   async function (event) {
+//     event.preventDefault()
+//     sayChoose();
+//   }
 
 
 //button sign-out
@@ -555,8 +555,18 @@ async function signedInFlow(wallet: WalletInterface) {
 }
 
 function setDefaultFilter (){
+  let allYourFarmsPools = qsa(".your-farms")
+  let allLivePools = qsa(".active-pool")
   const event= new Event ("click")
-  qs("#your-farms-filter").dispatchEvent(event) 
+  //If you don´t have farms show live pools as default
+  if (allYourFarmsPools.length == 0){
+    qs("#live-filter")!.dispatchEvent(event)
+    if (allLivePools.length == 0){
+      qs("#ended-filter")!.dispatchEvent(event)
+    }
+  } else {
+    qs("#your-farms-filter").dispatchEvent(event)
+  }
 }
 
 // Initialize contract & set global variables
@@ -870,9 +880,19 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   
 }
 
+function addFocusClass(input:HTMLElement) {
+  return function (event:Event) {
+    event?.preventDefault
+    input.classList.toggle("focused")
+  }
+}
+
 function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {
   let inputContainer = qs(".generic-token-input-container")
   var newInputContainer = inputContainer.cloneNode(true) as HTMLElement
+  let inputRowContainer = newInputContainer.querySelector(".input-container") as HTMLElement
+  let infoRowContainer = newInputContainer.querySelector(".available-info") as HTMLElement
+  let input = newInputContainer.querySelector("input") as HTMLElement
   
   const metaData = contractData.metaData
   newInputContainer.classList.remove("generic-token-input-container")
@@ -882,10 +902,13 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
   newInputContainer.querySelector(".available-info span")!.innerHTML = `Available to ${action}`
   newInputContainer.querySelector(".amount-available")?.classList.add(action)
+
+  input!.addEventListener("focus", addFocusClass(inputRowContainer!))
+  input!.addEventListener("blur", addFocusClass(inputRowContainer!))
   
   let inputLogoContainer = newInputContainer.querySelector(".input-container .token-logo") as HTMLElement
   let amountAvailableValue = newInputContainer.querySelector(".amount-available .value")
-  let maxButton = newInputContainer.querySelector(".max-button") as HTMLElement
+  let maxButton = infoRowContainer.querySelector(".max-button") as HTMLElement
 
   if (metaData.icon != null){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
@@ -894,21 +917,25 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
       tokenLogoElement?.setAttribute("src", metaData.icon)
       inputLogoContainer?.classList.remove("hidden")
     } else if(metaData.icon.startsWith("<svg")) {
-      let tokenLogoElement = newInputContainer.querySelector("div.token-logo")
+      let tokenLogoElement = newInputContainer.querySelector("div.token-logo-svg-container")
       tokenLogoElement!.innerHTML = metaData.icon
       tokenLogoElement!.classList.remove("hidden")
     }
   } else {
     inputLogoContainer.innerHTML= `${metaData.name}`
+    inputLogoContainer?.classList.remove("hidden")
   }
 
   if(action == "stake") {
     amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+    maxButton.addEventListener("click", maxStakeClicked(inputRowContainer, infoRowContainer))
   } else if(action == "unstake") {
     amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount, contractData.metaData.decimals, 7)
+    maxButton.addEventListener("click", maxUnstakeClicked(inputRowContainer, infoRowContainer))
   }
   
   showOrHideMaxButton(contractData.balance, maxButton)
+
 
   newPool.querySelector(`.main-${action}`)!.append(newInputContainer)
 }
@@ -992,7 +1019,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.classList.add("inactive-pool")
   }
 
-  // TODO MARTIN //DUDA tengo q hacer algo más acá o ya lo terminé y nunca borre el TODO?
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let activated = newPool.querySelector("#activated") as HTMLElement
@@ -1000,6 +1026,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   activated.classList.add("hidden")
   activateButtonContainer.classList.add("hidden")
+  harvestButton.classList.add("hidden")
   
   if(newPool.classList.contains("inactive-pool") && !newPool.classList.contains("your-farms")) {
     // Completely ended contract. Don't put listeners regarding stake/unstake/harvest
@@ -1027,24 +1054,22 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
       if (!newPool.classList.contains("your-farms")) {
         activateButtonContainer.classList.remove("hidden")
         activateButton.addEventListener("click", depositClicked(poolParams, newPool))
-        harvestButton.classList.add("hidden")
         
         if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
           let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
           newPool.querySelector("#depositWarning")!.innerHTML = warningText
-
+          
         }
       } else {
         activateButtonContainer.classList.add("hidden")
         activateButton.setAttribute("disabled", "disabled")
+        harvestButton.classList.remove("hidden")
       }
       
     } else {
       newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
       const event= new Event ("click")
       newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
-      
-
     }
   }
 
@@ -1123,24 +1148,24 @@ function getRewardsPerDaySingle(poolParams: PoolParams) {
   return BigInt(poolParams.contractParams.farming_rate) * 60n * 24n
 }
 
-//DUDA no estoy seguro de si esto lo usabamos o no al final
-function maxStakeClicked(pool: HTMLElement) {
+
+function maxStakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
   return function (event: Event) {
     event.preventDefault()
 
-    let input = pool.querySelector(".main-stake input") as HTMLInputElement
-    const amount = pool.querySelector(".stake .value")!.innerHTML
+    let input = inputRowContainer.querySelector("input") as HTMLInputElement
+    const amount = infoRowContainer.querySelector(".value")!.innerHTML
 
     input.value = amount.toString()
   }
 }
-//DUDA idem
-function maxUnstakeClicked(pool: HTMLElement) {
+
+function maxUnstakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
   return function (event: Event) {
     event.preventDefault()
 
-    let input = pool.querySelector(".main-unstake input") as HTMLInputElement
-    const amount = pool.querySelector(".unstake .value")!.innerHTML
+    let input = inputRowContainer.querySelector(".input") as HTMLInputElement
+    const amount = infoRowContainer.querySelector(".value")!.innerHTML
 
     input.value = amount.toString()
   }
@@ -1373,11 +1398,10 @@ window.onload = async function () {
       //       showSuccess(data[0], "Transaction Result")
       //   }
       // }
-
     }
     else {
       //not signed-in 
-      await signedOutFlow() //show home-not-connected -> select wallet page
+      // await signedOutFlow() //show home-not-connected -> select wallet page
     }
   }
   catch (ex) {
