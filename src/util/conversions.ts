@@ -86,7 +86,7 @@ export function convertToDecimals(str:string|BigInt, decimals: number, truncate:
   // clear leading zeros
   let i = 0
   for(; i<str.length && str[i]=="0"; ++i) {}
-  if (i != 0)//DUDA esto cuándo se cumple si está fuera del for?
+  if (i != 0)
     str = str.substring(i);
   if (str == "0")
     return "0";

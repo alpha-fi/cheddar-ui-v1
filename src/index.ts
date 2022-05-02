@@ -605,49 +605,49 @@ function loginNarwallets() {
 }
 
 //DUDA si no usamos el submitForm borrar esto
-async function setupTransaction({
-  receiverId,
-  actions,
-  nonceOffset = 1,
-}: {
-  receiverId: string;
-  actions: Action[];
-  nonceOffset?: number;
-}) {
+// async function setupTransaction({
+//   receiverId,
+//   actions,
+//   nonceOffset = 1,
+// }: {
+//   receiverId: string;
+//   actions: Action[];
+//   nonceOffset?: number;
+// }) {
 
-  //console.log(nearConnectedWalletAccount)
+//   //console.log(nearConnectedWalletAccount)
 
 
-  const localKey = await nearConnectedWalletAccount.connection.signer.getPublicKey(
-    nearConnectedWalletAccount.accountId,
-    nearConnectedWalletAccount.connection.networkId
-  );
-  let accessKey = await nearConnectedWalletAccount.accessKeyForTransaction(
-    receiverId,
-    actions,
-    localKey
-  );
-  if (!accessKey) {
-    throw new Error(
-      `Cannot find matching key for transaction sent to ${receiverId}`
-    );
-  }
+//   const localKey = await nearConnectedWalletAccount.connection.signer.getPublicKey(
+//     nearConnectedWalletAccount.accountId,
+//     nearConnectedWalletAccount.connection.networkId
+//   );
+//   let accessKey = await nearConnectedWalletAccount.accessKeyForTransaction(
+//     receiverId,
+//     actions,
+//     localKey
+//   );
+//   if (!accessKey) {
+//     throw new Error(
+//       `Cannot find matching key for transaction sent to ${receiverId}`
+//     );
+//   }
 
-  const block = await nearConnectedWalletAccount.connection.provider.block({ finality: 'final' });
-  const blockHash = baseDecode(block.header.hash);
+//   const block = await nearConnectedWalletAccount.connection.provider.block({ finality: 'final' });
+//   const blockHash = baseDecode(block.header.hash);
 
-  const publicKey = PublicKey.from(accessKey.public_key);
-  const nonce = accessKey.access_key.nonce + nonceOffset;
+//   const publicKey = PublicKey.from(accessKey.public_key);
+//   const nonce = accessKey.access_key.nonce + nonceOffset;
 
-  return createTransaction(
-    nearConnectedWalletAccount.accountId,
-    publicKey,
-    receiverId,
-    nonce,
-    actions,
-    blockHash
-  );
-}
+//   return createTransaction(
+//     nearConnectedWalletAccount.accountId,
+//     publicKey,
+//     receiverId,
+//     nonce,
+//     actions,
+//     blockHash
+//   );
+// }
 
 function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
   if (Number(walletBalance.replace(".", "")) > 0) {
@@ -667,7 +667,7 @@ function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
 }
 
 async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
-  poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()  
+  poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
 }
 
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
@@ -697,11 +697,12 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
 }
 
+//TODO MARTIN
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
   var metaData = poolParams.metaData;
   let accName = poolParams.resultParams.accName
   
-  let accountInfo = await poolParams.stakingContract.status(accName)//DUDA xq stakingContract en simple devuelve un array de string y en multiple otro devuelve un "status"?
+  let accountInfo = await poolParams.stakingContract.status(accName)//StakingContract en simple devuelve un array de string y en multiple otro devuelve un "status"?
   
   let staked = (accountInfo) ? BigInt(accountInfo.stake_tokens) : 0;
   let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
@@ -718,7 +719,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
 
 
-  setAccountInfo(poolParams, accountInfo)//DUDA no olvidar esto
+  setAccountInfo(poolParams, accountInfo)
   let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
   // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
@@ -1104,7 +1105,7 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
   for(let i = 0; i < tokenIconDataArray.length; i++) {
     const tokenIconData = tokenIconDataArray[i]
     var newMiniIcon: HTMLElement
-    if(tokenIconData.isSvg) {
+    if(tokenIconData.isSvg) {//TODO MARTIN this can be standarized
       var doc = parser.parseFromString(tokenIconData.src, "image/svg+xml");
       newMiniIcon = doc.documentElement
     } else {
@@ -1240,7 +1241,7 @@ window.onload = async function () {
 
     //console.log(countDownDate)
 
-    //DUDA para que es esto?
+    //DUDA para que es esto? Esto era para el lanzamiento de la app.
     // var x = setInterval(function() {
 
     //   // Get today's date and time
@@ -1287,12 +1288,12 @@ window.onload = async function () {
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
-      wallet = new NearWebWallet(nearWebWalletConnection);//DUDA q pedo con esto?
+      wallet = new NearWebWallet(nearWebWalletConnection);//DUDA esto vamos a tener que probar bien pero safa?
       
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)
       await signedInFlow(wallet)
-      const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME//DUDA y esto?
+      const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
       const cheddarContract = new NEP141Trait(cheddarContractName);
       cheddarContract.wallet = wallet;
       const cheddarBalance = await cheddarContract.ft_balance_of(accountName)
@@ -1353,7 +1354,7 @@ window.onload = async function () {
       //   var receiver = finalExecutionOutcome?.transaction.receiver_id;
       //   for (let i = 0; i < poolList.length; i++) {
       //     //console.log("poolList[i].contract.contractId: ", poolList[i].contract.contractId)
-      //     if (poolList[i].stakingContract.contractId == receiver) {//DUDA q onda con esto?
+      //     if (poolList[i].stakingContract.contractId == receiver) {
       //       const metaData = poolList[i].metaData
       //       showSuccess(`Unstaked ${convertToDecimals(args.amount, metaData.decimals, 2)} ${metaData.symbol}`)
       //       // showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
@@ -1395,7 +1396,7 @@ window.onload = async function () {
       //       // if(receiver) {
       //       for (let i = 0; i < poolList.length; i++) {
       //         //console.log("poolList[i].tokenContract.contractId: ", poolList[i].tokenContract.contractId)
-      //         if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
+      //         if (poolList[i].tokenContract.contractId == receiver) {
       //           const metaData = poolList[i].metaData
       //           showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
       //           break;
@@ -1408,7 +1409,7 @@ window.onload = async function () {
       //       /** TODO - Fix for mutliple transactions **/
       //       var receiver = finalExecutionOutcome?.transaction.receiver_id;
       //       for (let i = 0; i < poolList.length; i++) {
-      //         if (poolList[i].tokenContract.contractId == receiver) {//DUDA que onda con esto?
+      //         if (poolList[i].tokenContract.contractId == receiver) {
       //           const metaData = poolList[i].metaData
       //           showSuccess(`Staked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
       //           break;
@@ -1427,7 +1428,7 @@ window.onload = async function () {
     }
   }
   catch (ex) {
-    showErr(ex)//DUDA q onda con esto?
+    showErr(ex as Error)
   }
 }
 
