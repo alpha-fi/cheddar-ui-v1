@@ -181,7 +181,7 @@ export class PoolParamsP3 {
             const data = {
                 isSvg: src.includes("<svg"),
                 src: src,
-                alt: this.metaData.name ? this.metaData.name : "NoName" 
+                alt: farmTokenContract.metaData.name ? farmTokenContract.metaData.name : "NoName" //DUDA esto estaba con this.metaData.name . Lo cambié por esto xq me parece q era lo correcto pero consulto por si rompí otra cosa y no me dí cuenta.
             }
             dataArray.push(data)
         }

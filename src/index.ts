@@ -718,7 +718,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
 
 
-  setAccountInfo(poolParams, accountInfo)
+  setAccountInfo(poolParams, accountInfo)//DUDA no olvidar esto
   let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
   // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
@@ -1132,6 +1132,9 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
     let unclaimedRewardData = unclaimedRewardsDataArray[i]
     newUnclaimedRewardsRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
     newRewardTokensRow.querySelector(".reward-token-name")!.innerHTML = unclaimedRewardData.iconData.alt
+    console.log("unclaimedRewardData: " + unclaimedRewardData)
+    console.log("unclaimedRewardData.iconData: " + unclaimedRewardData.iconData)
+    console.log("unclaimedRewardData.iconData.alt: " + unclaimedRewardData.iconData.alt)
 
     const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
     const rewardTokenHoverIconContainer = newRewardTokensRow.querySelector(".reward-token-icon") as HTMLElement
@@ -1148,7 +1151,7 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
     toggleGenericClass(newMiniIcon, "mini-icon")
     var newMiniIconClon = newMiniIcon.cloneNode(true) as HTMLElement
     iconContainer.append(newMiniIcon)
-    rewardTokenHoverIconContainer.append(newMiniIconClon)//DUDA debería clonar este elemento para que poder appendearlo xq ya lo appendié en el anterior?
+    rewardTokenHoverIconContainer.append(newMiniIconClon)
     toggleGenericClass(newUnclaimedRewardsRow, "unclaimed-rewards-row")
     toggleGenericClass(newRewardTokensRow, "reward-tokens-row")
     unclaimedRewardsInfoRowContainer.append(newUnclaimedRewardsRow)
