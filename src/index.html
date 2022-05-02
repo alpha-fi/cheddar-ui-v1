@@ -365,12 +365,20 @@
       <div id="contract-information">
         <div class="main-contract-information">
           <ul>
-            <li>
-              <span>Reward tokens</span>
-              <div class="reward-tokens-value" style="display: inline-block;">
-                <!-- Reward tokens value gets filled programmatically -->
+            <div class="reward-tokens-container">
+              <li>
+                <span>Reward tokens</span>
+                <div class="reward-tokens-value" style="display: inline-block;">
+                  <!-- Reward tokens value gets filled programmatically -->
+                </div>
+              </li>
+              <div class="reward-tokens-info-container hidden">
+                <div class="generic-reward-tokens-row hidden">
+                  <span class="reward-token-name"></span>
+                  <span class="reward-token-icon"></span>
+                </div>
               </div>
-            </li>
+            </div>
             <li><span>Deposit Fee</span><span class="deposit-fee-value">{deposit_fee}</span></li>
             <div class="unclaimed-rewards-container">
               <li><span>Unclaimed rewards <!-- CHEDDAR EARNED --></span><span class="unclaimed-rewards-dollars-value">{unclaimed_rewards}</span></li>

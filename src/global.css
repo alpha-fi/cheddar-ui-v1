@@ -1379,13 +1379,14 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container {
+.unclaimed-rewards-info-container, .reward-tokens-info-container {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
   transform: translate(19vw, -81px);
-  width: 88px;
+  width: 135px;
+  height: 51px;
   background-color: var(--white);
   align-items: center;
   justify-content: center;
@@ -1395,7 +1396,7 @@ input:checked + .slider:before {
   margin: 10px 40px;
 }
 
-.unclaimed-rewards-info-container > div {
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div {
   width: 80%;
   display: flex;
   flex-direction: row;
@@ -1404,7 +1405,7 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container span {
+.unclaimed-rewards-info-container span, .reward-tokens-info-container span {
   padding: 5px;
   border-width: 0px 1px;
   border-radius: 12px;
@@ -1420,7 +1421,7 @@ input:checked + .slider:before {
   margin-left: 3px;
 }
 
-.unclaimed-rewards-row .mini-icon {
+.unclaimed-rewards-row .mini-icon, .reward-token-icon .mini-icon {
   margin: -30% 0;
   height: 18px;
 }

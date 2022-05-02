@@ -949,6 +949,13 @@ async function toggleExpandStakeUnstakeSection (newPool: HTMLElement, elemWithLi
   elemWithListener.addEventListener("click", await toggleActions(stakingUnstakingContainer));
 }
 
+function standardHoverToDisplayExtraInfo (elementWithListenner: HTMLElement, elementShown: HTMLElement) {
+  elementWithListenner.addEventListener("mouseover", toggleElement(elementShown));
+  elementWithListenner.addEventListener("mouseout", toggleElement(elementShown));
+  elementShown.addEventListener("mouseover", showElement(elementShown));
+  elementShown.addEventListener("mouseout", hideElement(elementShown));
+}
+
 async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
   var metaData = poolParams.metaData;
@@ -999,6 +1006,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
   let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
   var contractParams = poolParams.contractParams;
+  let rewardTokensValue= newPool.querySelector(".reward-tokens-value")! as HTMLElement;
+  let rewardTokensInfoContainer = newPool.querySelector(".reward-tokens-info-container")! as HTMLElement;
   let unclaimedRewardsDollarsValue = newPool.querySelector(".unclaimed-rewards-dollars-value")! as HTMLElement;
   let unclaimedRewardsInfoContainer = newPool.querySelector(".unclaimed-rewards-info-container")! as HTMLElement;
 
@@ -1075,10 +1084,9 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   await addRewardTokenIcons(poolParams, newPool)
   await addUnclaimedRewards(poolParams, newPool)
-  unclaimedRewardsDollarsValue.addEventListener("mouseover", toggleElement(unclaimedRewardsInfoContainer));
-  unclaimedRewardsDollarsValue.addEventListener("mouseout", toggleElement(unclaimedRewardsInfoContainer));
-  unclaimedRewardsInfoContainer.addEventListener("mouseover", showElement(unclaimedRewardsInfoContainer));
-  unclaimedRewardsInfoContainer.addEventListener("mouseout", hideElement(unclaimedRewardsInfoContainer));
+  
+  standardHoverToDisplayExtraInfo(rewardTokensValue, rewardTokensInfoContainer)
+  standardHoverToDisplayExtraInfo(unclaimedRewardsDollarsValue, unclaimedRewardsInfoContainer)
   // await addUnclaimedRewards(poolParams, newPool)
 
   qs("#pool_list").append(newPool)
@@ -1090,6 +1098,7 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
   const tokenIconDataArray: RewardTokenIconData[] = await poolParams.getRewardTokenIconData()
   const icon = qs(".generic-mini-icon")
   const container = newPool.querySelector(".reward-tokens-value") as HTMLElement
+  
   var parser = new DOMParser();
   
   for(let i = 0; i < tokenIconDataArray.length; i++) {
@@ -1109,19 +1118,24 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
 }
 
 async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const rowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
-  const row = qs(".generic-unclaimed-rewards-row") as HTMLElement
+  const unclaimedRewardsInfoRowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
+  const rewardTokenInfoRowContainer = newPool.querySelector(".reward-tokens-info-container") as HTMLElement
+  const genericUnclaimedRewardsRow = qs(".generic-unclaimed-rewards-row") as HTMLElement
+  const genericRewardTokensRow = qs(".generic-reward-tokens-row") as HTMLElement
   const icon = qs(".generic-mini-icon")
   const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
   var parser = new DOMParser();
   
   for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
-    const newRow = row.cloneNode(true) as HTMLElement
+    const newUnclaimedRewardsRow = genericUnclaimedRewardsRow.cloneNode(true) as HTMLElement
+    const newRewardTokensRow = genericRewardTokensRow.cloneNode(true) as HTMLElement
     let unclaimedRewardData = unclaimedRewardsDataArray[i]
-    newRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
+    newUnclaimedRewardsRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
+    newRewardTokensRow.querySelector(".reward-token-name")!.innerHTML = unclaimedRewardData.iconData.alt
 
-    const iconContainer = newRow.querySelector(".icon") as HTMLElement
-    
+    const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
+    const rewardTokenHoverIconContainer = newRewardTokensRow.querySelector(".reward-token-icon") as HTMLElement
+
     var newMiniIcon: HTMLElement
     if(unclaimedRewardData.iconData.isSvg) {
       var doc = parser.parseFromString(unclaimedRewardData.iconData.src, "image/svg+xml");
@@ -1132,9 +1146,14 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
       newMiniIcon.setAttribute("alt", unclaimedRewardData.iconData.alt)
     }
     toggleGenericClass(newMiniIcon, "mini-icon")
+    var newMiniIconClon = newMiniIcon.cloneNode(true) as HTMLElement
     iconContainer.append(newMiniIcon)
-    toggleGenericClass(newRow, "unclaimed-rewards-row")
-    rowContainer.append(newRow)
+    rewardTokenHoverIconContainer.append(newMiniIconClon)//DUDA debería clonar este elemento para que poder appendearlo xq ya lo appendié en el anterior?
+    toggleGenericClass(newUnclaimedRewardsRow, "unclaimed-rewards-row")
+    toggleGenericClass(newRewardTokensRow, "reward-tokens-row")
+    unclaimedRewardsInfoRowContainer.append(newUnclaimedRewardsRow)
+    rewardTokenInfoRowContainer.append(newRewardTokensRow)
+
   }
 }
 
