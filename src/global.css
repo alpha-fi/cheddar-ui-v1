@@ -1285,7 +1285,7 @@ input:checked + .slider:before {
 #new-token-header {
   display: flex;
   justify-content: space-between;
-  padding-top: 14px;
+  padding: 14px 0 8px 0;
 }
 
 #token-logo-container {
@@ -1322,7 +1322,7 @@ input:checked + .slider:before {
   width: 26.88vw;
   max-width: 468px;
   min-width: 334.4px;
-  transform: translate(-23px, -59px);
+  transform: translate(-23px, -67px);
   position: absolute;
   background-color: var(--white);
   padding: 9.6px;
@@ -1415,6 +1415,7 @@ input:checked + .slider:before {
 .reward-tokens-value {
   display: flex;
   justify-content: flex-end;
+  max-height: 32px;
 }
 
 .reward-tokens-value img {

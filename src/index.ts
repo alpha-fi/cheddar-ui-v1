@@ -1178,8 +1178,11 @@ function maxStakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLE
 
     let input = inputRowContainer.querySelector("input") as HTMLInputElement
     const amount = infoRowContainer.querySelector(".value")!.innerHTML
+    const inputEvent= new Event ("input")
 
+    
     input.value = amount.toString()
+    input.dispatchEvent(inputEvent)
   }
 }
 
