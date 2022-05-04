@@ -288,4 +288,14 @@ export class PoolParamsP3 {
         }
         return walletAvailable
     }
+
+    //DUDA esto está bien? En este momento está devolviendo un Array. Creo que debría encontrar una forma de devolver sólo un número pero no tengo idea de cómo.
+    async getWalletAvailableDisplayable() {
+        const available = await this.getWalletAvailable()
+        const availableDisplayableArray = []
+        for (let i = 0; i < available.length; i++) {
+            availableDisplayableArray.push(convertToDecimals(available[i], this.metaData.decimals, 7))    
+        }
+        return availableDisplayableArray
+    }
 }
