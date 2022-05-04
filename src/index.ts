@@ -191,7 +191,7 @@ async function getUnclaimedRewardsInUSDMultiple(poolParams: PoolParamsP3): Promi
     const metaData = farmTokenContract.metaData
     const symbol = metaData.symbol
     console.log("RESULT PARAMS:", poolParams.resultParams)
-    const unclaimedRewards = poolParams.resultParams.farmedUnits[index]
+    const unclaimedRewards = poolParams.resultParams.farmed[index]
     const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
 
@@ -870,6 +870,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     
   }
   const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
+  console.log("Unclaimed rewards multiple", unclaimedRewards)
   newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
   //I use this 2 for loops to match every combination of inputs without repeating itself
   for (let i=0; i < tokenSymbols.length; i++){

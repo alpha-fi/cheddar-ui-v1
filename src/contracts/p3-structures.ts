@@ -27,8 +27,10 @@ export class P3ContractParams {
 
 export class Status {
     stake_tokens: U128String[] = [];
-    farmed_units: U128String = "0";
-    farmed: U128String[] = [];
+    stake: U128String = "";
+    farmed_units: U128String = "";
+    farmed_tokens: U128String[] = [];
+    cheddy_nft: string = "";
     timestamp: number = 0;
 }
 

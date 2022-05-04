@@ -124,7 +124,7 @@ export class PoolParamsP3 {
 
         this.resultParams.staked = accountInfo.stake_tokens
         this.resultParams.farmedUnits = accountInfo.farmed_units
-        this.resultParams.farmed = accountInfo.farmed
+        this.resultParams.farmed = accountInfo.farmed_tokens
         this.resultParams.previous_timestamp = accountInfo.timestamp
         // Contract saves previous_timestamp in seconds
         this.resultParams.accName = accName
@@ -134,6 +134,11 @@ export class PoolParamsP3 {
         await this.setContractParams()
         await this.setStakeTokenContractList()
         await this.setFarmTokenContractList()
+        await this.setResultParams()
+    }
+
+    async refreshAllExtraData() {
+        await this.setContractParams()
         await this.setResultParams()
     }
 
@@ -189,14 +194,17 @@ export class PoolParamsP3 {
         
     }
 
-    getUnclaimedRewardsData(): UnclaimedRewardsData[] {
+    getUnclaimedRewardsData(): Promise<UnclaimedRewardsData[]> {
         let dataArray: UnclaimedRewardsData[] = []
         let iconDataArray = this.getRewardTokenIconData()
+        // const accName = this.stakingContract.wallet.getAccountId()
+        // const status: Status = await this.stakingContract.status(accName)
+        console.log("UNCLAIMED REWARDS", this.resultParams.farmed)
         
         for(let i = 0; i < iconDataArray.length; i++) {
             const iconData = iconDataArray[i]
-            // TODO Fix when Henry answeres how we should handle the unclaimed rewards
-            const amount = convertToDecimals(this.resultParams.farmedUnits, this.metaData.decimals, 7)
+            // TODO Fix when Henry answers how we should handle the unclaimed rewards
+            const amount = convertToDecimals(this.resultParams.farmed[i], this.farmTokenContractList[i].metaData.decimals, 7)
             dataArray.push({
                 amount: amount,
                 iconData: iconData
