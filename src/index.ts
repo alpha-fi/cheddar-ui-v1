@@ -702,21 +702,26 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   var metaData = poolParams.metaData;
   let accName = poolParams.resultParams.accName
   
-  let accountInfo = await poolParams.stakingContract.status(accName)//StakingContract en simple devuelve un array de string y en multiple otro devuelve un "status"?
+  let accountInfo = await poolParams.stakingContract.status(accName)
+  let stakedArray = []
+  let displayableStakedArray = []
   
-  let staked = (accountInfo) ? BigInt(accountInfo.stake_tokens) : 0;
-  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
+  for (let i = 0; i < accountInfo.stake_tokens.length; i++) {
+    stakedArray.push((accountInfo) ? BigInt(accountInfo.stake_tokens[i]) : 0)
+    displayableStakedArray.push(convertToDecimals(stakedArray[i].toString(), metaData.decimals, 7))
+  }
   
+
   let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
-  showOrHideMaxButton(displayableStaked.toString(), unstakeMaxButton)
+  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStakedArray//DUDA esto ya estaba hecho no?
+  showOrHideMaxButton(displayableStakedArray.toString(), unstakeMaxButton)//Esto también
 
 
-  const walletBalances = await poolParams.getWalletAvailableDisplayable()
+  const walletBalancesArray = await poolParams.getWalletAvailableDisplayable()//DUDA Esto devuelve un array, revisar lo que lo usa.
   
   let stakeMaxButton = qs(".stake .max-button") as HTMLElement
-  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
-  showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
+  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalancesArray.toString())//Esto ya se hace, no?
+  showOrHideMaxButton(walletBalancesArray.toString(), stakeMaxButton)
 
 
   setAccountInfo(poolParams, accountInfo)
@@ -1100,20 +1105,11 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
   const icon = qs(".generic-mini-icon")
   const container = newPool.querySelector(".reward-tokens-value") as HTMLElement
   
-  var parser = new DOMParser();
   
   for(let i = 0; i < tokenIconDataArray.length; i++) {
     const tokenIconData = tokenIconDataArray[i]
-    var newMiniIcon: HTMLElement
-    if(tokenIconData.isSvg) {//TODO MARTIN this can be standarized
-      var doc = parser.parseFromString(tokenIconData.src, "image/svg+xml");
-      newMiniIcon = doc.documentElement
-    } else {
-      newMiniIcon = icon.cloneNode(true) as HTMLElement 
-      newMiniIcon.setAttribute("src", tokenIconData.src)
-      newMiniIcon.setAttribute("alt", tokenIconData.alt)
-    }
-    toggleGenericClass(newMiniIcon, "mini-icon")
+    
+    var newMiniIcon = importMiniIcon(tokenIconData, icon) as HTMLElement
     container.append(newMiniIcon)
   }
 }
@@ -1125,7 +1121,6 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
   const genericRewardTokensRow = qs(".generic-reward-tokens-row") as HTMLElement
   const icon = qs(".generic-mini-icon")
   const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
-  var parser = new DOMParser();
   
   for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
     const newUnclaimedRewardsRow = genericUnclaimedRewardsRow.cloneNode(true) as HTMLElement
@@ -1140,16 +1135,9 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
     const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
     const rewardTokenHoverIconContainer = newRewardTokensRow.querySelector(".reward-token-icon") as HTMLElement
 
-    var newMiniIcon: HTMLElement
-    if(unclaimedRewardData.iconData.isSvg) {
-      var doc = parser.parseFromString(unclaimedRewardData.iconData.src, "image/svg+xml");
-      newMiniIcon = doc.documentElement
-    } else {
-      newMiniIcon = icon.cloneNode(true) as HTMLElement
-      newMiniIcon.setAttribute("src", unclaimedRewardData.iconData.src)
-      newMiniIcon.setAttribute("alt", unclaimedRewardData.iconData.alt)
-    }
-    toggleGenericClass(newMiniIcon, "mini-icon")
+    
+    var newMiniIcon = importMiniIcon(unclaimedRewardData.iconData, icon) as HTMLElement
+    
     var newMiniIconClon = newMiniIcon.cloneNode(true) as HTMLElement
     iconContainer.append(newMiniIcon)
     rewardTokenHoverIconContainer.append(newMiniIconClon)
@@ -1159,6 +1147,21 @@ async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool:
     rewardTokenInfoRowContainer.append(newRewardTokensRow)
 
   }
+}
+
+function importMiniIcon(iconData: RewardTokenIconData, iconNode: HTMLElement){
+  var parser = new DOMParser();
+  var newMiniIcon: HTMLElement
+    if(iconData.isSvg) {
+      var doc = parser.parseFromString(iconData.src, "image/svg+xml");
+      newMiniIcon = doc.documentElement
+    } else {
+      newMiniIcon = iconNode.cloneNode(true) as HTMLElement
+      newMiniIcon.setAttribute("src", iconData.src)
+      newMiniIcon.setAttribute("alt", iconData.alt)
+    }
+    toggleGenericClass(newMiniIcon, "mini-icon")
+    return newMiniIcon
 }
 
 function toggleGenericClass(element: HTMLElement, className: string) {
