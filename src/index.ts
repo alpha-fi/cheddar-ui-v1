@@ -38,6 +38,7 @@ let nearConnectedWalletAccount: ConnectedWalletAccount;
 let requestSignTransOptions: RequestSignTransactionsOptions;
 let accountName;
 let isPaused = false;
+let loggedWithNarwallets = false
 
 //time in ms
 const SECONDS = 1000
@@ -183,6 +184,42 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
   return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
 }
 
+async function convertToUSDMultiple(tokenContractList: ContractData[], amountList: U128String[]): Promise<string> {
+  // const stakeTokenContractList = poolParams.stakeTokenContractList
+  const rewardTokenArray = tokenContractList.map(tokenContract => tokenContract.metaData.symbol)
+  const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
+  let amountInUsd: number = 0
+  tokenContractList.forEach((tokenContract, index) => {
+    const metaData = tokenContract.metaData
+    const symbol = metaData.symbol
+    const unclaimedRewards = amountList[index]
+    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
+    const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
+
+    amountInUsd += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
+  })
+
+  return amountInUsd.toFixed(2)
+}
+
+async function getTotalStakedInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
+  const stakeTokenContractList = poolParams.stakeTokenContractList
+  const rewardTokenArray = stakeTokenContractList.map(stakeTokenContract => stakeTokenContract.metaData.symbol)
+  const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
+  let totalStaked = 0
+  stakeTokenContractList.forEach((stakeTokenContract, index) => {
+    const metaData = stakeTokenContract.metaData
+    const symbol = metaData.symbol
+    const unclaimedRewards = poolParams.resultParams.farmed[index]
+    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
+    const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
+
+    totalStaked += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
+  })
+
+  return totalStaked
+}
+
 async function getUnclaimedRewardsInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
   const farmTokenContractList = poolParams.farmTokenContractList
   const rewardTokenArray = farmTokenContractList.map(farmTokenContract => farmTokenContract.metaData.symbol)
@@ -191,13 +228,10 @@ async function getUnclaimedRewardsInUSDMultiple(poolParams: PoolParamsP3): Promi
   farmTokenContractList.forEach((farmTokenContract, index) => {
     const metaData = farmTokenContract.metaData
     const symbol = metaData.symbol
-    console.log("RESULT PARAMS:", poolParams.resultParams)
     const unclaimedRewards = poolParams.resultParams.farmed[index]
     const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
 
-    console.log("tokenData!.price: ", tokenData!.price)
-    console.log("currentRewardsDisplayable ", unclaimedRewards)
     pendingRewards += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
   })
   
@@ -228,15 +262,17 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
             
       // TODO DANI: está ejecutando cosas después del stake, cuando el stake no se terminó
       await poolParams.stake(amountValues)
-      //clear form
-      for(let i = 0; i < inputArray.length; i++) {
-        inputArray[i].value = ""  
-      }
-      
-      poolParams.resultParams.addStaked(amountValues)
-      // await refreshPoolInfoMultiple(poolParams, newPool)
+      if(loggedWithNarwallets) {
+        //clear form
+        for(let i = 0; i < inputArray.length; i++) {
+          inputArray[i].value = ""  
+        }
+        
+        poolParams.resultParams.addStaked(amountValues)
+        // await refreshPoolInfoMultiple(poolParams, newPool)
 
-      showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
+        showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
+      }
 
     }
     catch (ex) {
@@ -746,13 +782,13 @@ async function refreshAccountInfoGeneric(poolList: Array<PoolParams>) {
 /// when the user chooses "connect to web-page" in the narwallets-chrome-extension
 function narwalletConnected(ev: CustomEvent) {
   wallet = narwallets;
-
+  loggedWithNarwallets = true
   signedInFlow(wallet)
 }
 
 /// when the user chooses "disconnect from web-page" in the narwallets-chrome-extension
 function narwalletDisconnected(ev: CustomEvent) {
-
+  loggedWithNarwallets = false
   wallet = disconnectedWallet;
 
   signedOutFlow()
@@ -791,14 +827,16 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   let totalStaked = poolParams.contractParams.total_staked.toString()
   const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
-  var contractData = {
-    contract: poolParams.stakeTokenContract,
-    metaData: poolParams.metaData,
-    balance: walletBalance
-  }
+  const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
+  const farmTokenContractData: ContractData = await poolParams.getFarmTokenContractData();
+  // var contractData = {
+  //   contract: poolParams.stakeTokenContract,
+  //   metaData: poolParams.metaData,
+  //   balance: walletBalance
+  // }
 
-  addInput(newPool, contractData, "stake")
-  addInput(newPool, contractData, "unstake", poolParams.resultParams.staked.toString())
+  addInput(newPool, stakeTokenContractData, "stake")
+  addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
 
   // newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
@@ -840,7 +878,13 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  newPool.querySelector(".main-contract-information .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metaData.decimals, 5).toString()
+  // TODO reimplement when popup is ready
+  // addTotalStaked(newPool, poolParams.metaData.symbol, convertToDecimals(totalStaked, metaData.decimals, 7).toString())
+  // const contractData: ContractData = await poolParams.getStakeTokenContractData();
+  const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
+  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.farming_rate.toString()])
+  newPool.querySelector(".main-contract-information .total-staked-value-usd")!.innerHTML = totalStakedInUsd
+  newPool.querySelector(".main-contract-information .total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
@@ -875,9 +919,26 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
     
   }
-  const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
+
+  // const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
+  const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
+  
   console.log("Unclaimed rewards multiple", unclaimedRewards)
-  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
+  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards
+
+  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
+  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
+
+  const totalFarmedInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
+  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
+  // TODO reimplement when popup is ready
+  // for(let i = poolParams.contractParams.total_staked.length - 1; i >= 0; i--) {
+  //   const tokenName = poolParams.stakeTokenContractList[i].metaData.symbol
+  //   const totalStaked = convertToDecimals(poolParams.contractParams.total_staked[i], poolParams.stakeTokenContractList[i].metaData.decimals, 7)
+
+  //   addTotalStaked(newPool, tokenName, totalStaked)
+  // }
+
   //I use this 2 for loops to match every combination of inputs without repeating itself
   for (let i=0; i < tokenSymbols.length; i++){
     for (let u=0; u < tokenSymbols.length; u++){
@@ -898,6 +959,18 @@ function addFocusClass(input:HTMLElement) {
     event?.preventDefault
     input.classList.toggle("focused")
   }
+}
+
+function addTotalStaked(newPool: HTMLElement, tokenName: string, value: string) {
+  let totalStakedContainer = qs(".generic-total-staked-row")
+  var newTotalStakedContainer = totalStakedContainer.cloneNode(true) as HTMLElement
+  
+  newTotalStakedContainer.querySelector(".token-name")!.innerHTML = tokenName
+  newTotalStakedContainer.querySelector(".total-staked-value")!.innerHTML = value
+
+  toggleGenericClass(newTotalStakedContainer, "total-staked-row")
+  newPool.querySelector(`.main-contract-information ul`)!.prepend(newTotalStakedContainer)
+
 }
 
 function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {

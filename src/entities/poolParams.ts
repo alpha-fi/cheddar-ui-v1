@@ -1,9 +1,11 @@
+import { wallet } from "..";
 import { ContractParams } from "../contracts/contract-structs";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { RewardTokenIconData, UnclaimedRewardsData } from "./genericData";
+import { ContractData } from "./poolParamsP3";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -134,6 +136,22 @@ export class PoolParams {
             amount: amount,
             iconData: rewardTokenIconData[0]
         }]
+    }
+
+    async getStakeTokenContractData(): Promise<ContractData> {
+        return {
+            contract: this.stakeTokenContract,
+            metaData: await this.stakeTokenContract.ft_metadata(),
+            balance: await this.stakeTokenContract.ft_balance_of(wallet.getAccountId()),
+        }
+    }
+
+    async getFarmTokenContractData(): Promise<ContractData> {
+        return {
+            contract: this.cheddarContract,
+            metaData: this.metaData,
+            balance: await this.cheddarContract.ft_balance_of(wallet.getAccountId()),
+        }
     }
 
     setTotalRewardsPerDay() {
