@@ -957,9 +957,9 @@ async function toggleExpandStakeUnstakeSection (newPool: HTMLElement, elemWithLi
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   let stakingUnstakingContainer = newPool.querySelector("#activated")! as HTMLElement;
-  elemWithListener.addEventListener("click", await toggleActions(expandPoolButton));
-  elemWithListener.addEventListener("click", await toggleActions(hidePoolButton));
-  elemWithListener.addEventListener("click", await toggleActions(stakingUnstakingContainer));
+  elemWithListener.addEventListener("click", toggleActions(expandPoolButton));
+  elemWithListener.addEventListener("click", toggleActions(hidePoolButton));
+  elemWithListener.addEventListener("click", toggleActions(stakingUnstakingContainer));
 }
 
 function standardHoverToDisplayExtraInfo (elementWithListenner: HTMLElement, elementShown: HTMLElement) {
@@ -1004,20 +1004,19 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   // New code
   // let poolContainer = newPool.querySelector("#generic-pool-container")! as HTMLElement;
-  let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
+  // let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
-  let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
+  // let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
   let infoIcon = newPool.querySelector("#new-token-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
-  let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
-  let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
-  let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
-  let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
-  let staking = newPool.querySelector(".main-stake")! as HTMLElement;
-  let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
-  let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
-  let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+  // let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
+  // let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+  // let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+  // let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+  // let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+  // let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+  // let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
   var contractParams = poolParams.contractParams;
   let rewardTokensValue= newPool.querySelector(".reward-tokens-value")! as HTMLElement;
   let rewardTokensInfoContainer = newPool.querySelector(".reward-tokens-info-container")! as HTMLElement;
@@ -1041,58 +1040,66 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.classList.add("inactive-pool")
   }
 
-  let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
-  let activateButton = newPool.querySelector(".activate") as HTMLElement
-  let activated = newPool.querySelector("#activated") as HTMLElement
-  let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
+  // let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
+  // let activateButton = newPool.querySelector(".activate") as HTMLElement
+  // let activated = newPool.querySelector("#activated") as HTMLElement
+  // let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
+  // If is not registered, returns null
+  // let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
 
-  activated.classList.add("hidden")
-  activateButtonContainer.classList.add("hidden")
-  harvestButton.classList.add("hidden")
-  
-  if(newPool.classList.contains("inactive-pool") && !newPool.classList.contains("your-farms")) {
-    // Completely ended contract. Don't put listeners regarding stake/unstake/harvest
+
+  // TODO Martin - add classes in html and not here (as default)
+  // activated.classList.add("hidden")
+  // activateButtonContainer.classList.add("hidden")
+  // harvestButton.classList.add("hidden")
+  const isUserFarming = newPool.classList.contains("your-farms")
+  if(newPool.classList.contains("inactive-pool")) {
+    // Completely ended contract. Don't put listeners regarding stake/unstake/harvest/activate
+    displayInactivePool(newPool, isUserFarming)
   } else {
-    newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
-    newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
-    // Live and ended contracts.
-    expandPoolButton.classList.remove("hidden")
-
-    toggleExpandStakeUnstakeSection(newPool, poolContainer)
-    toggleExpandStakeUnstakeSection(newPool, expandPoolButton)
-    toggleExpandStakeUnstakeSection(newPool, hidePoolButton)
-
-    unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-    unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
-    unstakeTabButton.addEventListener("click", setActiveColor);
-    unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
+    await displayActivePool(newPool, poolParams, isUserFarming)
+    // Shows or hides the "Staking/Unstaking" text
+    // newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
+    // newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
+    // // Live and ended contracts.
+    // expandPoolButton.classList.remove("hidden")
     
-    if (!newPool.classList.contains("inactive-pool")) {
-      stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-      stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-      stakeTabButton.addEventListener("click", setActiveColor);
-      stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
+
+    // toggleExpandStakeUnstakeSection(newPool, poolContainer)
+    // toggleExpandStakeUnstakeSection(newPool, expandPoolButton)
+    // toggleExpandStakeUnstakeSection(newPool, hidePoolButton)
+
+    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
+    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
+    // unstakeTabButton.addEventListener("click", setActiveColor);
+    // unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
+    
+    // if (newPool.classList.contains("active-pool")) {
+    //   stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+    //   stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+    //   stakeTabButton.addEventListener("click", setActiveColor);
+    //   stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
       
-      if (!newPool.classList.contains("your-farms")) {
-        activateButtonContainer.classList.remove("hidden")
-        activateButton.addEventListener("click", depositClicked(poolParams, newPool))
+    //   if (!newPool.classList.contains("your-farms")) {
+    //     activateButtonContainer.classList.remove("hidden")
+    //     activateButton.addEventListener("click", depositClicked(poolParams, newPool))
         
-        if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
-          let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.05 NEAR storage deposit, gets refunded."
-          newPool.querySelector("#depositWarning")!.innerHTML = warningText
+    //     if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+    //       let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
+    //       newPool.querySelector("#depositWarning")!.innerHTML = warningText
           
-        }
-      } else {
-        activateButtonContainer.classList.add("hidden")
-        activateButton.setAttribute("disabled", "disabled")
-        harvestButton.classList.remove("hidden")
-      }
+    //     }
+    //   } else {
+    //     activateButtonContainer.classList.add("hidden")
+    //     activateButton.setAttribute("disabled", "disabled")
+    //     harvestButton.classList.remove("hidden")
+    //   }
       
-    } else {
-      newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
-      const event= new Event ("click")
-      newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
-    }
+    // } else {
+    //   newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
+    //   const event= new Event ("click")
+    //   newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
+    // }
   }
 
   await addRewardTokenIcons(poolParams, newPool)
@@ -1105,6 +1112,89 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   qs("#pool_list").append(newPool)
 
   newPool.querySelector("#contract-information .deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
+}
+
+function displayInactivePool(newPool: HTMLElement, isUserFarming: boolean) {
+  if(isUserFarming) {
+    toggleStakeUnstakeSection(newPool)
+    setUnstakeTabListeners(newPool)
+
+    newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
+    const event= new Event ("click")
+    newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
+  }
+}
+
+function toggleStakeUnstakeSection(newPool: HTMLElement) {
+  let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
+  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
+  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
+
+  let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
+  let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
+  let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
+  expandPoolButton.classList.remove("hidden")
+  toggleExpandStakeUnstakeSection(newPool, poolContainer)
+  toggleExpandStakeUnstakeSection(newPool, expandPoolButton)
+  toggleExpandStakeUnstakeSection(newPool, hidePoolButton)
+}
+
+function setUnstakeTabListeners(newPool: HTMLElement) {
+  let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+  let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+  let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+  let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+  let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+  let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+
+  unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
+  unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
+  unstakeTabButton.addEventListener("click", setActiveColor);
+  unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
+}
+
+async function displayActivePool(newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3, isUserFarming: boolean) {
+  let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
+  let activateButton = newPool.querySelector(".activate") as HTMLElement
+  // let activated = newPool.querySelector("#activated") as HTMLElement
+  let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
+  let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
+
+  if(isAccountRegistered) {
+    toggleStakeUnstakeSection(newPool)
+
+    let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+    let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+    let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+    let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+    let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+    let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+
+    setUnstakeTabListeners(newPool)
+    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
+    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
+    // unstakeTabButton.addEventListener("click", setActiveColor);
+    // unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
+
+    stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+    stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+    stakeTabButton.addEventListener("click", setActiveColor);
+    stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
+  } else {
+    activateButtonContainer.classList.remove("hidden")
+    activateButton.addEventListener("click", depositClicked(poolParams, newPool))
+
+    if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+      let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
+      newPool.querySelector("#depositWarning")!.innerHTML = warningText 
+    }
+  }
+
+  if(isUserFarming) {
+    activateButtonContainer.classList.add("hidden")
+    activateButton.setAttribute("disabled", "disabled")
+    harvestButton.classList.remove("hidden")
+  }
 }
 
 async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
@@ -1494,7 +1584,7 @@ async function unstakeResult(argsArray: [{amount: string, token: string}]) {
 }
 
 // NEW CODE
-async function toggleActions(elementToShow: HTMLElement) {
+function toggleActions(elementToShow: HTMLElement) {
   return function (event: Event) {
     event.preventDefault();
     let element = event.target as HTMLElement

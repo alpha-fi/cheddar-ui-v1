@@ -21,12 +21,17 @@ export class HtmlPoolParams {
 export class PoolResultParams {
     // All the numbers that are bigint are expected to be without any decimal points, and are converted when needed
     staked: U128String[] = [];
-    farmedUnits: U128String = "";
+    farmedUnits: U128String = "0";
     farmed: U128String[] = [];
     // computed holds an integer number with no decimal places holding the info about the computed cheddar rewars calculated
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
+
+    constructor(stakedTokensLength: number, farmedTokensLength: number) {
+        this.staked = new Array(stakedTokensLength).fill("0")
+        this.farmed = new Array(farmedTokensLength).fill("0")
+    }
 
     hasStakedTokens() {
         let hasStakedTokens = false
@@ -67,7 +72,7 @@ export class PoolParamsP3 {
     farmTokenContractList: ContractData[] = [];
     metaData: FungibleTokenMetadata;
     metaData2: FungibleTokenMetadata;
-    resultParams: PoolResultParams;
+    resultParams: PoolResultParams = new PoolResultParams(0, 0);
 
     constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, wallet: WalletInterface) {
         this.wallet = wallet
@@ -78,7 +83,7 @@ export class PoolParamsP3 {
         this.contractParams = new P3ContractParams();
         this.cheddarContract= cheddarContract;
         // this.tokenContract = tokenContract;
-        this.resultParams = new PoolResultParams();
+        // this.resultParams = new PoolResultParams();
         this.metaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
 
@@ -121,9 +126,13 @@ export class PoolParamsP3 {
     async setResultParams() {
         const accName = this.stakingContract.wallet.getAccountId()
         let accountInfo: Status = await this.stakingContract.status(accName)
-        //TODO DANI TODO MARTIN tenemos que hacer que los usuarios no tengan problemas si no tienen el storage deposit activo.
-        console.log("AccInfo " + accountInfo)
-
+        if(!accountInfo) {
+            const stakeTokensLength = this.contractParams.stake_tokens.length
+            const farmTokensLength = this.contractParams.farm_tokens.length
+            this.resultParams = new PoolResultParams(stakeTokensLength, farmTokensLength)
+            return
+        }
+    
         this.resultParams.staked = accountInfo.stake_tokens
         this.resultParams.farmedUnits = accountInfo.farmed_units
         this.resultParams.farmed = accountInfo.farmed_tokens
