@@ -941,10 +941,10 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
   if(action == "stake") {
     amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", inputMaxButtonClicked(inputRowContainer, infoRowContainer))
+    maxButton.addEventListener("click", inputMaxButtonClicked(newInputContainer))
   } else if(action == "unstake") {
     amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", inputMaxButtonClicked(inputRowContainer, infoRowContainer))
+    maxButton.addEventListener("click", inputMaxButtonClicked(newInputContainer))
   }
   
   showOrHideMaxButton(contractData.balance, maxButton)
@@ -1181,13 +1181,12 @@ function getRewardsPerDaySingle(poolParams: PoolParams) {
   return BigInt(poolParams.contractParams.farming_rate) * 60n * 24n
 }
 
-
-function inputMaxButtonClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
+function inputMaxButtonClicked(newInputContainer: HTMLElement) {
   return function (event: Event) {
     event.preventDefault()
 
-    let input = inputRowContainer.querySelector("input") as HTMLInputElement
-    const amount = infoRowContainer.querySelector(".value")!.innerHTML
+    let input = newInputContainer.querySelector("input") as HTMLInputElement
+    const amount = newInputContainer.querySelector(".value")!.innerHTML
     const inputEvent= new Event ("input")
 
     
