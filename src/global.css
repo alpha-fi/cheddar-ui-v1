@@ -1379,12 +1379,12 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container, .reward-tokens-info-container {
+.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-farmed-info-container {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(19vw, -81px);
+  transform: translate(19vw, -49px);
   width: 135px;
   height: 51px;
   background-color: var(--white);
@@ -1396,7 +1396,7 @@ input:checked + .slider:before {
   margin: 10px 40px;
 }
 
-.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div {
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .total-farmed-info-container > div {
   width: 92%;
   display: flex;
   flex-direction: row;
