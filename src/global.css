@@ -1397,7 +1397,7 @@ input:checked + .slider:before {
 }
 
 .unclaimed-rewards-info-container > div, .reward-tokens-info-container > div {
-  width: 80%;
+  width: 92%;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;

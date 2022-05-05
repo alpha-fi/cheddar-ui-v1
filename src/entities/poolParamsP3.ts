@@ -121,6 +121,8 @@ export class PoolParamsP3 {
     async setResultParams() {
         const accName = this.stakingContract.wallet.getAccountId()
         let accountInfo: Status = await this.stakingContract.status(accName)
+        //TODO DANI TODO MARTIN tenemos que hacer que los usuarios no tengan problemas si no tienen el storage deposit activo.
+        console.log("AccInfo " + accountInfo)
 
         this.resultParams.staked = accountInfo.stake_tokens
         this.resultParams.farmedUnits = accountInfo.farmed_units
@@ -194,7 +196,9 @@ export class PoolParamsP3 {
         
     }
 
-    getUnclaimedRewardsData(): Promise<UnclaimedRewardsData[]> {
+    //DUDA está bien q no sea async?
+    // getUnclaimedRewardsData(): Promise<UnclaimedRewardsData[]> {
+    getUnclaimedRewardsData(): UnclaimedRewardsData[] {
         let dataArray: UnclaimedRewardsData[] = []
         let iconDataArray = this.getRewardTokenIconData()
         // const accName = this.stakingContract.wallet.getAccountId()

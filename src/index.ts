@@ -167,7 +167,8 @@ qs('#your-farms-filter').onclick= filterPools("your-farms")
 function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
   return async function (event: Event) {
     event.preventDefault()
-    await poolParams.stakingContract.storageDeposit();
+    await poolParams.stakingContract.storageDeposit()
+    //DUDA lo q está acá abajo no se corre xq cuando se ejecuta storageDeposit te tira a la otra página y cuando vuelve no hay nada q le diga q lo corra, verdad? Va a tener q estar en otra parte? Cuando vuelve se corre el onLoad verdad? Con eso alcanzaría (Que de hecho ya están ahí las condiciones que determinan si tiene que ser mostrado)
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
   }
@@ -356,7 +357,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
       //clear form
       stakeInput.value = ""
       poolParams.resultParams.addStaked(ntoy(stakeAmount))
-      await refreshPoolInfo(poolParams, newPool)//DUDA esto no debería ser refreshPoolInfoSingle?
+      refreshPoolInfo(poolParams, newPool)//DUDA esto no debería ser refreshPoolInfoSingle?
 
       showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
 
@@ -375,13 +376,16 @@ function harvestMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     event?.preventDefault()
     showWait("Harvesting...")
     
+    
     // let amount = poolParams.resultParams.getCurrentCheddarRewards()
 
     await poolParams.stakingContract.withdraw_crop()
 
+    //DUDA habría que agregar resultParams.computed y .real al P3?
+    
     // poolParams.resultParams.computed = 0n
     // poolParams.resultParams.real = 0n
-    // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
+    // // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
 
     // showSuccess("Harvested" + toStringDecMin(parseFloat(amount)) + " CHEDDAR")
     showSuccess("Harvested successfully")
@@ -429,7 +433,9 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
       unstakeInput.value = ""
 
       //refresh acc info
-      await refreshPoolInfo(poolParams, newPool)
+      refreshPoolInfo(poolParams, newPool)
+      //DUDA No estoy entendiendo el flujo cuando clickeamos los botones de acciones que nos llevan a la otra página.
+      // refreshPoolInfoSingle(poolParams, newPool) //Esta línea la agregué porque pensé que corresponde pero realmente estoy confundido.
       showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.metaData.symbol)
 
       poolParams.resultParams.addStaked(ntoy(unstakeAmount))
@@ -666,7 +672,7 @@ function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
   poolParams.resultParams.previous_timestamp = Number(accountInfo[2])
 }
 
-async function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
+function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
   poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
 }
 
@@ -834,7 +840,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  newPool.querySelector(".stats-container .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metaData.decimals, 5).toString()
+  newPool.querySelector(".main-contract-information .total-staked-value")!.innerHTML = convertToDecimals(totalStaked, metaData.decimals, 5).toString()
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
@@ -935,10 +941,10 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
   if(action == "stake") {
     amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", maxStakeClicked(inputRowContainer, infoRowContainer))
+    maxButton.addEventListener("click", inputMaxButtonClicked(inputRowContainer, infoRowContainer))
   } else if(action == "unstake") {
-    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", maxUnstakeClicked(inputRowContainer, infoRowContainer))
+    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 7)
+    maxButton.addEventListener("click", inputMaxButtonClicked(inputRowContainer, infoRowContainer))
   }
   
   showOrHideMaxButton(contractData.balance, maxButton)
@@ -1176,7 +1182,7 @@ function getRewardsPerDaySingle(poolParams: PoolParams) {
 }
 
 
-function maxStakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
+function inputMaxButtonClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
   return function (event: Event) {
     event.preventDefault()
 
@@ -1187,17 +1193,6 @@ function maxStakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLE
     
     input.value = amount.toString()
     input.dispatchEvent(inputEvent)
-  }
-}
-
-function maxUnstakeClicked(inputRowContainer: HTMLElement, infoRowContainer: HTMLElement) {
-  return function (event: Event) {
-    event.preventDefault()
-
-    let input = inputRowContainer.querySelector(".input") as HTMLInputElement
-    const amount = infoRowContainer.querySelector(".value")!.innerHTML
-
-    input.value = amount.toString()
   }
 }
 
