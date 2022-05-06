@@ -22,6 +22,10 @@ export class ContractParams {
     total_staked: string = "0" //yoctoNEAR
     rewards_per_day: bigint;
     fee_rate: number = 0;   
+
+    getRewardsPerDay(): bigint {
+        return this.farming_rate * 60n * 24n
+    }
     
 }
 

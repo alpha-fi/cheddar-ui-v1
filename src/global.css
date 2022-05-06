@@ -1422,7 +1422,7 @@ input:checked + .slider:before {
   margin-left: 3px;
 }
 
-.unclaimed-rewards-row .mini-icon, .reward-token-icon .mini-icon {
+.unclaimed-rewards-row .mini-icon, .reward-token-icon .mini-icon, .detail-row {
   margin: -30% 0;
   height: 18px;
 }

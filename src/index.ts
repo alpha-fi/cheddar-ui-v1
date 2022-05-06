@@ -19,7 +19,7 @@ import { PoolParams, PoolResultParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
-import { HTMLTokenInputData, RewardTokenIconData, UnclaimedRewardsData } from './entities/genericData';
+import { DetailRowElements, HTMLTokenInputData, TokenIconData, UnclaimedRewardsData } from './entities/genericData';
 
 import * as nearAPI from "near-api-js"
 import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
@@ -169,7 +169,7 @@ function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) 
   return async function (event: Event) {
     event.preventDefault()
     await poolParams.stakingContract.storageDeposit()
-    //DUDA lo q está acá abajo no se corre xq cuando se ejecuta storageDeposit te tira a la otra página y cuando vuelve no hay nada q le diga q lo corra, verdad? Va a tener q estar en otra parte? Cuando vuelve se corre el onLoad verdad? Con eso alcanzaría (Que de hecho ya están ahí las condiciones que determinan si tiene que ser mostrado)
+    
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
   }
@@ -260,7 +260,6 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       //get amount
       const min_deposit_amount = 1;
             
-      // TODO DANI: está ejecutando cosas después del stake, cuando el stake no se terminó
       await poolParams.stake(amountValues)
       if (loggedWithNarwallets) {
         //clear form
@@ -307,7 +306,6 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       //get amount
       const min_deposit_amount = 1;
             
-      // TODO DANI: está ejecutando cosas después del stake, cuando el stake no se terminó
       await poolParams.unstake(amountValues)
       if (loggedWithNarwallets) {
         //clear form
@@ -389,8 +387,8 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
       }
 
       const walletAvailable = await poolParams.getWalletAvailable()
-      if (stakeAmount > parseFloat(walletAvailable)) throw Error(`Only ${walletAvailable} ${poolParams.metaData.symbol} Available to Stake.`);
-      await poolParams.stakeTokenContract.ft_transfer_call(poolParams.stakingContract.contractId, convertToBase(stakeAmount.toString(), poolParams.metaData.decimals.toString()), "to farm")
+      if (stakeAmount > parseFloat(walletAvailable)) throw Error(`Only ${walletAvailable} ${poolParams.stakingContractMetaData.symbol} Available to Stake.`);
+      await poolParams.stakeTokenContract.ft_transfer_call(poolParams.stakingContract.contractId, convertToBase(stakeAmount.toString(), poolParams.stakingContractMetaData.decimals.toString()), "to farm")
 
       if (loggedWithNarwallets) {
         //clear form
@@ -398,7 +396,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
         poolParams.resultParams.addStaked(ntoy(stakeAmount))
         refreshPoolInfo(poolParams, newPool)//DUDA esto no debería ser refreshPoolInfoSingle?
   
-        showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.metaData.symbol)
+        showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakingContractMetaData.symbol)
       }
 
     }
@@ -411,6 +409,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
   }
 }
 
+// TODO DANI - implement
 function harvestMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
   return async function (event: Event) {
     event?.preventDefault()
@@ -460,13 +459,13 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
       unstakeInput.setAttribute("disabled", "disabled")
       let unstakeAmount = parseFloat(unstakeInput.value)
       const staked = poolParams.resultParams.staked
-      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.metaData.decimals, 5))
+      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.stakingContractMetaData.decimals, 5))
       if (isNaN(unstakeAmount)) {
         throw Error("Please Input a Number.")
       }
       
-      if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${poolParams.metaData.symbol} Available to Unstake.`);
-      await poolParams.stakingContract.unstake(convertToBase(unstakeAmount.toString(), poolParams.metaData.decimals.toString()))
+      if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${poolParams.stakingContractMetaData.symbol} Available to Unstake.`);
+      await poolParams.stakingContract.unstake(convertToBase(unstakeAmount.toString(), poolParams.stakingContractMetaData.decimals.toString()))
       
       if (loggedWithNarwallets) {
         //clear form
@@ -477,7 +476,7 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
 
         poolParams.resultParams.addStaked(ntoy(unstakeAmount))
         // refreshPoolInfoSingle(poolParams, newPool) //Esta línea la agregué porque pensé que corresponde pero realmente estoy confundido.
-        showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.metaData.symbol)
+        showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.stakingContractMetaData.symbol)
       }
     }
     catch (ex) {
@@ -650,51 +649,6 @@ function loginNarwallets() {
   window.open("http://www.narwallets.com/help/connect-to-web-app")
 }
 
-//DUDA si no usamos el submitForm borrar esto
-// async function setupTransaction({
-//   receiverId,
-//   actions,
-//   nonceOffset = 1,
-// }: {
-//   receiverId: string;
-//   actions: Action[];
-//   nonceOffset?: number;
-// }) {
-
-//   //console.log(nearConnectedWalletAccount)
-
-
-//   const localKey = await nearConnectedWalletAccount.connection.signer.getPublicKey(
-//     nearConnectedWalletAccount.accountId,
-//     nearConnectedWalletAccount.connection.networkId
-//   );
-//   let accessKey = await nearConnectedWalletAccount.accessKeyForTransaction(
-//     receiverId,
-//     actions,
-//     localKey
-//   );
-//   if (!accessKey) {
-//     throw new Error(
-//       `Cannot find matching key for transaction sent to ${receiverId}`
-//     );
-//   }
-
-//   const block = await nearConnectedWalletAccount.connection.provider.block({ finality: 'final' });
-//   const blockHash = baseDecode(block.header.hash);
-
-//   const publicKey = PublicKey.from(accessKey.public_key);
-//   const nonce = accessKey.access_key.nonce + nonceOffset;
-
-//   return createTransaction(
-//     nearConnectedWalletAccount.accountId,
-//     publicKey,
-//     receiverId,
-//     nonce,
-//     actions,
-//     blockHash
-//   );
-// }
-
 function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
   if (Number(walletBalance.replace(".", "")) > 0) {
     elem.classList.remove("hidden")
@@ -716,7 +670,7 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
 }
 
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
-  var metaData = poolParams.metaData;
+  var metaData = poolParams.stakingContractMetaData;
   let accName = poolParams.resultParams.accName
   
   let accountInfo = await poolParams.stakingContract.status(accName)
@@ -744,7 +698,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
 //TODO MARTIN
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
-  var metaData = poolParams.metaData;
+  var metaData = poolParams.stakingContractMetaData;
   let accName = poolParams.resultParams.accName
   
   let accountInfo = await poolParams.stakingContract.status(accName)
@@ -758,7 +712,6 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   
 
   let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStakedArray//DUDA esto ya estaba hecho no?
   showOrHideMaxButton(displayableStakedArray.toString(), unstakeMaxButton)//Esto también
 
 
@@ -825,7 +778,7 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
   const walletBalance: U128String = await poolParams.getWalletAvailable()
 
-  const metaData = poolParams.metaData
+  const metaData = poolParams.stakingContractMetaData
   let totalStaked = poolParams.contractParams.total_staked.toString()
   const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
@@ -960,17 +913,17 @@ function addFocusClass(input:HTMLElement) {
   }
 }
 
-function addTotalStaked(newPool: HTMLElement, tokenName: string, value: string) {
-  let totalStakedContainer = qs(".generic-total-staked-row")
-  var newTotalStakedContainer = totalStakedContainer.cloneNode(true) as HTMLElement
+// function addTotalStaked(newPool: HTMLElement, tokenName: string, value: string) {
+//   let totalStakedContainer = qs(".generic-total-staked-row")
+//   var newTotalStakedContainer = totalStakedContainer.cloneNode(true) as HTMLElement
   
-  newTotalStakedContainer.querySelector(".token-name")!.innerHTML = tokenName
-  newTotalStakedContainer.querySelector(".total-staked-value")!.innerHTML = value
+//   newTotalStakedContainer.querySelector(".token-name")!.innerHTML = tokenName
+//   newTotalStakedContainer.querySelector(".total-staked-value")!.innerHTML = value
 
-  toggleGenericClass(newTotalStakedContainer, "total-staked-row")
-  newPool.querySelector(`.main-contract-information ul`)!.prepend(newTotalStakedContainer)
+//   toggleGenericClass(newTotalStakedContainer, "total-staked-row")
+//   newPool.querySelector(`.main-contract-information ul`)!.prepend(newTotalStakedContainer)
 
-}
+// }
 
 function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {
   let inputContainer = qs(".generic-token-input-container")
@@ -1043,7 +996,7 @@ function standardHoverToDisplayExtraInfo (elementWithListenner: HTMLElement, ele
 
 async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
-  var metaData = poolParams.metaData;
+  var metaData = poolParams.stakingContractMetaData;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
   let isContractActivated = null
@@ -1133,7 +1086,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     // Completely ended contract. Don't put listeners regarding stake/unstake/harvest/activate
     displayInactivePool(newPool, isUserFarming)
   } else {
-    await displayActivePool(newPool, poolParams, isUserFarming)
+    await displayActivePool(poolParams, newPool, isUserFarming)
     // Shows or hides the "Staking/Unstaking" text
     // newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
     // newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
@@ -1179,7 +1132,10 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   }
 
   await addRewardTokenIcons(poolParams, newPool)
-  await addUnclaimedRewards(poolParams, newPool)
+  await addRewardsTokenDetail(poolParams, newPool)
+  await addUnclaimedRewardsDetail(poolParams, newPool)
+  await addRewardsPerDayDetail(poolParams, newPool)
+  await addTotalStakedDetail(poolParams, newPool)
   
   standardHoverToDisplayExtraInfo(totalStakedValueUsd, totalStakedInfoContainer)
   standardHoverToDisplayExtraInfo(totalFarmedValueUsd, totalFarmedInfoContainer)
@@ -1231,7 +1187,7 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
-async function displayActivePool(newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3, isUserFarming: boolean) {
+async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, isUserFarming: boolean) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   // let activated = newPool.querySelector("#activated") as HTMLElement
@@ -1276,77 +1232,134 @@ async function displayActivePool(newPool: HTMLElement, poolParams: PoolParams|Po
 }
 
 async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const tokenIconDataArray: RewardTokenIconData[] = await poolParams.getRewardTokenIconData()
-  const icon = qs(".generic-mini-icon")
+  const tokenIconDataArray: TokenIconData[] = await poolParams.getRewardTokenIconData()
   const container = newPool.querySelector(".reward-tokens-value") as HTMLElement
-  
   
   for(let i = 0; i < tokenIconDataArray.length; i++) {
     const tokenIconData = tokenIconDataArray[i]
     
-    var newMiniIcon = importMiniIcon(tokenIconData, icon) as HTMLElement
+    var newMiniIcon = importMiniIcon(tokenIconData) as HTMLElement
     container.append(newMiniIcon)
   }
 }
 
-//DUDA vale la pena meter esto en la f(x) de abajo puesto q tienen una estructura similar?
-//DUDA cómo sigo esto? De dónde saco la data q me falta?
-// async function addPoolBasicInfo(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, tokenContractList: ContractData[]) {
-//   const totalStakedInfoRowContainer = newPool.querySelector(".total-staked-info-container") as HTMLElement
-//   const totalFarmedInfoContainer = newPool.querySelector(".total-farmed-info-container") as HTMLElement
-//   const genericTotalStakedRow = qs(".generic-total-staked-row") as HTMLElement
-//   const genericTotalFarmedRow = qs(".generic-total-farmed-row") as HTMLElement
-//   const icon = qs(".generic-mini-icon")
-//   const stakeTokenCointractList = []
-  
-//   //DUDA no conviene convertir lo del single a array directamente en la fuente no? Existe una mejor manera de hacerlo?
-//   if(/*Is multiple*/) {
-//     stakeTokenCointractList = poolParams.stakeTokenContractList
-//   } else {
-//     stakeTokenCointractList.push(poolParams.cheddarContract./*ALGO*/)
-//   }
+async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  const stakeTokenDataArray = poolParams.getStakeTokensDetail()
+  let totalStakedRows: DetailRowElements = {
+    parentClass: "total-staked-info-container",
+    rows: []
+  }
 
-//   for(let i = 0; i < stakeTokenCointractList.length; i++){
-//     const newGenericTotalStakedRow = genericTotalStakedRow.cloneNode(true) as HTMLElement
-//     const newGenericTotalFarmedRow = genericTotalFarmedRow.cloneNode(true) as HTMLElement
-//     let stakeTokenCointractData = stakeTokenCointractList[i]
-//     newGenericTotalStakedRow.querySelector(".staked-token-icon")!.innerHTML = 
-//   }
-// }
+  for(let i = 0; i < stakeTokenDataArray.length; i++) {
+    let stakeTokenData = stakeTokenDataArray[i]
+    const row = {
+      iconData: stakeTokenData.iconData,
+	    content: stakeTokenData.content
+    }
 
-async function addUnclaimedRewards(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const unclaimedRewardsInfoRowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
-  const rewardTokenInfoRowContainer = newPool.querySelector(".reward-tokens-info-container") as HTMLElement
-  const genericUnclaimedRewardsRow = qs(".generic-unclaimed-rewards-row") as HTMLElement
-  const genericRewardTokensRow = qs(".generic-reward-tokens-row") as HTMLElement
-  const icon = qs(".generic-mini-icon")
-  const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
-  
-  for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
-    const newUnclaimedRewardsRow = genericUnclaimedRewardsRow.cloneNode(true) as HTMLElement
-    const newRewardTokensRow = genericRewardTokensRow.cloneNode(true) as HTMLElement
-    let unclaimedRewardData = unclaimedRewardsDataArray[i]
-    newUnclaimedRewardsRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
-    newRewardTokensRow.querySelector(".reward-token-name")!.innerHTML = unclaimedRewardData.iconData.alt
+    totalStakedRows.rows.push(row)
+  }
 
-    const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
-    const rewardTokenHoverIconContainer = newRewardTokensRow.querySelector(".reward-token-icon") as HTMLElement
+  addDetailRows(newPool, totalStakedRows) 
+  // const totalStakedArray = poolParams.contractParams.total_staked
+  // const stakeTokenContractList = poolParams.stakeTokenContractList
+  // let totalStakedRows: DetailRowElements = {
+  //   parentClass: "reward-tokens-info-container",
+  //   rows: []
+  // }
+  // for(let i = 0; i < totalStakedArray.length; i++) {
+  //   let totalStaked = totalStakedArray[i]
+  //   let stakeTokenContractData = stakeTokenContractList[i]
+  //   const row = {
+  //     iconData: totalStaked,
+	//     content: totalStaked.tokenName
+  //   }
 
+  //   rewardTokenIconElements.rows.push(row)
+  // }
+}
+
+async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  convertAndAddRewardDataRows(poolParams, newPool, "total-farmed-info-container", "rewardsPerDay")
+}
+
+// TODO MARTIN call method when below TODO is done
+async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, tokenContractList: ContractData[]) {
+  // TODO MARTIN implement total farmed in html and put class. It's in info and should be down
+  convertAndAddRewardDataRows(poolParams, newPool, "", "totalRewards")
+}
+
+async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
+  const rewardsTokenDataArray = poolParams.getRewardsTokenDetail()
+  let rewardsPerDayRows: DetailRowElements = {
+    parentClass,
+    rows: []
+  }
+  for(let i = 0; i < rewardsTokenDataArray.length; i++) {
+    let rewardsTokenData = rewardsTokenDataArray[i]
+    const row = {
+      iconData: rewardsTokenData.iconData,
+      // @ts-ignore
+	    content: rewardsTokenData[key]
+    }
+
+    rewardsPerDayRows.rows.push(row)
+  }
+  addDetailRows(newPool, rewardsPerDayRows)  
+}
+
+async function addRewardsTokenDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  convertAndAddRewardDataRows(poolParams, newPool, "reward-tokens-info-container", "tokenName")
+}
+
+function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
+  const parentElement = newPool.querySelector(`.${rowsData.parentClass}`) as HTMLElement
+  const genericRow = qs(`.generic-detail-row`) as HTMLElement
+  // const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
+  const rows = rowsData.rows
+
+  for(let i = 0; i < rows.length; i++) {
+    const newRow = genericRow.cloneNode(true) as HTMLElement
+    let row = rows[i]
+    newRow.querySelector(".content")!.innerHTML = row.content
+
+    const iconContainer = newRow.querySelector(".icon") as HTMLElement
     
-    var newMiniIcon = importMiniIcon(unclaimedRewardData.iconData, icon) as HTMLElement
+    var newMiniIcon = importMiniIcon(row.iconData) as HTMLElement
     
-    var newMiniIconClon = newMiniIcon.cloneNode(true) as HTMLElement
     iconContainer.append(newMiniIcon)
-    rewardTokenHoverIconContainer.append(newMiniIconClon)
-    toggleGenericClass(newUnclaimedRewardsRow, "unclaimed-rewards-row")
-    toggleGenericClass(newRewardTokensRow, "reward-tokens-row")
-    unclaimedRewardsInfoRowContainer.append(newUnclaimedRewardsRow)
-    rewardTokenInfoRowContainer.append(newRewardTokensRow)
+    toggleGenericClass(newRow, "detail-row")
+    parentElement.append(newRow)
 
   }
 }
 
-function importMiniIcon(iconData: RewardTokenIconData, iconNode: HTMLElement){
+async function addUnclaimedRewardsDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  convertAndAddRewardDataRows(poolParams, newPool, "unclaimed-rewards-info-container", "userUnclaimedRewards")
+
+  // const unclaimedRewardsInfoRowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
+  // const genericUnclaimedRewardsRow = qs(".generic-unclaimed-rewards-row") as HTMLElement
+  // const icon = qs(".generic-mini-icon")
+  // const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
+  
+  // for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
+  //   const newUnclaimedRewardsRow = genericUnclaimedRewardsRow.cloneNode(true) as HTMLElement
+  //   let unclaimedRewardData = unclaimedRewardsDataArray[i]
+  //   newUnclaimedRewardsRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
+
+  //   const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
+    
+  //   var newMiniIcon = importMiniIcon(unclaimedRewardData.iconData, icon) as HTMLElement
+    
+  //   iconContainer.append(newMiniIcon)
+  //   toggleGenericClass(newUnclaimedRewardsRow, "unclaimed-rewards-row")
+  //   unclaimedRewardsInfoRowContainer.append(newUnclaimedRewardsRow)
+
+  // }
+}
+
+function importMiniIcon(iconData: TokenIconData){
+  const iconNode: HTMLElement = qs(".generic-mini-icon")
   var parser = new DOMParser();
   var newMiniIcon: HTMLElement
     if(iconData.isSvg) {
@@ -1355,7 +1368,7 @@ function importMiniIcon(iconData: RewardTokenIconData, iconNode: HTMLElement){
     } else {
       newMiniIcon = iconNode.cloneNode(true) as HTMLElement
       newMiniIcon.setAttribute("src", iconData.src)
-      newMiniIcon.setAttribute("alt", iconData.alt)
+      newMiniIcon.setAttribute("alt", iconData.tokenName)
     }
     toggleGenericClass(newMiniIcon, "mini-icon")
     return newMiniIcon

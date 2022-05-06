@@ -1,16 +1,37 @@
-export interface RewardTokenIconData {
+import { U128String } from "../wallet-api/util"
+
+export interface TokenIconData {
     isSvg: boolean
     src: string
-    alt: string
+    tokenName: string
 }
 
 export interface UnclaimedRewardsData {
     amount: string
-    iconData: RewardTokenIconData
+    iconData: TokenIconData
 }
 
 export interface HTMLTokenInputData {
     htmlInputArray: HTMLInputElement[]
     amountValuesArray: bigint[]
     transferedAmountWithSymbolArray: string[]
+}
+
+export interface DetailRowElements {
+	parentClass: string,
+	// genericItemClass: string,
+	rows: DetailRow[]
+}
+
+export interface DetailRow {
+	iconData: TokenIconData,
+	content: string
+}
+
+export interface RewardsTokenData {
+    iconData: TokenIconData
+    tokenName: string
+    rewardsPerDay: string
+    totalRewards: string
+    userUnclaimedRewards: string
 }

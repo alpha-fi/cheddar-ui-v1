@@ -5,7 +5,7 @@ import { P3ContractParams, Status } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
-import { RewardTokenIconData, UnclaimedRewardsData } from "./genericData";
+import { DetailRow, DetailRowElements, RewardsTokenData, TokenIconData, UnclaimedRewardsData } from "./genericData";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -63,16 +63,18 @@ export class PoolParamsP3 {
     index: number
     type: string
     html: HtmlPoolParams;
+
     stakingContract: StakingPoolP3
+    stakingContractMetaData: FungibleTokenMetadata;
     contractParams: P3ContractParams;
+    resultParams: PoolResultParams = new PoolResultParams(0, 0);
+
     cheddarContract: NEP141Trait;
     // tokenContract: NEP141Trait;
     // stakeTokenContractList: NEP141Trait[] = [];
     stakeTokenContractList: ContractData[] = [];
     farmTokenContractList: ContractData[] = [];
-    metaData: FungibleTokenMetadata;
     metaData2: FungibleTokenMetadata;
-    resultParams: PoolResultParams = new PoolResultParams(0, 0);
 
     constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, wallet: WalletInterface) {
         this.wallet = wallet
@@ -84,7 +86,7 @@ export class PoolParamsP3 {
         this.cheddarContract= cheddarContract;
         // this.tokenContract = tokenContract;
         // this.resultParams = new PoolResultParams();
-        this.metaData = {} as FungibleTokenMetadata;
+        this.stakingContractMetaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
 
         this.stakingContract.wallet = wallet;
@@ -189,15 +191,61 @@ export class PoolParamsP3 {
         await this.stakingContract.callMulipleTransactions(TXs)   
     }
 
-    getRewardTokenIconData(): RewardTokenIconData[] {
-        let dataArray: RewardTokenIconData[] = []
+    getStakeTokensDetail(): DetailRow[]{
+        let dataArray: DetailRow[] = []
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const stakeTokenContract = this.stakeTokenContractList[i]
+            const iconData = this.getIcon(stakeTokenContract)
+            const totalStaked = convertToDecimals(this.contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 7)
+
+            dataArray.push({
+                iconData,
+                content: totalStaked
+            })
+        }
+        return dataArray
+    }
+
+    getRewardsTokenDetail(): RewardsTokenData[] {
+        let dataArray: RewardsTokenData[] = []
+        for(let i = 0; i < this.farmTokenContractList.length; i++) {
+            const farmTokenContract = this.farmTokenContractList[i]
+            const iconData = this.getIcon(farmTokenContract)
+            const tokenName = farmTokenContract.metaData.name
+            const rewardsPerDayBN = BigInt(this.contractParams.farm_token_rates[i]) * 60n * 24n
+            const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 7)
+            const totalRewards = convertToDecimals(this.contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 7)
+            const userUnclaimedRewards = convertToDecimals(this.resultParams.farmed[i], farmTokenContract.metaData.decimals, 7)
+
+            dataArray.push({
+                iconData,
+                tokenName,
+                rewardsPerDay,
+                totalRewards,
+                userUnclaimedRewards,
+            })
+        }
+        return dataArray
+    }
+
+    getIcon(contractData: ContractData): TokenIconData{
+        const src = contractData.metaData.icon ? contractData.metaData.icon : contractData.metaData.name
+        return {
+            isSvg: src.includes("<svg"),
+            src: src,
+            tokenName: contractData.metaData.name ? contractData.metaData.name : "NoName"
+        }
+    }
+
+    getRewardTokenIconData(): TokenIconData[] {
+        let dataArray: TokenIconData[] = []
         for(let i = 0; i < this.farmTokenContractList.length; i++) {
             const farmTokenContract = this.farmTokenContractList[i]
             const src = farmTokenContract.metaData.icon ? farmTokenContract.metaData.icon : farmTokenContract.metaData.name
             const data = {
                 isSvg: src.includes("<svg"),
                 src: src,
-                alt: farmTokenContract.metaData.name ? farmTokenContract.metaData.name : "NoName"
+                tokenName: farmTokenContract.metaData.name ? farmTokenContract.metaData.name : "NoName"
             }
             dataArray.push(data)
         }
@@ -205,8 +253,10 @@ export class PoolParamsP3 {
         
     }
 
-    //DUDA está bien q no sea async?
-    // getUnclaimedRewardsData(): Promise<UnclaimedRewardsData[]> {
+    getStakeTokensData(): {
+
+    }
+    
     getUnclaimedRewardsData(): UnclaimedRewardsData[] {
         let dataArray: UnclaimedRewardsData[] = []
         let iconDataArray = this.getRewardTokenIconData()
@@ -315,7 +365,7 @@ export class PoolParamsP3 {
         const available = await this.getWalletAvailable()
         const availableDisplayableArray = []
         for (let i = 0; i < available.length; i++) {
-            availableDisplayableArray.push(convertToDecimals(available[i], this.metaData.decimals, 7))    
+            availableDisplayableArray.push(convertToDecimals(available[i], this.stakingContractMetaData.decimals, 7))    
         }
         return availableDisplayableArray
     }
