@@ -18,7 +18,6 @@ function getPriceWithData(tokenSymbol: string, allTokenData: RefTokenData[]): Re
         // NUT arbitrarily
         tokenSymbol = "nut".toLowerCase()
     }
-    console.log(`Searching for token ${tokenSymbol}`)
     let output: RefTokenData | undefined = undefined
     allTokenData.forEach(tokenData => {
         if(tokenData.symbol.toLowerCase() === tokenSymbol) {

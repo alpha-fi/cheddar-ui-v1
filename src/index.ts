@@ -180,7 +180,7 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
   const rewardTokenData: RefTokenData = await getTokenData(rewardToken)
   const metaData = await poolParams.cheddarContract.ft_metadata()
   const currentRewards: bigint = poolParams.resultParams.real
-  const currentRewardsDisplayable = convertToDecimals(currentRewards, metaData.decimals, 7)
+  const currentRewardsDisplayable = convertToDecimals(currentRewards, metaData.decimals, 5)
   return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
 }
 
@@ -199,7 +199,7 @@ async function convertToUSDMultiple(tokenContractList: ContractData[], amountLis
     amountInUsd += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
   })
 
-  return amountInUsd.toFixed(2)
+  return amountInUsd.toFixed(5)
 }
 
 async function getTotalStakedInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
@@ -343,6 +343,7 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
     let input = stakeContainer.querySelector(".amount") as HTMLInputElement
     htmlInputArray.push(input)
     let amount = parseFloat(input.value)
+    
     if (isNaN(amount)) {
       throw Error("Please Input a Number.")
     }
@@ -414,19 +415,9 @@ function harvestMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
   return async function (event: Event) {
     event?.preventDefault()
     showWait("Harvesting...")
-    
-    
-    // let amount = poolParams.resultParams.getCurrentCheddarRewards()
 
     await poolParams.stakingContract.withdraw_crop()
 
-    //DUDA habría que agregar resultParams.computed y .real al P3?
-    
-    // poolParams.resultParams.computed = 0n
-    // poolParams.resultParams.real = 0n
-    // // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
-
-    // showSuccess("Harvested" + toStringDecMin(parseFloat(amount)) + " CHEDDAR")
     showSuccess("Harvested successfully")
   }
 }
@@ -698,32 +689,45 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
 //TODO MARTIN
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
-  var metaData = poolParams.stakingContractMetaData;
-  let accName = poolParams.resultParams.accName
-  
-  let accountInfo = await poolParams.stakingContract.status(accName)
-  let stakedArray = []
-  let displayableStakedArray = []
-  
-  for (let i = 0; i < accountInfo.stake_tokens.length; i++) {
-    stakedArray.push((accountInfo) ? BigInt(accountInfo.stake_tokens[i]) : 0)
-    displayableStakedArray.push(convertToDecimals(stakedArray[i].toString(), metaData.decimals, 7))
+  await poolParams.refreshAllExtraData()
+
+  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
+  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
+  const totalStakedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(".total-staked-info-container .detail-row")
+  for(let i = 0; i < totalStakedDetailsElements.length; i++) {
+    const row = totalStakedDetailsElements[i]
+    const tokenMetadata = poolParams.stakeTokenContractList[i].metaData
+    const content = convertToDecimals(poolParams.contractParams.total_staked[i], tokenMetadata.decimals, 7)
+    row.querySelector(".content")!.innerHTML = content
+    
   }
+
+  // var metaData = poolParams.stakingContractMetaData;
+  // let accName = poolParams.resultParams.accName
+  
+  // let accountInfo = await poolParams.stakingContract.status(accName)
+  // let stakedArray = []
+  // let displayableStakedArray = []
+  
+  // for (let i = 0; i < accountInfo.stake_tokens.length; i++) {
+  //   stakedArray.push((accountInfo) ? BigInt(accountInfo.stake_tokens[i]) : 0)
+  //   displayableStakedArray.push(convertToDecimals(stakedArray[i].toString(), metaData.decimals, 7))
+  // }
   
 
-  let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  showOrHideMaxButton(displayableStakedArray.toString(), unstakeMaxButton)//Esto también
+  // let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
+  // showOrHideMaxButton(displayableStakedArray.toString(), unstakeMaxButton)//Esto también
 
 
-  const walletBalancesArray = await poolParams.getWalletAvailableDisplayable()//DUDA Esto devuelve un array, revisar lo que lo usa.
+  // const walletBalancesArray = await poolParams.getWalletAvailableDisplayable()//DUDA Esto devuelve un array, revisar lo que lo usa.
   
-  let stakeMaxButton = qs(".stake .max-button") as HTMLElement
-  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalancesArray.toString())//Esto ya se hace, no?
-  showOrHideMaxButton(walletBalancesArray.toString(), stakeMaxButton)
+  // let stakeMaxButton = qs(".stake .max-button") as HTMLElement
+  // newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalancesArray.toString())//Esto ya se hace, no?
+  // showOrHideMaxButton(walletBalancesArray.toString(), stakeMaxButton)
 
 
-  setAccountInfo(poolParams, accountInfo)
-  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
+  // setAccountInfo(poolParams, accountInfo)
+  // let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 
   // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
 }
@@ -750,27 +754,46 @@ function narwalletDisconnected(ev: CustomEvent) {
   signedOutFlow()
 }
 
-// function autoFillStakeAmount2= (e)=>{
-//   qs("input.stake-amount") = e * 2
-// }
+function calculateAmountHaveStaked(stakeRates: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
+	const amountToStake = amount * stakeRates[newAmountIndex] / stakeRates[amountIndex]
+	return amountToStake
+}
 
-function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, mul: boolean) {
+function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
+	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
+	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
+	const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
+	return amountToStake > 0n ? amountToStake : 0n
+}
+
+function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
+	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
+	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
+	const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
+	return amountToUnstake > 0n ? amountToUnstake : 0n
+}
+
+function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, index: number) {
   return function (event: Event) {
     event.preventDefault()
-    let value1 = (event.target as HTMLInputElement).value
-    let input2 = pool.querySelector(`${inputRoute}`) as HTMLInputElement
-    if (value1 == "") {
-      input2.value = ""
-    } 
-    //We use this || because the first option have issues recognizing if "number+string" is a number or not (example value1="1a")
-    else if (Number.isNaN(value1) || (value1 != parseFloat(value1).toString())) {
-      input2.value = "Please Input a Number"
-    } else {
-      let rates = poolParams.contractParams.stake_rates
-      const mulRate = Number(BigInt(rates[1]) * 100n / (BigInt(rates[0]))) / 100
-      const rate = mul ? mulRate : (mulRate ** -1)
-      //Replace the "2" with proper variable name
-      input2.value = (Number(value1) * rate).toString()
+    const value1 = (event.target as HTMLInputElement).value
+    const amountToStake = BigInt(convertToBase(value1, poolParams.stakeTokenContractList[index].metaData.decimals.toString()))
+
+    let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
+    const stakeRates = poolParams.contractParams.stake_rates.map(rate => BigInt(rate))
+    const totalStaked = poolParams.resultParams.staked.map(total => BigInt(total))
+    for(let i = 0; i < inputs.length; i++) {
+      if(i != index) {
+        let amountToTransferSecondaryBN
+        if(inputRoute.includes("unstake")) {
+          amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStaked, amountToStake, index, i)
+        } else {
+          amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStaked, amountToStake, index, i)
+          
+        }
+        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[i].metaData.decimals, 5)
+        inputs.item(i).value = amountToStakeSecondary
+      }
     }
   }
 }
@@ -835,7 +858,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   // addTotalStaked(newPool, poolParams.metaData.symbol, convertToDecimals(totalStaked, metaData.decimals, 7).toString())
   // const contractData: ContractData = await poolParams.getStakeTokenContractData();
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
-  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.farming_rate.toString()])
+  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = totalStakedInUsd
   newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
 
@@ -881,7 +904,8 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
 
-  const totalFarmedInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
+  const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
+  const totalFarmedInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
   // TODO reimplement when popup is ready
   // for(let i = poolParams.contractParams.total_staked.length - 1; i >= 0; i--) {
@@ -893,17 +917,18 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
   //I use this 2 for loops to match every combination of inputs without repeating itself
   for (let i=0; i < tokenSymbols.length; i++){
-    for (let u=0; u < tokenSymbols.length; u++){
-      if (i != u){
-        newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake .${tokenSymbols[u]}-input input`, i == 0))
-        newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake .${tokenSymbols[u]}-input input`, i == 0))
-      }
-    }
+    newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
+    newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
   }
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
   newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
   
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  if(isDateInRange) {
+    window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
+  }
 }
 
 function addFocusClass(input:HTMLElement) {
@@ -1329,6 +1354,8 @@ function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
     
     iconContainer.append(newMiniIcon)
     toggleGenericClass(newRow, "detail-row")
+    console.log("Token name", row.iconData.tokenName)
+    newRow.classList.add(row.iconData.tokenName.toLowerCase().replace(/ /g, "-"))
     parentElement.append(newRow)
 
   }

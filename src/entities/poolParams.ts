@@ -229,9 +229,10 @@ export class PoolParams {
     }
 
     async getFarmTokenContractData(): Promise<ContractData> {
+        const metadata = await this.cheddarContract.ft_metadata()
         return {
             contract: this.cheddarContract,
-            metaData: this.stakingContractMetaData,
+            metaData: metadata,
             balance: await this.cheddarContract.ft_balance_of(wallet.getAccountId()),
         }
     }

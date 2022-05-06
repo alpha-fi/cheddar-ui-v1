@@ -101,13 +101,14 @@ export class PoolParamsP3 {
             let contract = new NEP141Trait(tokenContractName)
             contract.wallet = this.wallet
             let metaData = await contract.ft_metadata()
+            let balance = await contract.ft_balance_of(this.wallet.getAccountId())
             if(metaData.symbol == "STNEAR") {
                 metaData.symbol = "stNEAR";
             }
             tokenContractList.push({
                 contract,
                 metaData,
-                balance: "0"
+                balance
             })
         }
         return tokenContractList
@@ -153,6 +154,7 @@ export class PoolParamsP3 {
     async refreshAllExtraData() {
         await this.setContractParams()
         await this.setResultParams()
+        await this.setStakeTokenContractList()
     }
 
     async stake(amounts: bigint[]) {
