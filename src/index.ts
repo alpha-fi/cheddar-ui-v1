@@ -852,7 +852,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   let totalFarmed = poolParams.contractParams.total_farmed.toString()
   newPool.querySelector(".total-token-farmed-value")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
 
-  newPool.querySelector(".stats-container .token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
+  newPool.querySelector(".token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
   // TODO reimplement when popup is ready
   // addTotalStaked(newPool, poolParams.metaData.symbol, convertToDecimals(totalStaked, metaData.decimals, 7).toString())
@@ -1170,7 +1170,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   qs("#pool_list").append(newPool)
 
-  newPool.querySelector("#contract-information .deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
+  newPool.querySelector(".deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
 }
 
 function displayInactivePool(newPool: HTMLElement, isUserFarming: boolean) {

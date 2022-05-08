@@ -7,27 +7,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
 
 html {
-  --white              : white;
-  --bg                 : #F8F9FA;
-  --fg                 : #333333;
-  --primary            : #8542EB;
-  --primary-low        : #8542eb70;
-  --secondary          : #4BC7EF;
-  --success            : rgb(90, 206, 132);
-  --input              : #F6F2FD;
-  --yellow             : #F9BA37;
-  --gray               : #555;
-  --new-gray           : #9C9494;
-  --second-new-grey    : #EBE7F5;
-  --light-gray         : #ccc;
-  --shadow             : #e6e6e6;
-  background-color     : var(--bg);
-  font-family          : 'Inter', sans-serif;
-  /*body font*/
-  font-size            : 13px;
-  font-weight          : 500;
+  --white                    : white;
+  --bg                       : #F8F9FA;
+  --fg                       : #333333;
+  --primary-selected         : #9D67EF;
+  --primary                  : #8542EB;
+  --primary-low              : #8542eb70;
+  --secondary                : #4BC7EF;
+  --success                  : rgb(90, 206, 132);
+  --input                    : #F6F2FD;
+  --yellow                   : #F9BA37;
+  --second-yellow            : #FFD262;
+  --second-yellow-selected   : rgba(255, 210, 98, 0.66);
+  --gray                     : #555;
+  --new-gray                 : #9C9494;
+  --second-new-grey          : #EBE7F5;
+  --light-gray               : #ccc;
+  --shadow                   : #e6e6e6;
+  background-color           : var(--bg);
+  font-family                : 'Inter', sans-serif;
+  /*body font*/   
+  font-size                  : 13px;
+  font-weight                : 500;
   /* identical to box height, or 123% */
-  color                : var(--fg);
+  color                      : var(--fg);
   background     : url(assets/cheddar-farm-background.svg) top center / contain no-repeat;
   background-size: 100% auto;
   background-color: #5e8c01;
@@ -179,8 +182,8 @@ a {
 }*/
 
 a.selected {
-  color      : var(--fg);
-  background-color: var(--primary-low);
+  color: hsla(0,0%,100%,.8901960784313725);
+  background-color: var(--primary-selected);
   font-weight: bold;
 }
 
@@ -358,8 +361,14 @@ header nav a {
 }
 
 .user-info {
-  background-color: var(--second-new-grey);
-  color: var(--primary);
+  background-color: var(--second-yellow);
+  color: var(--fg);
+}
+
+.user-info.selected {
+  background-color: var(--second-yellow-selected);
+  color: var(--fg);
+  font-weight: bold;
 }
 
 .pool-meta.actions {
@@ -1384,9 +1393,7 @@ input:checked + .slider:before {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(19vw, -49px);
-  width: 135px;
-  height: 51px;
+  transform: translate(19vw, -100%);
   background-color: var(--white);
   align-items: center;
   justify-content: center;
@@ -1394,10 +1401,11 @@ input:checked + .slider:before {
   border-radius: 12px;
   align-content: space-around;
   margin: 10px 40px;
+  padding: 0 9px;
 }
 
+
 .unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .total-farmed-info-container > div {
-  width: 92%;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -1405,7 +1413,7 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container span, .reward-tokens-info-container span {
+.detail-row span {
   padding: 5px;
   border-width: 0px 1px;
   border-radius: 12px;
@@ -1422,7 +1430,7 @@ input:checked + .slider:before {
   margin-left: 3px;
 }
 
-.unclaimed-rewards-row .mini-icon, .reward-token-icon .mini-icon, .detail-row {
+.detail-row .mini-icon {
   margin: -30% 0;
   height: 18px;
 }
