@@ -1291,21 +1291,72 @@ input:checked + .slider:before {
   color: black;
 }
 
-#new-pool-header {
+.new-pool-header {
   display: flex;
   justify-content: space-between;
   padding: 14px 0 8px 0;
 }
 
-#token-logo-container {
+.token-logo-container {
+  max-width: 40%;
   height: 50px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  align-content: center;
+  justify-content: flex-start;
 }
 
-#token-logo-container img {
+.token-logo-container img, .token-logo-svg-container svg {
   width: 49.66px;
   background-color: var(--white);
   border-radius: 100%;
   box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
+}
+
+.logo-2, .logo-3, .logo-4, .logo-5, .logo-6 {
+  transform: translateX(-50%);
+}
+
+.logo-2 {
+  z-index: 20;
+}
+
+.logo-3 {
+  z-index: 21;
+}
+
+.logo-4 {
+  z-index: 22;
+}
+
+.logo-5 {
+  z-index: 23;
+}
+
+.logo-6 {
+  z-index: 24;
+}
+
+.token-pool-stats .logo-2 {
+  z-index: 31;
+}
+
+.token-pool-stats .logo-3 {
+  z-index: 32;
+}
+
+.token-pool-stats .logo-4 {
+  z-index: 33;
+}
+
+.token-pool-stats .logo-5 {
+  z-index: 34;
+}
+
+.token-pool-stats .logo-6 {
+  z-index: 35;
 }
 
 .token-stats {
@@ -1320,28 +1371,28 @@ input:checked + .slider:before {
 }
 
 #token-name-container {
-  transform: translate(-36px, -4px);
+  width: 40%;
   font-size: 16px;
   font-weight: 700;
   line-height: 19px;
 }
 
 #token-pool-stats {
-  z-index: 1;
+  z-index: 30;
   width: 26.88vw;
   max-width: 468px;
   min-width: 334.4px;
-  transform: translate(-23px, -67px);
+  transform: translate(-23px, -72px);
   position: absolute;
   background-color: var(--white);
-  padding: 9.6px;
+  padding: 0 10px;
   border-top: 0px;
   border-right: 12px;
   border-bottom: 12px;
   border-left: 12px;
   border-color: var(--second-new-grey);
   border-style: solid;
-  border-radius: 14px;
+  border-radius: 18px;
 }
 
 #token-pool-stats #new-pool-header {
@@ -1388,7 +1439,7 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container {
+.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .total-farmed-info-container {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
@@ -1405,7 +1456,7 @@ input:checked + .slider:before {
 }
 
 
-.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div {
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div, .total-farmed-info-container > div {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;

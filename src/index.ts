@@ -882,12 +882,12 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   const poolContainer = newPool.querySelector("#pool-container") as HTMLElement
   const tokenPoolStatsContainer = newPool.querySelector("#token-pool-stats") as HTMLElement
 
-  const newTokenPoolStats = newHeader.cloneNode(true) as HTMLElement
-
+  
   poolContainer.prepend(newHeader)
-  tokenPoolStatsContainer.prepend(newTokenPoolStats)
-
+  
   toggleGenericClass2(newHeader)
+  const newTokenPoolStats = newHeader.cloneNode(true) as HTMLElement
+  tokenPoolStatsContainer.prepend(newTokenPoolStats)
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1286,6 +1286,7 @@ function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index:
     newTokenLogoElement!.innerHTML= `${metaData.name}`
   }
   toggleGenericClass2(newTokenLogoElement)
+  newTokenLogoElement.classList.add(`logo-${index+1}`)
   container.append(newTokenLogoElement)
 }
 
