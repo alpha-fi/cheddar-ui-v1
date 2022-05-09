@@ -107,7 +107,7 @@ export class PoolParams {
         tokenContractList.push({
             contract,
             metaData,
-            balance: "0"
+            balance: await contract.ft_balance_of(this.wallet.getAccountId())
         })
         return tokenContractList
     }
@@ -158,7 +158,13 @@ export class PoolParams {
         await this.setMetaData();
         await this.setResultParams();
     }
-    // ACA
+
+    async refreshAllExtraData() {
+        await this.setContractParams()
+        await this.setResultParams()
+        await this.setStakeTokenContractList()
+    }
+    
     getStakedTokenIconData(): TokenIconData[] {
         
         const stakeTokenContract = this.stakeTokenContractList[0]

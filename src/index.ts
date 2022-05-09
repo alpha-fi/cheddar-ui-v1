@@ -640,8 +640,8 @@ function loginNarwallets() {
   window.open("http://www.narwallets.com/help/connect-to-web-app")
 }
 
-function showOrHideMaxButton(walletBalance: String, elem: HTMLElement) {
-  if (Number(walletBalance.replace(".", "")) > 0) {
+function showOrHideMaxButton(walletBalance: number, elem: HTMLElement) {
+  if (walletBalance > 0) {
     elem.classList.remove("hidden")
   }
   else {
@@ -661,75 +661,92 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
 }
 
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
-  var metaData = poolParams.stakingContractMetaData;
-  let accName = poolParams.resultParams.accName
-  
-  let accountInfo = await poolParams.stakingContract.status(accName)
-  
-  let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
-  let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
-  
-  let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
-  showOrHideMaxButton(displayableStaked.toString(), unstakeMaxButton)
-
-
-  const walletBalances = await poolParams.getWalletAvailableDisplayable()
-  
-  let stakeMaxButton = qs(".stake .max-button") as HTMLElement
-  newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
-  showOrHideMaxButton(walletBalances.toString(), stakeMaxButton)
-
-
-  setAccountInfo(poolParams, accountInfo)
-  let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
-
-  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
-}
-
-//TODO MARTIN
-async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
 
-  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
-  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
-  const totalStakedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(".total-staked-info-container .detail-row")
-  for(let i = 0; i < totalStakedDetailsElements.length; i++) {
-    const row = totalStakedDetailsElements[i]
-    const tokenMetadata = poolParams.stakeTokenContractList[i].metaData
-    const content = convertToDecimals(poolParams.contractParams.total_staked[i], tokenMetadata.decimals, 7)
-    row.querySelector(".content")!.innerHTML = content
-    
+  updateDetail(newPool, poolParams.stakeTokenContractList, [poolParams.contractParams.total_staked], "total-staked")
+  updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.contractParams.total_farmed], "total-farmed")
+  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates([poolParams.contractParams.farming_rate.toString()]), "rewards-per-day")
+  updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.resultParams.real.toString()], "unclaimed-rewards")
+
+  const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
+  refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
+  refreshInputAmounts(poolParams, newPool, "main-unstake", [poolParams.resultParams.staked.toString()])
+
+  if(poolParams.resultParams.staked == 0n) {
+    newPool.classList.remove("your-farms")
+    const isContractActivated = (await poolParams.stakingContract.storageBalance()) != null;
+    if(isContractActivated) {
+      newPool.querySelector("#activate")?.classList.add("hidden")
+    } else {
+      newPool.querySelector("#activate")?.classList.remove("hidden")
+    }
   }
 
   // var metaData = poolParams.stakingContractMetaData;
   // let accName = poolParams.resultParams.accName
   
   // let accountInfo = await poolParams.stakingContract.status(accName)
-  // let stakedArray = []
-  // let displayableStakedArray = []
   
-  // for (let i = 0; i < accountInfo.stake_tokens.length; i++) {
-  //   stakedArray.push((accountInfo) ? BigInt(accountInfo.stake_tokens[i]) : 0)
-  //   displayableStakedArray.push(convertToDecimals(stakedArray[i].toString(), metaData.decimals, 7))
-  // }
+  // let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
+  // let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
   
-
   // let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  // showOrHideMaxButton(displayableStakedArray.toString(), unstakeMaxButton)//Esto también
+  // newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
+  // showOrHideMaxButton(Number(displayableStaked), unstakeMaxButton)
 
 
-  // const walletBalancesArray = await poolParams.getWalletAvailableDisplayable()//DUDA Esto devuelve un array, revisar lo que lo usa.
+  // const walletBalances = await poolParams.getWalletAvailableDisplayable()
   
   // let stakeMaxButton = qs(".stake .max-button") as HTMLElement
-  // newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalancesArray.toString())//Esto ya se hace, no?
-  // showOrHideMaxButton(walletBalancesArray.toString(), stakeMaxButton)
+  // newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
+  // showOrHideMaxButton(Number(walletBalances), stakeMaxButton)
 
 
   // setAccountInfo(poolParams, accountInfo)
   // let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
+}
 
-  // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = unclaimedRewards.toString()
+async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
+  await poolParams.refreshAllExtraData()
+
+  updateDetail(newPool, poolParams.stakeTokenContractList, poolParams.contractParams.total_staked, "total-staked")
+  updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "total-farmed")
+  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(poolParams.contractParams.farm_token_rates), "rewards-per-day")
+  updateDetail(newPool, poolParams.farmTokenContractList, poolParams.resultParams.farmed, "unclaimed-rewards")
+
+  const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
+  refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
+  refreshInputAmounts(poolParams, newPool, "main-unstake", poolParams.resultParams.staked)
+}
+
+function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
+  const inputArray = newPool.querySelectorAll(`.${className} .token-input-container`)
+  for(let i = 0; i < inputArray.length; i++) {
+    const input = inputArray[i]
+    const tokenContractData: ContractData = poolParams.stakeTokenContractList[i]
+    const balance = amounts[i]
+    const balanceDisplayable = convertToDecimals(balance, tokenContractData.metaData.decimals, 7)
+    input.querySelector(".value")!.innerHTML = balanceDisplayable
+
+    const maxButton = input.querySelector(".max-button") as HTMLElement
+    showOrHideMaxButton(Number(balanceDisplayable), maxButton)
+  }
+}
+
+function convertRewardsRates(rates: string[]) {
+  return rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
+}
+
+async function updateDetail(newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
+  const totalFarmedInUsd: string = await convertToUSDMultiple(contractList, totals)
+  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = totalFarmedInUsd
+  const totalFarmedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
+  for(let i = 0; i < totalFarmedDetailsElements.length; i++) {
+    const row = totalFarmedDetailsElements[i]
+    const tokenMetadata = contractList[i].metaData
+    const content = convertToDecimals(totals[i], tokenMetadata.decimals, 7)
+    row.querySelector(".content")!.innerHTML = content
+  }
 }
 
 
@@ -831,7 +848,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
-  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
+  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards.toFixed(7).toString()
 
   // let totalFarmed = poolParams.contractParams.total_farmed.toString()
   // newPool.querySelector(".total-farmed-value-usd")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
@@ -913,7 +930,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   // const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
   const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
 
-  newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards
+  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards
 
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
@@ -1012,8 +1029,8 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
     amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 7)
     maxButton.addEventListener("click", inputMaxButtonClicked(newInputContainer))
   }
-  
-  showOrHideMaxButton(contractData.balance, maxButton)
+  const balanceDisplayable = convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+  showOrHideMaxButton(Number(balanceDisplayable), maxButton)
 
 
   newPool.querySelector(`.main-${action}`)!.append(newInputContainer)
@@ -1092,7 +1109,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let rewardsPerDayInfoContainer = newPool.querySelector(".rewards-per-day-info-container")! as HTMLElement;
   let rewardTokensValue = newPool.querySelector(".reward-tokens-value")! as HTMLElement;
   let rewardTokensInfoContainer = newPool.querySelector(".reward-tokens-info-container")! as HTMLElement;
-  let unclaimedRewardsDollarsValue = newPool.querySelector(".unclaimed-rewards-dollars-value")! as HTMLElement;
+  let unclaimedRewardsDollarsValue = newPool.querySelector(".unclaimed-rewards-value-usd")! as HTMLElement;
   let unclaimedRewardsInfoContainer = newPool.querySelector(".unclaimed-rewards-info-container")! as HTMLElement;
 
   
@@ -1265,6 +1282,9 @@ function addStakedTokenBasicData(poolParams: PoolParams|PoolParamsP3, newPool: H
 
 function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index: number = 0) {
   let newTokenLogoElement: HTMLElement
+  // if(metaData.icon == null) {
+  //   metaData.icon = 
+  // }
   if (metaData.icon != null){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
     if(metaData.icon.startsWith("data:image/svg+xml")) { // icon is img
@@ -1753,6 +1773,7 @@ async function unstakeResult(argsArray: [{amount: string, token: string}]) {
   
   for(let i = 0; i < argsArray.length; i++) {
     const args = argsArray[i]
+    console.log("UNSTAKE RESULT TOKEN: ", args.token)
     let contract = new NEP141Trait(args.token)
     contract.wallet = wallet
 
