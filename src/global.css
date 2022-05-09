@@ -1291,7 +1291,7 @@ input:checked + .slider:before {
   color: black;
 }
 
-#new-token-header {
+#new-pool-header {
   display: flex;
   justify-content: space-between;
   padding: 14px 0 8px 0;
@@ -1344,7 +1344,7 @@ input:checked + .slider:before {
   border-radius: 14px;
 }
 
-#token-pool-stats #new-token-header {
+#token-pool-stats #new-pool-header {
   padding-top: 0px;
 }
 

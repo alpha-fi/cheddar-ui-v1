@@ -154,6 +154,17 @@ export class PoolParams {
         await this.setMetaData();
         await this.setResultParams();
     }
+    // ACA
+    getStakedTokenIconData(): TokenIconData[] {
+        
+        const stakeTokenContract = this.stakeTokenContractList[0]
+        const src = stakeTokenContract.metaData.icon ? stakeTokenContract.metaData.icon : stakeTokenContract.metaData.name
+        return [{
+            isSvg: src.includes("<svg"),
+            src: src,
+            tokenName: stakeTokenContract.metaData.name ? stakeTokenContract.metaData.name : "NoName"
+        }]
+    }
 
     async getRewardTokenIconData(): Promise<TokenIconData[]> {
         const cheddarMetaData = await this.cheddarContract.ft_metadata()

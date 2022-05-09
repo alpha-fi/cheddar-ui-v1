@@ -238,6 +238,22 @@ export class PoolParamsP3 {
             tokenName: contractData.metaData.name ? contractData.metaData.name : "NoName"
         }
     }
+    // ACA
+    getStakedTokenIconData(): TokenIconData[] {
+        let dataArray: TokenIconData[] = []
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const stakeTokenContract = this.stakeTokenContractList[i]
+            const src = stakeTokenContract.metaData.icon ? stakeTokenContract.metaData.icon : stakeTokenContract.metaData.name
+            const data = {
+                isSvg: src.includes("<svg"),
+                src: src,
+                tokenName: stakeTokenContract.metaData.name ? stakeTokenContract.metaData.name : "NoName"
+            }
+            dataArray.push(data)
+        }
+        return dataArray
+        
+    }
 
     getRewardTokenIconData(): TokenIconData[] {
         let dataArray: TokenIconData[] = []

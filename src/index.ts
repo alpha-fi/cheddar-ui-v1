@@ -17,7 +17,7 @@ import { checkRedirectSearchParams, checkRedirectSearchParamsMultiple } from './
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
 import { PoolParams, PoolResultParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
-import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
+import { ContractData, HtmlPoolParams, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
 import { DetailRowElements, HTMLTokenInputData, TokenIconData, UnclaimedRewardsData } from './entities/genericData';
 
@@ -816,6 +816,8 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   addInput(newPool, stakeTokenContractData, "stake")
   addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
 
+  //ACA
+  addFarmedTokensBasicInfo(poolParams, newPool, stakeTokenContractData)
   // newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
   // newPool.querySelector(".main-stake .token-input-container")?.classList.remove("hidden")
@@ -878,8 +880,30 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   }
 }
 
-async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
+//ACA
+function addFarmedTokensBasicInfo(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractData: ContractData) {
+  const poolContainer = newPool.querySelector("#pool-container") as HTMLElement
+  const tokenPoolStatsContainer = newPool.querySelector("#token-pool-stats") as HTMLElement
 
+  addStakedTokenBasicData(poolParams, newPool, contractData)
+
+  const genericNewPoolHeader = qs(".generic-new-pool-header") as HTMLElement
+  const newNewPoolHeader = genericNewPoolHeader.cloneNode(true) as HTMLElement
+  
+  newNewPoolHeader.classList.remove("hidden")
+  newNewPoolHeader.classList.remove("generic-new-pool-header")
+  
+
+  const newTokenPoolStats = newNewPoolHeader.cloneNode(true) as HTMLElement
+
+
+  poolContainer.prepend(newNewPoolHeader)
+  tokenPoolStatsContainer.prepend(newTokenPoolStats)
+}
+
+async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
+  //ACA  descomentar esto cuando .getStakeTokenContractData esté bien implementado
+  // const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
   let tokenSymbols = []
   await poolParams.getWalletAvailable()
   for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
@@ -888,6 +912,8 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
     addInput(newPool, contractData, "stake")
     addInput(newPool, contractData, "unstake", poolParams.resultParams.staked[i])
+
+    // addFarmedTokensBasicInfo(poolParams, newPool, stakeTokenContractData)
     
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
 
@@ -1058,7 +1084,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
   // let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
-  let infoIcon = newPool.querySelector("#new-token-header .information-icon-container")! as HTMLElement;
+  let infoIcon = newPool.querySelector("#new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
   // let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   // let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
@@ -1253,6 +1279,43 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
     activateButtonContainer.classList.add("hidden")
     activateButton.setAttribute("disabled", "disabled")
     harvestButton.classList.remove("hidden")
+  }
+}
+
+//ACA
+async function addStakedTokenBasicData(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractData: ContractData) {
+  const tokenIconDataArray: TokenIconData[] = await poolParams.getStakedTokenIconData()
+  const container = newPool.querySelector(".token-logo-container") as HTMLElement
+  const namesContainer = newPool.querySelector("#token-name-container") as HTMLElement
+  const genericTokenNameTag = newPool.querySelector(".generic-token-name") as HTMLElement
+  const tokenSvgLogoContainerLogoContainer = container.querySelector(".token-logo-svg-container")
+  const metaData = contractData.metaData
+  
+  for(let i = 0; i < tokenIconDataArray.length; i++) {
+    const tokenIconData = tokenIconDataArray[i]
+    
+    if (metaData.icon != null){
+      // inputLogoContainer.innerHTML= `${metaData.icon}`
+      if(metaData.icon.startsWith("data:image/svg+xml")) {
+        let tokenLogoElement = container.querySelector("img")
+        tokenLogoElement?.setAttribute("src", metaData.icon)
+        tokenSvgLogoContainerLogoContainer?.classList.remove("hidden")
+      } else if(metaData.icon.startsWith("<svg")) {
+        let tokenLogoElement = container.querySelector("div.token-logo-svg-container")
+        tokenLogoElement!.innerHTML = metaData.icon
+        tokenLogoElement!.classList.remove("hidden")
+      }
+    } else {
+      tokenSvgLogoContainerLogoContainer!.innerHTML= `${metaData.name}`
+      tokenSvgLogoContainerLogoContainer?.classList.remove("hidden")
+    }
+
+    const newFarmedTokenName = genericTokenNameTag.cloneNode(true) as HTMLElement
+    
+    newFarmedTokenName.innerHTML = tokenIconData.tokenName
+    toggleGenericClass(newFarmedTokenName, "token-name")
+    
+    namesContainer.append(newFarmedTokenName)
   }
 }
 
