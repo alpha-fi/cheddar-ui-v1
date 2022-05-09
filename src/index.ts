@@ -816,8 +816,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   addInput(newPool, stakeTokenContractData, "stake")
   addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
 
-  //ACA
-  addFarmedTokensBasicInfo(poolParams, newPool, stakeTokenContractData)
+  addHeader(poolParams, newPool)
   // newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
 
   // newPool.querySelector(".main-stake .token-input-container")?.classList.remove("hidden")
@@ -826,15 +825,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   // let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
   // stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
   
-  // showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool
-
-
-
-  newPool.querySelectorAll(".token-name").forEach(element => {
-    element.innerHTML = metaData.symbol
-  })
-
-  
+  // showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool  
   
   // newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
   
@@ -842,27 +833,17 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
 
   newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards.toFixed(7).toString()
 
+  // let totalFarmed = poolParams.contractParams.total_farmed.toString()
+  // newPool.querySelector(".total-farmed-value-usd")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
 
-  // let unstakeMaxButton = newPool.querySelector(`.unstake .max-button`) as HTMLElement
-  // unstakeMaxButton.addEventListener("click", maxUnstakeClicked(newPool))
-  // showOrHideMaxButton(stakedDisplayable.toString(), unstakeMaxButton)
+  // newPool.querySelector(".token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
-  // if (Number(stakedDisplayable) > 0) {
-  //   unstakeMaxButton.classList.remove("hidden")
-  // }
-
-  let totalFarmed = poolParams.contractParams.total_farmed.toString()
-  newPool.querySelector(".total-token-farmed-value")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
-
-  newPool.querySelector(".token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
-
-  // TODO reimplement when popup is ready
-  // addTotalStaked(newPool, poolParams.metaData.symbol, convertToDecimals(totalStaked, metaData.decimals, 7).toString())
-  // const contractData: ContractData = await poolParams.getStakeTokenContractData();
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
-  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
+  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
+  const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = totalStakedInUsd
   newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
 
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
 
@@ -880,30 +861,37 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   }
 }
 
-//ACA
-function addFarmedTokensBasicInfo(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractData: ContractData) {
+function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
+  const tokenContractDataArray: ContractData[] = poolParams.stakeTokenContractList
+  const logoContainer = header.querySelector(".token-logo-container")! as HTMLElement
+  logoContainer.innerHTML = ""
+
+  for(let i = 0; i < tokenContractDataArray.length; i++) {
+    const tokenIconData = tokenContractDataArray[i]
+    const metaData = tokenIconData.metaData
+    addLogo(metaData, logoContainer, i)
+  }
+}
+
+function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  const genericHeader = qs(".generic-new-pool-header")
+  const newHeader = genericHeader.cloneNode(true) as HTMLElement
+
+  addAllLogos(poolParams, newHeader)
+
   const poolContainer = newPool.querySelector("#pool-container") as HTMLElement
   const tokenPoolStatsContainer = newPool.querySelector("#token-pool-stats") as HTMLElement
 
-  addStakedTokenBasicData(poolParams, newPool, contractData)
+  const newTokenPoolStats = newHeader.cloneNode(true) as HTMLElement
 
-  const genericNewPoolHeader = qs(".generic-new-pool-header") as HTMLElement
-  const newNewPoolHeader = genericNewPoolHeader.cloneNode(true) as HTMLElement
-  
-  newNewPoolHeader.classList.remove("hidden")
-  newNewPoolHeader.classList.remove("generic-new-pool-header")
-  
-
-  const newTokenPoolStats = newNewPoolHeader.cloneNode(true) as HTMLElement
-
-
-  poolContainer.prepend(newNewPoolHeader)
+  poolContainer.prepend(newHeader)
   tokenPoolStatsContainer.prepend(newTokenPoolStats)
+
+  toggleGenericClass2(newHeader)
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  //ACA  descomentar esto cuando .getStakeTokenContractData esté bien implementado
-  // const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
+  addHeader(poolParams, newPool)
   let tokenSymbols = []
   await poolParams.getWalletAvailable()
   for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
@@ -927,12 +915,14 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
   newPool.querySelector(".unclaimed-rewards-dollars-value")!.innerHTML = unclaimedRewards
 
+  
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
-  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
-
+  const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
   const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
-  const totalFarmedInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
-  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
+  const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
+  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
+  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
   // TODO reimplement when popup is ready
   // for(let i = poolParams.contractParams.total_staked.length - 1; i >= 0; i--) {
   //   const tokenName = poolParams.stakeTokenContractList[i].metaData.symbol
@@ -1084,7 +1074,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
   // let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
-  let infoIcon = newPool.querySelector("#new-pool-header .information-icon-container")! as HTMLElement;
+  let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
   // let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   // let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
@@ -1098,6 +1088,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let totalStakedInfoContainer = newPool.querySelector(".total-staked-info-container")! as HTMLElement;
   let totalFarmedValueUsd = newPool.querySelector(".total-farmed-value-usd")! as HTMLElement;
   let totalFarmedInfoContainer = newPool.querySelector(".total-farmed-info-container")! as HTMLElement;
+  let rewardsPerDayValueUsd = newPool.querySelector(".rewards-per-day-value-usd")! as HTMLElement;
+  let rewardsPerDayInfoContainer = newPool.querySelector(".rewards-per-day-info-container")! as HTMLElement;
   let rewardTokensValue = newPool.querySelector(".reward-tokens-value")! as HTMLElement;
   let rewardTokensInfoContainer = newPool.querySelector(".reward-tokens-info-container")! as HTMLElement;
   let unclaimedRewardsDollarsValue = newPool.querySelector(".unclaimed-rewards-dollars-value")! as HTMLElement;
@@ -1120,76 +1112,30 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     newPool.classList.add("inactive-pool")
   }
 
-  // let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
-  // let activateButton = newPool.querySelector(".activate") as HTMLElement
-  // let activated = newPool.querySelector("#activated") as HTMLElement
-  // let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
-  // If is not registered, returns null
-  // let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
+  newPool.querySelectorAll(".token-name").forEach(element => {
+    element.innerHTML = poolParams.getPoolName()
+  })
 
-
-  // TODO Martin - add classes in html and not here (as default)
-  // activated.classList.add("hidden")
-  // activateButtonContainer.classList.add("hidden")
-  // harvestButton.classList.add("hidden")
   const isUserFarming = newPool.classList.contains("your-farms")
   if(newPool.classList.contains("inactive-pool")) {
     // Completely ended contract. Don't put listeners regarding stake/unstake/harvest/activate
     displayInactivePool(newPool, isUserFarming)
   } else {
     await displayActivePool(poolParams, newPool, isUserFarming)
-    // Shows or hides the "Staking/Unstaking" text
-    // newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
-    // newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
-    // // Live and ended contracts.
-    // expandPoolButton.classList.remove("hidden")
-    
-
-    // toggleExpandStakeUnstakeSection(newPool, poolContainer)
-    // toggleExpandStakeUnstakeSection(newPool, expandPoolButton)
-    // toggleExpandStakeUnstakeSection(newPool, hidePoolButton)
-
-    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
-    // unstakeTabButton.addEventListener("click", setActiveColor);
-    // unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
-    
-    // if (newPool.classList.contains("active-pool")) {
-    //   stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-    //   stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-    //   stakeTabButton.addEventListener("click", setActiveColor);
-    //   stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
-      
-    //   if (!newPool.classList.contains("your-farms")) {
-    //     activateButtonContainer.classList.remove("hidden")
-    //     activateButton.addEventListener("click", depositClicked(poolParams, newPool))
-        
-    //     if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
-    //       let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
-    //       newPool.querySelector("#depositWarning")!.innerHTML = warningText
-          
-    //     }
-    //   } else {
-    //     activateButtonContainer.classList.add("hidden")
-    //     activateButton.setAttribute("disabled", "disabled")
-    //     harvestButton.classList.remove("hidden")
-    //   }
-      
-    // } else {
-    //   newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
-    //   const event= new Event ("click")
-    //   newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
-    // }
   }
-
   await addRewardTokenIcons(poolParams, newPool)
+
+  await addTotalStakedDetail(poolParams, newPool)
+  await addTotalFarmedDetail(poolParams, newPool)
+  await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
   await addUnclaimedRewardsDetail(poolParams, newPool)
-  await addRewardsPerDayDetail(poolParams, newPool)
-  await addTotalStakedDetail(poolParams, newPool)
+  
+  
   
   standardHoverToDisplayExtraInfo(totalStakedValueUsd, totalStakedInfoContainer)
   standardHoverToDisplayExtraInfo(totalFarmedValueUsd, totalFarmedInfoContainer)
+  standardHoverToDisplayExtraInfo(rewardsPerDayValueUsd, rewardsPerDayInfoContainer)
   standardHoverToDisplayExtraInfo(rewardTokensValue, rewardTokensInfoContainer)
   standardHoverToDisplayExtraInfo(unclaimedRewardsDollarsValue, unclaimedRewardsInfoContainer)
   // await addUnclaimedRewards(poolParams, newPool)
@@ -1283,40 +1229,64 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
 }
 
 //ACA
-async function addStakedTokenBasicData(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractData: ContractData) {
-  const tokenIconDataArray: TokenIconData[] = await poolParams.getStakedTokenIconData()
-  const container = newPool.querySelector(".token-logo-container") as HTMLElement
-  const namesContainer = newPool.querySelector("#token-name-container") as HTMLElement
-  const genericTokenNameTag = newPool.querySelector(".generic-token-name") as HTMLElement
-  const tokenSvgLogoContainerLogoContainer = container.querySelector(".token-logo-svg-container")
-  const metaData = contractData.metaData
+function addStakedTokenBasicData(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  const tokenContractDataArray: ContractData[] = poolParams.stakeTokenContractList
+  // const container = newPool.querySelector(".token-logo-container") as HTMLElement
+  // const namesContainer = newPool.querySelector("#token-name-container") as HTMLElement
+  // const genericTokenNameTag = newPool.querySelector(".generic-token-name") as HTMLElement
+  // const tokenSvgLogoContainerLogoContainer = container.querySelector(".token-logo-svg-container")
+  // const metaData = contractData.metaData
+  const logoContainer = qs(".generic-new-pool-header .token-logo-container")
+  const newLogoContainer = logoContainer.cloneNode(true) as HTMLElement
+  let tokenNamesArray: string[] = []
   
-  for(let i = 0; i < tokenIconDataArray.length; i++) {
-    const tokenIconData = tokenIconDataArray[i]
+  for(let i = 0; i < tokenContractDataArray.length; i++) {
+    const tokenIconData = tokenContractDataArray[i]
+    const metaData = tokenIconData.metaData
+    addLogo(metaData, newLogoContainer, i)
     
-    if (metaData.icon != null){
-      // inputLogoContainer.innerHTML= `${metaData.icon}`
-      if(metaData.icon.startsWith("data:image/svg+xml")) {
-        let tokenLogoElement = container.querySelector("img")
-        tokenLogoElement?.setAttribute("src", metaData.icon)
-        tokenSvgLogoContainerLogoContainer?.classList.remove("hidden")
-      } else if(metaData.icon.startsWith("<svg")) {
-        let tokenLogoElement = container.querySelector("div.token-logo-svg-container")
-        tokenLogoElement!.innerHTML = metaData.icon
-        tokenLogoElement!.classList.remove("hidden")
-      }
-    } else {
-      tokenSvgLogoContainerLogoContainer!.innerHTML= `${metaData.name}`
-      tokenSvgLogoContainerLogoContainer?.classList.remove("hidden")
-    }
-
-    const newFarmedTokenName = genericTokenNameTag.cloneNode(true) as HTMLElement
+    // const newStakedTokenName = genericTokenNameTag.cloneNode(true) as HTMLElement
+    tokenNamesArray.push(metaData.symbol)
+    // newStakedTokenName.innerHTML = metaData.name
+    // toggleGenericClass2(newStakedTokenName)
     
-    newFarmedTokenName.innerHTML = tokenIconData.tokenName
-    toggleGenericClass(newFarmedTokenName, "token-name")
-    
-    namesContainer.append(newFarmedTokenName)
+    // namesContainer.append(newStakedTokenName)
   }
+  let tokenNames = tokenNamesArray.join(" - ")
+  let tokenNamesDisplayable = tokenNames
+  if(tokenNames.length > 30) {
+    tokenNamesDisplayable = tokenNames.substring(0, 10) + "..." + tokenNames.substring(tokenNames.length - 10)
+  }
+  // qs("#new-pool-header .token-name").innerHTML = tokenNamesDisplayable
+
+  toggleGenericClass2(newLogoContainer)
+
+}
+
+function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index: number = 0) {
+  let newTokenLogoElement: HTMLElement
+  if (metaData.icon != null){
+    // inputLogoContainer.innerHTML= `${metaData.icon}`
+    if(metaData.icon.startsWith("data:image/svg+xml")) { // icon is img
+      const tokenLogoElement = qs(".generic-token-logo-img")
+      newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
+      newTokenLogoElement?.setAttribute("src", metaData.icon)
+    } else if(metaData.icon.startsWith("<svg")) { // icon is svg tag
+      const tokenLogoElement = qs(".generic-token-logo-svg-container")
+      newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
+      newTokenLogoElement!.innerHTML = metaData.icon
+    } else { // Should never happen
+      const tokenLogoElement = qs(".generic-token-logo-text")
+      newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
+      newTokenLogoElement!.innerHTML= `${metaData.name}`
+    }
+  } else { // Logo is not loaded (for afi-tt)
+    const tokenLogoElement = qs(".generic-token-logo-text")
+    newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
+    newTokenLogoElement!.innerHTML= `${metaData.name}`
+  }
+  toggleGenericClass2(newTokenLogoElement)
+  container.append(newTokenLogoElement)
 }
 
 async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
@@ -1368,13 +1338,13 @@ async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool
 }
 
 async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  convertAndAddRewardDataRows(poolParams, newPool, "total-farmed-info-container", "rewardsPerDay")
+  convertAndAddRewardDataRows(poolParams, newPool, "rewards-per-day-info-container", "rewardsPerDay")
 }
 
 // TODO MARTIN call method when below TODO is done
-async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, tokenContractList: ContractData[]) {
+async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   // TODO MARTIN implement total farmed in html and put class. It's in info and should be down
-  convertAndAddRewardDataRows(poolParams, newPool, "", "totalRewards")
+  convertAndAddRewardDataRows(poolParams, newPool, "total-farmed-info-container", "totalRewards")
 }
 
 async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
@@ -1417,7 +1387,6 @@ function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
     
     iconContainer.append(newMiniIcon)
     toggleGenericClass(newRow, "detail-row")
-    console.log("Token name", row.iconData.tokenName)
     newRow.classList.add(row.iconData.tokenName.toLowerCase().replace(/ /g, "-"))
     parentElement.append(newRow)
 
@@ -1467,6 +1436,19 @@ function importMiniIcon(iconData: TokenIconData){
 function toggleGenericClass(element: HTMLElement, className: string) {
   element.classList.remove(`generic-${className}`)
   element.classList.add(`${className}`)
+  element.classList.remove("hidden")
+}
+
+function toggleGenericClass2(element: HTMLElement) {
+  for(let i = 0; i < element.classList.length; i++) {
+    let className = element.classList[i]
+    if(className.includes("generic-")) {
+      const newClass = className.substring("generic-".length)
+      element.classList.remove(`${className}`)
+      element.classList.add(`${newClass}`)
+    }
+  }
+  
   element.classList.remove("hidden")
 }
 
@@ -1532,8 +1514,6 @@ window.onload = async function () {
 
     var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
-
-    //console.log(countDownDate)
 
     //DUDA para que es esto? Esto era para el lanzamiento de la app.
     // var x = setInterval(function() {

@@ -114,6 +114,20 @@ export class PoolParamsP3 {
         return tokenContractList
     }
 
+    getPoolName() {
+        let tokenNames: string[] = []
+        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
+            const tokenContractData = this.stakeTokenContractList[i]
+            tokenNames.push(tokenContractData.metaData.symbol)
+        }
+        const names = tokenNames.join(" - ")
+        if(names.length > 20) {
+            return names.substring(0, 7) + "..." + names.substring(names.length - 7)
+        } else {
+            return names
+        }
+    }
+
     async setStakeTokenContractList() {
         this.stakeTokenContractList = await this.getTokenContractList(this.contractParams.stake_tokens)
     }

@@ -112,6 +112,10 @@ export class PoolParams {
         return tokenContractList
     }
 
+    getPoolName() {
+        return this.stakeTokenContractList[0].metaData.symbol
+    }
+
     async setStakeTokenContractList() {
         this.stakeTokenContractList = await this.getTokenContractList(this.stakeTokenContract.contractId)
     }

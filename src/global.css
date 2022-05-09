@@ -1388,7 +1388,7 @@ input:checked + .slider:before {
   justify-content: space-between;
 }
 
-.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-farmed-info-container {
+.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
@@ -1405,7 +1405,7 @@ input:checked + .slider:before {
 }
 
 
-.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .total-farmed-info-container > div {
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
