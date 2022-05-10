@@ -916,8 +916,12 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
 }
 
 function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  let tokenSymbols = []
   for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
+    const contractData = poolParams.stakeTokenContractList[i]
+    const metaData = contractData.metaData
     newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
+    tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
   }
 
   for (let i=0; i < tokenSymbols.length; i++){
