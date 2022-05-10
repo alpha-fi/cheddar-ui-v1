@@ -337,7 +337,15 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
 
   let inputContainerList = newPool.querySelectorAll(`.main-${action} .input-container`)  
   const stakeTokenContractList = poolParams.stakeTokenContractList
-  const walletAvailableList = await poolParams.getWalletAvailable()
+  let boundary: string[]
+  if(action == "stake") {
+    boundary = await poolParams.getWalletAvailable()
+  } else if(action == "unstake") {
+    boundary = poolParams.resultParams.staked
+  } else {
+    throw Error(`Action ${action} not available`)
+  }
+  
   for(let i = 0; i < inputContainerList.length; i++) {
     let stakeContainer = inputContainerList[i]
     let input = stakeContainer.querySelector(".amount") as HTMLInputElement
@@ -350,8 +358,8 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
     const metaData = stakeTokenContractList[i].metaData
 
     const stakeAmountBN: bigint = BigInt(convertToBase(amount.toString(), metaData.decimals.toString()))
-    if(BigInt(walletAvailableList[i]) < stakeAmountBN) {
-      const balanceDisplayable = convertToDecimals(walletAvailableList[i], metaData.decimals, 7)
+    if(BigInt(boundary[i]) < stakeAmountBN) {
+      const balanceDisplayable = convertToDecimals(boundary[i], metaData.decimals, 7)
       throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to ${action}.`)
     }
     
@@ -907,6 +915,28 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   tokenPoolStatsContainer.prepend(newTokenPoolStats)
 }
 
+function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
+    newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
+  }
+
+  for (let i=0; i < tokenSymbols.length; i++){
+    newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
+    newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
+  }
+
+  newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
+  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
+  
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  let refreshIntervalId = -1
+  if(isDateInRange) {
+    refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
+  }
+  newPool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
+}
+
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
   addHeader(poolParams, newPool)
   let tokenSymbols = []
@@ -922,7 +952,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
 
-    newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
+    // newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
 
     
   }
@@ -948,20 +978,21 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   //   addTotalStaked(newPool, tokenName, totalStaked)
   // }
 
-  //I use this 2 for loops to match every combination of inputs without repeating itself
-  for (let i=0; i < tokenSymbols.length; i++){
-    newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
-    newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
-  }
+  // for (let i=0; i < tokenSymbols.length; i++){
+  //   newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
+  //   newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
+  // }
 
-  newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
-  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
+  // newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
+  // newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
   
-  const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  if(isDateInRange) {
-    window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
-  }
+  // const now = Date.now() / 1000
+  // const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  // let refreshIntervalId = -1
+  // if(isDateInRange) {
+  //   refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
+  // }
+  // newPool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
 }
 
 function addFocusClass(input:HTMLElement) {
@@ -1052,6 +1083,51 @@ function standardHoverToDisplayExtraInfo (elementWithListenner: HTMLElement, ele
   elementShown.addEventListener("mouseout", hideElement(elementShown));
 }
 
+function hideAllDynamicElements(newPool: HTMLElement) {
+  newPool.querySelectorAll(".dynamic-display-element").forEach((elem) => {
+    elem.classList.add("hidden")
+  })
+}
+
+function resetActivePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
+  let newPool = pool.cloneNode(true) as HTMLElement
+  hideAllDynamicElements(newPool)
+  addFilterClasses(poolParams, newPool)
+
+  const isUserFarming = newPool.classList.contains("your-farms")
+  displayActivePool(poolParams, newPool, isUserFarming)
+  if(refreshIntervalId != -1) {
+    clearInterval(refreshIntervalId)
+    const now = Date.now() / 1000
+    const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+    refreshIntervalId = -1
+    if(isDateInRange) {
+      refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
+    }
+    pool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
+  }
+
+  pool.replaceWith(newPool)
+}
+
+function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
+  // Cleaning classes in case of reset
+  const classes = ["your-farms", "active-pool", "inactive-pool"]
+  classes.forEach(className => newPool.classList.remove(className))
+  
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+
+  if(poolParams.resultParams.hasStakedTokens()){
+    newPool.classList.add("your-farms")
+  }
+  if(isDateInRange) {
+    newPool.classList.add("active-pool")
+  } else {
+    newPool.classList.add("inactive-pool")
+  }
+}
+
 async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
   var metaData = poolParams.stakingContractMetaData;
@@ -1062,7 +1138,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;  
-
+  
 
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
@@ -1120,14 +1196,15 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
-  if(poolParams.resultParams.hasStakedTokens()){
-    newPool.classList.add("your-farms")
-  }
-  if(isDateInRange) {
-    newPool.classList.add("active-pool")
-  } else {
-    newPool.classList.add("inactive-pool")
-  }
+  addFilterClasses(poolParams, newPool)
+  // if(poolParams.resultParams.hasStakedTokens()){
+  //   newPool.classList.add("your-farms")
+  // }
+  // if(isDateInRange) {
+  //   newPool.classList.add("active-pool")
+  // } else {
+  //   newPool.classList.add("inactive-pool")
+  // }
 
   newPool.querySelectorAll(".token-name").forEach(element => {
     element.innerHTML = poolParams.getPoolName()
@@ -1146,9 +1223,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   await addTotalFarmedDetail(poolParams, newPool)
   await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
-  await addUnclaimedRewardsDetail(poolParams, newPool)
-  
-  
+  await addUnclaimedRewardsDetail(poolParams, newPool)  
   
   standardHoverToDisplayExtraInfo(totalStakedValueUsd, totalStakedInfoContainer)
   standardHoverToDisplayExtraInfo(totalFarmedValueUsd, totalFarmedInfoContainer)

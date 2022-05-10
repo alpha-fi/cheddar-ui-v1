@@ -314,8 +314,9 @@
   
   
   <!-- Repeated elements -->
-  <!-- Start generic pool container -->
+  <!-- Start generic pool container (NEW) -->
   <div id="generic-pool-container" class="hidden">
+    <button id="deleteme">Test</button>
     <div id="contrat-period-container">
       <span id="contract-start">{Contract start date}</span>
       <span>-</span>
@@ -398,22 +399,22 @@
           </ul>
         </div>
         <div class="main-contract-footer">
-          <button class="button hidden" id="harvest-button">HARVEST</button>
-          <div id="activate" class="hidden">
+          <button class="button dynamic-display-element hidden" id="harvest-button">HARVEST</button>
+          <div id="activate" class="dynamic-display-element hidden">
             <button class="activate button">Activate</button>
             <p id="depositWarning">0.06 NEAR storage deposit, gets refunded.</p>
           </div>
         </div>
-        <p class="visual-tool-expanding-indication-hidden">Staking/Unstaking</p>
+        <p id="vanishing-indicator" class="visual-tool-expanding-indication-hidden">Staking/Unstaking</p>
       </div>
     </div>
     <div id="expanding-indicators">
       <div class="hide-expand-buttons-container">
-        <img class="toggle-display hide-button hidden" src="./assets/hide-button.svg" alt="hide button">
-        <img class="toggle-display expand-button hidden" src="./assets/expand-button.svg" alt="expand button">
+        <img class="toggle-display hide-button dynamic-display-element hidden" src="./assets/hide-button.svg" alt="hide button">
+        <img class="toggle-display expand-button dynamic-display-element hidden" src="./assets/expand-button.svg" alt="expand button">
       </div>
     </div>
-    <div id="activated" class="hidden">
+    <div id="activated" class="dynamic-display-element hidden">
       <form id="staking-unstaking-container">
         <div class="show-type-container">
           <button class="unstaking">UNSTAKE</button>
@@ -433,7 +434,7 @@
     </div>
   </div>
   <!-- Ends generic pool container -->
-  <!-- ACA -->
+  
   <!-- Starts generic new pool header -->
   <div class="generic-new-pool-header hidden">
     <div class="token-logo-container">
