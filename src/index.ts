@@ -12,17 +12,16 @@ import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narw
 import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
 
 //qs/qsa are shortcut for document.querySelector/All
-import { qs, qsa, qsi, showWait, hideWaitKeepOverlay, showErr, showSuccess, showMessage, show, hide, hidePopup, hideOverlay, qsaInnerText, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
-import { checkRedirectSearchParams, checkRedirectSearchParamsMultiple } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
+import { qs, qsa, qsi, showWait, showErr, showSuccess, showMessage, show, hide, hideOverlay, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
+import { checkRedirectSearchParamsMultiple } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
-import { PoolParams, PoolResultParams } from './entities/poolParams';
+import { PoolParams } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
-import { ContractData, HtmlPoolParams, PoolParamsP3 } from './entities/poolParamsP3';
+import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
-import { DetailRowElements, HTMLTokenInputData, TokenIconData, UnclaimedRewardsData } from './entities/genericData';
+import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities/genericData';
 
 import * as nearAPI from "near-api-js"
-import { FinalExecutionOutcome } from 'near-api-js/lib/providers';
 import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 
@@ -96,23 +95,13 @@ function navClickHandler_ConnectFirst(event: Event) {
 
 qs('nav #unstake-m').onclick = navClickHandler_ConnectFirst
 qs('nav #liquidity').onclick = navClickHandler_ConnectFirst
-//qs('nav #delayed-unstake').onclick = navClickHandler_ConnectFirst
 qs('nav #my-account').onclick = navClickHandler_ConnectFirst
-
-//qs('#unstake-from-my-account').onclick = () => { showSection("#unstake") }
 
 qs('nav #faq').onclick = () => { showSection("#faq") }
 
 function sayChoose() {
   showMessage("Please choose a wallet to connect", "Connect first");
 }
-
-//button connect
-// qs('#stake-form-not-connected').onsubmit =
-//   async function (event) {
-//     event.preventDefault()
-//     sayChoose();
-//   }
 
 
 //button sign-out
@@ -200,42 +189,6 @@ async function convertToUSDMultiple(tokenContractList: ContractData[], amountLis
   })
 
   return amountInUsd.toFixed(5)
-}
-
-async function getTotalStakedInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
-  const stakeTokenContractList = poolParams.stakeTokenContractList
-  const rewardTokenArray = stakeTokenContractList.map(stakeTokenContract => stakeTokenContract.metaData.symbol)
-  const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
-  let totalStaked = 0
-  stakeTokenContractList.forEach((stakeTokenContract, index) => {
-    const metaData = stakeTokenContract.metaData
-    const symbol = metaData.symbol
-    const unclaimedRewards = poolParams.resultParams.farmed[index]
-    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
-    const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
-
-    totalStaked += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
-  })
-
-  return totalStaked
-}
-
-async function getUnclaimedRewardsInUSDMultiple(poolParams: PoolParamsP3): Promise<number> {
-  const farmTokenContractList = poolParams.farmTokenContractList
-  const rewardTokenArray = farmTokenContractList.map(farmTokenContract => farmTokenContract.metaData.symbol)
-  const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
-  let pendingRewards = 0
-  farmTokenContractList.forEach((farmTokenContract, index) => {
-    const metaData = farmTokenContract.metaData
-    const symbol = metaData.symbol
-    const unclaimedRewards = poolParams.resultParams.farmed[index]
-    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
-    const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
-
-    pendingRewards += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
-  })
-  
-  return pendingRewards
 }
 
 function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
@@ -507,26 +460,6 @@ function showRemoveLiquidityResult(yoctoCheddar: string) {
     , "Withdraw crop"
   )
 }
-
-//compute epoch info
-// let epochCached: EpochInfo;
-// let endOfEpochCached = new Date();
-// let epochDurationMs = 12 * HOURS;
-// async function endOfEpoch(): Promise<Date> {
-//   if (new Date() >= endOfEpochCached && wallet.isConnected()) {
-//     try {
-//       epochCached = await computeCurrentEpoch(wallet);
-//       endOfEpochCached = new Date(epochCached.ends_dtm);
-//       epochDurationMs = epochCached.duration_ms;
-//     }
-//     catch (ex) {
-//       showErr(ex);
-//       return new Date(new Date().getTime() - 12 * HOURS);
-//     }
-//   }
-//   return endOfEpochCached;
-// }
-
 //--------------------------------------
 // AutoRefresh
 async function autoRefresh() {
@@ -689,29 +622,6 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
       newPool.querySelector("#activate")?.classList.remove("hidden")
     }
   }
-
-  // var metaData = poolParams.stakingContractMetaData;
-  // let accName = poolParams.resultParams.accName
-  
-  // let accountInfo = await poolParams.stakingContract.status(accName)
-  
-  // let staked = (accountInfo) ? BigInt(accountInfo[0]) : 0;
-  // let displayableStaked = convertToDecimals(staked.toString(), metaData.decimals, 7)
-  
-  // let unstakeMaxButton = qs(".unstake .max-button") as HTMLElement
-  // newPool.querySelector(".unstake .value")!.innerHTML  = displayableStaked
-  // showOrHideMaxButton(Number(displayableStaked), unstakeMaxButton)
-
-
-  // const walletBalances = await poolParams.getWalletAvailableDisplayable()
-  
-  // let stakeMaxButton = qs(".stake .max-button") as HTMLElement
-  // newPool.querySelector(".stake .value")!.innerHTML = removeDecZeroes(walletBalances.toString())
-  // showOrHideMaxButton(Number(walletBalances), stakeMaxButton)
-
-
-  // setAccountInfo(poolParams, accountInfo)
-  // let unclaimedRewards = poolParams.resultParams.getCurrentCheddarRewards()
 }
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
@@ -824,44 +734,18 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
 }
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
-  const walletBalance: U128String = await poolParams.getWalletAvailable()
-
-  const metaData = poolParams.stakingContractMetaData
-  let totalStaked = poolParams.contractParams.total_staked.toString()
-  const rewardsPerDay = getRewardsPerDaySingle(poolParams)
 
   const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
   const farmTokenContractData: ContractData = await poolParams.getFarmTokenContractData();
-  // var contractData = {
-  //   contract: poolParams.stakeTokenContract,
-  //   metaData: poolParams.metaData,
-  //   balance: walletBalance
-  // }
 
   addInput(newPool, stakeTokenContractData, "stake")
   addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
 
   addHeader(poolParams, newPool)
-  // newPool.querySelector(".stake span.value")!.innerHTML = removeDecZeroes(walletBalance.toString());
-
-  // newPool.querySelector(".main-stake .token-input-container")?.classList.remove("hidden")
-  // newPool.querySelector(".main-unstake .token-input-container")?.classList.remove("hidden")
-
-  // let stakeMaxButton = newPool.querySelector(".stake .max-button") as HTMLElement
-  // stakeMaxButton.addEventListener("click", maxStakeClicked(newPool))
-  
-  // showOrHideMaxButton(walletBalance.toString(), stakeMaxButton)//TODO test if this function is working in the new pool  
-  
-  // newPool.querySelector("#staking-unstaking-container .unstake .value")!.innerHTML = stakedDisplayable
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
   newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards.toFixed(7).toString()
-
-  // let totalFarmed = poolParams.contractParams.total_farmed.toString()
-  // newPool.querySelector(".total-farmed-value-usd")!.innerHTML = convertToDecimals(totalFarmed, 24, 5)
-
-  // newPool.querySelector(".token-total-rewards-value")!.innerHTML = yton(rewardsPerDay.toString()).toString()
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
   const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
@@ -870,20 +754,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
 
-  newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
-
-  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
-
-  newPool.querySelector("#activate")?.addEventListener("click", depositClicked(poolParams, newPool))
-
-  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
-
-
-  const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  if(isDateInRange) {
-    window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
-  }
+  addSinglePoolListeners(poolParams, newPool)
 }
 
 function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
@@ -910,35 +781,46 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   
   poolContainer.prepend(newHeader)
   
-  toggleGenericClass2(newHeader)
+  toggleGenericClass(newHeader)
   const newTokenPoolStats = newHeader.cloneNode(true) as HTMLElement
   tokenPoolStatsContainer.prepend(newTokenPoolStats)
 }
 
 function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  addAllCommonListeners(poolParams, newPool)
   let tokenSymbols = []
-  for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
+  for(let i=0; i < poolParams.stakeTokenContractList.length; i++){ // Harvest button listener
     const contractData = poolParams.stakeTokenContractList[i]
     const metaData = contractData.metaData
     newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
   }
 
-  for (let i=0; i < tokenSymbols.length; i++){
+  for (let i=0; i < tokenSymbols.length; i++){ // Autofill inputs with correct rates
     newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
     newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
   }
 
+  // Stake/unstake buttons
   newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
   newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
   
+  setAllInputMaxButtonListeners(newPool)
+  // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
   let refreshIntervalId = -1
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
   }
-  newPool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
+  newPool.querySelector("#deleteme")?.addEventListener("click", resetMultiplePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
+
+  // Hover events
+  standardHoverToDisplayExtraInfo(newPool, "total-staked")
+  standardHoverToDisplayExtraInfo(newPool, "total-farmed")
+  standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
+  standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
+  standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -951,21 +833,13 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
     addInput(newPool, contractData, "stake")
     addInput(newPool, contractData, "unstake", poolParams.resultParams.staked[i])
-
-    // addFarmedTokensBasicInfo(poolParams, newPool, stakeTokenContractData)
     
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
-
-    // newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
-
-    
   }
 
-  // const unclaimedRewards = await getUnclaimedRewardsInUSDMultiple(poolParams)
   const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
 
   newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards
-
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
   const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
@@ -974,29 +848,8 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
   newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
-  // TODO reimplement when popup is ready
-  // for(let i = poolParams.contractParams.total_staked.length - 1; i >= 0; i--) {
-  //   const tokenName = poolParams.stakeTokenContractList[i].metaData.symbol
-  //   const totalStaked = convertToDecimals(poolParams.contractParams.total_staked[i], poolParams.stakeTokenContractList[i].metaData.decimals, 7)
 
-  //   addTotalStaked(newPool, tokenName, totalStaked)
-  // }
-
-  // for (let i=0; i < tokenSymbols.length; i++){
-  //   newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
-  //   newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
-  // }
-
-  // newPool.querySelector("#stake-button")?.addEventListener("click", stakeMultiple(poolParams, newPool))
-  // newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeMultiple(poolParams, newPool))
-  
-  // const now = Date.now() / 1000
-  // const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  // let refreshIntervalId = -1
-  // if(isDateInRange) {
-  //   refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
-  // }
-  // newPool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
+  addMultiplePoolListeners(poolParams, newPool)
 }
 
 function addFocusClass(input:HTMLElement) {
@@ -1005,18 +858,6 @@ function addFocusClass(input:HTMLElement) {
     input.classList.toggle("focused")
   }
 }
-
-// function addTotalStaked(newPool: HTMLElement, tokenName: string, value: string) {
-//   let totalStakedContainer = qs(".generic-total-staked-row")
-//   var newTotalStakedContainer = totalStakedContainer.cloneNode(true) as HTMLElement
-  
-//   newTotalStakedContainer.querySelector(".token-name")!.innerHTML = tokenName
-//   newTotalStakedContainer.querySelector(".total-staked-value")!.innerHTML = value
-
-//   toggleGenericClass(newTotalStakedContainer, "total-staked-row")
-//   newPool.querySelector(`.main-contract-information ul`)!.prepend(newTotalStakedContainer)
-
-// }
 
 function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {
   let inputContainer = qs(".generic-token-input-container")
@@ -1059,10 +900,8 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
   if(action == "stake") {
     amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", inputMaxButtonClicked(newInputContainer))
   } else if(action == "unstake") {
     amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 7)
-    maxButton.addEventListener("click", inputMaxButtonClicked(newInputContainer))
   }
   const balanceDisplayable = convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
   showOrHideMaxButton(Number(balanceDisplayable), maxButton)
@@ -1080,7 +919,9 @@ async function toggleExpandStakeUnstakeSection (newPool: HTMLElement, elemWithLi
   elemWithListener.addEventListener("click", toggleActions(stakingUnstakingContainer));
 }
 
-function standardHoverToDisplayExtraInfo (elementWithListenner: HTMLElement, elementShown: HTMLElement) {
+function standardHoverToDisplayExtraInfo (newPool: HTMLElement, className: string) {
+  const elementWithListenner = newPool.querySelector(`.${className}-value-usd`) as HTMLElement
+  const elementShown = newPool.querySelector(`.${className}-info-container`) as HTMLElement
   elementWithListenner.addEventListener("mouseover", toggleElement(elementShown));
   elementWithListenner.addEventListener("mouseout", toggleElement(elementShown));
   elementShown.addEventListener("mouseover", showElement(elementShown));
@@ -1093,13 +934,65 @@ function hideAllDynamicElements(newPool: HTMLElement) {
   })
 }
 
-function resetActivePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
+function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+  let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
+  let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
+  infoIcon.addEventListener("mouseover", showElement(poolStats));
+  poolStats.addEventListener("mouseover", showElement(poolStats));
+  poolStats.addEventListener("mouseout", hideElement(poolStats));
+
+  let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
+  vanishingIndicator?.classList.remove("transparent")
+  vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
+  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", vanishingIndicator));
+  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",vanishingIndicator));
+}
+
+function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
+  addAllCommonListeners(poolParams, newPool)
+  // Harvest button listener
+  const contractData = poolParams.stakeTokenContractList[0]
+  const metaData = contractData.metaData
+  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
+  // Token symbols is done this way to emulate multiple case. Single case will be removed shortly
+  let tokenSymbols = []
+  tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
+
+  // Stake/unstake buttons
+  newPool.querySelector("#stake-button")?.addEventListener("click", stakeSingle(poolParams, newPool))
+  newPool.querySelector("#unstake-button")?.addEventListener("click", unstakeSingle(poolParams, newPool))
+  
+  setAllInputMaxButtonListeners(newPool)
+  // Refresh every 5 seconds if it's live
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  let refreshIntervalId = -1
+  if(isDateInRange) {
+    refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
+  }
+  newPool.querySelector("#deleteme")?.addEventListener("click", resetSinglePoolListener.bind(null, poolParams, newPool, refreshPoolInfoSingle, refreshIntervalId))
+
+  // Hover events
+  standardHoverToDisplayExtraInfo(newPool, "total-staked")
+  standardHoverToDisplayExtraInfo(newPool, "total-farmed")
+  standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
+  standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
+  standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
+}
+
+function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refreshFunction: (pp: PoolParams, np: HTMLElement) => void, refreshIntervalId: number) {
   let newPool = pool.cloneNode(true) as HTMLElement
   hideAllDynamicElements(newPool)
   addFilterClasses(poolParams, newPool)
+  addSinglePoolListeners(poolParams, newPool)
+  
 
   const isUserFarming = newPool.classList.contains("your-farms")
-  displayActivePool(poolParams, newPool, isUserFarming)
+  if(newPool.classList.contains("inactive-pool")) {
+    displayInactivePool(newPool, isUserFarming)
+  } else {
+    displayActivePool(poolParams, newPool, isUserFarming)
+  }
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
     const now = Date.now() / 1000
@@ -1108,7 +1001,34 @@ function resetActivePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, re
     if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
-    pool.querySelector("#deleteme")?.addEventListener("click", resetActivePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
+    pool.querySelector("#deleteme")?.addEventListener("click", resetSinglePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
+  }
+
+  pool.replaceWith(newPool)
+}
+
+function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
+  let newPool = pool.cloneNode(true) as HTMLElement
+  hideAllDynamicElements(newPool)
+  addFilterClasses(poolParams, newPool)
+  addMultiplePoolListeners(poolParams, newPool)
+  
+
+  const isUserFarming = newPool.classList.contains("your-farms")
+  if(newPool.classList.contains("inactive-pool")) {
+    displayInactivePool(newPool, isUserFarming)
+  } else {
+    displayActivePool(poolParams, newPool, isUserFarming)
+  }
+  if(refreshIntervalId != -1) {
+    clearInterval(refreshIntervalId)
+    const now = Date.now() / 1000
+    const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+    refreshIntervalId = -1
+    if(isDateInRange) {
+      refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
+    }
+    pool.querySelector("#deleteme")?.addEventListener("click", resetMultiplePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
   }
 
   pool.replaceWith(newPool)
@@ -1121,7 +1041,7 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-
+  
   if(poolParams.resultParams.hasStakedTokens()){
     newPool.classList.add("your-farms")
   }
@@ -1137,9 +1057,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var metaData = poolParams.stakingContractMetaData;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
-  let isContractActivated = null
-  const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;  
   
@@ -1158,57 +1075,20 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   if (poolParams instanceof PoolParams) {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
-    isContractActivated = await poolParams.stakeTokenContract.storageBalance();
   } else {
     multiplePoolParams = poolParams
     await addPoolMultiple(multiplePoolParams, newPool)
-    isContractActivated = await poolParams.stakingContract.storageBalance();
   }
 
   // New code
-  // let poolContainer = newPool.querySelector("#generic-pool-container")! as HTMLElement;
-  // let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
-  // let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
-  let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
-  let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
-  // let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
-  // let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
-  // let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
-  // let staking = newPool.querySelector(".main-stake")! as HTMLElement;
-  // let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
-  // let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
-  // let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
   var contractParams = poolParams.contractParams;
-  let totalStakedValueUsd = newPool.querySelector(".total-staked-value-usd")! as HTMLElement;
-  let totalStakedInfoContainer = newPool.querySelector(".total-staked-info-container")! as HTMLElement;
-  let totalFarmedValueUsd = newPool.querySelector(".total-farmed-value-usd")! as HTMLElement;
-  let totalFarmedInfoContainer = newPool.querySelector(".total-farmed-info-container")! as HTMLElement;
-  let rewardsPerDayValueUsd = newPool.querySelector(".rewards-per-day-value-usd")! as HTMLElement;
-  let rewardsPerDayInfoContainer = newPool.querySelector(".rewards-per-day-info-container")! as HTMLElement;
-  let rewardTokensValue = newPool.querySelector(".reward-tokens-value")! as HTMLElement;
-  let rewardTokensInfoContainer = newPool.querySelector(".reward-tokens-info-container")! as HTMLElement;
-  let unclaimedRewardsDollarsValue = newPool.querySelector(".unclaimed-rewards-value-usd")! as HTMLElement;
-  let unclaimedRewardsInfoContainer = newPool.querySelector(".unclaimed-rewards-info-container")! as HTMLElement;
-
   
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
-  infoIcon.addEventListener("mouseover", showElement(poolStats));
-  poolStats.addEventListener("mouseover", showElement(poolStats));
-  poolStats.addEventListener("mouseout", hideElement(poolStats));
-
   addFilterClasses(poolParams, newPool)
-  // if(poolParams.resultParams.hasStakedTokens()){
-  //   newPool.classList.add("your-farms")
-  // }
-  // if(isDateInRange) {
-  //   newPool.classList.add("active-pool")
-  // } else {
-  //   newPool.classList.add("inactive-pool")
-  // }
 
   newPool.querySelectorAll(".token-name").forEach(element => {
     element.innerHTML = poolParams.getPoolName()
@@ -1216,7 +1096,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
 
   const isUserFarming = newPool.classList.contains("your-farms")
   if(newPool.classList.contains("inactive-pool")) {
-    // Completely ended contract. Don't put listeners regarding stake/unstake/harvest/activate
     displayInactivePool(newPool, isUserFarming)
   } else {
     await displayActivePool(poolParams, newPool, isUserFarming)
@@ -1228,13 +1107,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
   await addUnclaimedRewardsDetail(poolParams, newPool)  
-  
-  standardHoverToDisplayExtraInfo(totalStakedValueUsd, totalStakedInfoContainer)
-  standardHoverToDisplayExtraInfo(totalFarmedValueUsd, totalFarmedInfoContainer)
-  standardHoverToDisplayExtraInfo(rewardsPerDayValueUsd, rewardsPerDayInfoContainer)
-  standardHoverToDisplayExtraInfo(rewardTokensValue, rewardTokensInfoContainer)
-  standardHoverToDisplayExtraInfo(unclaimedRewardsDollarsValue, unclaimedRewardsInfoContainer)
-  // await addUnclaimedRewards(poolParams, newPool)
 
   qs("#pool_list").append(newPool)
 
@@ -1253,10 +1125,6 @@ function displayInactivePool(newPool: HTMLElement, isUserFarming: boolean) {
 }
 
 function toggleStakeUnstakeSection(newPool: HTMLElement) {
-  let showAndHideVisibilityTool = newPool.querySelector(".visual-tool-expanding-indication-hidden")! as HTMLElement;
-  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", showAndHideVisibilityTool));
-  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",showAndHideVisibilityTool));
-
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
   let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
@@ -1283,7 +1151,6 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
 async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, isUserFarming: boolean) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
-  // let activated = newPool.querySelector("#activated") as HTMLElement
   let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
   let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
 
@@ -1298,10 +1165,6 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
     let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
 
     setUnstakeTabListeners(newPool)
-    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstaking, staking));
-    // unstakeTabButton.addEventListener("click", showElementHideAnother(unstakeButton, stakeButton));
-    // unstakeTabButton.addEventListener("click", setActiveColor);
-    // unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 
     stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
     stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
@@ -1324,46 +1187,8 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
   }
 }
 
-//ACA
-function addStakedTokenBasicData(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const tokenContractDataArray: ContractData[] = poolParams.stakeTokenContractList
-  // const container = newPool.querySelector(".token-logo-container") as HTMLElement
-  // const namesContainer = newPool.querySelector("#token-name-container") as HTMLElement
-  // const genericTokenNameTag = newPool.querySelector(".generic-token-name") as HTMLElement
-  // const tokenSvgLogoContainerLogoContainer = container.querySelector(".token-logo-svg-container")
-  // const metaData = contractData.metaData
-  const logoContainer = qs(".generic-new-pool-header .token-logo-container")
-  const newLogoContainer = logoContainer.cloneNode(true) as HTMLElement
-  let tokenNamesArray: string[] = []
-  
-  for(let i = 0; i < tokenContractDataArray.length; i++) {
-    const tokenIconData = tokenContractDataArray[i]
-    const metaData = tokenIconData.metaData
-    addLogo(metaData, newLogoContainer, i)
-    
-    // const newStakedTokenName = genericTokenNameTag.cloneNode(true) as HTMLElement
-    tokenNamesArray.push(metaData.symbol)
-    // newStakedTokenName.innerHTML = metaData.name
-    // toggleGenericClass2(newStakedTokenName)
-    
-    // namesContainer.append(newStakedTokenName)
-  }
-  let tokenNames = tokenNamesArray.join(" - ")
-  let tokenNamesDisplayable = tokenNames
-  if(tokenNames.length > 30) {
-    tokenNamesDisplayable = tokenNames.substring(0, 10) + "..." + tokenNames.substring(tokenNames.length - 10)
-  }
-  // qs("#new-pool-header .token-name").innerHTML = tokenNamesDisplayable
-
-  toggleGenericClass2(newLogoContainer)
-
-}
-
 function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index: number = 0) {
   let newTokenLogoElement: HTMLElement
-  // if(metaData.icon == null) {
-  //   metaData.icon = 
-  // }
   if (metaData.icon != null){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
     if(metaData.icon.startsWith("data:image/svg+xml")) { // icon is img
@@ -1384,14 +1209,14 @@ function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index:
     newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
     newTokenLogoElement!.innerHTML= `${metaData.name}`
   }
-  toggleGenericClass2(newTokenLogoElement)
+  toggleGenericClass(newTokenLogoElement)
   newTokenLogoElement.classList.add(`logo-${index+1}`)
   container.append(newTokenLogoElement)
 }
 
 async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   const tokenIconDataArray: TokenIconData[] = await poolParams.getRewardTokenIconData()
-  const container = newPool.querySelector(".reward-tokens-value") as HTMLElement
+  const container = newPool.querySelector(".reward-tokens-value-usd") as HTMLElement
   
   for(let i = 0; i < tokenIconDataArray.length; i++) {
     const tokenIconData = tokenIconDataArray[i]
@@ -1419,31 +1244,13 @@ async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool
   }
 
   addDetailRows(newPool, totalStakedRows) 
-  // const totalStakedArray = poolParams.contractParams.total_staked
-  // const stakeTokenContractList = poolParams.stakeTokenContractList
-  // let totalStakedRows: DetailRowElements = {
-  //   parentClass: "reward-tokens-info-container",
-  //   rows: []
-  // }
-  // for(let i = 0; i < totalStakedArray.length; i++) {
-  //   let totalStaked = totalStakedArray[i]
-  //   let stakeTokenContractData = stakeTokenContractList[i]
-  //   const row = {
-  //     iconData: totalStaked,
-	//     content: totalStaked.tokenName
-  //   }
-
-  //   rewardTokenIconElements.rows.push(row)
-  // }
 }
 
 async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   convertAndAddRewardDataRows(poolParams, newPool, "rewards-per-day-info-container", "rewardsPerDay")
 }
 
-// TODO MARTIN call method when below TODO is done
 async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  // TODO MARTIN implement total farmed in html and put class. It's in info and should be down
   convertAndAddRewardDataRows(poolParams, newPool, "total-farmed-info-container", "totalRewards")
 }
 
@@ -1473,7 +1280,6 @@ async function addRewardsTokenDetail(poolParams: PoolParams|PoolParamsP3, newPoo
 function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
   const parentElement = newPool.querySelector(`.${rowsData.parentClass}`) as HTMLElement
   const genericRow = qs(`.generic-detail-row`) as HTMLElement
-  // const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
   const rows = rowsData.rows
 
   for(let i = 0; i < rows.length; i++) {
@@ -1486,7 +1292,7 @@ function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
     var newMiniIcon = importMiniIcon(row.iconData) as HTMLElement
     
     iconContainer.append(newMiniIcon)
-    toggleGenericClass(newRow, "detail-row")
+    toggleGenericClass(newRow)
     newRow.classList.add(row.iconData.tokenName.toLowerCase().replace(/ /g, "-"))
     parentElement.append(newRow)
 
@@ -1495,26 +1301,6 @@ function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
 
 async function addUnclaimedRewardsDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   convertAndAddRewardDataRows(poolParams, newPool, "unclaimed-rewards-info-container", "userUnclaimedRewards")
-
-  // const unclaimedRewardsInfoRowContainer = newPool.querySelector(".unclaimed-rewards-info-container") as HTMLElement
-  // const genericUnclaimedRewardsRow = qs(".generic-unclaimed-rewards-row") as HTMLElement
-  // const icon = qs(".generic-mini-icon")
-  // const unclaimedRewardsDataArray = await poolParams.getUnclaimedRewardsData()
-  
-  // for(let i = 0; i < unclaimedRewardsDataArray.length; i++) {
-  //   const newUnclaimedRewardsRow = genericUnclaimedRewardsRow.cloneNode(true) as HTMLElement
-  //   let unclaimedRewardData = unclaimedRewardsDataArray[i]
-  //   newUnclaimedRewardsRow.querySelector(".amount")!.innerHTML = unclaimedRewardData.amount
-
-  //   const iconContainer = newUnclaimedRewardsRow.querySelector(".icon") as HTMLElement
-    
-  //   var newMiniIcon = importMiniIcon(unclaimedRewardData.iconData, icon) as HTMLElement
-    
-  //   iconContainer.append(newMiniIcon)
-  //   toggleGenericClass(newUnclaimedRewardsRow, "unclaimed-rewards-row")
-  //   unclaimedRewardsInfoRowContainer.append(newUnclaimedRewardsRow)
-
-  // }
 }
 
 function importMiniIcon(iconData: TokenIconData){
@@ -1524,22 +1310,24 @@ function importMiniIcon(iconData: TokenIconData){
     if(iconData.isSvg) {
       var doc = parser.parseFromString(iconData.src, "image/svg+xml");
       newMiniIcon = doc.documentElement
+      newMiniIcon.classList.add("generic-mini-icon")
     } else {
       newMiniIcon = iconNode.cloneNode(true) as HTMLElement
       newMiniIcon.setAttribute("src", iconData.src)
       newMiniIcon.setAttribute("alt", iconData.tokenName)
     }
-    toggleGenericClass(newMiniIcon, "mini-icon")
+    // toggleGenericClass(newMiniIcon, "mini-icon")
+    toggleGenericClass(newMiniIcon)
     return newMiniIcon
 }
 
-function toggleGenericClass(element: HTMLElement, className: string) {
-  element.classList.remove(`generic-${className}`)
-  element.classList.add(`${className}`)
-  element.classList.remove("hidden")
-}
+// function toggleGenericClass(element: HTMLElement, className: string) {
+//   element.classList.remove(`generic-${className}`)
+//   element.classList.add(`${className}`)
+//   element.classList.remove("hidden")
+// }
 
-function toggleGenericClass2(element: HTMLElement) {
+function toggleGenericClass(element: HTMLElement) {
   for(let i = 0; i < element.classList.length; i++) {
     let className = element.classList[i]
     if(className.includes("generic-")) {
@@ -1552,8 +1340,13 @@ function toggleGenericClass2(element: HTMLElement) {
   element.classList.remove("hidden")
 }
 
-function getRewardsPerDaySingle(poolParams: PoolParams) {
-  return BigInt(poolParams.contractParams.farming_rate) * 60n * 24n
+function setAllInputMaxButtonListeners(newPool: HTMLElement) {
+  const inputContainerArray = newPool.querySelectorAll(".token-input-container")
+  for(let i = 0; i < inputContainerArray.length; i++) {
+    let inputContainer = inputContainerArray[i] as HTMLElement
+    const maxButton = inputContainer.querySelector(".max-button")
+    maxButton?.addEventListener("click", inputMaxButtonClicked(inputContainer))
+  }
 }
 
 function inputMaxButtonClicked(newInputContainer: HTMLElement) {
@@ -1563,7 +1356,6 @@ function inputMaxButtonClicked(newInputContainer: HTMLElement) {
     let input = newInputContainer.querySelector("input") as HTMLInputElement
     const amount = newInputContainer.querySelector(".value")!.innerHTML
     const inputEvent= new Event ("input")
-
     
     input.value = amount.toString()
     input.dispatchEvent(inputEvent)
@@ -1576,8 +1368,6 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
   for (let i = 0; i < poolList.length; i++) {
     await addPool(poolList[i]);
   }
-
-
 
   qs("#pool_list").style.display = "grid"
 
@@ -1593,10 +1383,6 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
 window.onload = async function () {
   try {
     let env = ENV //default
-
-    // const parts = window.location.pathname.split("/")
-    // const i = parts.indexOf("DApp")
-    // if (i >= 0) { env = parts[i + 1] }
 
     if (env != nearConfig.farms[0].networkId)
       nearConfig = getConfig(ENV);
@@ -1614,39 +1400,6 @@ window.onload = async function () {
 
     var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
-
-    //DUDA para que es esto? Esto era para el lanzamiento de la app.
-    // var x = setInterval(function() {
-
-    //   // Get today's date and time
-    //   var now = new Date().getTime();
-    //   var d = new Date();
-    //   var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
-
-    //   // Find  distance between now and the count down date
-    //   var distance = countDownDate.getTime() - d.getTime();
-    //   //console.log(distance)
-
-    //   // Time calculations for days, hours, minutes and seconds
-    //   var days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    //   var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    //   var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    //   var seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-    //   // Display the result in the element with id="demo"
-    //   document.getElementById("timer")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-    //   + minutes + "m : " + seconds + "s" + "</span></h2>";
-
-    //   document.getElementById("timer-non")!.innerHTML = "<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-    //   + minutes + "m : " + seconds + "s" + "</span></h2>";
-
-    //   // If the count down is finished, write some text
-    //   if (distance < 0) {
-    //     clearInterval(x);
-    //     document.getElementById("timer")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-    //     document.getElementById("timer-non")!.innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-    //   }
-    // }, 1000);
 
     //init narwallets listeners
     narwallets.setNetwork(nearConfig.farms[0].networkId); //tell the wallet which network we want to operate on
@@ -1711,90 +1464,6 @@ window.onload = async function () {
         // @ts-ignore
         await unstakeResult(args)
       }
-      // const { err, data, method, finalExecutionOutcome } = await checkRedirectSearchParams(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
-      // if (finalExecutionOutcome) {
-      //   var args = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
-      // }
-
-      // if (err) {
-      //   showError(err, "Transaction - " + method || "");
-      // }
-      // else if (method == "deposit_and_stake") {
-      //   showSuccess("Deposit Successful")
-      // }
-      // if (method == "unstake" && data == null) {
-      //   showSuccess("Unstaked All and Harvested Cheddar")
-      // } else if (method == "unstake" && args.amount != null) {
-      //   var receiver = finalExecutionOutcome?.transaction.receiver_id;
-      //   for (let i = 0; i < poolList.length; i++) {
-      //     //console.log("poolList[i].contract.contractId: ", poolList[i].contract.contractId)
-      //     if (poolList[i].stakingContract.contractId == receiver) {
-      //       const metaData = poolList[i].metaData
-      //       showSuccess(`Unstaked ${convertToDecimals(args.amount, metaData.decimals, 2)} ${metaData.symbol}`)
-      //       // showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-      //       break;
-      //     }
-      //   }
-      // } else if (method == "withdraw_crop") {
-
-      //   if (finalExecutionOutcome) {
-      //     var log = (finalExecutionOutcome.receipts_outcome[3].outcome.logs[0]).split(' ');
-      //     var message = yton(log[3]) + ' Cheddar Harvested!'
-      //     showSuccess(message)
-      //   }
-
-      // } else if (method == "storage_deposit") {
-      //   showSuccess(`Storage Deposit Successful`)
-      // }
-      // else if (data) {
-
-      //   switch (method) {
-      //     case "liquid_unstake": {
-      //       showSection("#unstake")
-      //       showUnstakeResult(data)
-      //       break;
-      //     }
-      //     case "nslp_add_liquidity": {
-      //       showSection("#liquidity")
-      //       //showLiquidityOwned();
-      //       break;
-      //     }
-      //     case "withdraw_crop": {
-      //       showSuccess(`${yton(data)} Cheddar Harvested!`)
-      //       break;
-      //     }
-      //     case "unstake": {
-      //       var receiver = finalExecutionOutcome?.transaction.receiver_id;
-      //       //console.log("Receiver: ", receiver)
-      //       //console.log("Length: ", poolList.length)
-      //       // if(receiver) {
-      //       for (let i = 0; i < poolList.length; i++) {
-      //         //console.log("poolList[i].tokenContract.contractId: ", poolList[i].tokenContract.contractId)
-      //         if (poolList[i].tokenContract.contractId == receiver) {
-      //           const metaData = poolList[i].metaData
-      //           showSuccess(`Unstaked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-      //           break;
-      //         }
-      //       }
-      //       // }
-      //       break;
-      //     }
-      //     case "ft_transfer_call": {
-      //       /** TODO - Fix for mutliple transactions **/
-      //       var receiver = finalExecutionOutcome?.transaction.receiver_id;
-      //       for (let i = 0; i < poolList.length; i++) {
-      //         if (poolList[i].tokenContract.contractId == receiver) {
-      //           const metaData = poolList[i].metaData
-      //           showSuccess(`Staked ${convertToDecimals(data, metaData.decimals, 2)} ${metaData.symbol}`)
-      //           break;
-      //         }
-      //       }
-      //       break;
-      //     }
-      //     default:
-      //       showSuccess(data[0], "Transaction Result")
-      //   }
-      // }
     }
     else {
       //not signed-in 
@@ -1804,10 +1473,6 @@ window.onload = async function () {
   catch (ex) {
     showErr(ex as Error)
   }
-}
-
-function showErrResult() {
-
 }
 
 async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id: string}]) {
