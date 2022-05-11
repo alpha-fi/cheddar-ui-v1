@@ -221,7 +221,6 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
         }
         
         poolParams.resultParams.addStaked(amountValues)
-        // await refreshPoolInfoMultiple(poolParams, newPool)
 
         showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
       }
@@ -267,7 +266,6 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
         }
         
         poolParams.resultParams.addStaked(amountValues.map(value => -value))
-        // await refreshPoolInfoMultiple(poolParams, newPool)
   
         showSuccess(`Staked ${unstakedAmountWithSymbol.join(" - ")}`)
       }
@@ -526,7 +524,7 @@ async function signedInFlow(wallet: WalletInterface) {
   takeUserAmountFromHome()
   const poolList = await getPoolList(wallet);
   await addPoolList(poolList)
-  await refreshAccountInfoGeneric(poolList)
+  // await refreshAccountInfoGeneric(poolList)
   qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
   setDefaultFilter()
 }
@@ -601,6 +599,8 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
   poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
 }
 
+let dateInRangeHack = false
+
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
 
@@ -622,6 +622,13 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
       newPool.querySelector("#activate")?.classList.remove("hidden")
     }
   }
+
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  if(!isDateInRange) {
+    resetSinglePoolListener(poolParams, newPool, refreshPoolInfoSingle, -1)
+  }
+  
 }
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
@@ -635,6 +642,12 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
   refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
   refreshInputAmounts(poolParams, newPool, "main-unstake", poolParams.resultParams.staked)
+
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  if(dateInRangeHack || !isDateInRange) {
+    resetMultiplePoolListener(poolParams, newPool, refreshPoolInfoMultiple, -1)
+  }
 }
 
 function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
@@ -813,7 +826,9 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
   }
-  newPool.querySelector("#deleteme")?.addEventListener("click", resetMultiplePoolListener.bind(null, poolParams, newPool, refreshPoolInfoMultiple, refreshIntervalId))
+  newPool.querySelector("#deleteme")?.addEventListener("click", function() {
+    dateInRangeHack = true
+  })
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
@@ -941,11 +956,14 @@ function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTM
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
-  let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
-  vanishingIndicator?.classList.remove("transparent")
-  vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
-  newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", vanishingIndicator));
-  newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",vanishingIndicator));
+  const isUserFarming = newPool.classList.contains("your-farms")
+  if(isUserFarming) { // Displays staking/unstaking when hovering on the pool
+    let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
+    vanishingIndicator?.classList.remove("transparent")
+    vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
+    newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", vanishingIndicator));
+    newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",vanishingIndicator));
+  }
 }
 
 function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
@@ -970,7 +988,9 @@ function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
   }
-  newPool.querySelector("#deleteme")?.addEventListener("click", resetSinglePoolListener.bind(null, poolParams, newPool, refreshPoolInfoSingle, refreshIntervalId))
+  newPool.querySelector("#deleteme")?.addEventListener("click", function() {
+    dateInRangeHack = true
+  })
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
@@ -984,14 +1004,12 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
   let newPool = pool.cloneNode(true) as HTMLElement
   hideAllDynamicElements(newPool)
   addFilterClasses(poolParams, newPool)
-  addSinglePoolListeners(poolParams, newPool)
   
-
-  const isUserFarming = newPool.classList.contains("your-farms")
+  addSinglePoolListeners(poolParams, newPool)
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool, isUserFarming)
+    displayInactivePool(newPool)
   } else {
-    displayActivePool(poolParams, newPool, isUserFarming)
+    displayActivePool(poolParams, newPool)
   }
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
@@ -1001,10 +1019,15 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
     if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
-    pool.querySelector("#deleteme")?.addEventListener("click", resetSinglePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
+    pool.querySelector("#deleteme")?.addEventListener("click", function() {
+      dateInRangeHack = true
+    })
   }
 
   pool.replaceWith(newPool)
+
+  const event = new Event('click')
+  qs(".activeFilterButton").dispatchEvent(event)
 }
 
 function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
@@ -1013,25 +1036,28 @@ function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, 
   addFilterClasses(poolParams, newPool)
   addMultiplePoolListeners(poolParams, newPool)
   
-
-  const isUserFarming = newPool.classList.contains("your-farms")
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool, isUserFarming)
+    displayInactivePool(newPool)
   } else {
-    displayActivePool(poolParams, newPool, isUserFarming)
+    displayActivePool(poolParams, newPool)
   }
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
     const now = Date.now() / 1000
     const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
     refreshIntervalId = -1
-    if(isDateInRange) {
+    if(!dateInRangeHack && isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
-    pool.querySelector("#deleteme")?.addEventListener("click", resetMultiplePoolListener.bind(null, poolParams, newPool, refreshFunction.bind(null, poolParams, newPool), refreshIntervalId))
+    pool.querySelector("#deleteme")?.addEventListener("click", function() {
+      dateInRangeHack = true
+    })
   }
 
   pool.replaceWith(newPool)
+
+  const event = new Event('click')
+  qs(".activeFilterButton").dispatchEvent(event)
 }
 
 function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
@@ -1045,7 +1071,8 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   if(poolParams.resultParams.hasStakedTokens()){
     newPool.classList.add("your-farms")
   }
-  if(isDateInRange) {
+  console.log(dateInRangeHack)
+  if(!dateInRangeHack && isDateInRange) {
     newPool.classList.add("active-pool")
   } else {
     newPool.classList.add("inactive-pool")
@@ -1072,6 +1099,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     icon!.setAttribute("src", metaData.icon || "");
   });
 
+  addFilterClasses(poolParams, newPool)
   if (poolParams instanceof PoolParams) {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
@@ -1088,17 +1116,15 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
-  addFilterClasses(poolParams, newPool)
 
   newPool.querySelectorAll(".token-name").forEach(element => {
     element.innerHTML = poolParams.getPoolName()
   })
 
-  const isUserFarming = newPool.classList.contains("your-farms")
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool, isUserFarming)
+    displayInactivePool(newPool)
   } else {
-    await displayActivePool(poolParams, newPool, isUserFarming)
+    await displayActivePool(poolParams, newPool)
   }
   await addRewardTokenIcons(poolParams, newPool)
 
@@ -1113,7 +1139,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   newPool.querySelector(".deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
 }
 
-function displayInactivePool(newPool: HTMLElement, isUserFarming: boolean) {
+function displayInactivePool(newPool: HTMLElement) {
+  const isUserFarming = newPool.classList.contains("your-farms")
   if(isUserFarming) {
     toggleStakeUnstakeSection(newPool)
     setUnstakeTabListeners(newPool)
@@ -1148,7 +1175,7 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
-async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, isUserFarming: boolean) {
+async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
@@ -1180,6 +1207,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
     }
   }
 
+  const isUserFarming = newPool.classList.contains("your-farms")
   if(isUserFarming) {
     activateButtonContainer.classList.add("hidden")
     activateButton.setAttribute("disabled", "disabled")

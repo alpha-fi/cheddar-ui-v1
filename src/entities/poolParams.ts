@@ -258,58 +258,6 @@ export class PoolParams {
         }
     }
 
-    setTotalRewardsPerDay() {
-
-
-        /*** Workaround Free Community Farm pool ***/
-        let totalRewardsPerDay = 0n
-        let totalStaked = 0n
-
-       
-        totalRewardsPerDay = BigInt(this.contractParams.farming_rate) * BigInt(60 * 24)
-        totalStaked = BigInt(this.contractParams.total_staked)
-        
-        //  QUESTION What is this for? (Used to be an else)
-        // else {
-        //     totalRewardsPerDay = BigInt(this.contractParams.rewards_per_day)
-        //     totalStaked = BigInt(this.contractParams.total_stake)
-        // }
-
-        // const staked = this.resultParams.staked
-
-
-        if(totalStaked > BigInt(0)) {
-
-            /*** Workaround Free Community Farm pool ***/
-
-            if(this.contractParams.farming_rate) {
-
-                /** TODO - Rewrite  **/
-                // QUESTION How to rewrite? So it doesn't throw any errors?
-                // let rewardsPerDay = BigInt(yton(totalRewardsPerDay)) * (BigInt(convertToDecimals(staked, this.metaData.decimals, 10)) / BigInt(convertToDecimals(totalStaked, this.metaData.decimals, 10)))
-                
-                // this.resultParams.real_rewards_per_day = BigInt(convertToBase(rewardsPerDay.toString(), "24"))
-
-                // console.log("Total Rewards Per Day ", yton(totalRewardsPerDay))
-                // console.log("Staked: ", convertToDecimals(staked, this.metaData.decimals, 10))
-                // console.log("Total Staked: ", convertToDecimals(totalStaked, this.metaData.decimals, 10))
-                // console.log("Fraction of Stake ", convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10))
-                // console.log("Rewards Per Day ", yton(totalRewardsPerDay) * (convertToDecimals(staked, this.metaData.decimals, 10) / convertToDecimals(totalStaked, this.metaData.decimals, 10)))
-            } else if(this.contractParams.farm_token_rates) {
-                /** TODO - Implement **/
-            } else {
-                this.resultParams.real_rewards_per_day = totalRewardsPerDay
-            }
-
-        } else {
-            // I think in this case, the real_rewards_per_day should be 0, since there is nothing in the pool,
-            // there is no reward for anyone.
-            this.resultParams.real_rewards_per_day = totalRewardsPerDay
-        }
-
-        this.resultParams.previous_timestamp = Date.now()
-    }
-
     setStatus(accountInfo: [string, string, string]) {
         this.resultParams.staked = BigInt(accountInfo[0]);
         this.resultParams.real = BigInt(accountInfo[1])
