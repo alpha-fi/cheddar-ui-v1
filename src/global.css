@@ -1284,17 +1284,37 @@ input:checked + .slider:before {
   border-radius: 12px;
 }
 
-#contrat-period-container {
+#contract-period-container {
   margin: 9px;
   font-size: 11px;
   font-weight: 700;
   color: black;
 }
 
+.date-in-range-indicator {
+  height: 20px;
+  aspect-ratio: 1;
+  position: absolute;
+  transform: translate(10px, -5px);
+}
+
+.onDate {
+  fill: rgb(151, 186, 16);
+}
+
+.offDate {
+  fill: rgb(255, 52, 52);
+}
+
+.poolOffDate {
+  opacity: 0.5;
+}
+
 .new-pool-header {
   display: flex;
   justify-content: space-between;
   padding: 14px 0 8px 0;
+  align-items: center;
 }
 
 .token-logo-container {
@@ -1303,7 +1323,6 @@ input:checked + .slider:before {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  align-items: flex-start;
   align-content: center;
   justify-content: flex-start;
 }
@@ -1379,7 +1398,7 @@ input:checked + .slider:before {
 #token-name-container .token-name {
   text-align: center;
   position: absolute;
-  transform: translateX(calc(-50% - 15px));
+  transform: translate(calc(-50% - 15px), -9px);
 }
 
 #token-pool-stats {
@@ -1581,7 +1600,7 @@ button.activate {
 
 .input-container .token-logo, .input-container .token-logo-svg-container svg {
   height: 40px;
-  padding-right: 10px;
+  margin-right: 10px;
   background-color: var(--shadow);
   border-radius: 50%;
 }

@@ -601,6 +601,38 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
 
 let dateInRangeHack = false
 
+function setDateInRangeVisualIndication(newPool: HTMLElement, isDateInRange: boolean) {
+  let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
+  let elementsToAplyOpacity = [
+    "#contract-period-container",
+    ".new-pool-header",
+    "#token-pool-stats .new-pool-header",
+    "#token-pool-stats .first-token",
+    "#token-pool-stats .token-stats",
+    ".total-staked",
+    ".total-staked-value-usd",
+    ".total-farmed",
+    ".total-farmed-value-usd",
+    ".rewards-per-day",
+    ".rewards-per-day-value-usd",
+    ".reward-tokens",
+    ".reward-tokens-value-usd"
+  ]
+  if(isDateInRange) {
+    dateInRangeIndicator.classList.remove("offDate")
+    dateInRangeIndicator.classList.add("onDate")
+    elementsToAplyOpacity.forEach(element => {
+      newPool.querySelector(element)?.classList.remove("poolOffDate")
+    });
+  } else {
+    dateInRangeIndicator.classList.remove("onDate")
+    dateInRangeIndicator.classList.add("offDate")
+    elementsToAplyOpacity.forEach(element => {
+      newPool.querySelector(element)?.classList.add("poolOffDate")
+    });
+  }
+}
+
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
 
@@ -625,10 +657,11 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  if(!isDateInRange) {
+  if(!isDateInRange) {    
     resetSinglePoolListener(poolParams, newPool, refreshPoolInfoSingle, -1)
   }
-  
+
+  setDateInRangeVisualIndication(newPool, isDateInRange)
 }
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
@@ -648,6 +681,8 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   if(dateInRangeHack || !isDateInRange) {
     resetMultiplePoolListener(poolParams, newPool, refreshPoolInfoMultiple, -1)
   }
+
+  setDateInRangeVisualIndication(newPool, isDateInRange)
 }
 
 function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
@@ -1085,14 +1120,15 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
 
-  var newPool = genericPoolElement.cloneNode(true) as HTMLElement;  
-  
+  var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
 
+  
+  
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
   newPool.classList.add("pool-container")
-
-
+  
+  
   let iconElem = newPool.querySelectorAll("#token-logo-container img")
   
   iconElem.forEach(icon => {
@@ -1107,7 +1143,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     multiplePoolParams = poolParams
     await addPoolMultiple(multiplePoolParams, newPool)
   }
-
+  
+  
   // New code
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
@@ -1127,13 +1164,17 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     await displayActivePool(poolParams, newPool)
   }
   await addRewardTokenIcons(poolParams, newPool)
-
+  
   await addTotalStakedDetail(poolParams, newPool)
   await addTotalFarmedDetail(poolParams, newPool)
   await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
-  await addUnclaimedRewardsDetail(poolParams, newPool)  
-
+  await addUnclaimedRewardsDetail(poolParams, newPool)
+  
+  let unixTimestamp = new Date().getTime() / 1000;
+  const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+  setDateInRangeVisualIndication(newPool, isDateInRange)
+  
   qs("#pool_list").append(newPool)
 
   newPool.querySelector(".deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"

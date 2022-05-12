@@ -317,10 +317,13 @@
   <!-- Start generic pool container (NEW) -->
   <div id="generic-pool-container" class="hidden">
     <button id="deleteme">Test</button>
-    <div id="contrat-period-container">
+    <div id="contract-period-container">
       <span id="contract-start">{Contract start date}</span>
       <span>-</span>
       <span id="contract-end">{Contract end date}</span>
+      <svg class="date-in-range-indicator">
+        <circle cx="10" cy="10" r="10"/>
+      </svg>
     </div>
     <div id="pool-container">
       <!-- Info auto generated here -->
@@ -377,7 +380,7 @@
             </li>
             <hr>
             <li class="reward-tokens-container">
-              <span>Reward tokens</span>
+              <span class="reward-tokens">Reward tokens</span>
               <div class="reward-tokens-value-usd" style="display: inline-block;">
                 <!-- Reward tokens value gets filled programmatically -->
               </div>
