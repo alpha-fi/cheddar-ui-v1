@@ -1318,7 +1318,7 @@ input:checked + .slider:before {
 }
 
 .token-logo-container {
-  max-width: 40%;
+  max-width: 35%;
   height: 50px;
   display: flex;
   flex-direction: row;
@@ -1358,25 +1358,29 @@ input:checked + .slider:before {
   z-index: 24;
 }
 
-.token-pool-stats .logo-2 {
+#token-pool-stats .logo-2 {
   z-index: 31;
 }
 
-.token-pool-stats .logo-3 {
+#token-pool-stats .logo-3 {
   z-index: 32;
 }
 
-.token-pool-stats .logo-4 {
+#token-pool-stats .logo-4 {
   z-index: 33;
 }
 
-.token-pool-stats .logo-5 {
+#token-pool-stats .logo-5 {
   z-index: 34;
 }
 
-.token-pool-stats .logo-6 {
+#token-pool-stats .logo-6 {
   z-index: 35;
 }
+
+/* #token-pool-stats .token-name {
+  width: 55%;
+} */
 
 .token-stats {
   margin: 3px;
@@ -1389,16 +1393,16 @@ input:checked + .slider:before {
   cursor: pointer;
 }
 
-#token-name-container {
+.token-name-container {
   font-size: 16px;
   font-weight: 700;
   line-height: 19px;
+  width: 55%;
 }
 
-#token-name-container .token-name {
+.token-name-container .token-name {
   text-align: center;
-  position: absolute;
-  transform: translate(calc(-50% - 15px), -9px);
+  transform: translateX(calc(-10%));
 }
 
 #token-pool-stats {
