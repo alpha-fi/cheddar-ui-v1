@@ -1219,7 +1219,7 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
 async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
-  let harvestButton = newPool.querySelector("#harvest-button") as HTMLElement
+  let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
   let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
 
   if(isAccountRegistered) {
@@ -1252,7 +1252,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
   if(isUserFarming) {
     activateButtonContainer.classList.add("hidden")
     activateButton.setAttribute("disabled", "disabled")
-    harvestButton.classList.remove("hidden")
+    harvestSection.classList.remove("hidden")
   }
 }
 
