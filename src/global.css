@@ -66,7 +66,6 @@ html {
 
 body {
   line-height: 1;
-  margin: 0;
 }
 
 header {
@@ -213,7 +212,7 @@ header nav a {
   vertical-align: baseline;
 } */
 
-#home-connected {
+#home-connected, #nft-pools-section {
   margin: 2rem;
 }
 
@@ -225,7 +224,6 @@ header nav a {
   justify-items: start;
   grid-template-columns: repeat(3, 1fr);
 }
-
 .grid > div {
   background-color: var(--second-new-grey);
   display: flex;
@@ -233,6 +231,9 @@ header nav a {
   justify-items: start;
   flex-direction: column;
   justify-content: center;
+}
+
+.grid > div, .nft-card div {
   width: 90%;
   max-width: 500px;
 }
@@ -1128,7 +1129,7 @@ input:checked + .slider:before {
 
 @media (max-width: 1000px) {
 
-  #home-connected {
+  #home-connected, #nft-pools-section {
     margin: 1rem;
   }
   
@@ -1171,7 +1172,7 @@ input:checked + .slider:before {
     font-size: 20px;
   }
 
-  #home-connected {
+  #home-connected, #nft-pools-section {
     margin: 0.25rem;
   }
 
@@ -1187,7 +1188,7 @@ input:checked + .slider:before {
     margin-left: 0!important;
   }
 
-  .grid > div {
+  .grid > div, .nft-card div {
     max-width: 315px;
   }
 
@@ -1230,8 +1231,7 @@ input:checked + .slider:before {
   align-items: stretch;
 }
 
-.pool-container {
-  width: 30%;
+.pool-container, .nft-card {
   min-width: 350px;
   height: max-content;
   border-width: 12px;
@@ -1451,7 +1451,7 @@ input:checked + .slider:before {
   align-content: space-between;
 }
 
-.main-contract-information {
+.main-contract-information, .nft-basic-info-and-interaction {
   width: 100%;
   font-weight: 600;
   font-size: 14px;
@@ -1462,9 +1462,10 @@ input:checked + .slider:before {
   height: 100%;
 }
 
-.main-contract-information li {
+.main-contract-information li, .nft-basic-info-and-interaction div {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .total-farmed-info-container {
@@ -1525,10 +1526,13 @@ button.activate {
 }
 
 #harvest-button, #stake-button, #unstake-button, .activate {
+  margin: 0 25%;
+}
+
+#harvest-button, #stake-button, #unstake-button, .activate, .nft-actions-container .button {
     background-color: var(--primary);
     color: var(--white);
     height: 36px;
-    margin: 0 25%;
     border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 4px;
 }
@@ -1640,4 +1644,24 @@ button.activate {
 
 .available-info>* {
   margin: 10px;
+}
+
+/* NFT section styles */
+.generic-nft-card, .nft-card {
+  background-color: var(--second-new-grey);
+  border-radius: 8px;
+}
+
+.nft-presentation, .nft-basic-info-and-interaction {
+  background-color: var(--bg);
+  margin: 12px;
+  border-radius: 4px;
+}
+
+.nft-img-container > * {
+  width: 376px;
+}
+
+.nft-actions-container {
+  display: flex;
 }

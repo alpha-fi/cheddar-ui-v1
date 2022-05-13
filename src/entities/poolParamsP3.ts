@@ -252,7 +252,7 @@ export class PoolParamsP3 {
             tokenName: contractData.metaData.name ? contractData.metaData.name : "NoName"
         }
     }
-    // ACA
+    
     getStakedTokenIconData(): TokenIconData[] {
         let dataArray: TokenIconData[] = []
         for(let i = 0; i < this.stakeTokenContractList.length; i++) {
