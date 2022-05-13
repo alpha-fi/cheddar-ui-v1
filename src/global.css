@@ -887,7 +887,7 @@ li {
 
 .harvest-section {
   display: flex;
-  transform: translateX(22px);
+  transform: translateX(35px);
 }
 
 .main-contract-footer {
@@ -901,6 +901,7 @@ li {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  margin-left: 26px;
 }
 
 .main-contract-footer p {
@@ -1578,6 +1579,14 @@ button.activate {
   margin: 0 auto;
   width: max-content;
   padding: 3px;
+}
+
+.expand-button {
+  transition: all 0.5s linear;
+}
+
+.flipped {
+  transform: rotate(180deg);
 }
 
 #expanding-indicators img {

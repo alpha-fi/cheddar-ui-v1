@@ -962,10 +962,9 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
 async function toggleExpandStakeUnstakeSection (newPool: HTMLElement, elemWithListener: HTMLElement){
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
-  let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
+  // let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   let stakingUnstakingContainer = newPool.querySelector("#activated")! as HTMLElement;
-  elemWithListener.addEventListener("click", toggleActions(expandPoolButton));
-  elemWithListener.addEventListener("click", toggleActions(hidePoolButton));
+  elemWithListener.addEventListener("click", flipElement(expandPoolButton));
   elemWithListener.addEventListener("click", toggleActions(stakingUnstakingContainer));
 }
 
@@ -1611,6 +1610,19 @@ function toggleActions(elementToShow: HTMLElement) {
     if (!tagsToIgnore.includes(tagName) || element.classList.contains("toggle-display")) {
       elementToShow.classList.toggle("hidden")
     }    
+  }
+}
+
+function flipElement(elementToFlip: HTMLElement) {
+  return function (event: Event){
+    event.preventDefault();
+    let element = event.target as HTMLElement
+    const tagName = element.tagName.toLowerCase()
+    const tagsToIgnore = ["button", "input", "span", "img"]
+
+    if (!tagsToIgnore.includes(tagName) || element.classList.contains("toggle-display")) {
+      elementToFlip.classList.toggle("flipped")
+    }
   }
 }
 
