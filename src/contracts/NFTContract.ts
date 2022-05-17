@@ -4,6 +4,7 @@ import * as nearAPI from "near-api-js"
 
 import {ntoy, TGas} from "../util/conversions"
 import { BN } from "bn.js";
+import { NFT } from "./nft-structs";
 
 type U128String = string;
 type U64String = string;
@@ -20,7 +21,7 @@ export class NFTContract extends SmartContract {
         return this.call("nft_transfer_call",{receiver_id:receiver_id, token_id:token_id, msg:"to boost"},TGas(200),"1"); //one-yocto attached
     }
 
-    async nft_tokens_for_owner(accountId:string) : Promise<U128String> {
+    async nft_tokens_for_owner(accountId:string) : Promise<NFT[]> {
         return this.view("nft_tokens_for_owner", {account_id: accountId})
     }
 

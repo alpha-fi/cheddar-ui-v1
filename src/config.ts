@@ -31,6 +31,7 @@ type GetConfigResult = {
 }
 
 type GetConfigResults = {
+  nftContractAddress: string
   farms: Array<GetConfigResult>;
 }
 
@@ -40,6 +41,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'production':
   case 'mainnet':
     return {
+      nftContractAddress: "",
       "farms": [
         {
           index: 0,
@@ -166,6 +168,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'development':
   case 'testnet':
     return {
+      nftContractAddress: "nft.cheddar.testnet",
       "farms": [
         {
           index: 0,

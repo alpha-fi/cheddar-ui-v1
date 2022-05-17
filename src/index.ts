@@ -26,6 +26,7 @@ import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams } from './contracts/contract-structs';
 import { P3ContractParams } from './contracts/p3-structures';
+import { nftBaseUrl } from './contracts/NFTContract';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -867,6 +868,10 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
     dateInRangeHack = true
   })
 
+  //Info to transfer so we can check what pool is loading the NFTs
+  let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
+  boostButton.addEventListener("click", showNFTGrid(poolParams))
+
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
   standardHoverToDisplayExtraInfo(newPool, "total-farmed")
@@ -988,13 +993,10 @@ function hideAllDynamicElements(newPool: HTMLElement) {
 function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
-  let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
+  
   infoIcon.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
-
-  //Info to transfer so we can check what pool is loading the NFTs
-  boostButton.addEventListener("click", showNFTGrid(poolParams.contractParams))
 
   const isUserFarming = newPool.classList.contains("your-farms")
   if(isUserFarming) { // Displays staking/unstaking when hovering on the pool
@@ -1680,24 +1682,36 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
   }
 }
 
-function showNFTGrid(contractParams: ContractParams|P3ContractParams) {
+function showNFTGrid(poolParams: PoolParamsP3) {
   return function () {
-    loadNFTs(contractParams) //DUDA esto debería ser async, ¿no?
+    loadNFTs(poolParams) //DUDA esto debería ser async, ¿no?
     qs("#nft-pools-section").classList.remove("hidden")
   }
 }
 
-function loadNFTs(contractParams: ContractParams|P3ContractParams) {
+async function loadNFTs(poolParams: PoolParamsP3) {
   const genericNFTCard = qs(".generic-nft-card")
   const NFTContainer = qs(".nft-grid") as HTMLElement
-
-  let nftCollection = ["168", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158"]
+  NFTContainer.innerHTML = ""
+  const accountId = poolParams.wallet.getAccountId()
+  const nftContract = poolParams.nftContract
+  let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
+  console.log("Collection", nftCollection.length)
+  // let nftCollection = ["168", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158"]
 
   nftCollection.forEach(nft => {
     const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
-
-    //TODO Dani. Here is where you should load the NFTs cards info (I think)
     
+    //TODO Dani. Here is where you should load the NFTs cards info (I think)
+    newNFTCard.querySelectorAll(".nft-name").forEach(elem => {
+      elem.innerHTML = nft.token_id
+    })
+
+    let imgElement = newNFTCard.querySelector(".nft-img-container img")
+    imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
+    imgElement!.setAttribute("alt", nft.metadata.media)
+
+
     NFTContainer.append(newNFTCard)    
     toggleGenericClass(newNFTCard)
   });

@@ -4,12 +4,9 @@ import { RefTokenData } from "../entities/refResponse";
 let tokenArray: RefTokenData[]
 
 async function setAllTokensData(): Promise<void> {
-    
     const url = "https://api.stats.ref.finance/api/top-tokens"
     const response = await fetch(url)
-    console.log(response)
     const json = await response.json()
-    console.log(json)
     tokenArray = json
 }
 

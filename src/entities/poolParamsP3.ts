@@ -1,5 +1,6 @@
 import { ContractParams } from "../contracts/contract-structs";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
+import { NFTContract } from "../contracts/NFTContract";
 import { StakingPoolP3 } from "../contracts/p3-staking";
 import { P3ContractParams, Status } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
@@ -76,7 +77,9 @@ export class PoolParamsP3 {
     farmTokenContractList: ContractData[] = [];
     metaData2: FungibleTokenMetadata;
 
-    constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, wallet: WalletInterface) {
+    nftContract: NFTContract
+
+    constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, nftContract: string, wallet: WalletInterface) {
         this.wallet = wallet
         this.index = index;
         this.type = type;
@@ -88,9 +91,11 @@ export class PoolParamsP3 {
         // this.resultParams = new PoolResultParams();
         this.stakingContractMetaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
+        this.nftContract = new NFTContract(nftContract)
 
         this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
+        this.nftContract.wallet = wallet
         // this.tokenContract.wallet = wallet;
     }
 
