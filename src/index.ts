@@ -894,6 +894,10 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
   }
 
+  //Show boost button patch (since simple pools will disapear and they have problems with the boost button)
+  newPool.querySelector(".boost-button")!.classList.remove("hidden")
+  newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
+
   const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
 
   newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards

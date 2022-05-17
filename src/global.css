@@ -216,10 +216,14 @@ header nav a {
   margin: 2rem;
 }
 
+.nft-img-container > * {
+  width: 100%;
+}
+
 .grid {
   display: grid;
   align-items: center;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  /* grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); */
   grid-gap: 1rem;
   justify-items: start;
   grid-template-columns: repeat(3, 1fr);
@@ -893,7 +897,7 @@ li {
   justify-content: space-between;
 }
 
-.equal-width-than-boost-button {
+.equal-witdh-than-boost-button-container, .structural-in-simple-pools {
   width: 45.313px;
 }
 
@@ -1147,7 +1151,7 @@ input:checked + .slider:before {
 
 }
 
-@media (max-width: 1000px) {
+@media screen and (max-width: 1000px) {
 
   #home-connected, #nft-pools-section {
     margin: 1rem;
@@ -1157,6 +1161,14 @@ input:checked + .slider:before {
     margin-left: 0.2rem;
   }
 
+  #nft-pools-section {
+    left: -13px !important;
+    top: -26px !important;
+  }
+
+  .nft-grid {
+    margin: 35px !important;
+  }
 }
 
 .tools {
@@ -1506,7 +1518,7 @@ h2.nft-name {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(19vw, -100%);
+  transform: translate(calc(19vw + 10%), -64%);
   background-color: var(--white);
   align-items: center;
   justify-content: center;
@@ -1690,12 +1702,13 @@ button.activate {
 /* NFT section styles */
 #nft-pools-section {
   background-color: #ffffffad;
-  position: absolute;
+  position: fixed;
   left: -25px;
   top: -27px;
-  height: 100vh;
+  height: 102vh;
   width: 100vw;
   overflow: scroll;
+  z-index: 100;
 }
 
 .nft-grid {
@@ -1724,4 +1737,16 @@ button.activate {
 
 .nft-actions-container button.button {
   min-width: 45%;
+}
+
+@media screen and (max-width: 1450px) and (min-width: 751px) {
+  .grid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 750px) {
+  .grid{
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
