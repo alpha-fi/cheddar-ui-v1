@@ -209,6 +209,7 @@ header nav a {
 .grid {
   display: grid;
   align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   grid-gap: 1rem;
   justify-items: start;
   grid-template-columns: repeat(3, 1fr);
@@ -883,7 +884,7 @@ li {
 }
 
 .equal-width-than-boost-button, .structural-in-simple-pools {
-  width: 45.313px;
+  width: 62.531px;
 }
 
 .empty {
@@ -904,6 +905,7 @@ li {
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 62.531px;
 }
 
 .main-contract-footer p {
@@ -1253,6 +1255,7 @@ input:checked + .slider:before {
 #home-connected #pool_list {
   justify-content: space-between;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
 .pool-container, .nft-card {
@@ -1727,8 +1730,14 @@ button.activate {
   display: flex;
 }
 
+.structural-container-nft-actions {
+  width: 10%;
+  height: 34px;
+}
+
 .nft-actions-container button.button {
   min-width: 45%;
+  height: 34px;
 }
 
 @media screen and (max-width: 1450px) and (min-width: 751px) {
@@ -1737,8 +1746,30 @@ button.activate {
   }
 }
 
+@media screen and (max-width: 1450px) and (min-width: 1175px) {
+  #token-pool-stats{
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 1174px) and (min-width: 751px) {
+  #token-pool-stats{
+    width: 41vw;
+  }
+}
+
 @media screen and (max-width: 750px) {
   .grid{
     grid-template-columns: repeat(1, 1fr);
+  }
+
+  #token-pool-stats{
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 581px) {
+  #token-pool-stats{
+    width: 81vw;    
   }
 }
