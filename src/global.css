@@ -84,17 +84,6 @@ h1 {
   color      : #272D36;
 }
 
-/* h2 {
-  font-weight  : 600;
-  font-size    : 20px;
-  line-height  : 20px; */
-  /* identical to box height, or 109% */
-  /* color        : #fd941f;
-  text-align   : center;
-  margin-top   : 0px;
-  margin-bottom: 15px;
-} */
-
 h2 img {
   vertical-align : middle;
   box-shadow     : rgb(0 0 0 / 19%) 0px 2px 14px;
@@ -188,9 +177,6 @@ a.selected {
 
 header nav a {
   flex         : 0 1 auto;
-  padding-left : 1em;
-  padding-right: 1em;
-  font-size    : 14px;
 }
 
 .navButton {
@@ -223,7 +209,6 @@ header nav a {
 .grid {
   display: grid;
   align-items: center;
-  /* grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); */
   grid-gap: 1rem;
   justify-items: start;
   grid-template-columns: repeat(3, 1fr);
@@ -1260,7 +1245,6 @@ input:checked + .slider:before {
 #home-connected #pool_list {
   justify-content: space-between;
   flex-wrap: wrap;
-  align-items: stretch;
 }
 
 .pool-container, .nft-card {

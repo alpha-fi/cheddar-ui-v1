@@ -1123,7 +1123,6 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   if(poolParams.resultParams.hasStakedTokens()){
     newPool.classList.add("your-farms")
   }
-  console.log(dateInRangeHack)
   if(!dateInRangeHack && isDateInRange) {
     newPool.classList.add("active-pool")
   } else {
