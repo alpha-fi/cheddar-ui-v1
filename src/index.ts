@@ -25,8 +25,9 @@ import * as nearAPI from "near-api-js"
 import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams } from './contracts/contract-structs';
-import { P3ContractParams } from './contracts/p3-structures';
+import { P3ContractParams, Status } from './contracts/p3-structures';
 import { nftBaseUrl } from './contracts/NFTContract';
+import { newNFT, NFT } from './contracts/nft-structs';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -516,6 +517,7 @@ function takeUserAmountFromHome(): string {
 
 // Display the signed-out-flow container
 async function signedOutFlow() {
+  signedInFlow(disconnectedWallet)
   showSection("#home")
   // await refreshAccountInfo();
 }
@@ -528,7 +530,11 @@ async function signedInFlow(wallet: WalletInterface) {
   const poolList = await getPoolList(wallet);
   await addPoolList(poolList)
   // await refreshAccountInfoGeneric(poolList)
-  qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
+  if(wallet == disconnectedWallet) {
+
+  } else {
+    qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
+  }
   setDefaultFilter()
 }
 
@@ -1541,11 +1547,15 @@ window.onload = async function () {
       } else if(method == "unstake"){
         // @ts-ignore
         await unstakeResult(args)
+      } else if(method == "nft_transfer_call"){
+        showSuccess("NFT staked successfully", "Stake NFT")
+        // @ts-ignore
+        // await nftStakeResult(args)
       }
     }
     else {
       //not signed-in 
-      // await signedOutFlow() //show home-not-connected -> select wallet page
+      await signedOutFlow() //show home-not-connected -> select wallet page
     }
   }
   catch (ex) {
@@ -1694,17 +1704,27 @@ function showNFTGrid(poolParams: PoolParamsP3) {
 }
 
 async function loadNFTs(poolParams: PoolParamsP3) {
-  const genericNFTCard = qs(".generic-nft-card")
   const NFTContainer = qs(".nft-grid") as HTMLElement
   NFTContainer.innerHTML = ""
+  
   const accountId = poolParams.wallet.getAccountId()
   const nftContract = poolParams.nftContract
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
-  console.log("Collection", nftCollection.length)
-  // let nftCollection = ["168", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158"]
+
+  let userStatus: Status = await poolParams.stakingContract.status(accountId)
+  if(userStatus.cheddy_nft != '') {
+    const stakedNft = newNFT(userStatus.cheddy_nft)
+    addNFT(poolParams, NFTContainer, stakedNft, true)
+  }
 
   nftCollection.forEach(nft => {
-    const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
+    addNFT(poolParams, NFTContainer, nft)
+  });
+}
+
+function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, staked: boolean = false) {
+  const genericNFTCard = qs(".generic-nft-card")
+  const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
     
     //TODO Dani. Here is where you should load the NFTs cards info (I think)
     newNFTCard.querySelectorAll(".nft-name").forEach(elem => {
@@ -1715,10 +1735,101 @@ async function loadNFTs(poolParams: PoolParamsP3) {
     imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
     imgElement!.setAttribute("alt", nft.metadata.media)
 
+    if(staked) {
+      let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
+      unstakeButton!.removeAttribute("disabled")
+      unstakeButton?.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+    } else {
+      let stakeButton = newNFTCard.querySelector(".stake-nft-button")
+      stakeButton!.removeAttribute("disabled")
+      stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+    }
 
-    NFTContainer.append(newNFTCard)    
+    container.append(newNFTCard)    
     toggleGenericClass(newNFTCard)
-  });
+}
+
+// event?.preventDefault()
+//     showWait("Staking...")
+    
+//     // let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
+//     let inputArray: HTMLInputElement[] = []
+
+//     try {
+//       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+//       const contractParams = poolParams.contractParams
+//       const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+//       if (!isDateInRange) throw Error("Pools is Closed.")
+      
+//       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: stakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "stake")
+//       inputArray = htmlInputArray
+      
+//       qsaAttribute("input", "disabled", "disabled")
+
+//       //get amount
+//       const min_deposit_amount = 1;
+            
+//       await poolParams.stake(amountValues)
+//       if (loggedWithNarwallets) {
+//         //clear form
+//         for(let i = 0; i < inputArray.length; i++) {
+//           inputArray[i].value = ""  
+//         }
+        
+//         poolParams.resultParams.addStaked(amountValues)
+
+//         showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
+//       }
+
+//     }
+//     catch (ex) {
+//       showErr(ex as Error)
+//     }
+//     // re-enable the form, whether the call succeeded or failed
+//     inputArray.forEach(input => {
+//       input.removeAttribute("disabled")
+//     });
+//   }
+
+function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
+  return async function(event: Event) {
+    try {
+      event.preventDefault()
+      showWait("Staking NFT...")
+
+      const tokenId = card.querySelector(".nft-name")!.innerHTML
+      const response = await poolParams.nftContract.nft_transfer_call(poolParams.stakingContract.contractId, tokenId)
+      showSuccess("NFT staked successfully")
+      card.querySelector(".stake-nft-button")!.setAttribute("disabled", "disabled")
+
+      let unstakeButton = card.querySelector(".unstake-nft-button")!
+      unstakeButton.removeAttribute("disabled")
+      unstakeButton.addEventListener("click", unstakeNFT(poolParams, card))
+    } catch(err) {
+      showErr(err as Error)
+    }
+  }
+}
+
+function unstakeNFT(poolParams: PoolParamsP3, card: HTMLElement) {
+  return async function (event: Event) {
+    try {
+      event.preventDefault()
+      showWait("Unstaking NFT...")
+
+      const response = await poolParams.stakingContract.withdraw_nft(poolParams.wallet.getAccountId())
+      showSuccess("NFT unstaked successfully")
+      card.querySelector(".unstake-nft-button")!.setAttribute("disabled", "disabled")
+
+      let stakeButton = card.querySelector(".stake-nft-button")!
+      stakeButton.removeAttribute("disabled")
+      stakeButton.addEventListener("click", stakeNFT(poolParams, card))
+    } catch(err) {
+      showErr(err as Error)
+    }
+    
+
+  }
 }
 
 function quitNFTGrid() {  

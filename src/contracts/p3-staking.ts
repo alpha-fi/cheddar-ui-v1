@@ -46,6 +46,10 @@ export class StakingPoolP3 extends SmartContract {
         return this.call("ft_transfer_call", {}, TGas(25), amount)
     }
 
+    withdraw_nft(receiver_id:string):Promise<void>{
+        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"0"); //one-yocto attached
+    }
+
     async callMulipleTransactions(txPromiseArray: {
         promise: Promise<nearAPI.transactions.Action>,
         contractName: string
