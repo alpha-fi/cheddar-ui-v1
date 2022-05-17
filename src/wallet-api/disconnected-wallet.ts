@@ -2,7 +2,7 @@ import {WalletInterface} from "./wallet-interface"
 import {U64String,U128String} from "./util"
 import {BatchTransaction} from "./batch-transaction"
 
-const NOT_CONNECTED="not connected";
+const NOT_CONNECTED="Connect to NEAR";
 
 // -----------------------------
 // Default disconnected wallet

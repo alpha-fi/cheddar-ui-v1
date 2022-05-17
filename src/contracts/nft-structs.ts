@@ -19,3 +19,25 @@ export interface NFTMetadata {
     reference: string
     reference_hash: string|null
 }
+
+export function newNFT(tokenId: string): NFT {
+    return {
+        token_id: tokenId,
+        owner_id: "",
+        metadata: {
+            title: "",
+            description: "",
+            media: tokenId + ".png",
+            media_hash: "",
+            copies: null,
+            issued_at: "",
+            expires_at: "",
+            starts_at: "",
+            updated_at: "",
+            extra: "",
+            reference: "",
+            reference_hash: ""
+        },
+        approved_account_ids: {}
+    }
+}

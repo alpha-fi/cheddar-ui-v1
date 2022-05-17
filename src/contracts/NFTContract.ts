@@ -13,10 +13,6 @@ export const nftBaseUrl = "https://bafybeibghcllcmurku7lxyg4wgxn2zsu5qqk7h4r6bmy
 
 export class NFTContract extends SmartContract {
 
-    async withdraw_nft(receiver_id:string):Promise<void>{
-        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"1"); //one-yocto attached
-    }
-
     async nft_transfer_call(receiver_id:string, token_id:U128String):Promise<any>{
         return this.call("nft_transfer_call",{receiver_id:receiver_id, token_id:token_id, msg:"to boost"},TGas(200),"1"); //one-yocto attached
     }
