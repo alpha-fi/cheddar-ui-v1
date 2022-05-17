@@ -47,6 +47,6 @@ export interface WalletInterface {
 
     requestSignTransactions(transactions: Transaction[], callbackUrl?: string, meta?: string): Promise<void>
 
-    requestSignTransactions(options: RequestSignTransactionsOptions): Promise<void> //DUDA esto?
+    requestSignTransactions(options: RequestSignTransactionsOptions): Promise<void>
 
 }

@@ -371,7 +371,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
         //clear form
         stakeInput.value = ""
         poolParams.resultParams.addStaked(ntoy(stakeAmount))
-        refreshPoolInfo(poolParams, newPool)//DUDA esto no debería ser refreshPoolInfoSingle?
+        refreshPoolInfo(poolParams, newPool)//Question: shouldnt this be in refreshPoolInfo?
   
         showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakingContractMetaData.symbol)
       }
@@ -1520,7 +1520,7 @@ window.onload = async function () {
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
-      wallet = new NearWebWallet(nearWebWalletConnection);//DUDA esto vamos a tener que probar bien pero safa?
+      wallet = new NearWebWallet(nearWebWalletConnection);
       
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)
@@ -1719,7 +1719,7 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
 
 function showNFTGrid(poolParams: PoolParamsP3) {
   return function () {
-    loadNFTs(poolParams) //DUDA esto debería ser async, ¿no?
+    loadNFTs(poolParams)
     qs("#nft-pools-section").classList.remove("hidden")
   }
 }
@@ -1817,8 +1817,7 @@ function quitNFTGrid() {
   return function (event: Event){
     event.preventDefault();
     let element = event.target as HTMLElement
-
-    //DUDA está bien este filtro? (Igual ahora lo voy a probar pero dejo anotado por las dudas). La idea es que se dispare si clickeo fuera de las cards.
+    
     console.log("Id", element.getAttribute("id"))
     console.log("Classes", element.classList.toString())
     if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("nft-grid")) {
