@@ -8,6 +8,8 @@ import { BN } from "bn.js";
 type U128String = string;
 type U64String = string;
 
+export const nftBaseUrl = "https://bafybeibghcllcmurku7lxyg4wgxn2zsu5qqk7h4r6bmyhpztmyd564cx54.ipfs.nftstorage.link/"
+
 export class NFTContract extends SmartContract {
 
     async withdraw_nft(receiver_id:string):Promise<void>{

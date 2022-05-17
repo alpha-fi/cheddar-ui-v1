@@ -1691,9 +1691,9 @@ function loadNFTs(contractParams: ContractParams|P3ContractParams) {
   const genericNFTCard = qs(".generic-nft-card")
   const NFTContainer = qs(".nft-grid") as HTMLElement
 
-  let nftColection = []
+  let nftCollection = ["168", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158", "111", "158", "168", "111", "158", "168", "111", "158"]
 
-  nftColection.forEach(nft => {
+  nftCollection.forEach(nft => {
     const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
 
     //TODO Dani. Here is where you should load the NFTs cards info (I think)
@@ -1709,11 +1709,13 @@ function quitNFTGrid() {
     let element = event.target as HTMLElement
 
     //DUDA está bien este filtro? (Igual ahora lo voy a probar pero dejo anotado por las dudas). La idea es que se dispare si clickeo fuera de las cards.
-    if (!element.classList.contains("nft-card")) {
+    console.log("Id", element.getAttribute("id"))
+    console.log("Classes", element.classList.toString())
+    if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("nft-grid")) {
       qs(".nft-grid").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
     }
   }
 }
 
-qs("#nft-pools-section").addEventListener("click", quitNFTGrid)
+qs("#nft-pools-section").addEventListener("click", quitNFTGrid())
