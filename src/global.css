@@ -211,7 +211,7 @@ header nav a {
   align-items: center;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   grid-gap: 1rem;
-  justify-items: start;
+  justify-items: center;
   grid-template-columns: repeat(3, 1fr);
 }
 .grid > div {
