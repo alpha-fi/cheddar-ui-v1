@@ -28,6 +28,7 @@ export class PoolResultParams {
     previous_timestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
+    cheddy_nft: string = '';
 
     constructor(stakedTokensLength: number, farmedTokensLength: number) {
         this.staked = new Array(stakedTokensLength).fill("0")
@@ -159,6 +160,7 @@ export class PoolParamsP3 {
         this.resultParams.farmedUnits = accountInfo.farmed_units
         this.resultParams.farmed = accountInfo.farmed_tokens
         this.resultParams.previous_timestamp = accountInfo.timestamp
+        this.resultParams.cheddy_nft = accountInfo.cheddy_nft
         // Contract saves previous_timestamp in seconds
         this.resultParams.accName = accName
     }

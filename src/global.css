@@ -901,6 +901,14 @@ li {
   width: 45.313px;
 }
 
+.empty {
+  fill: none;
+}
+
+.full {
+  fill: #F9BA37
+}
+
 .main-contract-footer {
   width: 100%;
   justify-content: center;

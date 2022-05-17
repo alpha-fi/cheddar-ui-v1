@@ -84,6 +84,18 @@ qs('#logo').onclick =
     }
   }
 
+qs('#my-account').onclick =
+  async function (event) {
+    event.preventDefault()
+    if (wallet.isConnected()) {
+      console.log("Connected")
+      signedInFlow(wallet)
+    } else {
+      console.log("Disconnected")
+      loginNearWebWallet();
+    }
+  }
+
 //generic nav handler
 function navClickHandler_ConnectFirst(event: Event) {
   event.preventDefault()
@@ -93,7 +105,8 @@ function navClickHandler_ConnectFirst(event: Event) {
   }
   else {
     showSection("#home")
-    sayChoose()
+    loginNearWebWallet()
+    // sayChoose()
   }
 }
 
@@ -518,7 +531,7 @@ function takeUserAmountFromHome(): string {
 // Display the signed-out-flow container
 async function signedOutFlow() {
   signedInFlow(disconnectedWallet)
-  showSection("#home")
+  // showSection("#home")
   // await refreshAccountInfo();
 }
 
@@ -527,15 +540,17 @@ async function signedInFlow(wallet: WalletInterface) {
   showSection("#home-connected")
   selectNav("#home")
   takeUserAmountFromHome()
-  const poolList = await getPoolList(wallet);
-  await addPoolList(poolList)
   // await refreshAccountInfoGeneric(poolList)
-  if(wallet == disconnectedWallet) {
-
-  } else {
+  if(wallet.isConnected()) {
+    const poolList = await getPoolList(wallet);
+    await addPoolList(poolList)
     qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
+    setDefaultFilter()
+  } else {
+    // If user is disconnected it, account Id is the default disconnected message
+    qs(".user-info #account-id").innerText = wallet.getAccountId()
   }
-  setDefaultFilter()
+  qs(".loader").style.display = "none"
 }
 
 function setDefaultFilter (){
@@ -578,7 +593,7 @@ function loginNearWebWallet() {
   // This works by creating a new access key for the user's account and storing
   // the private key in localStorage.
   //save what the user typed before navigating out
-  localStorage.setItem("amount", qsi("#stake-form-not-connected input.near").value)
+  // localStorage.setItem("amount", qsi("#stake-form-not-connected input.near").value)
   nearWebWalletConnection.requestSignIn(nearConfig.farms[0].contractName)
 }
 
@@ -690,6 +705,8 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   if(dateInRangeHack || !isDateInRange) {
     resetMultiplePoolListener(poolParams, newPool, refreshPoolInfoMultiple, -1)
   }
+
+  setBoostDisplay(poolParams, newPool)
 
   setDateInRangeVisualIndication(newPool, isDateInRange)
 }
@@ -870,9 +887,6 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
   }
-  newPool.querySelector("#deleteme")?.addEventListener("click", function() {
-    dateInRangeHack = true
-  })
 
   //Info to transfer so we can check what pool is loading the NFTs
   let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
@@ -916,7 +930,21 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
 
+  setBoostDisplay(poolParams, newPool)
+
   addMultiplePoolListeners(poolParams, newPool)
+}
+
+function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  const hasNFTStaked = poolParams.resultParams.cheddy_nft != ''
+  console.log("NFT staked?", hasNFTStaked)
+  if(hasNFTStaked) {
+    newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
+    newPool.querySelector(".boost-button span")!.innerHTML = "BOOSTED"
+  } else {
+    newPool.querySelector(".boost-button svg")!.setAttribute("class", "empty")
+    newPool.querySelector(".boost-button span")!.innerHTML = "BOOST"
+  }
 }
 
 function addFocusClass(input:HTMLElement) {
@@ -1040,9 +1068,7 @@ function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
   }
-  newPool.querySelector("#deleteme")?.addEventListener("click", function() {
-    dateInRangeHack = true
-  })
+  
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
@@ -1071,9 +1097,7 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
     if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
-    pool.querySelector("#deleteme")?.addEventListener("click", function() {
-      dateInRangeHack = true
-    })
+    
   }
 
   pool.replaceWith(newPool)
@@ -1101,9 +1125,7 @@ function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, 
     if(!dateInRangeHack && isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
-    pool.querySelector("#deleteme")?.addEventListener("click", function() {
-      dateInRangeHack = true
-    })
+    
   }
 
   pool.replaceWith(newPool)
@@ -1459,7 +1481,7 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
     qs("#pool_list").innerHTML = "<h2 style='color: #8542EB;text-shadow: white 0px 1px 5px;margin-top:5rem;'>You have No Staked Pools.</h2>"
   }
 
-  qs(".loader").style.display = "none"
+  // qs(".loader").style.display = "none"
 
   isPaused = false;
 }
@@ -1712,17 +1734,18 @@ async function loadNFTs(poolParams: PoolParamsP3) {
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
 
   let userStatus: Status = await poolParams.stakingContract.status(accountId)
-  if(userStatus.cheddy_nft != '') {
+  const poolHasStaked = userStatus.cheddy_nft != ''
+  if(poolHasStaked) {
     const stakedNft = newNFT(userStatus.cheddy_nft)
-    addNFT(poolParams, NFTContainer, stakedNft, true)
+    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, true)
   }
 
   nftCollection.forEach(nft => {
-    addNFT(poolParams, NFTContainer, nft)
+    addNFT(poolParams, NFTContainer, nft, poolHasStaked)
   });
 }
 
-function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, staked: boolean = false) {
+function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, poolHasStaked: boolean, staked: boolean = false) {
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
     
@@ -1735,61 +1758,19 @@ function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, stak
     imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
     imgElement!.setAttribute("alt", nft.metadata.media)
 
+    let stakeButton = newNFTCard.querySelector(".stake-nft-button")
+    stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
     if(staked) {
       let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
-      unstakeButton!.removeAttribute("disabled")
+      unstakeButton!.classList.remove("hidden")
       unstakeButton?.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
-    } else {
-      let stakeButton = newNFTCard.querySelector(".stake-nft-button")
-      stakeButton!.removeAttribute("disabled")
-      stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+    } else if(!poolHasStaked) {
+      stakeButton!.classList.remove("hidden")
     }
 
     container.append(newNFTCard)    
     toggleGenericClass(newNFTCard)
 }
-
-// event?.preventDefault()
-//     showWait("Staking...")
-    
-//     // let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
-//     let inputArray: HTMLInputElement[] = []
-
-//     try {
-//       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-//       const contractParams = poolParams.contractParams
-//       const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-//       if (!isDateInRange) throw Error("Pools is Closed.")
-      
-//       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: stakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "stake")
-//       inputArray = htmlInputArray
-      
-//       qsaAttribute("input", "disabled", "disabled")
-
-//       //get amount
-//       const min_deposit_amount = 1;
-            
-//       await poolParams.stake(amountValues)
-//       if (loggedWithNarwallets) {
-//         //clear form
-//         for(let i = 0; i < inputArray.length; i++) {
-//           inputArray[i].value = ""  
-//         }
-        
-//         poolParams.resultParams.addStaked(amountValues)
-
-//         showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
-//       }
-
-//     }
-//     catch (ex) {
-//       showErr(ex as Error)
-//     }
-//     // re-enable the form, whether the call succeeded or failed
-//     inputArray.forEach(input => {
-//       input.removeAttribute("disabled")
-//     });
-//   }
 
 function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
   return async function(event: Event) {
@@ -1798,7 +1779,7 @@ function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
       showWait("Staking NFT...")
 
       const tokenId = card.querySelector(".nft-name")!.innerHTML
-      const response = await poolParams.nftContract.nft_transfer_call(poolParams.stakingContract.contractId, tokenId)
+      await poolParams.nftContract.nft_transfer_call(poolParams.stakingContract.contractId, tokenId)
       showSuccess("NFT staked successfully")
       card.querySelector(".stake-nft-button")!.setAttribute("disabled", "disabled")
 
@@ -1817,13 +1798,14 @@ function unstakeNFT(poolParams: PoolParamsP3, card: HTMLElement) {
       event.preventDefault()
       showWait("Unstaking NFT...")
 
-      const response = await poolParams.stakingContract.withdraw_nft(poolParams.wallet.getAccountId())
+      await poolParams.stakingContract.withdraw_nft(poolParams.wallet.getAccountId())
       showSuccess("NFT unstaked successfully")
-      card.querySelector(".unstake-nft-button")!.setAttribute("disabled", "disabled")
+      card.querySelector(".unstake-nft-button")!.classList.add("hidden")
 
-      let stakeButton = card.querySelector(".stake-nft-button")!
-      stakeButton.removeAttribute("disabled")
-      stakeButton.addEventListener("click", stakeNFT(poolParams, card))
+      qsa(".stake-nft-button").forEach(elem => elem.classList.remove("hidden"))
+      // let stakeButton = card.querySelector(".stake-nft-button")!
+      // stakeButton.removeAttribute("disabled")
+      // stakeButton.addEventListener("click", stakeNFT(poolParams, card))
     } catch(err) {
       showErr(err as Error)
     }
