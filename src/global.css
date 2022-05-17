@@ -887,12 +887,18 @@ li {
 
 .harvest-section {
   display: flex;
-  transform: translateX(35px);
+  flex-wrap: nowrap;
+  align-content: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.equal-width-than-boost-button {
+  width: 45.313px;
 }
 
 .main-contract-footer {
   width: 100%;
-  display: flex;
   justify-content: center;
 }
 
@@ -901,7 +907,6 @@ li {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-left: 26px;
 }
 
 .main-contract-footer p {
@@ -1683,6 +1688,20 @@ button.activate {
 }
 
 /* NFT section styles */
+#nft-pools-section {
+  background-color: #ffffffad;
+  position: absolute;
+  left: -25px;
+  top: -27px;
+  height: 100vh;
+  width: 100vw;
+  overflow: scroll;
+}
+
+.nft-grid {
+  margin: 100px;
+}
+
 .generic-nft-card, .nft-card {
   background-color: var(--second-new-grey);
   border-radius: 8px;

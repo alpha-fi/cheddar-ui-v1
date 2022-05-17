@@ -24,6 +24,8 @@ import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities
 import * as nearAPI from "near-api-js"
 import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
+import { ContractParams } from './contracts/contract-structs';
+import { P3ContractParams } from './contracts/p3-structures';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -986,9 +988,13 @@ function hideAllDynamicElements(newPool: HTMLElement) {
 function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
+  let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
   infoIcon.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
+
+  //Info to transfer so we can check what pool is loading the NFTs
+  boostButton.addEventListener("click", showNFTGrid(poolParams.contractParams))
 
   const isUserFarming = newPool.classList.contains("your-farms")
   if(isUserFarming) { // Displays staking/unstaking when hovering on the pool
@@ -1194,11 +1200,9 @@ function displayInactivePool(newPool: HTMLElement) {
 function toggleStakeUnstakeSection(newPool: HTMLElement) {
   let expandPoolButton = newPool.querySelector(".expand-button")! as HTMLElement;
   let poolContainer = newPool.querySelector("#pool-container")! as HTMLElement
-  let hidePoolButton = newPool.querySelector(".hide-button")! as HTMLElement;
   expandPoolButton.classList.remove("hidden")
   toggleExpandStakeUnstakeSection(newPool, poolContainer)
   toggleExpandStakeUnstakeSection(newPool, expandPoolButton)
-  toggleExpandStakeUnstakeSection(newPool, hidePoolButton)
 }
 
 function setUnstakeTabListeners(newPool: HTMLElement) {
@@ -1675,3 +1679,41 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
     elementToDisplayAsNotActive.classList.remove("active");
   }
 }
+
+function showNFTGrid(contractParams: ContractParams|P3ContractParams) {
+  return function () {
+    loadNFTs(contractParams) //DUDA esto debería ser async, ¿no?
+    qs("#nft-pools-section").classList.remove("hidden")
+  }
+}
+
+function loadNFTs(contractParams: ContractParams|P3ContractParams) {
+  const genericNFTCard = qs(".generic-nft-card")
+  const NFTContainer = qs(".nft-grid") as HTMLElement
+
+  let nftColection = []
+
+  nftColection.forEach(nft => {
+    const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
+
+    //TODO Dani. Here is where you should load the NFTs cards info (I think)
+    
+    NFTContainer.append(newNFTCard)    
+    toggleGenericClass(newNFTCard)
+  });
+}
+
+function quitNFTGrid() {  
+  return function (event: Event){
+    event.preventDefault();
+    let element = event.target as HTMLElement
+
+    //DUDA está bien este filtro? (Igual ahora lo voy a probar pero dejo anotado por las dudas). La idea es que se dispare si clickeo fuera de las cards.
+    if (!element.classList.contains("nft-card")) {
+      qs(".nft-grid").innerHTML = ""
+      qs("#nft-pools-section").classList.add("hidden")
+    }
+  }
+}
+
+qs("#nft-pools-section").addEventListener("click", quitNFTGrid)

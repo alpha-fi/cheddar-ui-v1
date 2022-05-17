@@ -403,6 +403,7 @@
         </div>
         <div class="main-contract-footer">
           <div class="dynamic-display-element harvest-section hidden">
+            <div class="equal-width-than-boost-button"><!-- Structural div. Do not delete --></div>
             <button class="button" id="harvest-button">HARVEST</button>
             <div class="boost-button">
               <img src="../src/assets/boost-icon.svg" alt="boost icon">
@@ -654,32 +655,33 @@
   </div>
 
 
-  <section id="nft-pools-section">
+  <section id="nft-pools-section" class="hidden">
     <!-- NFT farming -->
     <div class="nft-grid grid">
      <!-- This will be filled with users NFT cards -->
-     <!-- Start generic NFT card -->
-     <div class="nft-card">
-       <div class="nft-presentation">
-         <h2 class="nft-name">{NFT name}</h2>
-         <div class="nft-img-container">
-           <img src="#" alt="">
-         </div>
-       </div>
-       <div class="nft-basic-info-and-interaction">
-         <div class="nft-name-row">
-           <h3>NFT name</h3>
-           <span class="nft-name">{NFT name}</span>
-         </div>
-         <div class="nft-actions-container">
-           <button class="button unstake-nft-button">UNSTAKE</button>
-           <button class="button stake-nft-button">STAKE</button>
-         </div>
-       </div>
-     </div>
-     <!-- Ends generic NFT card -->
     </div>
   </section>
+
+  <!-- Start generic NFT card -->
+  <div class="generic-nft-card hidden">
+    <div class="nft-presentation">
+      <h2 class="nft-name">{NFT name}</h2>
+      <div class="nft-img-container">
+        <img src="#" alt="">
+      </div>
+    </div>
+    <div class="nft-basic-info-and-interaction">
+      <div class="nft-name-row">
+        <h3>NFT name</h3>
+        <span class="nft-name">{NFT name}</span>
+      </div>
+      <div class="nft-actions-container">
+        <button class="button unstake-nft-button">UNSTAKE</button>
+        <button class="button stake-nft-button">STAKE</button>
+      </div>
+    </div>
+  </div>
+  <!-- Ends generic NFT card -->
   
 </body>
 
