@@ -537,6 +537,7 @@ async function signedOutFlow() {
 
 // Displaying the signed in flow container and fill in account-specific data
 async function signedInFlow(wallet: WalletInterface) {
+  let startTime = Date.now()
   showSection("#home-connected")
   selectNav("#home")
   takeUserAmountFromHome()
@@ -937,7 +938,6 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
 function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
   const hasNFTStaked = poolParams.resultParams.cheddy_nft != ''
-  console.log("NFT staked?", hasNFTStaked)
   if(hasNFTStaked) {
     newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
     newPool.querySelector(".boost-button span")!.innerHTML = "BOOSTED"
@@ -1159,8 +1159,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   let multiplePoolParams: PoolParamsP3
 
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
-
-  
   
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
@@ -1554,7 +1552,17 @@ window.onload = async function () {
         }
         
         if (finalExecutionOutcome) {
-          const arg = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+          let arg = JSON.parse(atob(finalExecutionOutcome.transaction.actions[0].FunctionCall.args))
+          if(arg.token == undefined) {
+            const stakeContract = finalExecutionOutcome.transaction.receiver_id
+            for(let i = 0; i < nearConfig.farms.length; i++) {
+              const farmData = nearConfig.farms[i]
+              if(farmData.contractName == stakeContract) {
+                arg.token = farmData.tokenContractName
+                break
+              }
+            }
+          }
           args.push(arg)
         }
         
@@ -1572,7 +1580,10 @@ window.onload = async function () {
         showSuccess("NFT staked successfully", "Stake NFT")
         // @ts-ignore
         // await nftStakeResult(args)
+      } else {
+        console.log("Method", method)
       }
+
     }
     else {
       //not signed-in 
@@ -1637,7 +1648,7 @@ async function unstakeResult(argsArray: [{amount: string, token: string}]) {
     )
   }
   message += tokensUnstakedMessage.join(" - ")
-  showSuccess(message, "Stake")
+  showSuccess(message, "Unstake")
 }
 
 // NEW CODE

@@ -86,6 +86,8 @@ export class PoolParamsP3 {
         this.type = type;
         this.html = html;
         this.stakingContract = stakingContract;
+        this.stakingContract.wallet = wallet;
+
         this.contractParams = new P3ContractParams();
         this.cheddarContract= cheddarContract;
         // this.tokenContract = tokenContract;
@@ -94,7 +96,6 @@ export class PoolParamsP3 {
         this.metaData2 = {} as FungibleTokenMetadata;
         this.nftContract = new NFTContract(nftContract)
 
-        this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
         this.nftContract.wallet = wallet
         // this.tokenContract.wallet = wallet;
