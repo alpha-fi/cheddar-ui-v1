@@ -199,7 +199,7 @@ async function convertToUSDMultiple(tokenContractList: ContractData[], amountLis
     const metaData = tokenContract.metaData
     const symbol = metaData.symbol
     const unclaimedRewards = amountList[index]
-    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 7)
+    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 5)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
 
     amountInUsd += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
@@ -327,7 +327,7 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
 
     const stakeAmountBN: bigint = BigInt(convertToBase(amount.toString(), metaData.decimals.toString()))
     if(BigInt(boundary[i]) < stakeAmountBN) {
-      const balanceDisplayable = convertToDecimals(boundary[i], metaData.decimals, 7)
+      const balanceDisplayable = convertToDecimals(boundary[i], metaData.decimals, 5)
       throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to ${action}.`)
     }
     
@@ -537,7 +537,6 @@ async function signedOutFlow() {
 
 // Displaying the signed in flow container and fill in account-specific data
 async function signedInFlow(wallet: WalletInterface) {
-  let startTime = Date.now()
   showSection("#home-connected")
   selectNav("#home")
   takeUserAmountFromHome()
@@ -718,7 +717,7 @@ function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLE
     const input = inputArray[i]
     const tokenContractData: ContractData = poolParams.stakeTokenContractList[i]
     const balance = amounts[i]
-    const balanceDisplayable = convertToDecimals(balance, tokenContractData.metaData.decimals, 7)
+    const balanceDisplayable = convertToDecimals(balance, tokenContractData.metaData.decimals, 5)
     input.querySelector(".value")!.innerHTML = balanceDisplayable
 
     const maxButton = input.querySelector(".max-button") as HTMLElement
@@ -737,7 +736,7 @@ async function updateDetail(newPool: HTMLElement, contractList: ContractData[], 
   for(let i = 0; i < totalFarmedDetailsElements.length; i++) {
     const row = totalFarmedDetailsElements[i]
     const tokenMetadata = contractList[i].metaData
-    const content = convertToDecimals(totals[i], tokenMetadata.decimals, 7)
+    const content = convertToDecimals(totals[i], tokenMetadata.decimals, 5)
     row.querySelector(".content")!.innerHTML = content
   }
 }
@@ -994,11 +993,11 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
   }
 
   if(action == "stake") {
-    amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+    amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 5)
   } else if(action == "unstake") {
-    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 7)
+    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 5)
   }
-  const balanceDisplayable = convertToDecimals(contractData.balance, contractData.metaData.decimals, 7)
+  const balanceDisplayable = convertToDecimals(contractData.balance, contractData.metaData.decimals, 5)
   showOrHideMaxButton(Number(balanceDisplayable), maxButton)
 
 
@@ -1622,7 +1621,7 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
       // This if should never be true
       throw new Error("Error obtaining metadata on stake result")
     }
-    const amount = convertToDecimals(args.amount, metadata.decimals, 7)
+    const amount = convertToDecimals(args.amount, metadata.decimals, 5)
     tokensStakedMessage.push(
       `${amount} ${metadata.symbol}`
     )
@@ -1642,7 +1641,7 @@ async function unstakeResult(argsArray: [{amount: string, token: string}]) {
     contract.wallet = wallet
 
     const metaData = await contract.ft_metadata()
-    const amount = convertToDecimals(args.amount, metaData.decimals, 7)
+    const amount = convertToDecimals(args.amount, metaData.decimals, 5)
     tokensUnstakedMessage.push(
       `${amount} ${metaData.symbol}`
     )

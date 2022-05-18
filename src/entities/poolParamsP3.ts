@@ -220,7 +220,7 @@ export class PoolParamsP3 {
         for(let i = 0; i < this.stakeTokenContractList.length; i++) {
             const stakeTokenContract = this.stakeTokenContractList[i]
             const iconData = this.getIcon(stakeTokenContract)
-            const totalStaked = convertToDecimals(this.contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 7)
+            const totalStaked = convertToDecimals(this.contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -237,9 +237,9 @@ export class PoolParamsP3 {
             const iconData = this.getIcon(farmTokenContract)
             const tokenName = farmTokenContract.metaData.name
             const rewardsPerDayBN = BigInt(this.contractParams.farm_token_rates[i]) * 60n * 24n
-            const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 7)
-            const totalRewards = convertToDecimals(this.contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 7)
-            const userUnclaimedRewards = convertToDecimals(this.resultParams.farmed[i], farmTokenContract.metaData.decimals, 7)
+            const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 5)
+            const totalRewards = convertToDecimals(this.contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 5)
+            const userUnclaimedRewards = convertToDecimals(this.resultParams.farmed[i], farmTokenContract.metaData.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -307,7 +307,7 @@ export class PoolParamsP3 {
         for(let i = 0; i < iconDataArray.length; i++) {
             const iconData = iconDataArray[i]
             // TODO Fix when Henry answers how we should handle the unclaimed rewards
-            const amount = convertToDecimals(this.resultParams.farmed[i], this.farmTokenContractList[i].metaData.decimals, 7)
+            const amount = convertToDecimals(this.resultParams.farmed[i], this.farmTokenContractList[i].metaData.decimals, 5)
             dataArray.push({
                 amount: amount,
                 iconData: iconData
@@ -405,7 +405,7 @@ export class PoolParamsP3 {
         const available = await this.getWalletAvailable()
         const availableDisplayableArray = []
         for (let i = 0; i < available.length; i++) {
-            availableDisplayableArray.push(convertToDecimals(available[i], this.stakingContractMetaData.decimals, 7))    
+            availableDisplayableArray.push(convertToDecimals(available[i], this.stakingContractMetaData.decimals, 5))    
         }
         return availableDisplayableArray
     }
