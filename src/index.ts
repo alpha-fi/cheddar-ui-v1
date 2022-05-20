@@ -625,7 +625,7 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
 
 let dateInRangeHack = false
 
-function setDateInRangeVisualIndication(newPool: HTMLElement, isDateInRange: boolean) {
+function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
   let elementsToAplyOpacity = [
     "#contract-period-container",
@@ -642,6 +642,14 @@ function setDateInRangeVisualIndication(newPool: HTMLElement, isDateInRange: boo
     ".reward-tokens",
     ".reward-tokens-value-usd"
   ]
+  /*
+  let toHarvest = poolParams.resultParams.getCurrentCheddarRewards() //DUDA Cómo consigo este dato de manera standard? Si no me equivoco así se consigue en el simple pero no en el multiple.
+  if(toHarvest == 0){
+    elementsToAplyOpacity.push(".unclaimed-rewards")
+    elementsToAplyOpacity.push(".unclaimed-rewards-value-usd")
+  }
+  */
+
   if(isDateInRange) {
     dateInRangeIndicator.classList.remove("offDate")
     dateInRangeIndicator.classList.add("onDate")
@@ -685,7 +693,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
     resetSinglePoolListener(poolParams, newPool, refreshPoolInfoSingle, -1)
   }
 
-  setDateInRangeVisualIndication(newPool, isDateInRange)
+  setDateInRangeVisualIndication(poolParams, newPool, isDateInRange)
 }
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
@@ -708,7 +716,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
 
   setBoostDisplay(poolParams, newPool)
 
-  setDateInRangeVisualIndication(newPool, isDateInRange)
+  setDateInRangeVisualIndication(poolParams, newPool, isDateInRange)
 }
 
 function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
@@ -731,7 +739,7 @@ function convertRewardsRates(rates: string[]) {
 
 async function updateDetail(newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
   const totalFarmedInUsd: string = await convertToUSDMultiple(contractList, totals)
-  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = totalFarmedInUsd
+  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `U$D ${totalFarmedInUsd}`
   const totalFarmedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
   for(let i = 0; i < totalFarmedDetailsElements.length; i++) {
     const row = totalFarmedDetailsElements[i]
@@ -819,14 +827,14 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
-  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards.toFixed(7).toString()
+  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(7).toString()}`
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
   const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
   const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
-  newPool.querySelector(".total-staked-value-usd")!.innerHTML = totalStakedInUsd
-  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
-  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
+  newPool.querySelector(".total-staked-value-usd")!.innerHTML = `U$D ${totalStakedInUsd}`
+  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = `U$D ${totalFarmedInUsd}`
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `U$D ${rewardsPerDayInUsd}`
 
   addSinglePoolListeners(poolParams, newPool)
 }
@@ -920,15 +928,15 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
   const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
 
-  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = unclaimedRewards
+  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards}`
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
   const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
   const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
-  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = totalStakedInUsd
-  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = totalFarmedInUsd
-  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = rewardsPerDayInUsd
+  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `U$D ${totalStakedInUsd}`
+  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = `U$D ${totalFarmedInUsd}`
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `U$D ${rewardsPerDayInUsd}`
 
   setBoostDisplay(poolParams, newPool)
 
@@ -1208,7 +1216,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   
   let unixTimestamp = new Date().getTime() / 1000;
   const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-  setDateInRangeVisualIndication(newPool, isDateInRange)
+  setDateInRangeVisualIndication(poolParams, newPool, isDateInRange)
   
   qs("#pool_list").append(newPool)
 
@@ -1656,7 +1664,7 @@ function toggleActions(elementToShow: HTMLElement) {
     event.preventDefault();
     let element = event.target as HTMLElement
     const tagName = element.tagName.toLowerCase()
-    const tagsToIgnore = ["button", "input", "span", "img"]
+    const tagsToIgnore = ["button", "input", "span", "img", "svg", "path"]
 
     if (!tagsToIgnore.includes(tagName) || element.classList.contains("toggle-display")) {
       elementToShow.classList.toggle("hidden")
@@ -1731,11 +1739,13 @@ function showNFTGrid(poolParams: PoolParamsP3) {
   return function () {
     loadNFTs(poolParams)
     qs("#nft-pools-section").classList.remove("hidden")
+    var body = document.body as HTMLElement
+    body.classList.toggle('noscroll')
   }
 }
 
 async function loadNFTs(poolParams: PoolParamsP3) {
-  const NFTContainer = qs(".nft-grid") as HTMLElement
+  const NFTContainer = qs(".nft-flex") as HTMLElement
   NFTContainer.innerHTML = ""
   
   const accountId = poolParams.wallet.getAccountId()
@@ -1758,7 +1768,6 @@ function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, pool
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
     
-    //TODO Dani. Here is where you should load the NFTs cards info (I think)
     newNFTCard.querySelectorAll(".nft-name").forEach(elem => {
       elem.innerHTML = nft.token_id
     })
@@ -1769,12 +1778,14 @@ function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, pool
 
     let stakeButton = newNFTCard.querySelector(".stake-nft-button")
     stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+
+    //TODO DANI TODO MARTIN add a condition to check if the user have any NFT staked to disable the stake buttons
     if(staked) {
       let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
       unstakeButton!.classList.remove("hidden")
       unstakeButton?.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
     } else if(!poolHasStaked) {
-      stakeButton!.classList.remove("hidden")
+      stakeButton!.removeAttribute("disabled")
     }
 
     container.append(newNFTCard)    
@@ -1786,11 +1797,17 @@ function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
     try {
       event.preventDefault()
       showWait("Staking NFT...")
-
+      
       const tokenId = card.querySelector(".nft-name")!.innerHTML
       await poolParams.nftContract.nft_transfer_call(poolParams.stakingContract.contractId, tokenId)
       showSuccess("NFT staked successfully")
-      card.querySelector(".stake-nft-button")!.setAttribute("disabled", "disabled")
+      
+      let allNFTCards = qsa(".nft-card")
+      allNFTCards.forEach(NFTCard => {
+        NFTCard.querySelector(".stake-nft-button")!.setAttribute("disabled", "disabled")
+      });
+
+      card.querySelector(".stake-nft-button")!.classList.add("hidden")
 
       let unstakeButton = card.querySelector(".unstake-nft-button")!
       unstakeButton.removeAttribute("disabled")
@@ -1811,7 +1828,10 @@ function unstakeNFT(poolParams: PoolParamsP3, card: HTMLElement) {
       showSuccess("NFT unstaked successfully")
       card.querySelector(".unstake-nft-button")!.classList.add("hidden")
 
-      qsa(".stake-nft-button").forEach(elem => elem.classList.remove("hidden"))
+      qsa(".stake-nft-button").forEach(elem => {
+        elem.removeAttribute("disabled")
+        elem.classList.remove("hidden")
+    })
       // let stakeButton = card.querySelector(".stake-nft-button")!
       // stakeButton.removeAttribute("disabled")
       // stakeButton.addEventListener("click", stakeNFT(poolParams, card))
@@ -1823,18 +1843,22 @@ function unstakeNFT(poolParams: PoolParamsP3, card: HTMLElement) {
   }
 }
 
-function quitNFTGrid() {  
+function quitNFTFlex() {  
   return function (event: Event){
     event.preventDefault();
+
+    var body = document.body as HTMLElement
+    body.classList.toggle('noscroll')
+    
     let element = event.target as HTMLElement
     
     console.log("Id", element.getAttribute("id"))
     console.log("Classes", element.classList.toString())
-    if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("nft-grid")) {
-      qs(".nft-grid").innerHTML = ""
+    if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("nft-flex")) {
+      qs(".nft-flex").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
     }
   }
 }
 
-qs("#nft-pools-section").addEventListener("click", quitNFTGrid())
+qs("#nft-pools-section").addEventListener("click", quitNFTFlex())

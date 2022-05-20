@@ -66,6 +66,8 @@ html {
 
 body {
   line-height: 1;
+  max-width: 117rem;
+  margin: 0 auto;
 }
 
 header {
@@ -212,7 +214,7 @@ header nav a {
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   grid-gap: 1rem;
   justify-items: center;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
 }
 .grid > div {
   background-color: var(--second-new-grey);
@@ -1161,8 +1163,8 @@ input:checked + .slider:before {
     top: -26px !important;
   }
 
-  .nft-grid {
-    margin: 35px !important;
+  .nft-flex {
+    flex-direction: column;
   }
 }
 
@@ -1246,6 +1248,10 @@ input:checked + .slider:before {
 }
 
 /* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
+.noscroll { 
+  overflow: hidden;
+}
+
 .transparent {
   transition: all 0.5s linear;
   opacity: 1;  
@@ -1706,12 +1712,22 @@ button.activate {
   z-index: 22;
 }
 
-.nft-grid {
-  margin: 100px;
+.nft-flex {
+  margin: 100px auto 0 auto;
+  padding: 30px;
+  border-radius: 12px;
+  width: max-content;
+  max-width: 117rem;
+  background-color: var(--second-new-grey);
+  display: flex;
+  grid-gap: 3rem;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
 }
 
 .generic-nft-card, .nft-card {
-  background-color: var(--second-new-grey);
+  background-color: var(--primary-low);
   border-radius: 8px;
 }
 
@@ -1722,8 +1738,8 @@ button.activate {
 }
 
 .nft-card > div {
-  width: 90%;
-  max-width: 500px;
+  width: 380px;
+  max-width: 80vw;
 }
 
 .nft-actions-container {
@@ -1740,13 +1756,19 @@ button.activate {
   height: 34px;
 }
 
-@media screen and (max-width: 1450px) and (min-width: 751px) {
+@media screen and (max-width: 1500px) and (min-width: 1130px) {
+  .grid{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 1129px) and (min-width: 751px) {
   .grid{
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media screen and (max-width: 1450px) and (min-width: 1175px) {
+@media screen and (max-width: 1500px) and (min-width: 1175px) {
   #token-pool-stats{
     width: 100%;
   }
