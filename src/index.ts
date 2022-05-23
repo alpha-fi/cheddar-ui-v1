@@ -827,10 +827,10 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
-  if (unclaimedRewards >= 0.0000001) {
+  if (Number(unclaimedRewards.toFixed(7)) != 0) {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(7).toString()}`
-  } else if (unclaimedRewards < 0.0000001) {//DUDA te parece aceptable esto así?
-    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(0).toString()}`
+  } else {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D 0`
   }
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
