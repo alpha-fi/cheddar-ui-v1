@@ -1440,7 +1440,7 @@ input:checked + .slider:before {
 
 #token-pool-stats {
   z-index: 20;
-  width: 26.88vw;
+  width: 17%;
   max-width: 468px;
   min-width: 334.4px;
   transform: translate(-23px, -72px);
@@ -1519,7 +1519,7 @@ h2.nft-name {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(calc(19vw + 10%), -60%);
+  transform: translate(229px, -60%);
   background-color: var(--white);
   align-items: center;
   justify-content: center;
@@ -1724,6 +1724,7 @@ button.activate {
   align-items: center;
   justify-items: center;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .generic-nft-card, .nft-card {
@@ -1756,6 +1757,18 @@ button.activate {
   height: 34px;
 }
 
+@media screen and (max-width: 1630px) {
+  .nft-flex {
+    max-width: 80vw;
+  }
+}
+
+@media screen and (maX-width: 1132px) {
+  .nft-flex {
+    max-width: 478px;
+  }
+}
+
 @media screen and (max-width: 1500px) and (min-width: 1130px) {
   .grid{
     grid-template-columns: repeat(3, 1fr);
@@ -1768,15 +1781,21 @@ button.activate {
   }
 }
 
-@media screen and (max-width: 1500px) and (min-width: 1175px) {
+@media screen and (max-width: 1500px) and (min-width: 1130px) {
   #token-pool-stats{
-    width: 100%;
+    width: 27%;
   }
 }
 
-@media screen and (max-width: 1174px) and (min-width: 751px) {
+@media screen and (max-width: 1129px) {
   #token-pool-stats{
-    width: 41vw;
+    width: 40%;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+  #token-pool-stats{
+    width: 41%;
   }
 }
 

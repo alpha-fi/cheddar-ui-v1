@@ -827,7 +827,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
-  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(7).toString()}`
+  if (unclaimedRewards >= 0.0000001) {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(7).toString()}`
+  } else if (unclaimedRewards < 0.0000001) {//DUDA te parece aceptable esto así?
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(0).toString()}`
+  }
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
   const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
@@ -1149,7 +1153,7 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
   
-  if(poolParams.resultParams.hasStakedTokens()){
+  if(poolParams.resultParams.hasStakedTokens()){//DUDA puede que esto genere lo que dice Henry "Contracts ends with unclaimed rewards and harvest button doesn't show"
     newPool.classList.add("your-farms")
   }
   if(!dateInRangeHack && isDateInRange) {
