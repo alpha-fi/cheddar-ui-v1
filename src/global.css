@@ -1355,8 +1355,8 @@ input:checked + .slider:before {
 }
 
 .token-logo-container {
-  max-width: 25%;
-  height: 50px;
+  width: 10%;
+  height: 44px;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -1365,59 +1365,55 @@ input:checked + .slider:before {
 }
 
 .token-logo-container img, .token-logo-svg-container svg {
-  width: 49.66px;
+  width: 44px;
   background-color: var(--white);
   border-radius: 100%;
   box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
 }
 
-.logo-2, .logo-3, .logo-4, .logo-5, .logo-6 {
-  transform: translateX(-50%);
+.token-logo-container > *:first-child {
+  margin-left: 0;
 }
 
-.logo-2 {
+.have-2-elements > * {
+  margin-left: -0.6rem;
+}
+
+.have-3-elements > * {
+  margin-left: -1.9rem;
+}
+
+.have-4-elements > * {
+  margin-left: -2.4rem;
+}
+
+.have-5-elements > * {
+  margin-left: -2.6rem;
+}
+
+.have-6-elements > * {
+  margin-left: -2.7rem;
+}
+
+.have-7-elements > * {
+  margin-left: -2.75rem;
+}
+
+.farmed-token-logo {
   z-index: 10;
 }
 
-.logo-3 {
+#token-pool-stats .farmed-token-logo {
   z-index: 11;
 }
 
-.logo-4 {
-  z-index: 12;
+.information-icon-container {
+  width: 10%;
 }
 
-.logo-5 {
-  z-index: 13;
+.information-icon-container img {
+  margin-left: 20%;
 }
-
-.logo-6 {
-  z-index: 14;
-}
-
-#token-pool-stats .logo-2 {
-  z-index: 15;
-}
-
-#token-pool-stats .logo-3 {
-  z-index: 16;
-}
-
-#token-pool-stats .logo-4 {
-  z-index: 17;
-}
-
-#token-pool-stats .logo-5 {
-  z-index: 18;
-}
-
-#token-pool-stats .logo-6 {
-  z-index: 19;
-}
-
-/* #token-pool-stats .token-name {
-  width: 55%;
-} */
 
 .token-stats {
   margin: 3px;
@@ -1435,11 +1431,11 @@ input:checked + .slider:before {
   font-weight: 700;
   line-height: 19px;
   width: 55%;
+  margin: 0 18%;
 }
 
 .token-name-container .token-name {
   text-align: center;
-  transform: translateX(calc(-10%));
 }
 
 #token-pool-stats {
@@ -1447,7 +1443,7 @@ input:checked + .slider:before {
   width: 17%;
   max-width: 468px;
   min-width: 334.4px;
-  transform: translate(-23px, -72px);
+  transform: translate(-23px, -66px);
   position: absolute;
   background-color: var(--white);
   padding: 0 10px;

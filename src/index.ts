@@ -852,11 +852,13 @@ function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
   const logoContainer = header.querySelector(".token-logo-container")! as HTMLElement
   logoContainer.innerHTML = ""
 
-  for(let i = 0; i < tokenContractDataArray.length; i++) {
+  let i = 0
+  for(; i < tokenContractDataArray.length; i++) {
     const tokenIconData = tokenContractDataArray[i]
     const metaData = tokenIconData.metaData
     addLogo(metaData, logoContainer, i)
   }
+  logoContainer.classList.add(`have-${i}-elements`)
 }
 
 function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
@@ -1160,7 +1162,7 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   const now = Date.now() / 1000
   const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
   
-  if(poolParams.resultParams.hasStakedTokens()){//DUDA puede que esto genere lo que dice Henry "Contracts ends with unclaimed rewards and harvest button doesn't show"
+  if(poolParams.resultParams.hasStakedTokens()){
     newPool.classList.add("your-farms")
   }
   if(!dateInRangeHack && isDateInRange) {
@@ -1332,7 +1334,7 @@ function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index:
     newTokenLogoElement!.innerHTML= `${metaData.name}`
   }
   toggleGenericClass(newTokenLogoElement)
-  newTokenLogoElement.classList.add(`logo-${index+1}`)
+  newTokenLogoElement.classList.add(`farmed-token-logo`)
   container.append(newTokenLogoElement)
 }
 
