@@ -16,7 +16,7 @@ async function generatePoolList(wallet: WalletInterface) {
         const index = nearConfig.farms[i].index as number;
         const type = nearConfig.farms[i].poolType as string;
         const poolHtml = new HtmlPoolParams(nearConfig.farms[i].poolName);
-        const cheddarContractName = new NEP141Trait(nearConfig.farms[i].cheddarContractName);
+        const cheddarContractName = new NEP141Trait(nearConfig.cheddarContractName);
         const tokenContractName = new NEP141Trait(nearConfig.farms[i].tokenContractName);
         let contract
         let poolParams

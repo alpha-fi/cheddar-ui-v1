@@ -572,7 +572,7 @@ function setDefaultFilter (){
 async function initNearWebWalletConnection() {
 
   // Initialize connection to the NEAR network
-  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig.farms[0]))
+  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig))
   // Initializing Wallet based Account.
   nearWebWalletConnection = new WalletConnection(near, null)
   nearConnectedWalletAccount = new ConnectedWalletAccount(nearWebWalletConnection, near.connection, nearWebWalletConnection.getAccountId())
@@ -1497,7 +1497,7 @@ window.onload = async function () {
   try {
     let env = ENV //default
 
-    if (env != nearConfig.farms[0].networkId)
+    if (env != nearConfig.networkId)
       nearConfig = getConfig(ENV);
 
     near = await nearAPI.connect(
@@ -1507,7 +1507,7 @@ window.onload = async function () {
                   keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore()
               }
           },
-          nearConfig.farms[0]
+          nearConfig
       )
     )
 
@@ -1515,7 +1515,7 @@ window.onload = async function () {
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
 
     //init narwallets listeners
-    narwallets.setNetwork(nearConfig.farms[0].networkId); //tell the wallet which network we want to operate on
+    narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
     addNarwalletsListeners(narwalletConnected, narwalletDisconnected) //listen to narwallets events
 
     //set-up auto-refresh loop (10 min)
@@ -1547,7 +1547,7 @@ window.onload = async function () {
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
       const poolList = await getPoolList(wallet)
-      const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.farms[0].explorerUrl || "explorer");
+      const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
       let method: string = ""
       let err
       let args = []

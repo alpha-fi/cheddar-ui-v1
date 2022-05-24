@@ -18,20 +18,21 @@ type GetConfigResult = {
   index?: number;
   poolType: string;
   poolName:string;
-  networkId:string;
-  nodeUrl:string;
-  keyPath?:string;
   contractName:string;
-  cheddarContractName:string;
   tokenContractName:string;
-  walletUrl:string;
-  helperUrl?:string;
-  explorerUrl?:string;
-  masterAccount?:string;
+  
 }
 
 type GetConfigResults = {
   nftContractAddress: string
+  networkId:string;
+  nodeUrl:string;
+  keyPath?:string;
+  cheddarContractName:string;
+  walletUrl:string;
+  helperUrl?:string;
+  explorerUrl?:string;
+  masterAccount?:string;
   farms: Array<GetConfigResult>;
 }
 
@@ -42,126 +43,134 @@ export function getConfig(env:string):GetConfigResults {
   case 'mainnet':
     return {
       nftContractAddress: "",
+      networkId: MAINNET_NETWORKID,
+      nodeUrl: MAINNET_NODEURL,
+      cheddarContractName: CHEDDAR_CONTRACT_NAME,
+      walletUrl: MAINNET_WALLETURL,
+      helperUrl: MAINNET_HELPERURL,
+      explorerUrl: MAINNET_EXPLORERURL,
+      keyPath: undefined,
+      masterAccount:undefined,
       "farms": [
         {
           index: 0,
           poolType: 'single',
           poolName : 'pulse',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-pulse.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: '52a047ee205701895ee06a375492490ec9c597ce.factory.bridge.near',
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 1,
           poolType: 'single',
           poolName : 'nUSDO',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-nusd.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'v3.oin_finance.near',
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 2,
           poolType: 'single',
           poolName : 'ref',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-ref.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'token.v2.ref-finance.near',
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 3  ,
           poolType: 'single',
           poolName : 'stNEAR',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-meta.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'meta-pool.near',
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 4,
           poolType: 'single',
           poolName : 'banana',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-bananas.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'berryclub.ek.near',
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 5,
           poolType: 'single',
           poolName : 'near',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p1-farm.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: CHEDDAR_CONTRACT_NAME,
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
         },
         {
           index: 6,
           poolType: 'single',
           poolName : 'cheddar',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'p2-cheddar.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: CHEDDAR_CONTRACT_NAME,
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined,
         },
         {
           index: 7,
           poolType: 'single',
           poolName : 'nearcon',
-          networkId: MAINNET_NETWORKID,
-          nodeUrl: MAINNET_NODEURL,
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
           contractName: 'farm-nearcon.cheddar.near',
-          cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
           tokenContractName: CHEDDAR_CONTRACT_NAME,
-          walletUrl: MAINNET_WALLETURL,
-          helperUrl: MAINNET_HELPERURL,
-          explorerUrl: MAINNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined,
         },
       ]
     }
@@ -169,66 +178,43 @@ export function getConfig(env:string):GetConfigResults {
   case 'testnet':
     return {
       nftContractAddress: "nft.cheddar.testnet",
+      networkId: TESTNET_NETWORKID,
+      nodeUrl: TESTNET_NODEURL,
+      cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
+      walletUrl: TESTNET_WALLETURL,
+      helperUrl: TESTNET_HELPERURL,
+      explorerUrl: TESTNET_EXPLORERURL,
+      keyPath: undefined,
+      masterAccount:undefined,
       "farms": [
         {
           index: 0,
           poolType: 'multiple',
           poolName : 'tt',
-          networkId: TESTNET_NETWORKID,
-          nodeUrl: TESTNET_NODEURL,
           contractName: 'p3-tt.cheddar.testnet',
-          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'test-token.cheddar.testnet',
-          walletUrl: TESTNET_WALLETURL,
-          helperUrl: TESTNET_HELPERURL,
-          explorerUrl: TESTNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
+          
         },
         {
           index: 1,
           poolType: 'single',
           poolName : 'stNear',
-          networkId: TESTNET_NETWORKID,
-          nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-meta.cheddar.testnet',
-          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'meta-v2.pool.testnet',
-          walletUrl: TESTNET_WALLETURL,
-          helperUrl: TESTNET_HELPERURL,
-          explorerUrl: TESTNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
         },
         {
           index: 2,
           poolType: 'single',
           poolName : 'banana',
-          networkId: TESTNET_NETWORKID,
-          nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-bananas.cheddar.testnet',
-          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'berryclub.testnet',
-          walletUrl: TESTNET_WALLETURL,
-          helperUrl: TESTNET_HELPERURL,
-          explorerUrl: TESTNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
         },
         {
           index: 3,
           poolType: 'single',
           poolName : 'ref',
-          networkId: TESTNET_NETWORKID,
-          nodeUrl: TESTNET_NODEURL,
           contractName: 'p2-ref.cheddar.testnet',
-          cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
           tokenContractName: 'ref.fakes.testnet',
-          walletUrl: TESTNET_WALLETURL,
-          helperUrl: TESTNET_HELPERURL,
-          explorerUrl: TESTNET_EXPLORERURL,
-          keyPath: undefined,
-          masterAccount:undefined,
         },
       ]
     }
