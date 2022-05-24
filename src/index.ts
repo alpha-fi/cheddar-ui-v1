@@ -667,7 +667,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   await poolParams.refreshAllExtraData()
 
   updateDetail(newPool, poolParams.stakeTokenContractList, [poolParams.contractParams.total_staked], "total-staked")
-  updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.contractParams.total_farmed], "total-farmed")
+  // updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.contractParams.total_farmed], "apr")
   updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates([poolParams.contractParams.farming_rate.toString()]), "rewards-per-day")
   updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.resultParams.real.toString()], "unclaimed-rewards")
 
@@ -698,7 +698,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   await poolParams.refreshAllExtraData()
 
   updateDetail(newPool, poolParams.stakeTokenContractList, poolParams.contractParams.total_staked, "total-staked")
-  updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "total-farmed")
+  // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
   updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(poolParams.contractParams.farm_token_rates), "rewards-per-day")
   updateDetail(newPool, poolParams.farmTokenContractList, poolParams.resultParams.farmed, "unclaimed-rewards")
 
@@ -736,11 +736,11 @@ function convertRewardsRates(rates: string[]) {
 }
 
 async function updateDetail(newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
-  const totalFarmedInUsd: string = await convertToUSDMultiple(contractList, totals)
-  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `$ ${totalFarmedInUsd}`
-  const totalFarmedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
-  for(let i = 0; i < totalFarmedDetailsElements.length; i++) {
-    const row = totalFarmedDetailsElements[i]
+  const totalInUsd: string = await convertToUSDMultiple(contractList, totals)
+  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `$ ${totalInUsd}`
+  const totalDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
+  for(let i = 0; i < totalDetailsElements.length; i++) {
+    const row = totalDetailsElements[i]
     const tokenMetadata = contractList[i].metaData
     const content = convertToDecimals(totals[i], tokenMetadata.decimals, 5)
     row.querySelector(".content")!.innerHTML = content
@@ -832,13 +832,19 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   }
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
-  const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
   const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
-  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = `$ ${totalFarmedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
+  
+  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd)
+  newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   addSinglePoolListeners(poolParams, newPool)
+}
+
+function calculateAPR(totalStakedInUsd: string, rewardsPerDayInUsd: string): string {
+  return (365 * Number(rewardsPerDayInUsd) / Number(totalStakedInUsd) * 100).toFixed(2)
+
 }
 
 function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
@@ -904,7 +910,7 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
-  standardHoverToDisplayExtraInfo(newPool, "total-farmed")
+  // standardHoverToDisplayExtraInfo(newPool, "apr")
   standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
   standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
@@ -933,12 +939,15 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards}`
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
-  const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
+  // const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
   const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
-  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = `$ ${totalFarmedInUsd}`
+  // newPool.querySelector(".apr-row .apr-value")!.innerHTML = `$ ${totalFarmedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
+
+  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd)
+  newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   setBoostDisplay(poolParams, newPool)
 
@@ -1081,7 +1090,7 @@ function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
-  standardHoverToDisplayExtraInfo(newPool, "total-farmed")
+  // standardHoverToDisplayExtraInfo(newPool, "apr")
   standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
   standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
@@ -1211,7 +1220,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   await addRewardTokenIcons(poolParams, newPool)
   
   await addTotalStakedDetail(poolParams, newPool)
-  await addTotalFarmedDetail(poolParams, newPool)
+  // await addTotalFarmedDetail(poolParams, newPool)
   await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
   await addUnclaimedRewardsDetail(poolParams, newPool)
@@ -1363,9 +1372,9 @@ async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPo
   convertAndAddRewardDataRows(poolParams, newPool, "rewards-per-day-info-container", "rewardsPerDay")
 }
 
-async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  convertAndAddRewardDataRows(poolParams, newPool, "total-farmed-info-container", "totalRewards")
-}
+// async function addTotalFarmedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+//   convertAndAddRewardDataRows(poolParams, newPool, "apr-info-container", "totalRewards")
+// }
 
 async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
   const rewardsTokenDataArray = poolParams.getRewardsTokenDetail()

@@ -1518,7 +1518,7 @@ h2.nft-name {
   line-height: 32px;
 }
 
-.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .total-farmed-info-container {
+.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .apr-info-container {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
@@ -1535,7 +1535,7 @@ h2.nft-name {
 }
 
 
-.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div, .total-farmed-info-container > div {
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div, .apr-info-container > div {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
