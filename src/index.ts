@@ -174,7 +174,16 @@ qs('#your-farms-filter').onclick= filterPools("your-farms")
 function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
   return async function (event: Event) {
     event.preventDefault()
-    await poolParams.stakingContract.storageDeposit()
+
+    //DUDA esto iba bien encaminado por este lado?
+    // let balance = await poolParams.stakingContract.storageBalance()
+    // balance.forEach(token => {
+      
+    // });
+
+    // if () {
+          await poolParams.stakingContract.storageDeposit()
+    // }
     
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")

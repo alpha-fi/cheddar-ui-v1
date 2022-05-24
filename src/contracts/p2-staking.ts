@@ -37,7 +37,7 @@ export class StakingPoolP1 extends SmartContract {
 
     /// Stake attached &NEAR and returns total amount of stake.
     stake(amount: number): Promise<U128String> {
-        return this.call("stake", {}, TGas(25), amount)
+        return this.call("stake", {}, TGas(25), amount.toString())
     }
 
     /// Unstakes given amount of $NEAR and transfers it back to the user.

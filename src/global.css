@@ -1396,7 +1396,7 @@ input:checked + .slider:before {
 }
 
 .have-7-elements > * {
-  margin-left: -2.75rem;
+  margin-left: -2.85rem;
 }
 
 .farmed-token-logo {

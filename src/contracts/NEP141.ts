@@ -72,7 +72,7 @@ export class NEP141Trait extends SmartContract {
     }
 
     /// Checks to see if an account is registered.
-    storageBalance(accountId?: AccountId): Promise<[U128String, U128String]> {
+    storageBalance(accountId: AccountId): Promise<[U128String, U128String]> {//DUDA arriba accountID está como string y acá esta como AccountId q no lo encuentra. Q onda?
       return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
     }
 
