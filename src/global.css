@@ -1339,7 +1339,11 @@ input:checked + .slider:before {
   fill: rgb(255, 52, 52);
 }
 
-.poolOffDate {
+.no-opacity {
+  opacity: 1 !important;
+}
+
+.inactive-pool #contract-period-container, .inactive-pool .new-pool-header, .inactive-pool .main-contract-information li>:nth-child(1), .inactive-pool .main-contract-information li>:nth-child(2), .inactive-pool .detail-row, .inactive-pool .first-token, .inactive-pool .stats-container {
   opacity: 0.5;
 }
 

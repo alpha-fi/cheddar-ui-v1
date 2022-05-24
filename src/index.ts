@@ -627,40 +627,38 @@ let dateInRangeHack = false
 
 function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
-  let elementsToAplyOpacity = [
-    "#contract-period-container",
-    ".new-pool-header",
-    "#token-pool-stats .new-pool-header",
-    "#token-pool-stats .first-token",
-    "#token-pool-stats .token-stats",
-    ".total-staked",
-    ".total-staked-value-usd",
-    ".total-farmed",
-    ".total-farmed-value-usd",
-    ".rewards-per-day",
-    ".rewards-per-day-value-usd",
-    ".reward-tokens",
-    ".reward-tokens-value-usd"
-  ]
-  /*
-  let toHarvest = poolParams.resultParams.getCurrentCheddarRewards() //DUDA Cómo consigo este dato de manera standard? Si no me equivoco así se consigue en el simple pero no en el multiple.
-  if(toHarvest == 0){
-    elementsToAplyOpacity.push(".unclaimed-rewards")
-    elementsToAplyOpacity.push(".unclaimed-rewards-value-usd")
-  }
-  */
 
   if(isDateInRange) {
     dateInRangeIndicator.classList.remove("offDate")
     dateInRangeIndicator.classList.add("onDate")
-    elementsToAplyOpacity.forEach(element => {
-      newPool.querySelector(element)?.classList.remove("poolOffDate")
-    });
   } else {
     dateInRangeIndicator.classList.remove("onDate")
     dateInRangeIndicator.classList.add("offDate")
-    elementsToAplyOpacity.forEach(element => {
-      newPool.querySelector(element)?.classList.add("poolOffDate")
+  }
+  
+  //DUDA El valor que está dentro del detail-row expresa una cantidad de tokens. Te parece correcto sumar todas las cantidades de tokens para compararlas con 0?
+  let allUnclaimedRewardsTotalAmount = 0
+  let allUnclaimedRewardsDetails = newPool.querySelectorAll(".unclaimed-rewards-info-container .detail-row") as NodeListOf<Element>
+  allUnclaimedRewardsDetails.forEach(unclaimedRewardDetail => {
+    let amountContainer = unclaimedRewardDetail.querySelector(".content")! as HTMLElement
+    let amount = Number(amountContainer.innerHTML)
+    allUnclaimedRewardsTotalAmount += amount
+  });
+
+  
+  let unclaimedRewards = newPool.querySelector(".unclaimed-rewards")
+  let unclaimedRewardsValue = newPool.querySelector(".unclaimed-rewards-value-usd")
+  if(allUnclaimedRewardsTotalAmount == 0){
+    unclaimedRewards!.classList.remove("no-opacity")
+    unclaimedRewardsValue!.classList.remove("no-opacity")
+    allUnclaimedRewardsDetails.forEach(unclaimedRewardDetail => {
+      unclaimedRewardDetail.classList.remove("no-opacity")
+    });
+  } else {
+    unclaimedRewards!.classList.add("no-opacity")
+    unclaimedRewardsValue!.classList.add("no-opacity")
+    allUnclaimedRewardsDetails.forEach(unclaimedRewardDetail => {
+      unclaimedRewardDetail.classList.add("no-opacity")
     });
   }
 }
@@ -739,7 +737,7 @@ function convertRewardsRates(rates: string[]) {
 
 async function updateDetail(newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
   const totalFarmedInUsd: string = await convertToUSDMultiple(contractList, totals)
-  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `U$D ${totalFarmedInUsd}`
+  newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `$ ${totalFarmedInUsd}`
   const totalFarmedDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
   for(let i = 0; i < totalFarmedDetailsElements.length; i++) {
     const row = totalFarmedDetailsElements[i]
@@ -828,17 +826,17 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
   if (Number(unclaimedRewards.toFixed(7)) != 0) {
-    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards.toFixed(7).toString()}`
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards.toFixed(7).toString()}`
   } else {
-    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D 0`
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ 0`
   }
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
   const totalFarmedInUsd = await convertToUSDMultiple([farmTokenContractData], [poolParams.contractParams.total_farmed])
   const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
-  newPool.querySelector(".total-staked-value-usd")!.innerHTML = `U$D ${totalStakedInUsd}`
-  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = `U$D ${totalFarmedInUsd}`
-  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `U$D ${rewardsPerDayInUsd}`
+  newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
+  newPool.querySelector(".total-farmed-value-usd")!.innerHTML = `$ ${totalFarmedInUsd}`
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
 
   addSinglePoolListeners(poolParams, newPool)
 }
@@ -932,15 +930,15 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 
   const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
 
-  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `U$D ${unclaimedRewards}`
+  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards}`
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
   const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
   const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
-  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `U$D ${totalStakedInUsd}`
-  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = `U$D ${totalFarmedInUsd}`
-  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `U$D ${rewardsPerDayInUsd}`
+  newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
+  newPool.querySelector(".total-farmed-row .total-farmed-value-usd")!.innerHTML = `$ ${totalFarmedInUsd}`
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
 
   setBoostDisplay(poolParams, newPool)
 
@@ -1233,6 +1231,7 @@ function displayInactivePool(newPool: HTMLElement) {
     toggleStakeUnstakeSection(newPool)
     setUnstakeTabListeners(newPool)
 
+    newPool.querySelector(".harvest-section")!.classList.remove("hidden")
     newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
     const event= new Event ("click")
     newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
