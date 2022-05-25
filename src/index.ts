@@ -24,10 +24,14 @@ import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities
 import * as nearAPI from "near-api-js"
 import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
-import { ContractParams } from './contracts/contract-structs';
+import { ContractParams, TransactionData } from './contracts/contract-structs';
 import { P3ContractParams, Status } from './contracts/p3-structures';
 import { nftBaseUrl } from './contracts/NFTContract';
 import { newNFT, NFT } from './contracts/nft-structs';
+import { BN } from 'bn.js';
+import { StakingPoolP3 } from './contracts/p3-staking';
+import { StakingPoolP1 } from './contracts/p2-staking';
+import { callMulipleTransactions } from './contracts/multipleCall';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -171,23 +175,43 @@ qs("#ended-filter").onclick=filterPools("inactive-pool")
 qs('#your-farms-filter').onclick= filterPools("your-farms")
 
 
-function depositClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
+function activateClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
   return async function (event: Event) {
     event.preventDefault()
+    let TXs: TransactionData[] = []
 
-    //DUDA esto iba bien encaminado por este lado?
-    // let balance = await poolParams.stakingContract.storageBalance()
-    // balance.forEach(token => {
-      
-    // });
+    const stakeTokenList = poolParams.stakeTokenContractList
+    for(let i = 0; i < stakeTokenList.length; i++) {
+      const tokenContract = stakeTokenList[i].contract
+      const doesNeedStorageDeposit = await needsStorageDeposit(tokenContract)
+      if (doesNeedStorageDeposit) {
+        TXs.push({
+          promise: tokenContract.storageDepositWithoutSend(),
+          contractName: tokenContract.contractId
+        })
+      }
+    }
 
-    // if () {
-          await poolParams.stakingContract.storageDeposit()
-    // }
+    const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContract)
+    if (doesNeedStorageDeposit) {
+      TXs.push({
+        promise: poolParams.stakingContract.storageDepositWithoutSend(),
+        contractName: poolParams.stakingContract.contractId
+      })
+    }
+    await callMulipleTransactions(TXs, poolParams.stakingContract)
+    
     
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
   }
+}
+
+async function needsStorageDeposit(contract: NEP141Trait|StakingPoolP1|StakingPoolP3): Promise<boolean> {
+  const contractStorageBalanceData = await contract.storageBalance()
+  if(contractStorageBalanceData == null) return true
+  const contractStorageBalanceBN = new BN(contractStorageBalanceData.total)
+  return contractStorageBalanceBN.gten(0)
 }
 
 async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<number> {
@@ -1304,7 +1328,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
     stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
   } else {
     activateButtonContainer.classList.remove("hidden")
-    activateButton.addEventListener("click", depositClicked(poolParams, newPool))
+    activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
     if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
       let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
@@ -1610,8 +1634,11 @@ window.onload = async function () {
         showSuccess("NFT staked successfully", "Stake NFT")
         // @ts-ignore
         // await nftStakeResult(args)
+      } else if(method == "storage_deposit"){
+        showSuccess("Successfully activated", "Activate")
       } else {
         console.log("Method", method)
+        console.log("Args", args.join("\n"))
       }
 
     }

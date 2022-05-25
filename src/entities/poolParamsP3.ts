@@ -1,4 +1,5 @@
 import { ContractParams } from "../contracts/contract-structs";
+import { callMulipleTransactions } from "../contracts/multipleCall";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { NFTContract } from "../contracts/NFTContract";
 import { StakingPoolP3 } from "../contracts/p3-staking";
@@ -194,7 +195,7 @@ export class PoolParamsP3 {
 
             TXs.push(promiseWithContract)
         }
-        await this.stakingContract.callMulipleTransactions(TXs)   
+        await callMulipleTransactions(TXs, this.stakingContract)   
     }
 
     async unstake(amounts: bigint[]) {
@@ -212,7 +213,7 @@ export class PoolParamsP3 {
 
             TXs.push(promiseWithContract)
         }
-        await this.stakingContract.callMulipleTransactions(TXs)   
+        await callMulipleTransactions(TXs, this.stakingContract)   
     }
 
     getStakeTokensDetail(): DetailRow[]{

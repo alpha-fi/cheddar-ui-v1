@@ -4,6 +4,9 @@ import * as nearAPI from "near-api-js"
 
 import {ntoy, TGas} from "../util/conversions"
 import { BN } from "bn.js";
+import { StorageBalance } from "./contract-structs";
+import { Action } from "near-api-js/lib/transaction";
+import { transactions } from "near-api-js";
 
 export type FungibleTokenMetadata = {
     spec: string;
@@ -72,7 +75,7 @@ export class NEP141Trait extends SmartContract {
     }
 
     /// Checks to see if an account is registered.
-    storageBalance(accountId: AccountId): Promise<[U128String, U128String]> {//DUDA arriba accountID está como string y acá esta como AccountId q no lo encuentra. Q onda?
+    storageBalance(accountId?: string): Promise<StorageBalance> {
       return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
     }
 
@@ -80,5 +83,18 @@ export class NEP141Trait extends SmartContract {
     storageDeposit(): Promise<[U128String, U128String]> {
       return this.call("storage_deposit", {}, TGas(25), "3000000000000000000000")
     }
+
+    async storageDepositWithoutSend():Promise<Action>{
+        return transactions.functionCall(
+            "storage_deposit", 
+            {}, 
+            new BN("200000000000000"), 
+            new BN("3000000000000000000000")
+        )
+    }
+
+    // storageDepositWithoutSend(): Promise<Action> {
+    //     return this.callWithoutSend("storage_deposit", {}, TGas(25), "3000000000000000000000")
+    //   }
 
 }

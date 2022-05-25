@@ -1,3 +1,4 @@
+import { transactions } from "near-api-js";
 import { ntoy } from "../util/conversions";
 
 type U128String = string;
@@ -39,4 +40,13 @@ export class TokenParams {
     symbol: string = "";
 }
 
+export interface StorageBalance {
+    total: string
+    available: string
+}
+
+export interface TransactionData {
+    promise: Promise<transactions.Action>,
+    contractName: string
+}
 
