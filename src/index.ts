@@ -32,6 +32,7 @@ import { BN } from 'bn.js';
 import { StakingPoolP3 } from './contracts/p3-staking';
 import { StakingPoolP1 } from './contracts/p2-staking';
 import { callMulipleTransactions } from './contracts/multipleCall';
+import { view } from './contracts/view-contract-calls';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -1537,12 +1538,20 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
   isPaused = false;
 }
 
+async function deleteMeViewMethods() {
+  const metadata = await view("p3-tt.cheddar.testnet", "status", {account_id: "empty_test.testnet"})
+  console.log(metadata)
+}
+
 window.onload = async function () {
   try {
     let env = ENV //default
 
     if (env != nearConfig.networkId)
       nearConfig = getConfig(ENV);
+
+      // DELETE
+    deleteMeViewMethods()
 
     near = await nearAPI.connect(
       Object.assign(
