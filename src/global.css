@@ -200,10 +200,6 @@ header nav a {
   vertical-align: baseline;
 } */
 
-#home-connected, #nft-pools-section {
-  margin: 2rem;
-}
-
 .nft-img-container > * {
   width: 100%;
 }
@@ -908,6 +904,7 @@ li {
   align-items: center;
   justify-content: center;
   width: 62.531px;
+  cursor: pointer;
 }
 
 .main-contract-footer p {
@@ -1300,6 +1297,10 @@ input:checked + .slider:before {
   color: var(--bg);
 }
 
+#pool-container {
+  position: relative;
+}
+
 #generic-pool-container, #pool-container, #activated {
   border-color: var(--second-new-grey);
   border-style: solid;
@@ -1440,7 +1441,7 @@ input:checked + .slider:before {
 
 #token-pool-stats {
   z-index: 20;
-  width: 17%;
+  width: 107%;
   max-width: 468px;
   min-width: 334.4px;
   transform: translate(-23px, -66px);
@@ -1519,7 +1520,7 @@ h2.nft-name {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(229px, -60%);
+  transform: translate(229px, -67%);
   background-color: var(--white);
   align-items: center;
   justify-content: center;
@@ -1706,15 +1707,15 @@ button.activate {
   position: fixed;
   left: -25px;
   top: -27px;
-  height: 102vh;
-  width: 100vw;
+  height: 105vh;
+  width: 103vw;
   overflow: scroll;
   z-index: 22;
 }
 
 .nft-flex {
-  margin: 100px auto 0 auto;
-  padding: 30px;
+  margin: 100px auto 100px auto;
+  padding: 30px 30px 60px 30px;
   border-radius: 12px;
   width: max-content;
   max-width: 117rem;
@@ -1781,36 +1782,11 @@ button.activate {
   }
 }
 
-@media screen and (max-width: 1500px) and (min-width: 1130px) {
-  #token-pool-stats{
-    width: 27%;
-  }
-}
-
-@media screen and (max-width: 1129px) {
-  #token-pool-stats{
-    width: 40%;
-  }
-}
-
-@media screen and (max-width: 1000px) {
-  #token-pool-stats{
-    width: 41%;
-  }
-}
 
 @media screen and (max-width: 750px) {
   .grid{
     grid-template-columns: repeat(1, 1fr);
   }
 
-  #token-pool-stats{
-    width: 100%;
-  }
-}
-
-@media screen and (max-width: 581px) {
-  #token-pool-stats{
-    width: 81vw;    
-  }
+  
 }

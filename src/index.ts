@@ -1736,7 +1736,7 @@ function flipElement(elementToFlip: HTMLElement) {
     event.preventDefault();
     let element = event.target as HTMLElement
     const tagName = element.tagName.toLowerCase()
-    const tagsToIgnore = ["button", "input", "span", "img"]
+    const tagsToIgnore = ["button", "input", "span", "img", "svg", "path", "polygon"]
 
     if (!tagsToIgnore.includes(tagName) || element.classList.contains("toggle-display")) {
       elementToFlip.classList.toggle("flipped")
@@ -1907,13 +1907,14 @@ function quitNFTFlex() {
     event.preventDefault();
 
     var body = document.body as HTMLElement
-    body.classList.toggle('noscroll')
     
     let element = event.target as HTMLElement
     
     console.log("Id", element.getAttribute("id"))
     console.log("Classes", element.classList.toString())
-    if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("nft-flex")) {
+    if (element.getAttribute("id") == "nft-pools-section") {
+      body.classList.toggle('noscroll')
+
       qs(".nft-flex").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
     }
