@@ -703,7 +703,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   updateDetail(newPool, poolParams.stakeTokenContractList, [poolParams.contractParams.total_staked], "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.contractParams.total_farmed], "apr")
   updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates([poolParams.contractParams.farming_rate.toString()]), "rewards-per-day")
-  updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.resultParams.real.toString()], "unclaimed-rewards")
+  uptadeDetailIfNecesary(poolParams, newPool, poolParams.farmTokenContractList, [poolParams.resultParams.real.toString()], "unclaimed-rewards")
 
   const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
   refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
@@ -711,8 +711,18 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
   if(poolParams.resultParams.staked == 0n) {
     newPool.classList.remove("your-farms")
-    const isContractActivated = (await poolParams.stakingContract.storageBalance()) != null;
-    if(isContractActivated) {
+    let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakingContract)
+    
+    const stakeTokenList = poolParams.stakeTokenContractList
+    for(let i = 0; i < stakeTokenList.length && !doesPoolNeedDeposit; i++) {
+      const tokenContract = stakeTokenList[i].contract
+      const doesTokenNeedStorageDeposit = await needsStorageDeposit(tokenContract)
+      if (doesTokenNeedStorageDeposit) {
+        doesPoolNeedDeposit = true
+      }
+    }
+
+    if(!doesPoolNeedDeposit) {
       newPool.querySelector("#activate")?.classList.add("hidden")
     } else {
       newPool.querySelector("#activate")?.classList.remove("hidden")
@@ -734,7 +744,7 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   updateDetail(newPool, poolParams.stakeTokenContractList, poolParams.contractParams.total_staked, "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
   updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(poolParams.contractParams.farm_token_rates), "rewards-per-day")
-  updateDetail(newPool, poolParams.farmTokenContractList, poolParams.resultParams.farmed, "unclaimed-rewards")
+  uptadeDetailIfNecesary(poolParams, newPool, poolParams.farmTokenContractList, poolParams.resultParams.farmed, "unclaimed-rewards")
 
   const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
   refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
@@ -778,6 +788,23 @@ async function updateDetail(newPool: HTMLElement, contractList: ContractData[], 
     const tokenMetadata = contractList[i].metaData
     const content = convertToDecimals(totals[i], tokenMetadata.decimals, 5)
     row.querySelector(".content")!.innerHTML = content
+  }
+}
+
+async function uptadeDetailIfNecesary(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
+  let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakingContract)
+    
+  const stakeTokenList = poolParams.stakeTokenContractList
+  for(let i = 0; i < stakeTokenList.length && !doesPoolNeedDeposit; i++) {
+    const tokenContract = stakeTokenList[i].contract
+    const doesTokenNeedStorageDeposit = await needsStorageDeposit(tokenContract)
+    if (doesTokenNeedStorageDeposit) {
+      doesPoolNeedDeposit = true
+    }
+  }
+
+  if (!doesPoolNeedDeposit) {
+    updateDetail(newPool, contractList, totals, baseClass)
   }
 }
 
@@ -859,10 +886,15 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+
   if (Number(unclaimedRewards.toFixed(7)) != 0) {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards.toFixed(7).toString()}`
-  } else {
+  } else if ((Number(unclaimedRewards.toFixed(7)) != 0) && isDateInRange) {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ 0`
+  } else {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
   }
 
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
@@ -970,9 +1002,18 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".boost-button")!.classList.remove("hidden")
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
 
-  const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed)
+  const unclaimedRewards = Number(await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed))
 
-  newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards}`
+  const now = Date.now() / 1000
+  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+
+  if (Number(unclaimedRewards.toFixed(7)) != 0) {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards.toFixed(7).toString()}`
+  } else if ((Number(unclaimedRewards.toFixed(7)) != 0) && isDateInRange) {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ 0`
+  } else {
+    newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
+  }
   
   const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
   // const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
@@ -1838,11 +1879,16 @@ function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, pool
     let stakeButton = newNFTCard.querySelector(".stake-nft-button")
     stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
 
-    //TODO DANI TODO MARTIN add a condition to check if the user have any NFT staked to disable the stake buttons
     if(staked) {
       let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
       unstakeButton!.classList.remove("hidden")
-      unstakeButton?.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+      unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+
+      stakeButton!.classList.add("hidden")
+    }
+
+    if (poolHasStaked) {
+      stakeButton!.setAttribute("disabled", "disabled")
     } else if(!poolHasStaked) {
       stakeButton!.removeAttribute("disabled")
     }

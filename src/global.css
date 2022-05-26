@@ -1290,6 +1290,7 @@ input:checked + .slider:before {
   height: 42px;
   border-radius: 10px;
   line-height: 42px;
+  cursor: pointer;
 }
 
 .pool-filter-container li:hover, .activeFilterButton {
