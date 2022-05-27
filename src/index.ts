@@ -1866,35 +1866,45 @@ async function loadNFTs(poolParams: PoolParamsP3) {
 
 function addNFT(poolParams: PoolParamsP3, container: HTMLElement, nft: NFT, poolHasStaked: boolean, staked: boolean = false) {
   const genericNFTCard = qs(".generic-nft-card")
-  const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement    
-    
-    newNFTCard.querySelectorAll(".nft-name").forEach(elem => {
-      elem.innerHTML = nft.token_id
-    })
+  const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement
+  
+  let i = 0
+  for (; i < newNFTCard.querySelectorAll(".nft-name").length; i++){
+    newNFTCard.querySelectorAll(".nft-name")[i].innerHTML = nft.token_id
+  }
 
-    let imgElement = newNFTCard.querySelector(".nft-img-container img")
-    imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
-    imgElement!.setAttribute("alt", nft.metadata.media)
+  //Only if user have more than 1 NFT the legend "You can only boost one NFT is shown"
+  const NFTPoolSection = qs("#nft-pools-section") as HTMLElement
+  const NFTPoolSectionInfoRow = NFTPoolSection.querySelector("h2") as HTMLElement
+  if (i > 1) {
+    NFTPoolSectionInfoRow.classList.remove("hidden")
+  } else {
+    NFTPoolSectionInfoRow.classList.add("hidden")
+  }
 
-    let stakeButton = newNFTCard.querySelector(".stake-nft-button")
-    stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+  let imgElement = newNFTCard.querySelector(".nft-img-container img")
+  imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
+  imgElement!.setAttribute("alt", nft.metadata.media)
 
-    if(staked) {
-      let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
-      unstakeButton!.classList.remove("hidden")
-      unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+  let stakeButton = newNFTCard.querySelector(".stake-nft-button")
+  stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
 
-      stakeButton!.classList.add("hidden")
-    }
+  if(staked) {
+    let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
+    unstakeButton!.classList.remove("hidden")
+    unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
 
-    if (poolHasStaked) {
-      stakeButton!.setAttribute("disabled", "disabled")
-    } else if(!poolHasStaked) {
-      stakeButton!.removeAttribute("disabled")
-    }
+    stakeButton!.classList.add("hidden")
+  }
 
-    container.append(newNFTCard)    
-    toggleGenericClass(newNFTCard)
+  if (poolHasStaked) {
+    stakeButton!.setAttribute("disabled", "disabled")
+  } else if(!poolHasStaked) {
+    stakeButton!.removeAttribute("disabled")
+  }
+
+  container.append(newNFTCard)    
+  toggleGenericClass(newNFTCard)
 }
 
 function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){

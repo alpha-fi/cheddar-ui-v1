@@ -140,7 +140,7 @@ p {
   font-size    : 13px;
   line-height  : 18px;
   /* identical to box height, or 146% */
-  margin-top   : 0.4em;
+  /* margin-top   : 0.4em; */
   margin-bottom: 0;
   font-weight  : 400;
 }
@@ -1261,10 +1261,13 @@ input:checked + .slider:before {
   align-items: stretch;
 }
 
+.pool-container {
+  border-width: 12px;
+}
+
 .pool-container, .nft-card {
   min-width: 350px;
   height: max-content;
-  border-width: 12px;
   border-radius: 8px!important;
 }
 
@@ -1308,7 +1311,7 @@ input:checked + .slider:before {
   background-color: var(--white);
 }
 
-#pool-container, .nft-presentation, .nft-basic-info-and-interaction {
+#pool-container {
   padding: 0px 10px;
 }
 
@@ -1505,11 +1508,11 @@ input:checked + .slider:before {
 
 h2.nft-name {
   text-align: center;
-  margin: 11px;
+  padding: 11px;
 }
 
 .nft-name-row {
-  width: 100%;
+  margin: 0 25px;
 }
 
 .nft-name-row h3 {
@@ -1714,13 +1717,26 @@ button.activate {
   z-index: 22;
 }
 
-.nft-flex {
+.nft-pools-container {
   margin: 100px auto 100px auto;
   padding: 30px 30px 60px 30px;
   border-radius: 12px;
   width: max-content;
   max-width: 117rem;
   background-color: var(--second-new-grey);
+}
+
+.nft-farm-info {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 39px;
+  text-align: center;
+  margin-bottom: 33px;
+}
+
+.nft-flex {
   display: flex;
   grid-gap: 3rem;
   align-items: center;
@@ -1729,15 +1745,30 @@ button.activate {
   flex-wrap: wrap;
 }
 
+.nft-card {
+  border-style: solid;
+  border-color: var(--second-new-grey);
+  border-width: 29px 12px 12px 12px;
+}
+
 .generic-nft-card, .nft-card {
-  background-color: var(--primary-low);
-  border-radius: 8px;
+  /* background-color: var(--primary-low);
+  border-radius: 8px; */
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
 }
 
 .nft-presentation, .nft-basic-info-and-interaction {
   background-color: var(--bg);
-  margin: 12px;
-  border-radius: 4px;
+  /* margin: 12px;
+  border-radius: 4px; */
+}
+
+.nft-basic-info-and-interaction {
+  padding: 8px;
+}
+
+.nft-presentation {
+  border-bottom: 12px var(--second-new-grey) solid;
 }
 
 .nft-card > div {
