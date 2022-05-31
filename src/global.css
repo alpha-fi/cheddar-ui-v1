@@ -158,8 +158,10 @@ header nav {
   flex           : 1 1 30%;
   display        : flex;
   flex-flow      : row wrap;
-  justify-content: center;
+  justify-content: flex-end;
   align-items    : center;
+  
+  z-index: 19;
 }
 
 .cheddar-main-logo-container {
@@ -1841,7 +1843,8 @@ button.activate {
 
 
   /*Burger*/
-  nav {
+  header nav {
+    justify-content: center;
     position: fixed;
     top: 11px;
     right: 11px;
@@ -1850,7 +1853,6 @@ button.activate {
     border-radius: 20%;
     height: 49px;
     aspect-ratio: 1;
-    z-index: 23;
   }
 
   .cheddar-main-logo-container {
