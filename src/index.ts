@@ -533,7 +533,12 @@ function showSection(selector: string) {
     show(section)
     selectNav(selector);
   }
+
+  //hide burger button
+  qs(".burger-button").classList.remove("burger-button--toggle")
+  qs(".navbar-links").classList.remove("show-navbar__links")
 }
+
 function selectNav(selector: string) {
   //nav
   const allNav = qsa("nav a");
@@ -1978,3 +1983,18 @@ function quitNFTFlex() {
 }
 
 qs("#nft-pools-section").addEventListener("click", quitNFTFlex())
+
+//Burger button
+const burgerButton = qs(".burger-button") as HTMLElement
+burgerButton.addEventListener('click', () => {
+  controlarMenu();
+});
+
+
+const navbarLinks = qs('.navbar-links') as HTMLElement
+const cheddarMainLogoContainer = qs('.cheddar-main-logo-container') as HTMLElement
+
+const controlarMenu = () => {
+  navbarLinks.classList.toggle('show-navbar__links')
+  burgerButton.classList.toggle('burger-button--toggle')
+};
