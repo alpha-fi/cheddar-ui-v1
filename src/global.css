@@ -1850,6 +1850,7 @@ button.activate {
     border-radius: 20%;
     height: 49px;
     aspect-ratio: 1;
+    z-index: 23;
   }
 
   .cheddar-main-logo-container {

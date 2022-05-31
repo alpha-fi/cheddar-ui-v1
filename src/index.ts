@@ -526,6 +526,10 @@ async function autoRefresh() {
 function showSection(selector: string) {
   //hide all sections
   qsa("main section").forEach(hide);
+  console.log("Emm si wachin estoy acá. ¿Q ondiwis?")
+  //Run quitNFTFlex so if that component is open it gets closed
+  //DUDA quiero correr la función que es retornada dentro de esta función. Cómoh?
+  quitNFTFlex();
   
   //show section
   const section = qs("main").querySelector(selector)
@@ -1971,9 +1975,7 @@ function quitNFTFlex() {
     
     let element = event.target as HTMLElement
     
-    console.log("Id", element.getAttribute("id"))
-    console.log("Classes", element.classList.toString())
-    if (element.getAttribute("id") == "nft-pools-section") {
+    if (element.getAttribute("id") == "nft-pools-section" || element.classList.contains("navButton")) {
       body.classList.toggle('noscroll')
 
       qs(".nft-flex").innerHTML = ""
@@ -1987,14 +1989,13 @@ qs("#nft-pools-section").addEventListener("click", quitNFTFlex())
 //Burger button
 const burgerButton = qs(".burger-button") as HTMLElement
 burgerButton.addEventListener('click', () => {
-  controlarMenu();
+  toggleBurgerNav();
 });
 
 
 const navbarLinks = qs('.navbar-links') as HTMLElement
-const cheddarMainLogoContainer = qs('.cheddar-main-logo-container') as HTMLElement
 
-const controlarMenu = () => {
+const toggleBurgerNav = () => {
   navbarLinks.classList.toggle('show-navbar__links')
   burgerButton.classList.toggle('burger-button--toggle')
 };
