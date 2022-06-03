@@ -1545,7 +1545,7 @@ h2.nft-name {
   flex-direction: column-reverse;
   flex-wrap: wrap;
   position: absolute;
-  transform: translate(229px, -67%);
+  transform: translate(229px, -61%);
   background-color: var(--white);
   align-items: center;
   justify-content: center;
