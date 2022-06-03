@@ -1901,24 +1901,21 @@ button.activate {
     display: block;
   }
 
-  .line1, .line2, .line3 {
+  .line1, .line2, .line3, .burger-button--toggle .line1, .burger-button--toggle .line2, .burger-button--toggle .line3 {
     transition: all 0.4s ease-in-out;
   }
 
   .burger-button--toggle .line1{
       margin-bottom: 0 !important;
       transform: rotate(-45deg) translate(-4px, 2.5px);
-      transition: all 0.4s ease-in-out;
   }
 
   .burger-button--toggle .line2{
       opacity: 0;
-      transition: all 0.4s ease-in-out;
   }
 
   .burger-button--toggle .line3{
       transform: rotate(45deg) translate(-5.6px, -4.5px);
-      transition: all 0.4s ease-in-out;
   }
 
   

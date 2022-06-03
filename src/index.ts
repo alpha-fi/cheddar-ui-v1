@@ -1841,11 +1841,11 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
 }
 
 function showNFTGrid(poolParams: PoolParamsP3) {
-  return function () {
-    loadNFTs(poolParams)
-    qs("#nft-pools-section").classList.remove("hidden")
+  return async function () {
+    await loadNFTs(poolParams)
     var body = document.body as HTMLElement
     body.classList.toggle('noscroll')
+    qs("#nft-pools-section").classList.remove("hidden")
   }
 }
 
