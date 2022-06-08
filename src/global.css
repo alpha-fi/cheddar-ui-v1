@@ -530,7 +530,7 @@ button.hollow {
   height: 32px;
   background: white;
   border-radius: 16px;
-  margin: 8px 16px 8px 0;
+  /* margin: 8px 16px 8px 0; */
   line-height: 12px;
   cursor: pointer;
   text-decoration: none;
@@ -558,7 +558,13 @@ button.hollow {
 
 .btn-outline-none {
   border: none;
-  margin-left: 3rem;
+  line-height: 32px;
+  /* margin-left: 3rem; */
+}
+
+.btn-outline-none svg {
+  top: 7px;
+  position: relative;
 }
 
 .hQrVZb {
@@ -1159,10 +1165,10 @@ input:checked + .slider:before {
   form {
     min-width: 280px;
   }
-
+/* 
   .btn-outline-none {
     margin-left: 1rem;
-  }
+  } */
 
 }
 
@@ -1172,9 +1178,9 @@ input:checked + .slider:before {
     margin: 1rem;
   }
   
-  .btn-outline-none {
+  /* .btn-outline-none {
     margin-left: 0.2rem;
-  }
+  } */
 
   #nft-pools-section {
     left: -13px !important;
@@ -1223,9 +1229,9 @@ input:checked + .slider:before {
     margin: 0.25rem;
   }
 
-  .btn-outline-none {
+  /* .btn-outline-none {
     margin-left: 1rem;
-  }
+  } */
 
   .popup {
     min-width: 300px!important;
@@ -1835,13 +1841,7 @@ button.activate {
   }
 }
 
-
-@media screen and (max-width: 750px) {
-  .grid{
-    grid-template-columns: repeat(1, 1fr);
-  }
-
-
+@media screen and (max-width: 860px) {
   /*Burger*/
   header nav {
     justify-content: center;
@@ -1917,6 +1917,90 @@ button.activate {
   .burger-button--toggle .line3{
       transform: rotate(45deg) translate(-5.6px, -4.5px);
   }
+}
+
+
+@media screen and (max-width: 750px) {
+  .grid{
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+
+  /* Burger
+  header nav {
+    justify-content: center;
+    position: fixed;
+    top: 11px;
+    right: 11px;
+    background-color: #ffffffc9;
+    padding: 10px;
+    border-radius: 20%;
+    height: 49px;
+    aspect-ratio: 1;
+  }
+
+  .cheddar-main-logo-container {
+    display: block;
+  }
+
+  .navbar-links{
+    display: flex;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 90%;
+    height: 100%;
+    background-color: var(--white);
+    box-shadow: -13px 6px 26px -8px rgb(0 0 0 / 40%);
+
+    flex-direction: column;
+    justify-content: flex-start;
+    transform: translateX(110%);
+    transition: transform 0.4s ease-in-out;
+  }
+
+  .navbar-links > *:first-child {
+    margin: 21px 0 29px 16px;
+  }
+
+  a.selected {
+    color: black;
+    background-color: var(--second-yellow);
+  }
+
+  .navButton {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 0px;    
+    color: black;
+    padding: 12px 0px 12px 16px;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .show-navbar__links {
+    transform: translateX(0);
+  }
+
+  .burger-button {
+    display: block;
+  }
+
+  .line1, .line2, .line3, .burger-button--toggle .line1, .burger-button--toggle .line2, .burger-button--toggle .line3 {
+    transition: all 0.4s ease-in-out;
+  }
+
+  .burger-button--toggle .line1{
+      margin-bottom: 0 !important;
+      transform: rotate(-45deg) translate(-4px, 2.5px);
+  }
+
+  .burger-button--toggle .line2{
+      opacity: 0;
+  }
+
+  .burger-button--toggle .line3{
+      transform: rotate(45deg) translate(-5.6px, -4.5px);
+  } */
 
   
 }
