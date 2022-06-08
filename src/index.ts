@@ -1087,7 +1087,7 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
 
   if (metaData.icon != null){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
-    if(metaData.icon.startsWith("data:image/svg+xml")) {
+    if(metaData.icon.startsWith("data:image")) {
       let tokenLogoElement = newInputContainer.querySelector("img.token-logo")
       tokenLogoElement?.setAttribute("src", metaData.icon)
       inputLogoContainer?.classList.remove("hidden")
