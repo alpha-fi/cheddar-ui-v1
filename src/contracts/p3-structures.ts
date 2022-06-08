@@ -25,7 +25,7 @@ export class P3ContractParams {
 
 }
 
-export class Status {
+export class PoolUserStatus {
     stake_tokens: U128String[] = [];
     stake: U128String = "";
     farmed_units: U128String = "";

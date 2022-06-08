@@ -1,13 +1,15 @@
+import { FarmData } from "../config";
 import { ContractParams } from "../contracts/contract-structs";
 import { callMulipleTransactions } from "../contracts/multipleCall";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { NFTContract } from "../contracts/NFTContract";
 import { StakingPoolP3 } from "../contracts/p3-staking";
-import { P3ContractParams, Status } from "../contracts/p3-structures";
+import { P3ContractParams } from "../contracts/p3-structures";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, DetailRowElements, RewardsTokenData, TokenIconData, UnclaimedRewardsData } from "./genericData";
+import { getStakingContractDataP3, StakingContractDataP3 } from "./PoolEntities";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -20,7 +22,7 @@ export class HtmlPoolParams {
     }
 }
 
-export class PoolResultParams {
+export class PoolUserStatus {
     // All the numbers that are bigint are expected to be without any decimal points, and are converted when needed
     staked: U128String[] = [];
     farmedUnits: U128String = "0";
@@ -55,7 +57,7 @@ export class PoolResultParams {
     }
 }
 
-export interface ContractData {
+export interface TokenContractData {
     contract: NEP141Trait
     metaData: FungibleTokenMetadata
     balance: U128String
@@ -63,46 +65,57 @@ export interface ContractData {
 
 export class PoolParamsP3 {
     wallet: WalletInterface
-    index: number
     type: string
     html: HtmlPoolParams;
 
-    stakingContract: StakingPoolP3
-    stakingContractMetaData: FungibleTokenMetadata;
-    contractParams: P3ContractParams;
-    resultParams: PoolResultParams = new PoolResultParams(0, 0);
+    stakingContractData: StakingContractDataP3
+    // stakingContract: StakingPoolP3
+    // stakingContractMetaData: FungibleTokenMetadata;
+    // contractParams: P3ContractParams;
+    // poolUserStatus: PoolUserStatus = new PoolUserStatus(0, 0);
 
-    cheddarContract: NEP141Trait;
+    // cheddarContract: NEP141Trait;
     // tokenContract: NEP141Trait;
     // stakeTokenContractList: NEP141Trait[] = [];
-    stakeTokenContractList: ContractData[] = [];
-    farmTokenContractList: ContractData[] = [];
-    metaData2: FungibleTokenMetadata;
+    stakeTokenContractList: TokenContractData[] = [];
+    farmTokenContractList: TokenContractData[] = [];
+    // metaData2: FungibleTokenMetadata;
 
     nftContract: NFTContract
 
-    constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, nftContract: string, wallet: WalletInterface) {
+    constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string) {
         this.wallet = wallet
-        this.index = index;
-        this.type = type;
-        this.html = html;
-        this.stakingContract = stakingContract;
-        this.stakingContract.wallet = wallet;
+        this.type = farmData.poolType;
 
-        this.contractParams = new P3ContractParams();
-        this.cheddarContract= cheddarContract;
-        // this.tokenContract = tokenContract;
-        // this.resultParams = new PoolResultParams();
-        this.stakingContractMetaData = {} as FungibleTokenMetadata;
-        this.metaData2 = {} as FungibleTokenMetadata;
+        this.html = new HtmlPoolParams(farmData.poolName);
+        this.stakingContractData = getStakingContractDataP3(wallet, farmData.contractName)
+
         this.nftContract = new NFTContract(nftContract)
-
-        this.cheddarContract.wallet = wallet;
-        this.nftContract.wallet = wallet
-        // this.tokenContract.wallet = wallet;
+        this.nftContract.wallet = this.wallet
     }
 
-    async getTokenContractList(contractNameArray: string[]): Promise<ContractData[]> {
+
+    // constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, nftContract: string, wallet: WalletInterface) {
+    //     this.wallet = wallet
+    //     this.type = type;
+    //     this.html = html;
+    //     this.stakingContract = stakingContract;
+    //     this.stakingContract.wallet = wallet;
+
+    //     this.contractParams = new P3ContractParams();
+    //     this.cheddarContract= cheddarContract;
+    //     // this.tokenContract = tokenContract;
+    //     // this.resultParams = new PoolResultParams();
+    //     this.stakingContractMetaData = {} as FungibleTokenMetadata;
+    //     this.metaData2 = {} as FungibleTokenMetadata;
+    //     this.nftContract = new NFTContract(nftContract)
+
+    //     this.cheddarContract.wallet = wallet;
+    //     this.nftContract.wallet = wallet
+    //     // this.tokenContract.wallet = wallet;
+    // }
+
+    async getTokenContractList(contractNameArray: string[]): Promise<TokenContractData[]> {
         let tokenContractList = []
         for(let i = 0; i < contractNameArray.length; i++) {
             const tokenContractName= contractNameArray[i]
@@ -150,21 +163,21 @@ export class PoolParamsP3 {
 
     async setResultParams() {
         const accName = this.stakingContract.wallet.getAccountId()
-        let accountInfo: Status = await this.stakingContract.status(accName)
+        let accountInfo: PoolUserStatus = await this.stakingContract.status(accName)
         if(!accountInfo) {
             const stakeTokensLength = this.contractParams.stake_tokens.length
             const farmTokensLength = this.contractParams.farm_tokens.length
-            this.resultParams = new PoolResultParams(stakeTokensLength, farmTokensLength)
+            this.poolUserStatus = new PoolUserStatus(stakeTokensLength, farmTokensLength)
             return
         }
     
-        this.resultParams.staked = accountInfo.stake_tokens
-        this.resultParams.farmedUnits = accountInfo.farmed_units
-        this.resultParams.farmed = accountInfo.farmed_tokens
-        this.resultParams.previous_timestamp = accountInfo.timestamp
-        this.resultParams.cheddy_nft = accountInfo.cheddy_nft
+        this.poolUserStatus.staked = accountInfo.stake_tokens
+        this.poolUserStatus.farmedUnits = accountInfo.farmed_units
+        this.poolUserStatus.farmed = accountInfo.farmed_tokens
+        this.poolUserStatus.previous_timestamp = accountInfo.timestamp
+        this.poolUserStatus.cheddy_nft = accountInfo.cheddy_nft
         // Contract saves previous_timestamp in seconds
-        this.resultParams.accName = accName
+        this.poolUserStatus.accName = accName
     }
 
     async setAllExtraData() {
@@ -240,7 +253,7 @@ export class PoolParamsP3 {
             const rewardsPerDayBN = BigInt(this.contractParams.farm_token_rates[i]) * 60n * 24n
             const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 5)
             const totalRewards = convertToDecimals(this.contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 5)
-            const userUnclaimedRewards = convertToDecimals(this.resultParams.farmed[i], farmTokenContract.metaData.decimals, 5)
+            const userUnclaimedRewards = convertToDecimals(this.poolUserStatus.farmed[i], farmTokenContract.metaData.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -253,7 +266,7 @@ export class PoolParamsP3 {
         return dataArray
     }
 
-    getIcon(contractData: ContractData): TokenIconData{
+    getIcon(contractData: TokenContractData): TokenIconData{
         const src = contractData.metaData.icon ? contractData.metaData.icon : contractData.metaData.name
         return {
             isSvg: src.includes("<svg"),
@@ -303,12 +316,12 @@ export class PoolParamsP3 {
         let iconDataArray = this.getRewardTokenIconData()
         // const accName = this.stakingContract.wallet.getAccountId()
         // const status: Status = await this.stakingContract.status(accName)
-        console.log("UNCLAIMED REWARDS", this.resultParams.farmed)
+        console.log("UNCLAIMED REWARDS", this.poolUserStatus.farmed)
         
         for(let i = 0; i < iconDataArray.length; i++) {
             const iconData = iconDataArray[i]
             // TODO Fix when Henry answers how we should handle the unclaimed rewards
-            const amount = convertToDecimals(this.resultParams.farmed[i], this.farmTokenContractList[i].metaData.decimals, 5)
+            const amount = convertToDecimals(this.poolUserStatus.farmed[i], this.farmTokenContractList[i].metaData.decimals, 5)
             dataArray.push({
                 amount: amount,
                 iconData: iconData
@@ -360,25 +373,25 @@ export class PoolParamsP3 {
             } else if(this.contractParams.farm_token_rates) {
                 /** TODO - Implement **/
             } else {
-                this.resultParams.real_rewards_per_day = totalRewardsPerDay
+                this.poolUserStatus.real_rewards_per_day = totalRewardsPerDay
             }
 
         } else {
             // I think in this case, the real_rewards_per_day should be 0, since there is nothing in the pool,
             // there is no reward for anyone.
-            this.resultParams.real_rewards_per_day = totalRewardsPerDay
+            this.poolUserStatus.real_rewards_per_day = totalRewardsPerDay
         }
 
-        this.resultParams.previous_timestamp = Date.now()
+        this.poolUserStatus.previous_timestamp = Date.now()
     }
 
     setStatus(accountInfo: [string, string, string]) {
         // QUESTION Why would accountInfo be undefined|false?
         if(accountInfo) {            
               // QUESTION Should we use indexes instead?
-            this.resultParams.staked = accountInfo.stake_tokens;
-            this.resultParams.real = BigInt(accountInfo.farmed)
-            this.resultParams.previous_timestamp = Number(accountInfo.timestamp)
+            this.poolUserStatus.staked = accountInfo.stake_tokens;
+            this.poolUserStatus.real = BigInt(accountInfo.farmed)
+            this.poolUserStatus.previous_timestamp = Number(accountInfo.timestamp)
         }
     }
 

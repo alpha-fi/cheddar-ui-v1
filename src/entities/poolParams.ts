@@ -1,11 +1,13 @@
 import { wallet } from "..";
+import { FarmData } from "../config";
 import { ContractParams } from "../contracts/contract-structs";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, RewardsTokenData, TokenIconData, UnclaimedRewardsData } from "./genericData";
-import { ContractData } from "./poolParamsP3";
+import { getStakingContractDataP2, StakingContractDataP2, StakingContractDataP3 } from "./PoolEntities";
+import { TokenContractData } from "./poolParamsP3";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -58,45 +60,64 @@ export class PoolResultParams {
 
 export class PoolParams {
     wallet: WalletInterface
-    index: number
     type: string
     html: HtmlPoolParams;
+    stakingContractData: StakingContractDataP2
     // Contract called to move the tokens
-    stakingContract: StakingPoolP1;
+    // stakingContract: StakingPoolP1;
     // Staking contract metadata
-    stakingContractMetaData: FungibleTokenMetadata;
-    // Current state of the staking contract
-    contractParams: ContractParams;
-    // Current state of user in staking contract
-    resultParams: PoolResultParams;
+    stakeTokenMetaData: FungibleTokenMetadata;
+    // // Current state of the staking contract
+    // contractParams: ContractParams;
+    // // Current state of user in staking contract
+    // resultParams: PoolResultParams;
     // Cheddar contract
     cheddarContract: NEP141Trait;
     // Token to be staked contract
     stakeTokenContract: NEP141Trait;
     // Not used - remove
-    metaData2: FungibleTokenMetadata;
-    stakeTokenContractList: ContractData[] = [];
-    farmTokenContractList: ContractData[] = [];
+    // metaData2: FungibleTokenMetadata;
+    stakeTokenContractList: TokenContractData[] = [];
+    farmTokenContractList: TokenContractData[] = [];
 
-    constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP1, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface) {
+    constructor(wallet: WalletInterface, farmData: FarmData, cheddarContractId: string) {
         this.wallet = wallet
-        this.index = index;
-        this.type = type;
-        this.html = html;
-        this.stakingContract = contract;
-        this.contractParams = new ContractParams();
-        this.cheddarContract= cheddarContract;
-        this.stakeTokenContract = tokenContract;
-        this.resultParams = resultParams;
-        this.stakingContractMetaData = {} as FungibleTokenMetadata;
-        this.metaData2 = {} as FungibleTokenMetadata;
+        this.type = farmData.poolType;
+        this.html = new HtmlPoolParams(farmData.poolName)
+        
+        this.stakingContractData = getStakingContractDataP2(wallet, farmData.contractName);
+        
+        this.cheddarContract= new NEP141Trait(cheddarContractId);
+        this.stakeTokenContract = new NEP141Trait(farmData.tokenContractName)
+        // this.resultParams = resultParams;
+        this.stakeTokenMetaData = {} as FungibleTokenMetadata;
+        // this.metaData2 = {} as FungibleTokenMetadata;
 
-        this.stakingContract.wallet = wallet;
+        // this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
         this.stakeTokenContract.wallet = wallet;
     }
 
-    async getTokenContractList(tokenContractName: string): Promise<ContractData[]> {
+    // constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP1, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface) {
+    //     this.wallet = wallet
+    //     this.index = index;
+    //     this.type = type;
+    //     this.html = html;
+        
+    //     this.stakingContract = contract;
+    //     this.contractParams = new ContractParams();
+    //     this.cheddarContract= cheddarContract;
+    //     this.stakeTokenContract = tokenContract;
+    //     this.resultParams = resultParams;
+    //     this.stakingContractMetaData = {} as FungibleTokenMetadata;
+    //     this.metaData2 = {} as FungibleTokenMetadata;
+
+    //     this.stakingContract.wallet = wallet;
+    //     this.cheddarContract.wallet = wallet;
+    //     this.stakeTokenContract.wallet = wallet;
+    // }
+
+    async getTokenContractList(tokenContractName: string): Promise<TokenContractData[]> {
         let tokenContractList = []
         let contract = new NEP141Trait(tokenContractName)
         contract.wallet = this.wallet
@@ -129,9 +150,9 @@ export class PoolParams {
     }
 
     async setMetaData() {
-        this.stakingContractMetaData = await this.stakeTokenContract.ft_metadata()
-        if(this.stakingContractMetaData.symbol == "STNEAR") {
-            this.stakingContractMetaData.symbol = "stNEAR";
+        this.stakeTokenMetaData = await this.stakeTokenContract.ft_metadata()
+        if(this.stakeTokenMetaData.symbol == "STNEAR") {
+            this.stakeTokenMetaData.symbol = "stNEAR";
         }
 
         this.metaData2 = await this.cheddarContract.ft_metadata()
@@ -223,7 +244,7 @@ export class PoolParams {
         return dataArray
     }
 
-    getIcon(contractData: ContractData): TokenIconData{
+    getIcon(contractData: TokenContractData): TokenIconData{
         const src = contractData.metaData.icon ? contractData.metaData.icon : contractData.metaData.name
         return {
             isSvg: src.includes("<svg"),
@@ -241,7 +262,7 @@ export class PoolParams {
         }]
     }
 
-    async getStakeTokenContractData(): Promise<ContractData> {
+    async getStakeTokenContractData(): Promise<TokenContractData> {
         return {
             contract: this.stakeTokenContract,
             metaData: await this.stakeTokenContract.ft_metadata(),
@@ -249,7 +270,7 @@ export class PoolParams {
         }
     }
 
-    async getFarmTokenContractData(): Promise<ContractData> {
+    async getFarmTokenContractData(): Promise<TokenContractData> {
         const metadata = await this.cheddarContract.ft_metadata()
         return {
             contract: this.cheddarContract,
@@ -270,6 +291,6 @@ export class PoolParams {
 
     async getWalletAvailableDisplayable() {
         const available = await this.getWalletAvailable()
-        return convertToDecimals(available, this.stakingContractMetaData.decimals, 7)
+        return convertToDecimals(available, this.stakeTokenMetaData.decimals, 7)
     }
 }

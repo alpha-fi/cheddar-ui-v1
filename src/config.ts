@@ -14,7 +14,7 @@ const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
-type GetConfigResult = {
+export type FarmData = {
   index?: number;
   poolType: string;
   poolName:string;
@@ -33,7 +33,7 @@ type GetConfigResults = {
   helperUrl?:string;
   explorerUrl?:string;
   masterAccount?:string;
-  farms: Array<GetConfigResult>;
+  farms: Array<FarmData>;
 }
 
 export function getConfig(env:string):GetConfigResults {
@@ -193,7 +193,6 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'tt',
           contractName: 'p3-tt.cheddar.testnet',
           tokenContractName: 'test-token.cheddar.testnet',
-          
         },
         {
           index: 1,
