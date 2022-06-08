@@ -229,10 +229,14 @@ async function convertToUSDMultiple(tokenContractList: ContractData[], amountLis
   const rewardTokenArray = tokenContractList.map(tokenContract => tokenContract.metaData.symbol)
   const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
   let amountInUsd: number = 0
+  // console.log("Token contract list: ", tokenContractList)
+  // console.log(amountList)
   tokenContractList.forEach((tokenContract, index) => {
     const metaData = tokenContract.metaData
     const symbol = metaData.symbol
     const unclaimedRewards = amountList[index]
+    
+    // console.log(unclaimedRewards)
     const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 5)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
 
@@ -880,7 +884,7 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
 }
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
-
+  
   const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
   const farmTokenContractData: ContractData = await poolParams.getFarmTokenContractData();
 
@@ -907,14 +911,18 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
   
-  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd)
+  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd, isDateInRange)
   newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   addSinglePoolListeners(poolParams, newPool)
 }
 
-function calculateAPR(totalStakedInUsd: string, rewardsPerDayInUsd: string): string {
-  return (365 * Number(rewardsPerDayInUsd) / Number(totalStakedInUsd) * 100).toFixed(2)
+function calculateAPR(totalStakedInUsd: string, rewardsPerDayInUsd: string, isDateInRange: boolean): string {
+  if(!isDateInRange) {
+    return "-"
+  } else {
+    return (365 * Number(rewardsPerDayInUsd) / Number(totalStakedInUsd) * 100).toFixed(2)
+  }
 
 }
 
@@ -1584,20 +1592,12 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
   isPaused = false;
 }
 
-async function deleteMeViewMethods() {
-  const metadata = await view("p3-tt.cheddar.testnet", "status", {account_id: "empty_test.testnet"})
-  console.log(metadata)
-}
-
 window.onload = async function () {
   try {
     let env = ENV //default
 
     if (env != nearConfig.networkId)
       nearConfig = getConfig(ENV);
-
-      // DELETE
-    deleteMeViewMethods()
 
     near = await nearAPI.connect(
       Object.assign(
