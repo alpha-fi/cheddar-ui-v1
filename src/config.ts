@@ -1,6 +1,7 @@
 export const ENV = 'mainnet'
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+export const NO_CONTRACT_DEPOSIT_NEAR = "no-contract-deposit-near"
 
 const MAINNET_NETWORKID = 'mainnet'
 const MAINNET_NODEURL = 'https://rpc.mainnet.near.org'
@@ -127,21 +128,21 @@ export function getConfig(env:string):GetConfigResults {
           // keyPath: undefined,
           // masterAccount:undefined
         },
-        // {
-        //   index: 5,
-        //   poolType: 'single',
-        //   poolName : 'near',
-        //   // networkId: MAINNET_NETWORKID,
-        //   // nodeUrl: MAINNET_NODEURL,
-        //   contractName: 'p1-farm.cheddar.near',
-        //   // cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        //   tokenContractName: CHEDDAR_CONTRACT_NAME,
-        //   // walletUrl: MAINNET_WALLETURL,
-        //   // helperUrl: MAINNET_HELPERURL,
-        //   // explorerUrl: MAINNET_EXPLORERURL,
-        //   // keyPath: undefined,
-        //   // masterAccount:undefined
-        // },
+        {
+          index: 5,
+          poolType: 'single',
+          poolName : 'Near',
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
+          contractName: 'p1-farm.cheddar.near',
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: NO_CONTRACT_DEPOSIT_NEAR,
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined
+        },
         {
           index: 6,
           poolType: 'single',
@@ -157,21 +158,21 @@ export function getConfig(env:string):GetConfigResults {
           // keyPath: undefined,
           // masterAccount:undefined,
         },
-        // {
-        //   index: 7,
-        //   poolType: 'single',
-        //   poolName : 'nearcon',
-        //   // networkId: MAINNET_NETWORKID,
-        //   // nodeUrl: MAINNET_NODEURL,
-        //   contractName: 'farm-nearcon.cheddar.near',
-        //   // cheddarContractName: CHEDDAR_CONTRACT_NAME,
-        //   tokenContractName: CHEDDAR_CONTRACT_NAME,
-        //   // walletUrl: MAINNET_WALLETURL,
-        //   // helperUrl: MAINNET_HELPERURL,
-        //   // explorerUrl: MAINNET_EXPLORERURL,
-        //   // keyPath: undefined,
-        //   // masterAccount:undefined,
-        // },
+        {
+          index: 7,
+          poolType: 'single',
+          poolName : 'Nearcon',
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
+          contractName: 'farm-nearcon.cheddar.near',
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: NO_CONTRACT_DEPOSIT_NEAR,
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined,
+        },
       ]
     }
   case 'development':

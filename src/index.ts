@@ -905,7 +905,7 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   } else {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
   }
-
+  
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
   const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
@@ -1086,7 +1086,6 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
   let maxButton = infoRowContainer.querySelector(".max-button") as HTMLElement
 
   if (metaData.icon != null){
-    // inputLogoContainer.innerHTML= `${metaData.icon}`
     if(metaData.icon.startsWith("data:image")) {
       let tokenLogoElement = newInputContainer.querySelector("img.token-logo")
       tokenLogoElement?.setAttribute("src", metaData.icon)
@@ -1403,7 +1402,7 @@ function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index:
   let newTokenLogoElement: HTMLElement
   if (metaData.icon != null){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
-    if(metaData.icon.startsWith("data:image/svg+xml")) { // icon is img
+    if(metaData.icon.startsWith("data:image")) { // icon is img
       const tokenLogoElement = qs(".generic-token-logo-img")
       newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
       newTokenLogoElement?.setAttribute("src", metaData.icon)

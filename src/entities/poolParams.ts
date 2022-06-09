@@ -1,5 +1,7 @@
 import { wallet } from "..";
+import { NO_CONTRACT_DEPOSIT_NEAR } from "../config";
 import { ContractParams } from "../contracts/contract-structs";
+import { getNearMetadata } from "../contracts/nearHardcodedObjects";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toStringDec, toStringDecLong, yton } from "../util/conversions";
@@ -77,8 +79,10 @@ export class PoolParams {
     metaData2: FungibleTokenMetadata;
     stakeTokenContractList: ContractData[] = [];
     farmTokenContractList: ContractData[] = [];
+    // Used only for contracts that stake near
+    poolName: string
 
-    constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP1, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface) {
+    constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP1, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface, poolName: string) {
         this.wallet = wallet
         this.index = index;
         this.type = type;
@@ -90,6 +94,7 @@ export class PoolParams {
         this.resultParams = resultParams;
         this.stakingContractMetaData = {} as FungibleTokenMetadata;
         this.metaData2 = {} as FungibleTokenMetadata;
+        this.poolName = poolName
 
         this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
@@ -126,6 +131,12 @@ export class PoolParams {
 
     async setContractParams() {
         this.contractParams = await this.stakingContract.get_contract_params();
+        if(this.contractParams.total_staked === undefined) {
+            // p1 contracts have the parameter total_stake, while p2 contracts have total_staked. So this is a patch for avoiding changing code
+            this.contractParams.total_staked = this.contractParams.total_stake
+            this.contractParams.farming_rate = this.contractParams.rewards_per_day
+            this.contractParams.total_farmed = this.contractParams.total_rewards
+        }
     }
 
     async setMetaData() {
@@ -153,10 +164,15 @@ export class PoolParams {
 
     async setAllExtraData() {
         await this.setContractParams();
-        await this.setStakeTokenContractList()
         await this.setFarmTokenContractList()
-        await this.setMetaData();
         await this.setResultParams();
+        if(this.stakeTokenContract.contractId != NO_CONTRACT_DEPOSIT_NEAR) {
+            await this.setStakeTokenContractList()
+            await this.setMetaData();
+        } else {
+            // The deposited token is Near, so things are handled differently
+            this.stakeTokenContractList = [await this.getStakeTokenContractData()]
+        }
     }
 
     async refreshAllExtraData() {
@@ -242,10 +258,18 @@ export class PoolParams {
     }
 
     async getStakeTokenContractData(): Promise<ContractData> {
-        return {
-            contract: this.stakeTokenContract,
-            metaData: await this.stakeTokenContract.ft_metadata(),
-            balance: await this.stakeTokenContract.ft_balance_of(wallet.getAccountId()),
+        if(this.stakeTokenContract.contractId !== NO_CONTRACT_DEPOSIT_NEAR) {
+            return {
+                contract: this.stakeTokenContract,
+                metaData: await this.stakeTokenContract.ft_metadata(),
+                balance: await this.stakeTokenContract.ft_balance_of(wallet.getAccountId()),
+            }
+        } else {
+            return {
+                contract: this.stakeTokenContract,
+                metaData: getNearMetadata(this.poolName),
+                balance: await this.wallet.getAccountBalance(),
+            }
         }
     }
 

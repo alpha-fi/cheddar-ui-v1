@@ -22,6 +22,9 @@ function getPriceWithData(tokenSymbol: string): RefTokenData {
         // NUT arbitrarily
         tokenSymbol = "nut".toLowerCase()
     }
+    if(tokenSymbol == "near" || tokenSymbol == "nearcon") {
+        tokenSymbol = "wnear"
+    }
     let output: RefTokenData | undefined = undefined
     tokenArray.forEach(tokenData => {
         if(tokenData.symbol.toLowerCase() === tokenSymbol) {

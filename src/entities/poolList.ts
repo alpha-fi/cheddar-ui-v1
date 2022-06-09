@@ -25,7 +25,7 @@ async function generatePoolList(wallet: WalletInterface) {
             poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, nearConfig.nftContractAddress, wallet);
         } else {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
-            poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet);
+            poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet, nearConfig.farms[i].poolName);
         }
         await poolParams.setAllExtraData();
 
