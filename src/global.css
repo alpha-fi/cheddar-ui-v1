@@ -1282,6 +1282,10 @@ input:checked + .slider:before {
   color: var(--light-gray);
 }
 
+#home-connected {
+  margin: 0 15px;
+}
+
 #home-connected #pool_list {
   justify-content: space-between;
   flex-wrap: wrap;
@@ -1296,6 +1300,14 @@ input:checked + .slider:before {
   min-width: 350px;
   height: max-content;
   border-radius: 8px!important;
+}
+
+.news {
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 3rem;
+  color: black;
 }
 
 .pool-filter-container {
