@@ -20,7 +20,7 @@ export class HtmlPoolParams {
     }
 }
 
-export class PoolResultParams {
+export class UserStatusP2 {
     // All the numbers that are bigint are expected to be without any decimal points, and are converted when needed
     real_rewards_per_day: bigint = 0n;
     skip: Number = 0;
@@ -29,9 +29,15 @@ export class PoolResultParams {
     // computed holds an integer number with no decimal places holding the info about the computed cheddar rewars calculated
     computed: bigint = 0n;
     previous_real: bigint = 0n;
-    previous_timestamp: number = 0;
+    previousTimestamp: number = 0;
     tokenDecimals: Number = 0;
     accName: string = '';
+
+    constructor(userStatus: [string, string, string]) {
+        this.staked = BigInt(userStatus[0])
+        this.real = BigInt(userStatus[1])
+        this.previousTimestamp = Number(userStatus[2])
+    }
 
     hasStakedTokens() {
         return this.staked > 0n
@@ -85,7 +91,8 @@ export class PoolParams {
         this.type = farmData.poolType;
         this.html = new HtmlPoolParams(farmData.poolName)
         
-        this.stakingContractData = getStakingContractDataP2(wallet, farmData.contractName);
+        this.stakingContractData = new StakingContractDataP2(wallet, farmData.contractName);
+        this.stakingContractData.contract
         
         this.cheddarContract= new NEP141Trait(cheddarContractId);
         this.stakeTokenContract = new NEP141Trait(farmData.tokenContractName)
@@ -96,6 +103,11 @@ export class PoolParams {
         // this.stakingContract.wallet = wallet;
         this.cheddarContract.wallet = wallet;
         this.stakeTokenContract.wallet = wallet;
+    }
+
+    async userHasStakedTokens() {
+        const poolUserStatus: [string, string, string] = await this.stakingContractData.userStatusPromise
+        return Number(poolUserStatus[0]) > 0
     }
 
     // constructor(index: number, type:string, html: HtmlPoolParams, contract: StakingPoolP1, cheddarContract: NEP141Trait, tokenContract: NEP141Trait, resultParams: PoolResultParams, wallet: WalletInterface) {
@@ -173,17 +185,17 @@ export class PoolParams {
     }
 
     async setAllExtraData() {
-        await this.setContractParams();
-        await this.setStakeTokenContractList()
-        await this.setFarmTokenContractList()
-        await this.setMetaData();
-        await this.setResultParams();
+        // await this.setContractParams();
+        // await this.setStakeTokenContractList()
+        // await this.setFarmTokenContractList()
+        // await this.setMetaData();
+        // await this.setResultParams();
     }
 
     async refreshAllExtraData() {
-        await this.setContractParams()
-        await this.setResultParams()
-        await this.setStakeTokenContractList()
+        // await this.setContractParams()
+        // await this.setResultParams()
+        // await this.setStakeTokenContractList()
     }
     
     getStakedTokenIconData(): TokenIconData[] {
@@ -244,7 +256,7 @@ export class PoolParams {
         return dataArray
     }
 
-    getIcon(contractData: TokenContractData): TokenIconData{
+    getIcon(contractData: TokenContractData): TokenIconData {
         const src = contractData.metaData.icon ? contractData.metaData.icon : contractData.metaData.name
         return {
             isSvg: src.includes("<svg"),

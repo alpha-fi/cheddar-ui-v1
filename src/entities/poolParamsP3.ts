@@ -38,13 +38,7 @@ export class PoolUserStatus {
         this.farmed = new Array(farmedTokensLength).fill("0")
     }
 
-    hasStakedTokens() {
-        let hasStakedTokens = false
-        for(let i = 0; i < this.staked.length; i++) {
-            hasStakedTokens ||= BigInt(this.staked[i]) > 0n
-        }
-        return hasStakedTokens
-    }
+    
 
     getDisplayableAccountName() {
         return this.accName.length > 22 ? this.accName.slice(0, 10) + ".." + this.accName.slice(-10) : this.accName
@@ -94,6 +88,14 @@ export class PoolParamsP3 {
         this.nftContract.wallet = this.wallet
     }
 
+    async userHasStakedTokens() {
+        const poolUserStatus = await this.stakingContractData.contractParamsPromise
+        let hasStakedTokens = false
+        for(let i = 0; i < poolUserStatus.stake_tokens.length; i++) {
+            hasStakedTokens ||= BigInt(poolUserStatus.stake_tokens[i]) > 0n
+        }
+        return hasStakedTokens
+    }
 
     // constructor(index: number, type:string, html: HtmlPoolParams, stakingContract: StakingPoolP3, cheddarContract: NEP141Trait, nftContract: string, wallet: WalletInterface) {
     //     this.wallet = wallet
@@ -149,48 +151,50 @@ export class PoolParamsP3 {
         }
     }
 
-    async setStakeTokenContractList() {
-        this.stakeTokenContractList = await this.getTokenContractList(this.contractParams.stake_tokens)
+    async getStakeTokenContractList() {
+        const contractParams = await this.stakingContractData.contractParamsPromise
+        return await this.getTokenContractList(contractParams.stake_tokens)
     }
 
-    async setFarmTokenContractList() {
-        this.farmTokenContractList = await this.getTokenContractList(this.contractParams.farm_tokens)   
+    async getFarmTokenContractList() {
+        const contractParams = await this.stakingContractData.contractParamsPromise
+        return await this.getTokenContractList(contractParams.farm_tokens)   
     }
 
-    async setContractParams() {
-        this.contractParams = await this.stakingContract.get_contract_params();
-    }
+    // async setContractParams() {
+    //     this.stakingContractData.contractParamsPromise = this.stakingContractData.contract.get_contract_params();
+    // }
 
-    async setResultParams() {
-        const accName = this.stakingContract.wallet.getAccountId()
-        let accountInfo: PoolUserStatus = await this.stakingContract.status(accName)
-        if(!accountInfo) {
-            const stakeTokensLength = this.contractParams.stake_tokens.length
-            const farmTokensLength = this.contractParams.farm_tokens.length
-            this.poolUserStatus = new PoolUserStatus(stakeTokensLength, farmTokensLength)
-            return
-        }
+    // async setResultParams() {
+    //     const accName = this.stakingContract.wallet.getAccountId()
+    //     let accountInfo: PoolUserStatus = await this.stakingContract.status(accName)
+    //     if(!accountInfo) {
+    //         const stakeTokensLength = this.contractParams.stake_tokens.length
+    //         const farmTokensLength = this.contractParams.farm_tokens.length
+    //         this.poolUserStatus = new PoolUserStatus(stakeTokensLength, farmTokensLength)
+    //         return
+    //     }
     
-        this.poolUserStatus.staked = accountInfo.stake_tokens
-        this.poolUserStatus.farmedUnits = accountInfo.farmed_units
-        this.poolUserStatus.farmed = accountInfo.farmed_tokens
-        this.poolUserStatus.previous_timestamp = accountInfo.timestamp
-        this.poolUserStatus.cheddy_nft = accountInfo.cheddy_nft
-        // Contract saves previous_timestamp in seconds
-        this.poolUserStatus.accName = accName
-    }
+    //     this.poolUserStatus.staked = accountInfo.stake_tokens
+    //     this.poolUserStatus.farmedUnits = accountInfo.farmed_units
+    //     this.poolUserStatus.farmed = accountInfo.farmed_tokens
+    //     this.poolUserStatus.previous_timestamp = accountInfo.timestamp
+    //     this.poolUserStatus.cheddy_nft = accountInfo.cheddy_nft
+    //     // Contract saves previous_timestamp in seconds
+    //     this.poolUserStatus.accName = accName
+    // }
 
     async setAllExtraData() {
-        await this.setContractParams()
-        await this.setStakeTokenContractList()
-        await this.setFarmTokenContractList()
-        await this.setResultParams()
+        // await this.setContractParams()
+        // await this.setStakeTokenContractList()
+        // await this.setFarmTokenContractList()
+        // await this.setResultParams()
     }
 
     async refreshAllExtraData() {
-        await this.setContractParams()
-        await this.setResultParams()
-        await this.setStakeTokenContractList()
+        // await this.setContractParams()
+        // await this.setResultParams()
+        // await this.setStakeTokenContractList()
     }
 
     async stake(amounts: bigint[]) {

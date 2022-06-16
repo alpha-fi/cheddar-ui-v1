@@ -220,7 +220,8 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
   const rewardToken = "cheddar"
   const rewardTokenData: RefTokenData = await getTokenData(rewardToken)
   const metaData = await poolParams.cheddarContract.ft_metadata()
-  const currentRewards: bigint = poolParams.resultParams.real
+  const userPoolParams = await poolParams.stakingContractData.getUserStatus()
+  const currentRewards: bigint = userPoolParams.real
   const currentRewardsDisplayable = convertToDecimals(currentRewards, metaData.decimals, 5)
   return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
 }
@@ -578,8 +579,8 @@ async function signedInFlow(wallet: WalletInterface) {
   // await refreshAccountInfoGeneric(poolList)
   if(wallet.isConnected()) {
     const poolList = await getPoolList(wallet);
-    await addPoolList(poolList)
-    qs(".user-info #account-id").innerText = poolList[0].poolUserStatus.getDisplayableAccountName()
+    
+    qs(".user-info #account-id").innerText = poolList[0].wallet.getAccountId()
     setDefaultFilter()
   } else {
     // If user is disconnected it, account Id is the default disconnected message
@@ -853,8 +854,11 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   const stakeTokenContractData: TokenContractData = await poolParams.getStakeTokenContractData();
   const farmTokenContractData: TokenContractData = await poolParams.getFarmTokenContractData();
 
+  console.log("Data", poolParams.stakingContractData)
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const userStatus = await poolParams.stakingContractData.getUserStatus()
   addInput(newPool, stakeTokenContractData, "stake")
-  addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
+  addInput(newPool, stakeTokenContractData, "unstake", userStatus.staked.toString())
 
   addHeader(poolParams, newPool)
   
@@ -866,8 +870,8 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ 0`
   }
 
-  const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
-  const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
+  const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [contractParams.total_staked])
+  const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(contractParams.farming_rate) * 60n * 24n).toString()])
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
   
@@ -1101,10 +1105,10 @@ function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTM
   }
 }
 
-function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
+async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   addAllCommonListeners(poolParams, newPool)
   // Harvest button listener
-  const contractData = poolParams.stakeTokenContractList[0]
+  const contractData = await poolParams.getStakeTokenContractData()
   const metaData = contractData.metaData
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
   // Token symbols is done this way to emulate multiple case. Single case will be removed shortly
@@ -1189,15 +1193,17 @@ function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, 
   qs(".activeFilterButton").dispatchEvent(event)
 }
 
-function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
+async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
   // Cleaning classes in case of reset
   const classes = ["your-farms", "active-pool", "inactive-pool"]
   classes.forEach(className => newPool.classList.remove(className))
   
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const contractParams = await poolParams.stakingContractData.contractParamsPromise
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   
-  if(poolParams.poolUserStatus.hasStakedTokens()){
+  const poolUserStatus: PoolUserStatus|[string, string, string] = await poolParams.stakingContractData.userStatusPromise
+  if(await poolParams.userHasStakedTokens()){
     newPool.classList.add("your-farms")
   }
   if(!dateInRangeHack && isDateInRange) {
@@ -1594,6 +1600,7 @@ window.onload = async function () {
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
       const poolList = await getPoolList(wallet)
+      await addPoolList(poolList)
       const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
       let method: string = ""
       let err
