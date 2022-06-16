@@ -1403,30 +1403,56 @@ input:checked + .slider:before {
   height: 44px;
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-content: center;
-  justify-content: center;
-}
-
-.have-1-elements img, .have-1-elements svg {
-  width: 44px !important;
-  max-width: none !important;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .token-logo-container img, .token-logo-svg-container svg {
-  width: 50%;
-  max-width: 33px;
+  max-width: 44px;
+  aspect-ratio: 1;
   background-color: var(--white);
   border-radius: 100%;
   box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
 }
 
-.have-5-elements > *:nth-child(3) {
-  margin: -1.2rem 10px;
+.token-logo-container > *:first-child {
+  margin-left: 0;
 }
 
-.have-6-elements > *:nth-child(3), .have-6-elements > *:nth-child(4) {
-  margin: -1.2rem 0;
+.have-1-elements > * {
+  height: 100%;
+}
+
+.have-2-elements > * {
+  margin-left: -0.6rem;
+  height: 90%;
+}
+
+.have-3-elements > * {
+  margin-left: -1.3rem;
+  height: 85%;
+}
+
+.have-4-elements > * {
+  margin-left: -1.5rem;
+  height: 80%;
+}
+
+.have-5-elements > * {
+  margin-left: -1.3rem;
+  height: 70%;
+}
+
+.have-6-elements > * {
+  margin-left: -1.35rem;
+  height: 65%;
+}
+
+.have-7-elements > * {
+  margin-left: -1.4rem;
+  height: 63%;
 }
 
 .farmed-token-logo {
@@ -1442,7 +1468,7 @@ input:checked + .slider:before {
 }
 
 .information-icon-container img {
-  margin-left: 64%;
+  margin-left: 53%;
 }
 
 .token-stats {
@@ -1461,7 +1487,7 @@ input:checked + .slider:before {
   font-weight: 700;
   line-height: 19px;
   width: 55%;
-  /* margin: 0 18%; */
+  margin: 0 12%;
 }
 
 .token-name-container .token-name {
