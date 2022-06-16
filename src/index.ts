@@ -22,7 +22,7 @@ import { U128String } from './wallet-api/util';
 import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities/genericData';
 
 import * as nearAPI from "near-api-js"
-import { getPrice as getTokenData, getPrices as getTokenDataArray } from './util/oracle';
+import { getTokenData, getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
 import { P3ContractParams, Status } from './contracts/p3-structures';
@@ -587,7 +587,7 @@ async function signedInFlow(wallet: WalletInterface) {
   if(wallet.isConnected()) {
     const poolList = await getPoolList(wallet);
     await addPoolList(poolList)
-    qs(".user-info #account-id").innerText = poolList[0].resultParams.getDisplayableAccountName()
+    qs(".user-info #account-id").innerText = wallet.getDisplayableAccountId()
     setDefaultFilter()
   } else {
     // If user is disconnected it, account Id is the default disconnected message
@@ -1247,7 +1247,8 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
   classes.forEach(className => newPool.classList.remove(className))
   
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  // const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const isDateInRange = now < poolParams.contractParams.farming_end
   
   if(poolParams.resultParams.hasStakedTokens()){
     newPool.classList.add("your-farms")
@@ -1315,7 +1316,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   await addUnclaimedRewardsDetail(poolParams, newPool)
   
   let unixTimestamp = new Date().getTime() / 1000;
-  const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+  // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+  const isDateInRange = unixTimestamp < contractParams.farming_end
   setDateInRangeVisualIndication(poolParams, newPool, isDateInRange)
   
   qs("#pool_list").append(newPool)

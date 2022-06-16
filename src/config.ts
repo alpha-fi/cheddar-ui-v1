@@ -173,6 +173,21 @@ export function getConfig(env:string):GetConfigResults {
           // keyPath: undefined,
           // masterAccount:undefined,
         },
+        {
+          index: 8,
+          poolType: 'multiple',
+          poolName : 'cheddar-ref-burrow',
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
+          contractName: 'p3-ref-bbr.cheddar.near',
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: 'test-token.cheddar.testnet',
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined,
+        },
       ]
     }
   case 'development':

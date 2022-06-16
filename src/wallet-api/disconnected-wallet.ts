@@ -18,6 +18,9 @@ export class DisconnectedWallet implements WalletInterface {
     }
     
     getAccountId():string{ return NOT_CONNECTED }
+    getDisplayableAccountId(): string {
+        return this.getAccountId()
+    }
 
     async getAccountBalance(accountId?:string):Promise<U128String>{ return "0"};
 

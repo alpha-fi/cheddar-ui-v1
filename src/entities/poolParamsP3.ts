@@ -128,7 +128,7 @@ export class PoolParamsP3 {
             const tokenContractData = this.stakeTokenContractList[i]
             tokenNames.push(tokenContractData.metaData.symbol)
         }
-        const names = tokenNames.join(" - ")
+        const names = tokenNames.join(" + ")
         if(names.length > 20) {
             return names.substring(0, 7) + "..." + names.substring(names.length - 7)
         } else {
