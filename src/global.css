@@ -1351,7 +1351,7 @@ input:checked + .slider:before {
   text-align: center;
   display: block;
   font-size: 2rem;
-  margin-top: 30px;
+  margin: 30px;
 }
 
 #pool-container {
