@@ -1302,12 +1302,19 @@ input:checked + .slider:before {
   border-radius: 8px!important;
 }
 
-.news {
+/* .news {
   padding: 14px;
-  border-radius: 10px;
   text-align: center;
   font-size: 3rem;
   color: black;
+} */
+
+.news {
+  text-align: center;
+  color: #8542eb;
+  font-size: 1.5rem;
+  padding: 14px;
+  text-decoration: underline;
 }
 
 .pool-filter-container {
@@ -1338,6 +1345,13 @@ input:checked + .slider:before {
 .pool-filter-container li:hover, .activeFilterButton {
   background-color: var(--primary);
   color: var(--bg);
+}
+
+.not-connected-msg h2 {
+  text-align: center;
+  display: block;
+  font-size: 2rem;
+  margin-top: 30px;
 }
 
 #pool-container {

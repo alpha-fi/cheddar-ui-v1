@@ -588,10 +588,13 @@ async function signedInFlow(wallet: WalletInterface) {
     const poolList = await getPoolList(wallet);
     await addPoolList(poolList)
     qs(".user-info #account-id").innerText = wallet.getDisplayableAccountId()
+    qs(".not-connected-msg").classList.add("hidden")
     setDefaultFilter()
   } else {
+    qs(".not-connected-msg").classList.remove("hidden")
     // If user is disconnected it, account Id is the default disconnected message
     qs(".user-info #account-id").innerText = wallet.getAccountId()
+
   }
   qs(".loader").style.display = "none"
 }
