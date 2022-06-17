@@ -871,18 +871,20 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
     const amountToStake = BigInt(convertToBase(value1, poolParams.stakeTokenContractList[index].metaData.decimals.toString()))
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
-    const stakeRates = poolParams.contractParams.stake_rates.map(rate => BigInt(rate))
+    // THE FOLLOWING LINE IS A PATCH. IT IS USED TO MAKE CHEDDAR+REF+BURROW WORK, BUT IT IS NOT GENERIC AT ALL
+    const decimals = [6, -6, -6] // THIS LINE IS THE PATCH
+    const stakeRates = poolParams.contractParams.stake_rates.map((rate, index) => decimals[index] > 0 ? BigInt(rate) * BigInt(10 ** decimals[index]) : BigInt(rate) / BigInt(10 ** Math.abs(decimals[index]))) // USING DECIMALS IN THIS CASE IS A PATCH
     const totalStaked = poolParams.resultParams.staked.map(total => BigInt(total))
     for(let i = 0; i < inputs.length; i++) {
       if(i != index) {
         let amountToTransferSecondaryBN
-        if(inputRoute == "unstake") {
+        if(inputRoute.includes("unstake")) {
           amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStaked, amountToStake, index, i)
         } else {
           amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStaked, amountToStake, index, i)
           
         }
-        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[index].metaData.decimals, 5)
+        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[i].metaData.decimals, 5)
         // const amountToStakeSecondary
         inputs.item(i).value = amountToStakeSecondary
       }
