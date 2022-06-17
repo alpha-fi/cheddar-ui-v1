@@ -851,17 +851,34 @@ function calculateAmountHaveStaked(stakeRates: bigint[], amount: bigint, amountI
 
 function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
 	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
-	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
-	const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
-	return amountToStake > 0n ? amountToStake : 0n
+  return totalAmountStakedWithThisStake * stakeRates[amountIndex] / stakeRates[newAmountIndex]
+	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
+	// const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
+	// return amountToStake > 0n ? amountToStake : 0n
 }
+
+// function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
+// 	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
+// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
+// 	const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
+// 	return amountToStake > 0n ? amountToStake : 0n
+// }
 
 function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
-	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
-	const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
-	return amountToUnstake > 0n ? amountToUnstake : 0n
+  const output = totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
+  return output > 0n ? output : BigInt(-1) * output
+	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
+	// const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
+	// return amountToUnstake > 0n ? amountToUnstake : 0n
 }
+
+// function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
+// 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
+// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
+// 	const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
+// 	return amountToUnstake > 0n ? amountToUnstake : 0n
+// }
 
 function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, index: number) {
   return function (event: Event) {
@@ -872,8 +889,8 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
     // THE FOLLOWING LINE IS A PATCH. IT IS USED TO MAKE CHEDDAR+REF+BURROW WORK, BUT IT IS NOT GENERIC AT ALL
-    const decimals = [6, -6, -6] // THIS LINE IS THE PATCH
-    const stakeRates = poolParams.contractParams.stake_rates.map((rate, index) => decimals[index] > 0 ? BigInt(rate) * BigInt(10 ** decimals[index]) : BigInt(rate) / BigInt(10 ** Math.abs(decimals[index]))) // USING DECIMALS IN THIS CASE IS A PATCH
+    // const decimals = [6, -6, -6] // THIS LINE IS THE PATCH
+    const stakeRates = poolParams.contractParams.stake_rates.map((rate, index) => BigInt(rate)) // USING DECIMALS IN THIS CASE IS A PATCH
     const totalStaked = poolParams.resultParams.staked.map(total => BigInt(total))
     for(let i = 0; i < inputs.length; i++) {
       if(i != index) {
@@ -1866,6 +1883,11 @@ async function loadNFTs(poolParams: PoolParamsP3) {
   const accountId = poolParams.wallet.getAccountId()
   const nftContract = poolParams.nftContract
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
+
+  if(nftCollection.length == 0) {
+    NFTContainer.innerHTML = "You don't have any NFT's"
+    return
+  }
 
   let userStatus: Status = await poolParams.stakingContract.status(accountId)
   const poolHasStaked = userStatus.cheddy_nft != ''

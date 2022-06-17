@@ -43,7 +43,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'production':
   case 'mainnet':
     return {
-      nftContractAddress: "",
+      nftContractAddress: "nft.cheddar.near",
       networkId: MAINNET_NETWORKID,
       nodeUrl: MAINNET_NODEURL,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,

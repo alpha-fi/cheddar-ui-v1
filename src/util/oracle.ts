@@ -6,6 +6,7 @@ let tokenDataArray: RefTokenData[]
 async function setAllTokensData(): Promise<void> {
     const url = "https://api.stats.ref.finance/api/top-tokens"
     const response = await fetch(url)
+    const errorMessage = "We are experiencing issues with the Ref Price Oracle, please try again in a bit."
     const json = await response.json()
     tokenDataArray = json
 }
