@@ -257,7 +257,8 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
       const contractParams = poolParams.contractParams
-      const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      const isDateInRange = unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
       
       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: stakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "stake")
@@ -302,7 +303,8 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
       const contractParams = poolParams.contractParams
-      const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      const isDateInRange = unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
       
       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: unstakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "unstake")
@@ -865,6 +867,7 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
   return function (event: Event) {
     event.preventDefault()
     const value1 = (event.target as HTMLInputElement).value
+    // const amountToStake = BigInt(value1)
     const amountToStake = BigInt(convertToBase(value1, poolParams.stakeTokenContractList[index].metaData.decimals.toString()))
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
@@ -873,13 +876,14 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
     for(let i = 0; i < inputs.length; i++) {
       if(i != index) {
         let amountToTransferSecondaryBN
-        if(inputRoute.includes("unstake")) {
+        if(inputRoute == "unstake") {
           amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStaked, amountToStake, index, i)
         } else {
           amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStaked, amountToStake, index, i)
           
         }
-        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[i].metaData.decimals, 5)
+        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[index].metaData.decimals, 5)
+        // const amountToStakeSecondary
         inputs.item(i).value = amountToStakeSecondary
       }
     }
