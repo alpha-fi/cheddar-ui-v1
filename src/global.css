@@ -559,7 +559,6 @@ button.hollow {
 .btn-outline-none {
   border: none;
   line-height: 32px;
-  /* margin-left: 3rem; */
 }
 
 .btn-outline-none svg {
@@ -1165,11 +1164,6 @@ input:checked + .slider:before {
   form {
     min-width: 280px;
   }
-/* 
-  .btn-outline-none {
-    margin-left: 1rem;
-  } */
-
 }
 
 @media screen and (max-width: 1000px) {
@@ -1177,10 +1171,6 @@ input:checked + .slider:before {
   #home-connected, #nft-pools-section {
     margin: 1rem;
   }
-  
-  /* .btn-outline-none {
-    margin-left: 0.2rem;
-  } */
 
   #nft-pools-section {
     left: -13px !important;
@@ -1302,13 +1292,6 @@ input:checked + .slider:before {
   border-radius: 8px!important;
 }
 
-/* .news {
-  padding: 14px;
-  text-align: center;
-  font-size: 3rem;
-  color: black;
-} */
-
 .news {
   text-align: center;
   color: #8542eb;
@@ -1373,6 +1356,7 @@ input:checked + .slider:before {
   background: var(--white);
   box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
   border-radius: 12px;
+  position: relative;
 }
 
 #contract-period-container {
@@ -1513,8 +1497,9 @@ input:checked + .slider:before {
   width: 107%;
   max-width: 468px;
   min-width: 334.4px;
-  transform: translate(-23px, -66px);
+  transform: translateX(-23px);
   position: absolute;
+  top: 0px;
   background-color: var(--white);
   padding: 0 10px;
   border-top: 0px;
@@ -1544,7 +1529,9 @@ input:checked + .slider:before {
 .stats-container li {
   display: flex;
   justify-content: space-between;
-  margin: 11px;
+  margin: 11px auto;
+  position: relative;
+  align-items: center;
 }
 
 #contract-information {
@@ -1569,6 +1556,7 @@ input:checked + .slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
 }
 
 h2.nft-name {
@@ -1588,16 +1576,20 @@ h2.nft-name {
   display: flex;
   flex-direction: column-reverse;
   flex-wrap: wrap;
-  position: absolute;
-  transform: translate(229px, -61%);
-  background-color: var(--white);
   align-items: center;
   justify-content: center;
+  align-content: space-around;
+
+  position: absolute;
+  left: 85%;
+  transform: translateY(-61%);
+
+  background-color: var(--white);
   border: 1px solid var(--second-new-grey);
   border-radius: 12px;
-  align-content: space-around;
   margin: 10px 40px;
   padding: 0 9px;
+
   z-index: 1;
 }
 
