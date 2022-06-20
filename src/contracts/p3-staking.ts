@@ -59,7 +59,7 @@ export class StakingPoolP3 extends SmartContract {
     }
 
     withdraw_nft(receiver_id:string):Promise<void>{
-        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"0"); //one-yocto attached
+        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"1"); //one-yocto attached
     }
 
     // This function is generic, not a p3-staking function. Should be on a more generic place

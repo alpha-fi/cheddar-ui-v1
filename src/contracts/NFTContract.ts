@@ -9,7 +9,7 @@ import { NFT } from "./nft-structs";
 type U128String = string;
 type U64String = string;
 
-export const nftBaseUrl = "https://bafybeibghcllcmurku7lxyg4wgxn2zsu5qqk7h4r6bmyhpztmyd564cx54.ipfs.nftstorage.link/"
+export const nftBaseUrl = "https://nftstorage.link/ipfs/bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice/"
 
 export class NFTContract extends SmartContract {
 

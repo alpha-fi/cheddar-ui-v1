@@ -1062,7 +1062,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   // newPool.querySelector(".apr-row .apr-value")!.innerHTML = `$ ${totalFarmedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
 
-  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd)
+  const apr = calculateAPR(totalStakedInUsd, rewardsPerDayInUsd, isDateInRange)
   newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   setBoostDisplay(poolParams, newPool)
