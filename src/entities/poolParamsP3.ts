@@ -82,14 +82,14 @@ export class PoolParamsP3 {
         this.type = farmData.poolType;
 
         this.html = new HtmlPoolParams(farmData.poolName);
-        this.stakingContractData = getStakingContractDataP3(wallet, farmData.contractName)
+        this.stakingContractData = new StakingContractDataP3(wallet, farmData.contractName)
 
         this.nftContract = new NFTContract(nftContract)
         this.nftContract.wallet = this.wallet
     }
 
     async userHasStakedTokens() {
-        const poolUserStatus = await this.stakingContractData.contractParamsPromise
+        const poolUserStatus = await this.stakingContractData.getUserStatus()
         let hasStakedTokens = false
         for(let i = 0; i < poolUserStatus.stake_tokens.length; i++) {
             hasStakedTokens ||= BigInt(poolUserStatus.stake_tokens[i]) > 0n
@@ -137,10 +137,11 @@ export class PoolParamsP3 {
         return tokenContractList
     }
 
-    getPoolName() {
+    async getPoolName() {
         let tokenNames: string[] = []
-        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
-            const tokenContractData = this.stakeTokenContractList[i]
+        const stakeTokenContractList: TokenContractData[] = await this.stakingContractData.getStakeTokenContractList()
+        for(let i = 0; i < stakeTokenContractList.length; i++) {
+            const tokenContractData = stakeTokenContractList[i]
             tokenNames.push(tokenContractData.metaData.symbol)
         }
         const names = tokenNames.join(" - ")
@@ -233,12 +234,15 @@ export class PoolParamsP3 {
         await callMulipleTransactions(TXs, this.stakingContract)   
     }
 
-    getStakeTokensDetail(): DetailRow[]{
+    async getStakeTokensDetail(): Promise<DetailRow[]>{
         let dataArray: DetailRow[] = []
-        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
-            const stakeTokenContract = this.stakeTokenContractList[i]
+        const contractParams = await this.stakingContractData.getContractParams()
+        const stakeTokenContractList = await this.stakingContractData.getStakeTokenContractList()
+
+        for(let i = 0; i < stakeTokenContractList.length; i++) {
+            const stakeTokenContract = stakeTokenContractList[i]
             const iconData = this.getIcon(stakeTokenContract)
-            const totalStaked = convertToDecimals(this.contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 5)
+            const totalStaked = convertToDecimals(contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -248,16 +252,21 @@ export class PoolParamsP3 {
         return dataArray
     }
 
-    getRewardsTokenDetail(): RewardsTokenData[] {
+    async getRewardsTokenDetail(): Promise<RewardsTokenData[]> {
         let dataArray: RewardsTokenData[] = []
-        for(let i = 0; i < this.farmTokenContractList.length; i++) {
-            const farmTokenContract = this.farmTokenContractList[i]
+        const contractParams = await this.stakingContractData.getContractParams()
+        const poolUserStatus = await this.stakingContractData.getUserStatus()
+        const farmTokenContractList = await this.stakingContractData.getFarmTokenContractList()
+        console.log("Pool user status", poolUserStatus)
+
+        for(let i = 0; i < farmTokenContractList.length; i++) {
+            const farmTokenContract = farmTokenContractList[i]
             const iconData = this.getIcon(farmTokenContract)
             const tokenName = farmTokenContract.metaData.name
-            const rewardsPerDayBN = BigInt(this.contractParams.farm_token_rates[i]) * 60n * 24n
+            const rewardsPerDayBN = BigInt(contractParams.farm_token_rates[i]) * 60n * 24n
             const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 5)
-            const totalRewards = convertToDecimals(this.contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 5)
-            const userUnclaimedRewards = convertToDecimals(this.poolUserStatus.farmed[i], farmTokenContract.metaData.decimals, 5)
+            const totalRewards = convertToDecimals(contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 5)
+            const userUnclaimedRewards = convertToDecimals(poolUserStatus.farmed_tokens[i], farmTokenContract.metaData.decimals, 5)
 
             dataArray.push({
                 iconData,

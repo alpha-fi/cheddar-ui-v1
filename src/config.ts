@@ -1,4 +1,4 @@
-export const ENV = 'testnet'
+export const ENV = 'mainnet'
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 

@@ -231,7 +231,8 @@ async function convertToUSDMultiple(tokenContractList: TokenContractData[], amou
   const rewardTokenArray = tokenContractList.map(tokenContract => tokenContract.metaData.symbol)
   const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
   let amountInUsd: number = 0
-  tokenContractList.forEach((tokenContract, index) => {
+  console.log("Amount list", amountList)
+  tokenContractList.forEach((tokenContract: TokenContractData, index: number) => {
     const metaData = tokenContract.metaData
     const symbol = metaData.symbol
     const unclaimedRewards = amountList[index]
@@ -581,7 +582,7 @@ async function signedInFlow(wallet: WalletInterface) {
     const poolList = await getPoolList(wallet);
     
     qs(".user-info #account-id").innerText = poolList[0].wallet.getAccountId()
-    setDefaultFilter()
+    
   } else {
     // If user is disconnected it, account Id is the default disconnected message
     qs(".user-info #account-id").innerText = wallet.getAccountId()
@@ -594,13 +595,15 @@ function setDefaultFilter (){
   let allLivePools = qsa(".active-pool")
   const event= new Event ("click")
   //If you don´t have farms show live pools as default
-  if (allYourFarmsPools.length == 0){
-    qs("#live-filter")!.dispatchEvent(event)
-    if (allLivePools.length == 0){
-      qs("#ended-filter")!.dispatchEvent(event)
-    }
-  } else {
+  if (allYourFarmsPools.length > 0){
+    console.log("Your farms")
     qs("#your-farms-filter").dispatchEvent(event)
+  } else if (allLivePools.length > 0){
+    console.log("Live")
+    qs("#live-filter")!.dispatchEvent(event)
+  } else {
+    console.log("Ended")
+    qs("#ended-filter")!.dispatchEvent(event)
   }
 }
 
@@ -658,8 +661,6 @@ function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
 function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
   poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
 }
-
-let dateInRangeHack = false
 
 function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
@@ -732,19 +733,22 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
 
-  updateDetail(newPool, poolParams.stakeTokenContractList, poolParams.contractParams.total_staked, "total-staked")
+
+  updateDetail(newPool, poolParams.stakeTokenContractList, contractParams.total_staked, "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
-  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(poolParams.contractParams.farm_token_rates), "rewards-per-day")
-  updateDetail(newPool, poolParams.farmTokenContractList, poolParams.poolUserStatus.farmed, "unclaimed-rewards")
+  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(contractParams.farm_token_rates), "rewards-per-day")
+  updateDetail(newPool, poolParams.farmTokenContractList, poolUserStatus.farmed_tokens, "unclaimed-rewards")
 
   const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
   refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
-  refreshInputAmounts(poolParams, newPool, "main-unstake", poolParams.poolUserStatus.staked)
+  refreshInputAmounts(poolParams, newPool, "main-unstake", poolUserStatus.stake_tokens)
 
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  if(dateInRangeHack || !isDateInRange) {
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
+  if(!isDateInRange) {
     resetMultiplePoolListener(poolParams, newPool, refreshPoolInfoMultiple, -1)
   }
 
@@ -851,16 +855,21 @@ function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputR
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
 
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const userStatus = await poolParams.stakingContractData.getUserStatus()
   const stakeTokenContractData: TokenContractData = await poolParams.getStakeTokenContractData();
   const farmTokenContractData: TokenContractData = await poolParams.getFarmTokenContractData();
 
-  console.log("Data", poolParams.stakingContractData)
-  const contractParams = await poolParams.stakingContractData.getContractParams()
-  const userStatus = await poolParams.stakingContractData.getUserStatus()
+  var metaData = poolParams.stakeTokenContractList[0].metaData
+  let iconElem = newPool.querySelectorAll("#token-logo-container img")
+  iconElem.forEach(icon => {
+    icon!.setAttribute("src", metaData.icon || "");
+  });
+  
   addInput(newPool, stakeTokenContractData, "stake")
   addInput(newPool, stakeTokenContractData, "unstake", userStatus.staked.toString())
 
-  addHeader(poolParams, newPool)
+  await addHeader(poolParams, newPool)
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
@@ -886,8 +895,14 @@ function calculateAPR(totalStakedInUsd: string, rewardsPerDayInUsd: string): str
 
 }
 
-function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
-  const tokenContractDataArray: TokenContractData[] = poolParams.stakeTokenContractList
+async function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
+  let tokenContractDataArray: TokenContractData[]
+  if(poolParams instanceof PoolParams) {
+    tokenContractDataArray = poolParams.stakeTokenContractList
+  } else {
+    tokenContractDataArray = await poolParams.stakingContractData.getStakeTokenContractList()
+  }
+  // tokenContractDataArray: TokenContractData[] = poolParams.stakingContractData
   const logoContainer = header.querySelector(".token-logo-container")! as HTMLElement
   logoContainer.innerHTML = ""
 
@@ -900,11 +915,11 @@ function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
   logoContainer.classList.add(`have-${i}-elements`)
 }
 
-function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   const genericHeader = qs(".generic-new-pool-header")
   const newHeader = genericHeader.cloneNode(true) as HTMLElement
 
-  addAllLogos(poolParams, newHeader)
+  await addAllLogos(poolParams, newHeader)
 
   const poolContainer = newPool.querySelector("#pool-container") as HTMLElement
   const tokenPoolStatsContainer = newPool.querySelector("#token-pool-stats") as HTMLElement
@@ -917,7 +932,7 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   tokenPoolStatsContainer.prepend(newTokenPoolStats)
 }
 
-function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
+async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
   addAllCommonListeners(poolParams, newPool)
   let tokenSymbols = []
   for(let i=0; i < poolParams.stakeTokenContractList.length; i++){ // Harvest button listener
@@ -939,7 +954,8 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
   setAllInputMaxButtonListeners(newPool)
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   let refreshIntervalId = -1
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), refreshTime)
@@ -958,7 +974,9 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  addHeader(poolParams, newPool)
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  await addHeader(poolParams, newPool)
   let tokenSymbols = []
   await poolParams.getWalletAvailable()
   for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
@@ -966,7 +984,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     const metaData = contractData.metaData
 
     addInput(newPool, contractData, "stake")
-    addInput(newPool, contractData, "unstake", poolParams.poolUserStatus.staked[i])
+    addInput(newPool, contractData, "unstake", poolUserStatus.stake_tokens[i])
     
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
   }
@@ -975,13 +993,13 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".boost-button")!.classList.remove("hidden")
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
 
-  const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.poolUserStatus.farmed)
+  const unclaimedRewards = await convertToUSDMultiple(poolParams.farmTokenContractList, poolUserStatus.farmed_tokens)
 
   newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards}`
   
-  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
+  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, contractParams.total_staked)
   // const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
-  const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
+  const rewardsPerDay = contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   // newPool.querySelector(".apr-row .apr-value")!.innerHTML = `$ ${totalFarmedInUsd}`
@@ -995,8 +1013,9 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   addMultiplePoolListeners(poolParams, newPool)
 }
 
-function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
-  const hasNFTStaked = poolParams.poolUserStatus.cheddy_nft != ''
+async function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  const hasNFTStaked = poolUserStatus.cheddy_nft != ''
   if(hasNFTStaked) {
     newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
     newPool.querySelector(".boost-button span")!.innerHTML = "BOOSTED"
@@ -1122,7 +1141,8 @@ async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLEleme
   setAllInputMaxButtonListeners(newPool)
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   let refreshIntervalId = -1
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), refreshTime)
@@ -1137,7 +1157,8 @@ async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLEleme
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
 }
 
-function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refreshFunction: (pp: PoolParams, np: HTMLElement) => void, refreshIntervalId: number) {
+async function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refreshFunction: (pp: PoolParams, np: HTMLElement) => void, refreshIntervalId: number) {
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   let newPool = pool.cloneNode(true) as HTMLElement
   hideAllDynamicElements(newPool)
   addFilterClasses(poolParams, newPool)
@@ -1151,7 +1172,7 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
     const now = Date.now() / 1000
-    const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+    const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
     refreshIntervalId = -1
     if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
@@ -1199,14 +1220,14 @@ async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: 
   classes.forEach(className => newPool.classList.remove(className))
   
   const now = Date.now() / 1000
-  const contractParams = await poolParams.stakingContractData.contractParamsPromise
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   
-  const poolUserStatus: PoolUserStatus|[string, string, string] = await poolParams.stakingContractData.userStatusPromise
+  // const poolUserStatus: PoolUserStatus|[string, string, string] = await poolParams.stakingContractData.getUserStatus()
   if(await poolParams.userHasStakedTokens()){
     newPool.classList.add("your-farms")
   }
-  if(!dateInRangeHack && isDateInRange) {
+  if(isDateInRange) {
     newPool.classList.add("active-pool")
   } else {
     newPool.classList.add("inactive-pool")
@@ -1215,10 +1236,9 @@ async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: 
 
 async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
-  var metaData = poolParams.stakingContractMetaData;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
-
+  
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
   
   newPool.setAttribute("id", poolParams.html.id)
@@ -1226,11 +1246,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   newPool.classList.add("pool-container")
   
   
-  let iconElem = newPool.querySelectorAll("#token-logo-container img")
   
-  iconElem.forEach(icon => {
-    icon!.setAttribute("src", metaData.icon || "");
-  });
 
   addFilterClasses(poolParams, newPool)
   if (poolParams instanceof PoolParams) {
@@ -1245,14 +1261,14 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   // New code
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
-  var contractParams = poolParams.contractParams;
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
-
+  const poolName = await poolParams.getPoolName()
   newPool.querySelectorAll(".token-name").forEach(element => {
-    element.innerHTML = poolParams.getPoolName()
+    element.innerHTML = poolName
   })
 
   if(newPool.classList.contains("inactive-pool")) {
@@ -1316,7 +1332,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
-  let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
+  let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
   if(isAccountRegistered) {
     toggleStakeUnstakeSection(newPool)
@@ -1392,7 +1408,7 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
 }
 
 async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const stakeTokenDataArray = poolParams.getStakeTokensDetail()
+  const stakeTokenDataArray = await poolParams.getStakeTokensDetail()
   let totalStakedRows: DetailRowElements = {
     parentClass: "total-staked-info-container",
     rows: []
@@ -1420,7 +1436,7 @@ async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPo
 // }
 
 async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
-  const rewardsTokenDataArray = poolParams.getRewardsTokenDetail()
+  const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   let rewardsPerDayRows: DetailRowElements = {
     parentClass,
     rows: []
@@ -1601,6 +1617,7 @@ window.onload = async function () {
       //show transaction result depending on method called
       const poolList = await getPoolList(wallet)
       await addPoolList(poolList)
+      setDefaultFilter()
       const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
       let method: string = ""
       let err
