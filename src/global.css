@@ -1581,7 +1581,7 @@ h2.nft-name {
   align-content: space-around;
 
   position: absolute;
-  left: 85%;
+  left: 80%;
   transform: translateY(-61%);
 
   background-color: var(--white);
