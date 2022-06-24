@@ -21,7 +21,12 @@ export class ContractParams {
     farming_end: number = 0; //unix timestamp
     total_farmed: string = "0" //yoctoCheddar
     total_staked: string = "0" //yoctoNEAR
+    // total_stake is needed for p1 contracts. It should only work for initial setting. On poolParams will be used to set total_staked so there shouldn't be any code differences
+    total_stake: string = "0"
+    // rewards_per_day is needed for p1 contracts. It should only work for initial setting. On poolParams will be used to set farming_rate so there shouldn't be any code differences
     rewards_per_day: bigint;
+    // total_rewards is needed for p1 contracts. It should only work for initial setting. On poolParams will be used to set total_farmed so there shouldn't be any code differences
+    total_rewards: string = "0"
     fee_rate: number = 0;   
 
     getRewardsPerDay(): bigint {

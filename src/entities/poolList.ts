@@ -27,6 +27,8 @@ async function generatePoolList(wallet: WalletInterface) {
         } else {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
             poolParams = new PoolParams(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
+            // poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet, nearConfig.farms[i].poolName);
+
         }
         await poolParams.setAllExtraData();
 
@@ -37,13 +39,12 @@ async function generatePoolList(wallet: WalletInterface) {
 export async function getPoolList(wallet: WalletInterface): Promise<(PoolParams | PoolParamsP3)[]> {
     if(!poolList || poolList.length == 0) {
         await generatePoolList(wallet);
-        poolList = await Promise.all(
+        await Promise.all(
             poolList.map(async function(pool) {
-                pool.stakingContractData.contractParams = await pool.stakingContractData.contractParamsPromise
-                return pool
+                return await pool.stakingContractData.getContractParams()
             })
         )
-        poolList = poolList.sort((a, b) => b.stakingContractData.contractParams!.farming_end - a.stakingContractData.contractParams!.farming_end)
+        poolList = poolList.sort((a, b) => b.stakingContractData.getContractParamsNotAsync().farming_end - a.stakingContractData.getContractParamsNotAsync().farming_end)
 
     }
     return poolList;

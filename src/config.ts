@@ -1,6 +1,6 @@
-export const ENV = 'mainnet'
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+export const NO_CONTRACT_DEPOSIT_NEAR = "no-contract-deposit-near"
 
 const MAINNET_NETWORKID = 'mainnet'
 const MAINNET_NODEURL = 'https://rpc.mainnet.near.org'
@@ -13,6 +13,8 @@ const TESTNET_NODEURL = 'https://rpc.testnet.near.org'
 const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
+
+export const ENV = MAINNET_NETWORKID
 
 export type FarmData = {
   index?: number;
@@ -42,7 +44,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'production':
   case 'mainnet':
     return {
-      nftContractAddress: "",
+      nftContractAddress: "nft.cheddar.near",
       networkId: MAINNET_NETWORKID,
       nodeUrl: MAINNET_NODEURL,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
@@ -130,12 +132,12 @@ export function getConfig(env:string):GetConfigResults {
         {
           index: 5,
           poolType: 'single',
-          poolName : 'near',
+          poolName : 'Near',
           // networkId: MAINNET_NETWORKID,
           // nodeUrl: MAINNET_NODEURL,
           contractName: 'p1-farm.cheddar.near',
           // cheddarContractName: CHEDDAR_CONTRACT_NAME,
-          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: NO_CONTRACT_DEPOSIT_NEAR,
           // walletUrl: MAINNET_WALLETURL,
           // helperUrl: MAINNET_HELPERURL,
           // explorerUrl: MAINNET_EXPLORERURL,
@@ -160,12 +162,27 @@ export function getConfig(env:string):GetConfigResults {
         {
           index: 7,
           poolType: 'single',
-          poolName : 'nearcon',
+          poolName : 'Nearcon',
           // networkId: MAINNET_NETWORKID,
           // nodeUrl: MAINNET_NODEURL,
           contractName: 'farm-nearcon.cheddar.near',
           // cheddarContractName: CHEDDAR_CONTRACT_NAME,
-          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: NO_CONTRACT_DEPOSIT_NEAR,
+          // walletUrl: MAINNET_WALLETURL,
+          // helperUrl: MAINNET_HELPERURL,
+          // explorerUrl: MAINNET_EXPLORERURL,
+          // keyPath: undefined,
+          // masterAccount:undefined,
+        },
+        {
+          index: 8,
+          poolType: 'multiple',
+          poolName : 'cheddar-ref-burrow',
+          // networkId: MAINNET_NETWORKID,
+          // nodeUrl: MAINNET_NODEURL,
+          contractName: 'p3-ref-bbr.cheddar.near',
+          // cheddarContractName: CHEDDAR_CONTRACT_NAME,
+          tokenContractName: 'test-token.cheddar.testnet',
           // walletUrl: MAINNET_WALLETURL,
           // helperUrl: MAINNET_HELPERURL,
           // explorerUrl: MAINNET_EXPLORERURL,

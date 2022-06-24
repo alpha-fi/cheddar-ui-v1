@@ -21,6 +21,11 @@ export class NearWebWallet implements WalletInterface {
         return this.walletConnection.getAccountId();
     }
 
+    getDisplayableAccountId(): string {
+        const accName = this.getAccountId()
+        return accName.length > 22 ? accName.slice(0, 10) + ".." + accName.slice(-10) : accName
+    }
+
     async getAccountBalance(accountId?:string):Promise<U128String> {
         const data = await this.walletConnection.account().getAccountBalance();
         return data.total;

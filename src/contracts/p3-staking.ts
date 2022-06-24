@@ -58,7 +58,7 @@ export class StakingPoolP3 extends SmartContract {
     }
 
     withdraw_nft(receiver_id:string):Promise<void>{
-        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"0"); //one-yocto attached
+        return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"1"); //one-yocto attached
     }
 
     /// Unstakes given amount of $NEAR and transfers it back to the user.

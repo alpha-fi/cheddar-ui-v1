@@ -1,4 +1,6 @@
+import { NO_CONTRACT_DEPOSIT_NEAR } from "../config";
 import { ContractParams } from "../contracts/contract-structs";
+import { getNearMetadata } from "../contracts/nearHardcodedObjects";
 import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { StakingPoolP3 } from "../contracts/p3-staking";
@@ -11,28 +13,29 @@ async function getTokenContractList(wallet:WalletInterface, contractNameArray: s
     let tokenContractList = []
     for(let i = 0; i < contractNameArray.length; i++) {
         const tokenContractName = contractNameArray[i]
-        let contract = new NEP141Trait(tokenContractName)
-        contract.wallet = wallet
-        let metaData = await contract.ft_metadata()
-        let balance = await contract.ft_balance_of(wallet.getAccountId())
-        if(metaData.symbol == "STNEAR") {
-            metaData.symbol = "stNEAR";
-        }
-        tokenContractList.push({
-            contract,
-            metaData,
-            balance
-        })
+        // let contract = new NEP141Trait(tokenContractName)
+        // contract.wallet = wallet
+        // let metaData = await contract.ft_metadata()
+        // let balance = await contract.ft_balance_of(wallet.getAccountId())
+        // if(metaData.symbol == "STNEAR") {
+        //     metaData.symbol = "stNEAR";
+        // }
+        tokenContractList.push(new TokenContractData(wallet, tokenContractName, ""))
     }
     return tokenContractList
 }
 
 export class StakingContractDataP3 {
+    // Contract to which one staked and unstakes
     contract: StakingPoolP3
+    // Staking contract parameters
     // @ts-ignore
     private contractParamsPromise: Promise<P3ContractParams>
+    // User parameters of staking contract
     // @ts-ignore
     private userStatusPromise: Promise<UserStatusP3>
+    // List of tokens accepted by staking contract 
+    private stakeTokenContractListPromise: Promise<TokenContractData[]>
     private contractParams: P3ContractParams | undefined
     private userStatus: UserStatusP3 | undefined
     private stakeTokenContractList: TokenContractData[] = [];
@@ -42,6 +45,7 @@ export class StakingContractDataP3 {
         this.contract = new StakingPoolP3(contractId)
         this.contract.wallet = wallet
         this.refreshData()
+        this.stakeTokenContractListPromise = this.getStakeTokenContractListPromise()
     }
 
     refreshData() {
@@ -58,6 +62,10 @@ export class StakingContractDataP3 {
         return this.contractParams
     }
 
+    getContractParamsNotAsync(): P3ContractParams {
+        return this.contractParams!
+    }
+
     async getUserStatus(): Promise<UserStatusP3> {
         if(this.userStatus === undefined) {
             this.userStatus = await this.userStatusPromise
@@ -69,10 +77,16 @@ export class StakingContractDataP3 {
         return this.userStatus
     }
 
+    private async getStakeTokenContractListPromise(): Promise<TokenContractData[]> {
+        const contractParams = await this.getContractParams();
+        return getTokenContractList(this.contract.wallet, contractParams.stake_tokens)
+    }
+
     async getStakeTokenContractList(): Promise<TokenContractData[]> {
         if(this.stakeTokenContractList.length == 0) {
-            const contractParams = await this.getContractParams();
-            this.stakeTokenContractList = await getTokenContractList(this.contract.wallet, contractParams.stake_tokens)
+            this.stakeTokenContractList = await this.stakeTokenContractListPromise as TokenContractData[]
+            // const contractParams = await this.getContractParams();
+            // this.stakeTokenContractList = await getTokenContractList(this.contract.wallet, contractParams.stake_tokens)
         }
         return this.stakeTokenContractList
     }
@@ -94,11 +108,14 @@ export class StakingContractDataP2 {
     private userStatusPromise: Promise<[U128String, U128String, U128String]>
     private contractParams: ContractParams | undefined
     private userStatus: UserStatusP2 | undefined
+    private stakeTokenContractList: TokenContractData[]
 
-    constructor(wallet: WalletInterface, contractId: string) {
+    constructor(wallet: WalletInterface, contractId: string, stakeTokenContractId: string, poolName: string) {
         this.contract = new StakingPoolP1(contractId)
         this.contract.wallet = wallet
         this.refreshData()
+
+        this.stakeTokenContractList = [new TokenContractData(wallet, stakeTokenContractId, poolName)]
     }
 
     
@@ -114,7 +131,17 @@ export class StakingContractDataP2 {
         if(this.contractParams === undefined) {
             this.contractParams = await this.contractParamsPromise
         }
+        if(this.contractParams.total_staked === undefined) {
+            // p1 contracts have the parameter total_stake, while p2 contracts have total_staked. So this is a patch for avoiding changing code
+            this.contractParams.total_staked = this.contractParams.total_stake
+            this.contractParams.farming_rate = this.contractParams.rewards_per_day
+            this.contractParams.total_farmed = this.contractParams.total_rewards
+        }
         return this.contractParams
+    }
+
+    getContractParamsNotAsync(): ContractParams {
+        return this.contractParams!
     }
 
     async getUserStatus(): Promise<UserStatusP2> {
@@ -124,46 +151,64 @@ export class StakingContractDataP2 {
         }
         return this.userStatus
     }
+
+    // This method is async so it matches with P3, since in that case, the stake tokens come from contract
+    async getStakeTokenContractList(): Promise<TokenContractData[]> {
+        return this.stakeTokenContractList
+    }
 }
 
-export interface TokenContractData {
-    contract: NEP141Trait
-    metaData: FungibleTokenMetadata
-    balance: U128String
+export class TokenContractData {
+    contract: NEP141Trait | undefined
+    wallet: WalletInterface
+    private metaDataPromise: Promise<FungibleTokenMetadata> | undefined
+    private balancePromise: Promise<U128String> | undefined
+    private metaData: FungibleTokenMetadata | undefined
+    private balance: U128String | undefined
+
+    constructor(wallet: WalletInterface, contractId: string, poolName: string = "") {
+        this.wallet = wallet
+        if(contractId !== NO_CONTRACT_DEPOSIT_NEAR) {
+            this.contract = new NEP141Trait(contractId)
+            this.contract.wallet = wallet
+
+            this.metaDataPromise = this.contract.ft_metadata()
+            this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
+        } else {
+            this.metaData = getNearMetadata(poolName)
+            this.balancePromise = wallet.getAccountBalance()
+        }
+    }
+
+    async getMetadata(): Promise<FungibleTokenMetadata> {
+        if(!this.metaData) {
+            this.metaData = await this.metaDataPromise
+        }
+        return this.metaData!
+    }
+
+    getMetadataSync(): FungibleTokenMetadata {
+        return this.metaData!
+    }
+
+    async getBalance(): Promise<U128String> {
+        if(!this.balance) {
+            this.balance = await this.balancePromise
+        }
+        return this.balance!
+    }
+
+    getBalanceSync(): U128String {
+        // If you get an undefined error, then you either need to use await getBalance() or await Promise.all(list.map(elem => elem.getBalance()))
+        return this.balance!
+    }
+
+    refreshData() {
+        this.balance = undefined
+        if(this.contract) {
+            this.balancePromise = this.contract.ft_balance_of(this.wallet.getAccountId())
+        } else {
+            this.balancePromise = this.wallet.getAccountBalance()
+        }
+    }
 }
-
-// export function getStakingContractDataP3(wallet: WalletInterface, contractId: string): StakingContractDataP3 {
-//     let contract = new StakingPoolP3(contractId)
-//     contract.wallet = wallet
-//     return refreshStakingContractDataP3(contract)
-// }
-
-// export function refreshStakingContractDataP3(contract: StakingPoolP3): StakingContractDataP3 {
-//     const contractParamsPromise = contract.get_contract_params()
-//     const userStatusPromise = contract.status()
-//     return {
-//         contract,
-//         contractParamsPromise,
-//         userStatusPromise,
-//         contractParams: undefined,
-//         userStatus: undefined
-//     }
-// }
-
-// export function getStakingContractDataP2(wallet: WalletInterface, contractId: string): StakingContractDataP2 {
-//     let contract = new StakingPoolP1(contractId)
-//     contract.wallet = wallet
-//     return refreshStakingContractDataP2(contract)
-// }
-
-// export function refreshStakingContractDataP2(contract: StakingPoolP1): StakingContractDataP2 {
-//     const contractParamsPromise = contract.get_contract_params()
-//     const userStatusPromise = contract.status()
-//     return {
-//         contract,
-//         contractParamsPromise,
-//         userStatusPromise,
-//         contractParams: undefined,
-//         userStatus: undefined
-//     }
-// }

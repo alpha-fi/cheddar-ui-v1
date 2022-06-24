@@ -9,7 +9,7 @@ import { bigintToStringDecLong, convertToDecimals, convertToBase, ntoy, toString
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, DetailRowElements, RewardsTokenData, TokenIconData, UnclaimedRewardsData } from "./genericData";
-import { getStakingContractDataP3, StakingContractDataP3 } from "./PoolEntities";
+import { getStakingContractDataP3, StakingContractDataP3, TokenContractData } from "./PoolEntities";
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -51,11 +51,11 @@ export class PoolUserStatus {
     }
 }
 
-export interface TokenContractData {
-    contract: NEP141Trait
-    metaData: FungibleTokenMetadata
-    balance: U128String
-}
+// export interface TokenContractData {
+//     contract: NEP141Trait
+//     metaData: FungibleTokenMetadata
+//     balance: U128String
+// }
 
 export class PoolParamsP3 {
     wallet: WalletInterface
@@ -144,7 +144,7 @@ export class PoolParamsP3 {
             const tokenContractData = stakeTokenContractList[i]
             tokenNames.push(tokenContractData.metaData.symbol)
         }
-        const names = tokenNames.join(" - ")
+        const names = tokenNames.join(" + ")
         if(names.length > 20) {
             return names.substring(0, 7) + "..." + names.substring(names.length - 7)
         } else {
@@ -200,20 +200,21 @@ export class PoolParamsP3 {
 
     async stake(amounts: bigint[]) {
         let TXs = []
-        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
-            const stakeContract = this.stakeTokenContractList[i]
-            const promise = stakeContract.contract.ft_transfer_call_without_send(
-                this.stakingContract.contractId, 
+        const stakeTokenContractList = await this.stakingContractData.getStakeTokenContractList()
+        for(let i = 0; i < stakeTokenContractList.length; i++) {
+            const stakeTokenContract = stakeTokenContractList[i].contract!
+            const promise = stakeTokenContract.ft_transfer_call_without_send(
+                this.stakingContractData.contract.contractId, 
                 amounts[i].toString()
             )
             const promiseWithContract = {
-            promise,
-            contractName: stakeContract.contract.contractId
+                promise,
+                contractName: stakeTokenContract.contractId
             }
 
             TXs.push(promiseWithContract)
         }
-        await callMulipleTransactions(TXs, this.stakingContract)   
+        await callMulipleTransactions(TXs, this.stakingContractData.contract)   
     }
 
     async unstake(amounts: bigint[]) {
@@ -241,8 +242,9 @@ export class PoolParamsP3 {
 
         for(let i = 0; i < stakeTokenContractList.length; i++) {
             const stakeTokenContract = stakeTokenContractList[i]
-            const iconData = this.getIcon(stakeTokenContract)
-            const totalStaked = convertToDecimals(contractParams.total_staked[i], stakeTokenContract.metaData.decimals, 5)
+            const iconData = await this.getIcon(stakeTokenContract)
+            const stakeTokenMetadata = await stakeTokenContract.getMetadata()
+            const totalStaked = convertToDecimals(contractParams.total_staked[i], stakeTokenMetadata.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -257,16 +259,16 @@ export class PoolParamsP3 {
         const contractParams = await this.stakingContractData.getContractParams()
         const poolUserStatus = await this.stakingContractData.getUserStatus()
         const farmTokenContractList = await this.stakingContractData.getFarmTokenContractList()
-        console.log("Pool user status", poolUserStatus)
 
         for(let i = 0; i < farmTokenContractList.length; i++) {
             const farmTokenContract = farmTokenContractList[i]
-            const iconData = this.getIcon(farmTokenContract)
-            const tokenName = farmTokenContract.metaData.name
+            const iconData = await this.getIcon(farmTokenContract)
+            const farmTokenMetadata: FungibleTokenMetadata = await farmTokenContract.getMetadata()
+            const tokenName = farmTokenMetadata.name
             const rewardsPerDayBN = BigInt(contractParams.farm_token_rates[i]) * 60n * 24n
-            const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenContract.metaData.decimals, 5)
-            const totalRewards = convertToDecimals(contractParams.total_farmed[i], farmTokenContract.metaData.decimals, 5)
-            const userUnclaimedRewards = convertToDecimals(poolUserStatus.farmed_tokens[i], farmTokenContract.metaData.decimals, 5)
+            const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenMetadata.decimals, 5)
+            const totalRewards = convertToDecimals(contractParams.total_farmed[i], farmTokenMetadata.decimals, 5)
+            const userUnclaimedRewards = convertToDecimals(poolUserStatus.farmed_tokens[i], farmTokenMetadata.decimals, 5)
 
             dataArray.push({
                 iconData,
@@ -279,12 +281,13 @@ export class PoolParamsP3 {
         return dataArray
     }
 
-    getIcon(contractData: TokenContractData): TokenIconData{
-        const src = contractData.metaData.icon ? contractData.metaData.icon : contractData.metaData.name
+    async getIcon(contractData: TokenContractData): Promise<TokenIconData>{
+        const metadata = await contractData.getMetadata()
+        const src = metadata.icon ? metadata.icon : metadata.name
         return {
             isSvg: src.includes("<svg"),
             src: src,
-            tokenName: contractData.metaData.name ? contractData.metaData.name : "NoName"
+            tokenName: metadata.name ? metadata.name : "NoName"
         }
     }
     
@@ -417,11 +420,13 @@ export class PoolParamsP3 {
 
     async getWalletAvailable(): Promise<U128String[]> {
         let walletAvailable: U128String[] = []
-        const accName = await this.wallet.getAccountId()
-        for(let i = 0; i < this.stakeTokenContractList.length; i++) {
-            const contractData = this.stakeTokenContractList[i]
-            let balance = await contractData.contract.ft_balance_of(accName)
-            contractData.balance = balance
+        // const accName = await this.wallet.getAccountId()
+        const stakeTokenContractList = await this.stakingContractData.getStakeTokenContractList()
+        for(let i = 0; i < stakeTokenContractList.length; i++) {
+            const contractData = stakeTokenContractList[i]
+            // let balance = await contractData.contract!.ft_balance_of(accName)
+            // contractData.balance = balance
+            const balance = await contractData.getBalance()
             walletAvailable.push(balance)
         }
         return walletAvailable
