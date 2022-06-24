@@ -33,10 +33,12 @@ export class UserStatusP2 {
     tokenDecimals: Number = 0;
     accName: string = '';
 
-    constructor(userStatus: [string, string, string]) {
-        this.staked = BigInt(userStatus[0])
-        this.real = BigInt(userStatus[1])
-        this.previousTimestamp = Number(userStatus[2])
+    constructor(userStatus?: [string, string, string]) {
+        if(userStatus) {
+            this.staked = BigInt(userStatus[0])
+            this.real = BigInt(userStatus[1])
+            this.previousTimestamp = Number(userStatus[2])
+        }
     }
 
     hasStakedTokens() {

@@ -5,6 +5,7 @@ import { FungibleTokenMetadata, NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { StakingPoolP3 } from "../contracts/p3-staking";
 import { P3ContractParams, PoolUserStatus as UserStatusP3 } from "../contracts/p3-structures";
+import { disconnectedWallet } from "../wallet-api/disconnected-wallet";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { UserStatusP2 } from "./poolParams";
@@ -145,7 +146,9 @@ export class StakingContractDataP2 {
     }
 
     async getUserStatus(): Promise<UserStatusP2> {
-        if(this.userStatus === undefined) {
+        if(this.contract.wallet == disconnectedWallet) {
+            this.userStatus = new UserStatusP2()
+        } else if(this.userStatus === undefined) {
             const userStatus = await this.userStatusPromise
             this.userStatus = new UserStatusP2(userStatus)
         }
@@ -192,7 +195,9 @@ export class TokenContractData {
     }
 
     async getBalance(): Promise<U128String> {
-        if(!this.balance) {
+        if(this.contract?.wallet == disconnectedWallet) {
+            this.balance = "0"
+        } else if(!this.balance) {
             this.balance = await this.balancePromise
         }
         return this.balance!

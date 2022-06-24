@@ -16,6 +16,7 @@ import { near } from ".."
 import { Action } from "near-api-js/lib/transaction"
 import { StorageBalance } from "./contract-structs"
 import { transactions } from "near-api-js"
+import { disconnectedWallet } from "../wallet-api/disconnected-wallet"
 
 type AccountId = string;
 

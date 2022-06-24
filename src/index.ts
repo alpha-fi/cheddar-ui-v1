@@ -183,9 +183,9 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement)
     event.preventDefault()
     let TXs: TransactionData[] = []
 
-    const stakeTokenList = poolParams.stakeTokenContractList
+    const stakeTokenList = await poolParams.stakingContractData.getStakeTokenContractList()
     for(let i = 0; i < stakeTokenList.length; i++) {
-      const tokenContract = stakeTokenList[i].contract
+      const tokenContract = stakeTokenList[i].contract!
       const doesNeedStorageDeposit = await needsStorageDeposit(tokenContract)
       if (doesNeedStorageDeposit) {
         TXs.push({
@@ -621,7 +621,7 @@ async function signedInFlow(wallet: WalletInterface) {
   takeUserAmountFromHome()
   // await refreshAccountInfoGeneric(poolList)
   if(wallet.isConnected()) {
-    const poolList = await getPoolList(wallet);    
+    // const poolList = await getPoolList(wallet);    
     // qs(".user-info #account-id").innerText = poolList[0].wallet.getAccountId()
     
     qs(".user-info #account-id").innerText = wallet.getDisplayableAccountId()
@@ -633,7 +633,6 @@ async function signedInFlow(wallet: WalletInterface) {
     qs(".user-info #account-id").innerText = wallet.getAccountId()
 
   }
-  qs(".loader").style.display = "none"
 }
 
 function setDefaultFilter (){
@@ -1051,9 +1050,9 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   for(let i=0; i < stakeTokenContractList.length; i++){ // Harvest button listener
     const contractData = stakeTokenContractList[i]
     const currentStakeTokenMetadata = await contractData.getMetadata()
-    newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
     tokenSymbols.push(`${currentStakeTokenMetadata.symbol.toLowerCase()}`)
   }
+  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
 
   for (let i=0; i < tokenSymbols.length; i++){ // Autofill inputs with correct rates
     newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
@@ -1203,7 +1202,6 @@ async function addInput(newPool: HTMLElement, contractData: TokenContractData, a
   }
 
   const balance = await contractData.getBalance()
-  const metadata = await contractData.getMetadata()
   if(action == "stake") {
     amountAvailableValue!.innerHTML= convertToDecimals(balance, metaData.decimals, 5)
   } else if(action == "unstake") {
@@ -1465,31 +1463,34 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
-  let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
+  
+  if(wallet != disconnectedWallet) {
+    let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-  if(isAccountRegistered) {
-    toggleStakeUnstakeSection(newPool)
+    if(isAccountRegistered) {
+      toggleStakeUnstakeSection(newPool)
 
-    let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
-    let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
-    let staking = newPool.querySelector(".main-stake")! as HTMLElement;
-    let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
-    let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
-    let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+      let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+      let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+      let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+      let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+      let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+      let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
 
-    setUnstakeTabListeners(newPool)
+      setUnstakeTabListeners(newPool)
 
-    stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-    stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-    stakeTabButton.addEventListener("click", setActiveColor);
-    stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
-  } else {
-    activateButtonContainer.classList.remove("hidden")
-    activateButton.addEventListener("click", activateClicked(poolParams, newPool))
+      stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+      stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+      stakeTabButton.addEventListener("click", setActiveColor);
+      stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
+    } else {
+      activateButtonContainer.classList.remove("hidden")
+      activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
-    if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
-      let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
-      newPool.querySelector("#depositWarning")!.innerHTML = warningText 
+      if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+        let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
+        newPool.querySelector("#depositWarning")!.innerHTML = warningText 
+      }
     }
   }
 
@@ -1731,8 +1732,8 @@ window.onload = async function () {
       //make the contract use NEAR Web Wallet
       wallet = new NearWebWallet(nearWebWalletConnection);
       
-      const poolList = await getPoolList(wallet)
-      await addPoolList(poolList)
+      // const poolList = await getPoolList(wallet)
+      // await addPoolList(poolList)
 
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)
@@ -1802,16 +1803,21 @@ window.onload = async function () {
         console.log("Args", args.join("\n"))
       }
       
-      setDefaultFilter()
     }
     else {
       //not signed-in 
       await signedOutFlow() //show home-not-connected -> select wallet page
     }
+    const poolList = await getPoolList(wallet)
+    await addPoolList(poolList)
+    setDefaultFilter()
   }
   catch (ex) {
     showErr(ex as Error)
+  } finally {
+    qs(".loader").style.display = "none"
   }
+
 }
 
 async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id: string}]) {
