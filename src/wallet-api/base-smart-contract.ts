@@ -2,7 +2,8 @@ import {WalletInterface} from "./wallet-interface"
 import {U64String,U128String} from "./util"
 import {disconnectedWallet} from "./disconnected-wallet";
 import * as nearAPI from "near-api-js"
-import { near } from "..";
+import { near, nearConfig } from "..";
+import { JsonRpcProvider } from "near-api-js/lib/providers";
 
 //-----------------------------
 // Base smart-contract proxy class
@@ -14,6 +15,7 @@ export class SmartContract {
     public wallet:WalletInterface;
     public nearWallet: nearAPI.WalletConnection;
     public account: nearAPI.ConnectedWalletAccount
+    public provider: JsonRpcProvider
 
     constructor( 
         public contractId:string, 
@@ -22,6 +24,23 @@ export class SmartContract {
         this.wallet = disconnectedWallet; //default wallet is DisconnectedWallet
         this.nearWallet = new nearAPI.WalletAccount(near, null)
         this.account = this.nearWallet.account()
+        this.provider = new JsonRpcProvider(nearConfig.nodeUrl)
+    }
+
+    async viewWithoutAccount(method: string, args: any = {}): Promise<any> {
+        const argsAsString = JSON.stringify(args)
+        let argsBase64 = Buffer.from(argsAsString).toString("base64")
+        const rawResult = await this.provider.query({
+            request_type: "call_function",
+            account_id: this.contractId,
+            method_name: method,
+            args_base64: argsBase64,
+            finality: "optimistic",
+          });
+        
+          // format result
+          const res = JSON.parse(Buffer.from(rawResult.result).toString());
+          return res
     }
 
     view(method:string, args?:any) : Promise<any> {

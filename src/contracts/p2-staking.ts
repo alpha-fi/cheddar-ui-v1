@@ -6,12 +6,12 @@
 import { ntoy, TGas } from "../util/conversions"
 import { SmartContract } from "../wallet-api/base-smart-contract"
 
-import type { ContractInfo } from "./NEP129"
 import { ContractParams, StorageBalance } from "./contract-structs"
 import { U128String } from "../wallet-api/util"
 import { Action } from "near-api-js/lib/transaction"
 import { transactions } from "near-api-js"
 import { BN } from "bn.js"
+import { disconnectedWallet } from "../wallet-api/disconnected-wallet"
 
 type AccountId = string;
 
@@ -22,17 +22,20 @@ export class StakingPoolP1 extends SmartContract {
 
     /// Returns contract params
     get_contract_params(): Promise<ContractParams> {
-        return this.view("get_contract_params", {})
+        return this.viewWithoutAccount("get_contract_params", {})
     }
 
     /// Returns amount of staked NEAR and farmed CHEDDAR of given account.
     status(accountId?: AccountId): Promise<[U128String, U128String, U128String]> {
-        return this.view("status", { account_id: accountId || this.wallet.getAccountId() })
+        if(this.wallet === disconnectedWallet) {
+            return Promise.resolve(["-", "-", "-"])
+        }
+        return this.viewWithoutAccount("status", { account_id: accountId || this.wallet.getAccountId() })
     }
 
     /// Checks to see if an account is registered.
     storageBalance(accountId?: AccountId): Promise<StorageBalance> {
-        return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
+        return this.viewWithoutAccount("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
     }
 
     /// Registers a user with the farm.

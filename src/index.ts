@@ -15,9 +15,9 @@ import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStrin
 import { qs, qsa, qsi, showWait, showErr, showSuccess, showMessage, show, hide, hideOverlay, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
 import { checkRedirectSearchParamsMultiple } from './wallet-api/near-web-wallet/checkRedirectSearchParams';
 import { FungibleTokenMetadata, NEP141Trait } from './contracts/NEP141';
-import { PoolParams } from './entities/poolParams';
+import { PoolParams, UserStatusP2 } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
-import { ContractData, PoolParamsP3 } from './entities/poolParamsP3';
+import { PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
 import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities/genericData';
 
@@ -25,14 +25,14 @@ import * as nearAPI from "near-api-js"
 import { getTokenData, getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
-import { P3ContractParams, Status } from './contracts/p3-structures';
+import { P3ContractParams, PoolUserStatus } from './contracts/p3-structures';
 import { nftBaseUrl } from './contracts/NFTContract';
 import { newNFT, NFT } from './contracts/nft-structs';
 import { BN } from 'bn.js';
 import { StakingPoolP3 } from './contracts/p3-staking';
 import { StakingPoolP1 } from './contracts/p2-staking';
 import { callMulipleTransactions } from './contracts/multipleCall';
-import { view } from './contracts/view-contract-calls';
+import { TokenContractData } from './entities/PoolEntities';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -52,6 +52,8 @@ let loggedWithNarwallets = false
 const SECONDS = 1000
 const MINUTES = 60 * SECONDS
 const HOURS = 60 * MINUTES
+
+const refreshTime = 60 * SECONDS
 
 const ONE_NEAR = BigInt(10) ** BigInt(24);
 //------------------------------
@@ -181,9 +183,9 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement)
     event.preventDefault()
     let TXs: TransactionData[] = []
 
-    const stakeTokenList = poolParams.stakeTokenContractList
+    const stakeTokenList = await poolParams.stakingContractData.getStakeTokenContractList()
     for(let i = 0; i < stakeTokenList.length; i++) {
-      const tokenContract = stakeTokenList[i].contract
+      const tokenContract = stakeTokenList[i].contract!
       const doesNeedStorageDeposit = await needsStorageDeposit(tokenContract)
       if (doesNeedStorageDeposit) {
         TXs.push({
@@ -193,14 +195,14 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement)
       }
     }
 
-    const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContract)
+    const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
     if (doesNeedStorageDeposit) {
       TXs.push({
-        promise: poolParams.stakingContract.storageDepositWithoutSend(),
-        contractName: poolParams.stakingContract.contractId
+        promise: poolParams.stakingContractData.contract.storageDepositWithoutSend(),
+        contractName: poolParams.stakingContractData.contract.contractId
       })
     }
-    await callMulipleTransactions(TXs, poolParams.stakingContract)
+    await callMulipleTransactions(TXs, poolParams.stakingContractData.contract)
     
     
     pool.querySelector("#deposit")!.classList.remove("hidden")
@@ -219,27 +221,30 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
   const rewardToken = "cheddar"
   const rewardTokenData: RefTokenData = await getTokenData(rewardToken)
   const metaData = await poolParams.cheddarContract.ft_metadata()
-  const currentRewards: bigint = poolParams.resultParams.real
+  const userPoolParams = await poolParams.stakingContractData.getUserStatus()
+  const currentRewards: bigint = userPoolParams.real
   const currentRewardsDisplayable = convertToDecimals(currentRewards, metaData.decimals, 5)
   return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
 }
 
-async function convertToUSDMultiple(tokenContractList: ContractData[], amountList: U128String[]): Promise<string> {
+async function convertToUSDMultiple(tokenContractList: TokenContractData[], amountList: U128String[]): Promise<string> {
   // const stakeTokenContractList = poolParams.stakeTokenContractList
-  const rewardTokenArray = tokenContractList.map(tokenContract => tokenContract.metaData.symbol)
+  await Promise.all(
+    tokenContractList.map(
+      (tokenContract: TokenContractData) => tokenContract.getMetadata()
+    )
+  )
+  const rewardTokenArray = tokenContractList.map(tokenContract => tokenContract.getMetadataSync().symbol)
   const rewardTokenDataMap: Map<string, RefTokenData> = await getTokenDataArray(rewardTokenArray)
   let amountInUsd: number = 0
-  // console.log("Token contract list: ", tokenContractList)
-  // console.log(amountList)
-  tokenContractList.forEach((tokenContract, index) => {
-    const metaData = tokenContract.metaData
+  tokenContractList.forEach((tokenContract: TokenContractData, index: number) => {
+    const metaData = tokenContract.getMetadataSync()
     const symbol = metaData.symbol
     const unclaimedRewards = amountList[index]
     
     // console.log(unclaimedRewards)
     const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 5)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
-
     amountInUsd += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
   })
 
@@ -256,7 +261,8 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
 
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-      const contractParams = poolParams.contractParams
+      const contractParams = await poolParams.stakingContractData.getContractParams()
+      // const contractParams = poolParams.contractParams
       // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
       const isDateInRange = unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
@@ -276,7 +282,9 @@ function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
           inputArray[i].value = ""  
         }
         
-        poolParams.resultParams.addStaked(amountValues)
+        // const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+        // poolUserStatus.addStaked(amountValues)
+        poolParams.stakingContractData.refreshData()
 
         showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
       }
@@ -302,7 +310,8 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
 
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-      const contractParams = poolParams.contractParams
+      const contractParams = await poolParams.stakingContractData.getContractParams()
+      // const contractParams = poolParams.contractParams
       // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
       const isDateInRange = unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
@@ -322,7 +331,8 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
           inputArray[i].value = ""  
         }
         
-        poolParams.resultParams.addStaked(amountValues.map(value => -value))
+        // poolParams.poolUserStatus.addStaked(amountValues.map(value => -value))
+        poolParams.stakingContractData.refreshData()
   
         showSuccess(`Staked ${unstakedAmountWithSymbol.join(" - ")}`)
       }
@@ -344,12 +354,13 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
   let stakedAmountWithSymbolArray: string[] = []
 
   let inputContainerList = newPool.querySelectorAll(`.main-${action} .input-container`)  
-  const stakeTokenContractList = poolParams.stakeTokenContractList
+  const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
   let boundary: string[]
   if(action == "stake") {
     boundary = await poolParams.getWalletAvailable()
   } else if(action == "unstake") {
-    boundary = poolParams.resultParams.staked
+    const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+    boundary = poolUserStatus.stake_tokens
   } else {
     throw Error(`Action ${action} not available`)
   }
@@ -363,16 +374,18 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
     if (isNaN(amount)) {
       throw Error("Please Input a Number.")
     }
-    const metaData = stakeTokenContractList[i].metaData
+    // const metaData = stakeTokenContractList[i].metaData
+    const currentStakeTokenMetadata = await stakeTokenContractList[i].getMetadata()
 
-    const stakeAmountBN: bigint = BigInt(convertToBase(amount.toString(), metaData.decimals.toString()))
+    const stakeAmountBN: bigint = BigInt(convertToBase(amount.toString(), currentStakeTokenMetadata.decimals.toString()))
+    console.log(i, boundary[i])
     if(BigInt(boundary[i]) < stakeAmountBN) {
-      const balanceDisplayable = convertToDecimals(boundary[i], metaData.decimals, 5)
-      throw Error(`Only ${balanceDisplayable} ${metaData.symbol} Available to ${action}.`)
+      const balanceDisplayable = convertToDecimals(boundary[i], currentStakeTokenMetadata.decimals, 5)
+      throw Error(`Only ${balanceDisplayable} ${currentStakeTokenMetadata.symbol} Available to ${action}.`)
     }
     
     amountValuesArray.push(stakeAmountBN)
-    stakedAmountWithSymbolArray.push(`${amount} ${metaData.symbol}`)
+    stakedAmountWithSymbolArray.push(`${amount} ${currentStakeTokenMetadata.symbol}`)
   }
   return {
     htmlInputArray,
@@ -391,7 +404,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
 
     try {
       let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-      const contractParams = poolParams.contractParams
+      const contractParams = await poolParams.stakingContractData.getContractParams()
       const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
       if (!isDateInRange) throw Error("Pools is Closed.")
       
@@ -404,8 +417,17 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
       }
 
       const walletAvailable = await poolParams.getWalletAvailable()
-      if (stakeAmount > parseFloat(walletAvailable)) throw Error(`Only ${walletAvailable} ${poolParams.stakingContractMetaData.symbol} Available to Stake.`);
-      await poolParams.stakeTokenContract.ft_transfer_call(poolParams.stakingContract.contractId, convertToBase(stakeAmount.toString(), poolParams.stakingContractMetaData.decimals.toString()), "to farm")
+      if (stakeAmount > parseFloat(walletAvailable)) throw Error(`Only ${walletAvailable} ${poolParams.stakeTokenMetaData.symbol} Available to Stake.`);
+      const stakeTokenContract = (await poolParams.stakingContractData.getStakeTokenContractList())[0]
+      const stakeTokenMetadata = await stakeTokenContract.getMetadata()
+      await poolParams.stakeTokenContract.ft_transfer_call(
+        poolParams.stakingContractData.contract.contractId, 
+        convertToBase(
+          stakeAmount.toString(), 
+          stakeTokenMetadata.decimals.toString()
+        ), 
+        "to farm"
+      )
 
       if (loggedWithNarwallets) {
         //clear form
@@ -413,7 +435,7 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
         poolParams.resultParams.addStaked(ntoy(stakeAmount))
         refreshPoolInfo(poolParams, newPool)//Question: shouldnt this be in refreshPoolInfo?
   
-        showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakingContractMetaData.symbol)
+        showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakeTokenMetaData.symbol)
       }
 
     }
@@ -432,7 +454,7 @@ function harvestMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
     event?.preventDefault()
     showWait("Harvesting...")
 
-    await poolParams.stakingContract.withdraw_crop()
+    await poolParams.stakingContractData.contract.withdraw_crop()
 
     showSuccess("Harvested successfully")
   }
@@ -442,13 +464,15 @@ function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
   return async function (event: Event) {
     event?.preventDefault()
     showWait("Harvesting...")
+
+    const poolUserStatus: UserStatusP2 = await poolParams.stakingContractData.getUserStatus()
     
-    let amount = poolParams.resultParams.getCurrentCheddarRewards()
+    let amount = poolUserStatus.getCurrentCheddarRewards()
 
-    await poolParams.stakingContract.withdraw_crop()
+    await poolParams.stakingContractData.contract.withdraw_crop()
 
-    poolParams.resultParams.computed = 0n
-    poolParams.resultParams.real = 0n
+    poolUserStatus.computed = 0n
+    poolUserStatus.real = 0n
     // newPool.querySelector(".unclaimed-rewards-value")!.innerHTML = "0"
 
     showSuccess("Harvested" + toStringDecMin(parseFloat(amount)) + " CHEDDAR")
@@ -460,19 +484,29 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
     event?.preventDefault()
     showWait("Unstaking...")
 
+    const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+    const stakeTokenContract = (await poolParams.stakingContractData.getStakeTokenContractList())[0]
+    const stakeTokenMetadata = await stakeTokenContract.getMetadata()
+
     let unstakeInput = newPool.querySelector(".main-unstake input") as HTMLInputElement
 
     try {      
       unstakeInput.setAttribute("disabled", "disabled")
       let unstakeAmount = parseFloat(unstakeInput.value)
-      const staked = poolParams.resultParams.staked
-      const stakedDisplayable = Number(convertToDecimals(staked.toString(), poolParams.stakingContractMetaData.decimals, 5))
+      const staked = poolUserStatus.staked
+      const stakedDisplayable = Number(convertToDecimals(staked.toString(), stakeTokenMetadata.decimals, 5))
       if (isNaN(unstakeAmount)) {
         throw Error("Please Input a Number.")
       }
       
-      if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${poolParams.stakingContractMetaData.symbol} Available to Unstake.`);
-      await poolParams.stakingContract.unstake(convertToBase(unstakeAmount.toString(), poolParams.stakingContractMetaData.decimals.toString()))
+      
+      if (unstakeAmount > stakedDisplayable) throw Error(`Only ${stakedDisplayable} ${stakeTokenMetadata.symbol} Available to Unstake.`);
+      await poolParams.stakingContractData.contract.unstake(
+        convertToBase(
+          unstakeAmount.toString(), 
+          stakeTokenMetadata.decimals.toString()
+        )
+      )
       
       if (loggedWithNarwallets) {
         //clear form
@@ -481,9 +515,9 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
         //refresh acc info
         refreshPoolInfo(poolParams, newPool)
 
-        poolParams.resultParams.addStaked(ntoy(unstakeAmount))
+        poolUserStatus.addStaked(ntoy(unstakeAmount))
         // refreshPoolInfoSingle(poolParams, newPool) //Esta línea la agregué porque pensé que corresponde pero realmente estoy confundido.
-        showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.stakingContractMetaData.symbol)
+        showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.stakeTokenMetaData.symbol)
       }
     }
     catch (ex) {
@@ -587,18 +621,18 @@ async function signedInFlow(wallet: WalletInterface) {
   takeUserAmountFromHome()
   // await refreshAccountInfoGeneric(poolList)
   if(wallet.isConnected()) {
-    const poolList = await getPoolList(wallet);
-    await addPoolList(poolList)
+    // const poolList = await getPoolList(wallet);    
+    // qs(".user-info #account-id").innerText = poolList[0].wallet.getAccountId()
+    
     qs(".user-info #account-id").innerText = wallet.getDisplayableAccountId()
-    qs(".not-connected-msg").classList.add("hidden")
-    setDefaultFilter()
+    // qs(".not-connected-msg").classList.add("hidden")
+
   } else {
     qs(".not-connected-msg").classList.remove("hidden")
     // If user is disconnected it, account Id is the default disconnected message
     qs(".user-info #account-id").innerText = wallet.getAccountId()
 
   }
-  qs(".loader").style.display = "none"
 }
 
 function setDefaultFilter (){
@@ -606,13 +640,14 @@ function setDefaultFilter (){
   let allLivePools = qsa(".active-pool")
   const event= new Event ("click")
   //If you don´t have farms show live pools as default
-  if (allYourFarmsPools.length == 0){
-    qs("#live-filter")!.dispatchEvent(event)
-    if (allLivePools.length == 0){
-      qs("#ended-filter")!.dispatchEvent(event)
-    }
-  } else {
+  if (allYourFarmsPools.length > 0){    console.log("Your farms")
     qs("#your-farms-filter").dispatchEvent(event)
+  } else if (allLivePools.length > 0){
+    console.log("Live")
+    qs("#live-filter")!.dispatchEvent(event)
+  } else {
+    console.log("Ended")
+    qs("#ended-filter")!.dispatchEvent(event)
   }
 }
 
@@ -671,8 +706,6 @@ function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
   poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
 }
 
-let dateInRangeHack = false
-
 function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
 
@@ -714,22 +747,25 @@ function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newP
 async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
 
-  updateDetail(newPool, poolParams.stakeTokenContractList, [poolParams.contractParams.total_staked], "total-staked")
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const userPoolParams = await poolParams.stakingContractData.getUserStatus()
+  await updateDetail(newPool, poolParams.stakeTokenContractList, [contractParams.total_staked], "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, [poolParams.contractParams.total_farmed], "apr")
-  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates([poolParams.contractParams.farming_rate.toString()]), "rewards-per-day")
-  uptadeDetailIfNecesary(poolParams, newPool, poolParams.farmTokenContractList, [poolParams.resultParams.real.toString()], "unclaimed-rewards")
+  await updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates([contractParams.farming_rate.toString()]), "rewards-per-day")
+  await uptadeDetailIfNecesary(poolParams, newPool, [await poolParams.getFarmTokenContractData()], [userPoolParams.real.toString()], "unclaimed-rewards")
 
-  const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
-  refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
-  refreshInputAmounts(poolParams, newPool, "main-unstake", [poolParams.resultParams.staked.toString()])
+  const stakeBalances = await Promise.all(poolParams.stakeTokenContractList.map(stakeCD => stakeCD.getBalance()))
+  // const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.getBalanceSync())
+  await refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
+  await refreshInputAmounts(poolParams, newPool, "main-unstake", [userPoolParams.staked.toString()])
 
-  if(poolParams.resultParams.staked == 0n) {
+  if(userPoolParams.staked == 0n) {
     newPool.classList.remove("your-farms")
-    let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakingContract)
+    let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakeTokenContract)
     
     const stakeTokenList = poolParams.stakeTokenContractList
     for(let i = 0; i < stakeTokenList.length && !doesPoolNeedDeposit; i++) {
-      const tokenContract = stakeTokenList[i].contract
+      const tokenContract = stakeTokenList[i].contract!
       const doesTokenNeedStorageDeposit = await needsStorageDeposit(tokenContract)
       if (doesTokenNeedStorageDeposit) {
         doesPoolNeedDeposit = true
@@ -744,7 +780,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
   }
 
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   if(!isDateInRange) {    
     resetSinglePoolListener(poolParams, newPool, refreshPoolInfoSingle, -1)
   }
@@ -754,19 +790,24 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
 
 async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLElement){
   await poolParams.refreshAllExtraData()
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
+  const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
 
-  updateDetail(newPool, poolParams.stakeTokenContractList, poolParams.contractParams.total_staked, "total-staked")
+
+  await updateDetail(newPool, await stakeTokenContractList, contractParams.total_staked, "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
-  updateDetail(newPool, poolParams.farmTokenContractList, convertRewardsRates(poolParams.contractParams.farm_token_rates), "rewards-per-day")
-  uptadeDetailIfNecesary(poolParams, newPool, poolParams.farmTokenContractList, poolParams.resultParams.farmed, "unclaimed-rewards")
+  await updateDetail(newPool, farmTokenContractList, convertRewardsRates(contractParams.farm_token_rates), "rewards-per-day")
+  await updateDetail(newPool, farmTokenContractList, poolUserStatus.farmed_tokens, "unclaimed-rewards")
 
-  const stakeBalances = poolParams.stakeTokenContractList.map(stakeCD => stakeCD.balance)
-  refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
-  refreshInputAmounts(poolParams, newPool, "main-unstake", poolParams.resultParams.staked)
+  const stakeBalances = await Promise.all(stakeTokenContractList.map(stakeCD => stakeCD.getBalance()))
+  await refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
+  await refreshInputAmounts(poolParams, newPool, "main-unstake", poolUserStatus.stake_tokens)
 
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  if(dateInRangeHack || !isDateInRange) {
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
+  if(!isDateInRange) {
     resetMultiplePoolListener(poolParams, newPool, refreshPoolInfoMultiple, -1)
   }
 
@@ -775,13 +816,15 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
   setDateInRangeVisualIndication(poolParams, newPool, isDateInRange)
 }
 
-function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
+async function refreshInputAmounts(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, className: string, amounts: U128String[]) {
   const inputArray = newPool.querySelectorAll(`.${className} .token-input-container`)
+  const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
   for(let i = 0; i < inputArray.length; i++) {
     const input = inputArray[i]
-    const tokenContractData: ContractData = poolParams.stakeTokenContractList[i]
+    const tokenContractData: TokenContractData = stakeTokenContractList[i]
     const balance = amounts[i]
-    const balanceDisplayable = convertToDecimals(balance, tokenContractData.metaData.decimals, 5)
+    const metadata = await tokenContractData.getMetadata()
+    const balanceDisplayable = convertToDecimals(balance, metadata.decimals, 5)
     input.querySelector(".value")!.innerHTML = balanceDisplayable
 
     const maxButton = input.querySelector(".max-button") as HTMLElement
@@ -793,20 +836,20 @@ function convertRewardsRates(rates: string[]) {
   return rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
 }
 
-async function updateDetail(newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
+async function updateDetail(newPool: HTMLElement, contractList: TokenContractData[], totals: string[], baseClass: string) {
   const totalInUsd: string = await convertToUSDMultiple(contractList, totals)
   newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `$ ${totalInUsd}`
   const totalDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
   for(let i = 0; i < totalDetailsElements.length; i++) {
     const row = totalDetailsElements[i]
-    const tokenMetadata = contractList[i].metaData
+    const tokenMetadata = await contractList[i].getMetadata()
     const content = convertToDecimals(totals[i], tokenMetadata.decimals, 5)
     row.querySelector(".content")!.innerHTML = content
   }
 }
 
-async function uptadeDetailIfNecesary(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractList: ContractData[], totals: string[], baseClass: string) {
-  let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakingContract)
+async function uptadeDetailIfNecesary(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, contractList: TokenContractData[], totals: string[], baseClass: string) {
+  let doesPoolNeedDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
     
   const stakeTokenList = poolParams.stakeTokenContractList
   for(let i = 0; i < stakeTokenList.length && !doesPoolNeedDeposit; i++) {
@@ -818,7 +861,7 @@ async function uptadeDetailIfNecesary(poolParams: PoolParams|PoolParamsP3, newPo
   }
 
   if (!doesPoolNeedDeposit) {
-    updateDetail(newPool, contractList, totals, baseClass)
+    await updateDetail(newPool, contractList, totals, baseClass)
   }
 }
 
@@ -849,80 +892,73 @@ function calculateAmountHaveStaked(stakeRates: bigint[], amount: bigint, amountI
 	return amountToStake
 }
 
-function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
-	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
-  return totalAmountStakedWithThisStake * stakeRates[amountIndex] / stakeRates[newAmountIndex]
-	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
-	// const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
-	// return amountToStake > 0n ? amountToStake : 0n
+function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, inputIndex: number, outputIndex: number): bigint {
+	const totalAmountStakedWithThisStake = totalStaked[inputIndex] + amount
+  const amountToStake: bigint = totalAmountStakedWithThisStake * stakeRates[inputIndex] / stakeRates[outputIndex] - totalStaked[outputIndex]
+  return amountToStake > 0n ? amountToStake : 0n
 }
 
-// function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
-// 	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
-// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
-// 	const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
-// 	return amountToStake > 0n ? amountToStake : 0n
-// }
 
 function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
-  const output = totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
-  return output > 0n ? output : BigInt(-1) * output
-	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
-	// const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
-	// return amountToUnstake > 0n ? amountToUnstake : 0n
+  const output = totalStaked[newIndex] - totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
+  return output > 0n ? output : 0n
 }
 
-// function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
-// 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
-// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
-// 	const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
-// 	return amountToUnstake > 0n ? amountToUnstake : 0n
-// }
-
-function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, index: number) {
-  return function (event: Event) {
+function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, indexInputToken: number) {
+  return async function (event: Event) {
     event.preventDefault()
     const value1 = (event.target as HTMLInputElement).value
     // const amountToStake = BigInt(value1)
-    const amountToStake = BigInt(convertToBase(value1, poolParams.stakeTokenContractList[index].metaData.decimals.toString()))
+    const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
+    const inputTokenMetadata = await stakeTokenContractList[indexInputToken].getMetadata()
+    const amountToStakingOrUnstaking = BigInt(convertToBase(value1, inputTokenMetadata.decimals.toString()))
+    const contractParams = await poolParams.stakingContractData.getContractParams()
+    const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
-    // THE FOLLOWING LINE IS A PATCH. IT IS USED TO MAKE CHEDDAR+REF+BURROW WORK, BUT IT IS NOT GENERIC AT ALL
-    // const decimals = [6, -6, -6] // THIS LINE IS THE PATCH
-    const stakeRates = poolParams.contractParams.stake_rates.map((rate, index) => BigInt(rate)) // USING DECIMALS IN THIS CASE IS A PATCH
-    const totalStaked = poolParams.resultParams.staked.map(total => BigInt(total))
-    for(let i = 0; i < inputs.length; i++) {
-      if(i != index) {
+    const stakeRates = contractParams.stake_rates.map((rate: U128String) => BigInt(rate)) 
+    const totalStakedByUser = poolUserStatus.stake_tokens.map(total => BigInt(total))
+    for(let indexOutputToken = 0; indexOutputToken < inputs.length; indexOutputToken++) {
+      if(indexOutputToken != indexInputToken) {
         let amountToTransferSecondaryBN
         if(inputRoute.includes("unstake")) {
-          amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStaked, amountToStake, index, i)
+          amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStakedByUser, amountToStakingOrUnstaking, indexInputToken, indexOutputToken)
         } else {
-          amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStaked, amountToStake, index, i)
+          amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStakedByUser, amountToStakingOrUnstaking, indexInputToken, indexOutputToken)
           
         }
-        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, poolParams.stakeTokenContractList[i].metaData.decimals, 5)
+        const currentStakeTokenMetadata = await stakeTokenContractList[indexOutputToken].getMetadata()
+        const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, currentStakeTokenMetadata.decimals, 5)
         // const amountToStakeSecondary
-        inputs.item(i).value = amountToStakeSecondary
+        inputs.item(indexOutputToken).value = amountToStakeSecondary
       }
     }
   }
 }
 
 async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Promise<void> {
+  const contractParams: ContractParams = await poolParams.stakingContractData.getContractParams()
+  const userStatus = await poolParams.stakingContractData.getUserStatus()
+  const stakeTokenContractData: TokenContractData = await poolParams.getStakeTokenContractData();
+  const farmTokenContractData: TokenContractData = await poolParams.getFarmTokenContractData();
+
+
+  var metaData = await poolParams.stakeTokenContractList[0].getMetadata()
+  let iconElem = newPool.querySelectorAll("#token-logo-container img")
+  iconElem.forEach(icon => {
+    icon!.setAttribute("src", metaData.icon || "");
+  });
   
-  const stakeTokenContractData: ContractData = await poolParams.getStakeTokenContractData();
-  const farmTokenContractData: ContractData = await poolParams.getFarmTokenContractData();
+  await addInput(newPool, stakeTokenContractData, "stake")
+  await addInput(newPool, stakeTokenContractData, "unstake", userStatus.staked.toString())
 
-  addInput(newPool, stakeTokenContractData, "stake")
-  addInput(newPool, stakeTokenContractData, "unstake", poolParams.resultParams.staked.toString())
-
-  addHeader(poolParams, newPool)
+  await addHeader(poolParams, newPool)
   
   let unclaimedRewards = await getUnclaimedRewardsInUSDSingle(poolParams)
 
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const isDateInRange = now < contractParams.farming_end
 
   if (Number(unclaimedRewards.toFixed(7)) != 0) {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards.toFixed(7).toString()}`
@@ -931,9 +967,9 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   } else {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
   }
-  
-  const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [poolParams.contractParams.total_staked])
-  const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(poolParams.contractParams.farming_rate) * 60n * 24n).toString()])
+  const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [contractParams.total_staked])
+  const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(contractParams.farming_rate) * 60n * 24n).toString()])
+
   newPool.querySelector(".total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
   
@@ -952,25 +988,31 @@ function calculateAPR(totalStakedInUsd: string, rewardsPerDayInUsd: string, isDa
 
 }
 
-function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
-  const tokenContractDataArray: ContractData[] = poolParams.stakeTokenContractList
+async function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElement) {
+  let tokenContractDataArray: TokenContractData[]
+  if(poolParams instanceof PoolParams) {
+    tokenContractDataArray = poolParams.stakeTokenContractList
+  } else {
+    tokenContractDataArray = await poolParams.stakingContractData.getStakeTokenContractList()
+  }
+  // tokenContractDataArray: TokenContractData[] = poolParams.stakingContractData
   const logoContainer = header.querySelector(".token-logo-container")! as HTMLElement
   logoContainer.innerHTML = ""
 
   let i = 0
   for(; i < tokenContractDataArray.length; i++) {
     const tokenIconData = tokenContractDataArray[i]
-    const metaData = tokenIconData.metaData
+    const metaData = await tokenIconData.getMetadata()
     addLogo(metaData, logoContainer, i)
   }
   logoContainer.classList.add(`have-${i}-elements`)
 }
 
-function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   const genericHeader = qs(".generic-new-pool-header")
   const newHeader = genericHeader.cloneNode(true) as HTMLElement
 
-  addAllLogos(poolParams, newHeader)
+  await addAllLogos(poolParams, newHeader)
 
   const poolContainer = newPool.querySelector("#pool-container") as HTMLElement
   const tokenPoolStatsContainer = newPool.querySelector("#token-pool-stats") as HTMLElement
@@ -983,15 +1025,16 @@ function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
   tokenPoolStatsContainer.prepend(newTokenPoolStats)
 }
 
-function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
+async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement) {
   addAllCommonListeners(poolParams, newPool)
   let tokenSymbols = []
-  for(let i=0; i < poolParams.stakeTokenContractList.length; i++){ // Harvest button listener
-    const contractData = poolParams.stakeTokenContractList[i]
-    const metaData = contractData.metaData
-    newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
-    tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
+  const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
+  for(let i=0; i < stakeTokenContractList.length; i++){ // Harvest button listener
+    const contractData = stakeTokenContractList[i]
+    const currentStakeTokenMetadata = await contractData.getMetadata()
+    tokenSymbols.push(`${currentStakeTokenMetadata.symbol.toLowerCase()}`)
   }
+  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
 
   for (let i=0; i < tokenSymbols.length; i++){ // Autofill inputs with correct rates
     newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
@@ -1005,10 +1048,11 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
   setAllInputMaxButtonListeners(newPool)
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   let refreshIntervalId = -1
   if(isDateInRange) {
-    refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), 5000)
+    refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), refreshTime)
   }
 
   //Info to transfer so we can check what pool is loading the NFTs
@@ -1024,15 +1068,25 @@ function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLElement
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  addHeader(poolParams, newPool)
+  const startTime = Date.now()
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const endTime2 = Date.now()
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  const endTime3 = Date.now()
+  const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
+  const endTime4 = Date.now()
+  const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
+  const endTime5 = Date.now()
+  const startTime2 = Date.now()
+  await addHeader(poolParams, newPool)
   let tokenSymbols = []
   await poolParams.getWalletAvailable()
-  for(let i=0; i < poolParams.stakeTokenContractList.length; i++){
-    const contractData = poolParams.stakeTokenContractList[i]
-    const metaData = contractData.metaData
+  for(let i=0; i < stakeTokenContractList.length; i++){
+    const contractData = stakeTokenContractList[i]
+    const metaData = await contractData.getMetadata()
 
-    addInput(newPool, contractData, "stake")
-    addInput(newPool, contractData, "unstake", poolParams.resultParams.staked[i])
+    await addInput(newPool, contractData, "stake")
+    await addInput(newPool, contractData, "unstake", poolUserStatus.stake_tokens[i])
     
     tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
   }
@@ -1041,10 +1095,12 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   newPool.querySelector(".boost-button")!.classList.remove("hidden")
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
 
-  const unclaimedRewards = Number(await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed))
+  
+  const unclaimedRewards = Number(await convertToUSDMultiple(farmTokenContractList, poolUserStatus.farmed_tokens))
+  // const unclaimedRewards = Number(await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.resultParams.farmed))
 
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const isDateInRange = now < contractParams.farming_end
 
   if (Number(unclaimedRewards.toFixed(7)) != 0) {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ ${unclaimedRewards.toFixed(7).toString()}`
@@ -1054,10 +1110,10 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
   }
   
-  const totalStakedInUsd: string = await convertToUSDMultiple(poolParams.stakeTokenContractList, poolParams.contractParams.total_staked)
+  const totalStakedInUsd: string = await convertToUSDMultiple(stakeTokenContractList, contractParams.total_staked)
   // const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
-  const rewardsPerDay = poolParams.contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
-  const rewardsPerDayInUsd = await convertToUSDMultiple(poolParams.farmTokenContractList, rewardsPerDay)
+  const rewardsPerDay = contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
+  const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   // newPool.querySelector(".apr-row .apr-value")!.innerHTML = `$ ${totalFarmedInUsd}`
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
@@ -1070,8 +1126,9 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   addMultiplePoolListeners(poolParams, newPool)
 }
 
-function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
-  const hasNFTStaked = poolParams.resultParams.cheddy_nft != ''
+async function setBoostDisplay(poolParams: PoolParamsP3, newPool: HTMLElement) {
+  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  const hasNFTStaked = poolUserStatus.cheddy_nft != ''
   if(hasNFTStaked) {
     newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
     newPool.querySelector(".boost-button span")!.innerHTML = "BOOSTED"
@@ -1088,14 +1145,14 @@ function addFocusClass(input:HTMLElement) {
   }
 }
 
-function addInput(newPool: HTMLElement, contractData: ContractData, action: string, stakedAmount?: U128String) {
+async function addInput(newPool: HTMLElement, contractData: TokenContractData, action: string, stakedAmount?: U128String) {
   let inputContainer = qs(".generic-token-input-container")
   var newInputContainer = inputContainer.cloneNode(true) as HTMLElement
   let inputRowContainer = newInputContainer.querySelector(".input-container") as HTMLElement
   let infoRowContainer = newInputContainer.querySelector(".available-info") as HTMLElement
   let input = newInputContainer.querySelector("input") as HTMLElement
   
-  const metaData = contractData.metaData
+  const metaData = await contractData.getMetadata()
   newInputContainer.classList.remove("generic-token-input-container")
   newInputContainer.classList.add("token-input-container")
   newInputContainer.classList.add(`${metaData.symbol.toLowerCase()}-input`)
@@ -1126,12 +1183,13 @@ function addInput(newPool: HTMLElement, contractData: ContractData, action: stri
     inputLogoContainer?.classList.remove("hidden")
   }
 
+  const balance = await contractData.getBalance()
   if(action == "stake") {
-    amountAvailableValue!.innerHTML= convertToDecimals(contractData.balance, contractData.metaData.decimals, 5)
+    amountAvailableValue!.innerHTML= convertToDecimals(balance, metaData.decimals, 5)
   } else if(action == "unstake") {
-    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, contractData.metaData.decimals, 5)
+    amountAvailableValue!.innerHTML= convertToDecimals(stakedAmount!, metaData.decimals, 5)
   }
-  const balanceDisplayable = convertToDecimals(contractData.balance, contractData.metaData.decimals, 5)
+  const balanceDisplayable = convertToDecimals(balance, metaData.decimals, 5)
   showOrHideMaxButton(Number(balanceDisplayable), maxButton)
 
 
@@ -1179,11 +1237,11 @@ function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTM
   }
 }
 
-function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
+async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   addAllCommonListeners(poolParams, newPool)
   // Harvest button listener
-  const contractData = poolParams.stakeTokenContractList[0]
-  const metaData = contractData.metaData
+  const contractData = await poolParams.getStakeTokenContractData()
+  const metaData = await contractData.getMetadata()
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
   // Token symbols is done this way to emulate multiple case. Single case will be removed shortly
   let tokenSymbols = []
@@ -1196,10 +1254,11 @@ function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   setAllInputMaxButtonListeners(newPool)
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
-  const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+  const contractParams = await poolParams.stakingContractData.getContractParams()
+  const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
   let refreshIntervalId = -1
   if(isDateInRange) {
-    refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), 5000)
+    refreshIntervalId = window.setInterval(refreshPoolInfoSingle.bind(null, poolParams, newPool), refreshTime)
   }
   
 
@@ -1211,7 +1270,8 @@ function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLElement) {
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
 }
 
-function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refreshFunction: (pp: PoolParams, np: HTMLElement) => void, refreshIntervalId: number) {
+async function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refreshFunction: (pp: PoolParams, np: HTMLElement) => void, refreshIntervalId: number) {
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   let newPool = pool.cloneNode(true) as HTMLElement
   hideAllDynamicElements(newPool)
   addFilterClasses(poolParams, newPool)
@@ -1225,7 +1285,7 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
     const now = Date.now() / 1000
-    const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+    const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
     refreshIntervalId = -1
     if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
@@ -1239,7 +1299,7 @@ function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement, refr
   qs(".activeFilterButton").dispatchEvent(event)
 }
 
-function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
+async function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, refreshFunction: (pp: PoolParamsP3, np: HTMLElement) => void, refreshIntervalId: number) {
   let newPool = pool.cloneNode(true) as HTMLElement
   hideAllDynamicElements(newPool)
   addFilterClasses(poolParams, newPool)
@@ -1253,9 +1313,10 @@ function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, 
   if(refreshIntervalId != -1) {
     clearInterval(refreshIntervalId)
     const now = Date.now() / 1000
-    const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
+    const contractParams = await poolParams.stakingContractData.getContractParams()
+    const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
     refreshIntervalId = -1
-    if(!dateInRangeHack && isDateInRange) {
+    if(isDateInRange) {
       refreshIntervalId = window.setInterval(refreshFunction.bind(null, poolParams, newPool), 5000)
     }
     
@@ -1267,19 +1328,21 @@ function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLElement, 
   qs(".activeFilterButton").dispatchEvent(event)
 }
 
-function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
+async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
   // Cleaning classes in case of reset
   const classes = ["your-farms", "active-pool", "inactive-pool"]
   classes.forEach(className => newPool.classList.remove(className))
   
   const now = Date.now() / 1000
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   // const isDateInRange = poolParams.contractParams.farming_start < now && now < poolParams.contractParams.farming_end
-  const isDateInRange = now < poolParams.contractParams.farming_end
+  const isDateInRange = now < contractParams.farming_end
   
-  if(poolParams.resultParams.hasStakedTokens()){
+  // const poolUserStatus: PoolUserStatus|[string, string, string] = await poolParams.stakingContractData.getUserStatus()
+  if(await poolParams.userHasStakedTokens()){
     newPool.classList.add("your-farms")
   }
-  if(!dateInRangeHack && isDateInRange) {
+  if(isDateInRange) {
     newPool.classList.add("active-pool")
   } else {
     newPool.classList.add("inactive-pool")
@@ -1288,22 +1351,14 @@ function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLEl
 
 async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
-  var metaData = poolParams.stakingContractMetaData;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
-
+  
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
   
   newPool.setAttribute("id", poolParams.html.id)
   newPool.classList.remove("hidden")
   newPool.classList.add("pool-container")
-  
-  
-  let iconElem = newPool.querySelectorAll("#token-logo-container img")
-  
-  iconElem.forEach(icon => {
-    icon!.setAttribute("src", metaData.icon || "");
-  });
 
   addFilterClasses(poolParams, newPool)
   if (poolParams instanceof PoolParams) {
@@ -1318,14 +1373,14 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   // New code
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
-  var contractParams = poolParams.contractParams;
+  const contractParams = await poolParams.stakingContractData.getContractParams()
   
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
 
-
+  const poolName = await poolParams.getPoolName()
   newPool.querySelectorAll(".token-name").forEach(element => {
-    element.innerHTML = poolParams.getPoolName()
+    element.innerHTML = poolName
   })
 
   if(newPool.classList.contains("inactive-pool")) {
@@ -1390,31 +1445,34 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: H
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
-  let isAccountRegistered = (await poolParams.stakingContract.storageBalance()) != null;
+  
+  if(wallet != disconnectedWallet) {
+    let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-  if(isAccountRegistered) {
-    toggleStakeUnstakeSection(newPool)
+    if(isAccountRegistered) {
+      toggleStakeUnstakeSection(newPool)
 
-    let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
-    let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
-    let staking = newPool.querySelector(".main-stake")! as HTMLElement;
-    let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
-    let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
-    let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+      let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+      let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+      let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+      let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+      let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+      let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
 
-    setUnstakeTabListeners(newPool)
+      setUnstakeTabListeners(newPool)
 
-    stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-    stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-    stakeTabButton.addEventListener("click", setActiveColor);
-    stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
-  } else {
-    activateButtonContainer.classList.remove("hidden")
-    activateButton.addEventListener("click", activateClicked(poolParams, newPool))
+      stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+      stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+      stakeTabButton.addEventListener("click", setActiveColor);
+      stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
+    } else {
+      activateButtonContainer.classList.remove("hidden")
+      activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
-    if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
-      let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
-      newPool.querySelector("#depositWarning")!.innerHTML = warningText 
+      if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
+        let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
+        newPool.querySelector("#depositWarning")!.innerHTML = warningText 
+      }
     }
   }
 
@@ -1466,7 +1524,7 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
 }
 
 async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
-  const stakeTokenDataArray = poolParams.getStakeTokensDetail()
+  const stakeTokenDataArray = await poolParams.getStakeTokensDetail()
   let totalStakedRows: DetailRowElements = {
     parentClass: "total-staked-info-container",
     rows: []
@@ -1494,7 +1552,7 @@ async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPo
 // }
 
 async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
-  const rewardsTokenDataArray = poolParams.getRewardsTokenDetail()
+  const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   let rewardsPerDayRows: DetailRowElements = {
     parentClass,
     rows: []
@@ -1656,6 +1714,9 @@ window.onload = async function () {
       //make the contract use NEAR Web Wallet
       wallet = new NearWebWallet(nearWebWalletConnection);
       
+      // const poolList = await getPoolList(wallet)
+      // await addPoolList(poolList)
+
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)
       await signedInFlow(wallet)
@@ -1672,7 +1733,6 @@ window.onload = async function () {
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
-      const poolList = await getPoolList(wallet)
       const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
       let method: string = ""
       let err
@@ -1718,20 +1778,28 @@ window.onload = async function () {
         // await nftStakeResult(args)
       } else if(method == "storage_deposit"){
         showSuccess("Successfully activated", "Activate")
+      } else if(method == "withdraw_crop") {
+        showSuccess("Tokens harvested successfully")
       } else {
         console.log("Method", method)
         console.log("Args", args.join("\n"))
       }
-
+      
     }
     else {
       //not signed-in 
       await signedOutFlow() //show home-not-connected -> select wallet page
     }
+    const poolList = await getPoolList(wallet)
+    await addPoolList(poolList)
+    setDefaultFilter()
   }
   catch (ex) {
     showErr(ex as Error)
+  } finally {
+    qs(".loader").style.display = "none"
   }
+
 }
 
 async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id: string}]) {
@@ -1740,7 +1808,7 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
   const poolList = await getPoolList(wallet)
   let pool: PoolParams | PoolParamsP3 | undefined
   for(let i = 0; i < poolList.length; i++) {
-    if(argsArray[0].receiver_id == poolList[i].stakingContract.contractId) {
+    if(argsArray[0].receiver_id == poolList[i].stakingContractData.contract.contractId) {
       pool = poolList[i]
       break
     }
@@ -1884,13 +1952,16 @@ async function loadNFTs(poolParams: PoolParamsP3) {
   const nftContract = poolParams.nftContract
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
 
-  if(nftCollection.length == 0) {
+
+  
+
+  let userStatus: PoolUserStatus = await poolParams.stakingContractData.getUserStatus()
+
+  const poolHasStaked = userStatus.cheddy_nft != ''
+  if(nftCollection.length == 0 && !poolHasStaked) {
     NFTContainer.innerHTML = "You don't have any NFT's"
     return
   }
-
-  let userStatus: Status = await poolParams.stakingContract.status(accountId)
-  const poolHasStaked = userStatus.cheddy_nft != ''
   if(poolHasStaked) {
     const stakedNft = newNFT(userStatus.cheddy_nft)
     addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, true)
@@ -1951,7 +2022,7 @@ function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
       showWait("Staking NFT...")
       
       const tokenId = card.querySelector(".nft-name")!.innerHTML
-      await poolParams.nftContract.nft_transfer_call(poolParams.stakingContract.contractId, tokenId)
+      await poolParams.nftContract.nft_transfer_call(poolParams.stakingContractData.contract.contractId, tokenId)
       showSuccess("NFT staked successfully")
       
       let allNFTCards = qsa(".nft-card")
@@ -1976,7 +2047,7 @@ function unstakeNFT(poolParams: PoolParamsP3, card: HTMLElement) {
       event.preventDefault()
       showWait("Unstaking NFT...")
 
-      await poolParams.stakingContract.withdraw_nft(poolParams.wallet.getAccountId())
+      await poolParams.stakingContractData.contract.withdraw_nft(poolParams.wallet.getAccountId())
       showSuccess("NFT unstaked successfully")
       card.querySelector(".unstake-nft-button")!.classList.add("hidden")
 

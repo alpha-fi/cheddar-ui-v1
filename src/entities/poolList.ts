@@ -2,7 +2,7 @@ import { nearConfig } from "..";
 import { NEP141Trait } from "../contracts/NEP141";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { StakingPoolP3 } from "../contracts/p3-staking";
-import { HtmlPoolParams, PoolParams, PoolResultParams } from "../entities/poolParams";
+import { HtmlPoolParams, PoolParams, UserStatusP2 } from "../entities/poolParams";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { PoolParamsP3 } from "./poolParamsP3";
 
@@ -21,11 +21,14 @@ async function generatePoolList(wallet: WalletInterface) {
         let contract
         let poolParams
         if(nearConfig.farms[i].poolType == "multiple") {
-            contract = new StakingPoolP3(nearConfig.farms[i].contractName);
-            poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, nearConfig.nftContractAddress, wallet);
+            // contract = new StakingPoolP3(nearConfig.farms[i].contractName);
+            // poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, nearConfig.nftContractAddress, wallet);
+            poolParams = new PoolParamsP3(wallet, nearConfig.farms[i], nearConfig.nftContractAddress)
         } else {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
-            poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet, nearConfig.farms[i].poolName);
+            poolParams = new PoolParams(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
+            // poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet, nearConfig.farms[i].poolName);
+
         }
         await poolParams.setAllExtraData();
 
@@ -33,11 +36,15 @@ async function generatePoolList(wallet: WalletInterface) {
     }
 }
 
-export async function getPoolList(wallet: WalletInterface) {
+export async function getPoolList(wallet: WalletInterface): Promise<(PoolParams | PoolParamsP3)[]> {
     if(!poolList || poolList.length == 0) {
         await generatePoolList(wallet);
-
-        poolList = poolList.sort((a, b) => b.contractParams.farming_end - a.contractParams.farming_end)
+        await Promise.all(
+            poolList.map(async function(pool) {
+                return await pool.stakingContractData.getContractParams()
+            })
+        )
+        poolList = poolList.sort((a, b) => b.stakingContractData.getContractParamsNotAsync().farming_end - a.stakingContractData.getContractParamsNotAsync().farming_end)
 
     }
     return poolList;

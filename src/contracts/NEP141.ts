@@ -59,15 +59,15 @@ export class NEP141Trait extends SmartContract {
     }
 
     async ft_total_supply() : Promise<U128String> {
-        return this.view("ft_total_supply")
+        return this.viewWithoutAccount("ft_total_supply")
     }
 
     async ft_balance_of(accountId:string) : Promise<U128String> {
-        return this.view("ft_balance_of",{account_id:accountId }) 
+        return this.viewWithoutAccount("ft_balance_of",{account_id:accountId }) 
     }
 
     async ft_metadata() :Promise<FungibleTokenMetadata>{
-        return this.view("ft_metadata");
+        return this.viewWithoutAccount("ft_metadata");
     }
 
     async new(owner_id: string, owner_supply: U128String):Promise<void>{
@@ -76,7 +76,7 @@ export class NEP141Trait extends SmartContract {
 
     /// Checks to see if an account is registered.
     storageBalance(accountId?: string): Promise<StorageBalance> {
-      return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
+      return this.viewWithoutAccount("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
     }
 
     /// Registers a user with the farm.
@@ -92,9 +92,5 @@ export class NEP141Trait extends SmartContract {
             new BN("3000000000000000000000")
         )
     }
-
-    // storageDepositWithoutSend(): Promise<Action> {
-    //     return this.callWithoutSend("storage_deposit", {}, TGas(25), "3000000000000000000000")
-    //   }
 
 }

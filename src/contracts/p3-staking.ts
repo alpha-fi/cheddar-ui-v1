@@ -6,7 +6,7 @@
 import { ntoy, TGas } from "../util/conversions"
 import { SmartContract } from "../wallet-api/base-smart-contract"
 
-import { P3ContractParams, Status, TransferTokenData } from "./p3-structures"
+import { P3ContractParams, PoolUserStatus as PoolUserStatus, TransferTokenData } from "./p3-structures"
 import { U128String } from "../wallet-api/util"
 
 import * as nearAPI from "near-api-js"
@@ -16,6 +16,7 @@ import { near } from ".."
 import { Action } from "near-api-js/lib/transaction"
 import { StorageBalance } from "./contract-structs"
 import { transactions } from "near-api-js"
+import { disconnectedWallet } from "../wallet-api/disconnected-wallet"
 
 type AccountId = string;
 
@@ -24,17 +25,17 @@ export class StakingPoolP3 extends SmartContract {
 
     /// Returns contract params
     get_contract_params(): Promise<P3ContractParams> {
-        return this.view("get_contract_params", {})
+        return this.viewWithoutAccount("get_contract_params")
     }
 
     /// Returns amount of staked NEAR and farmed CHEDDAR of given account.
-    status(accountId?: AccountId): Promise<Status> {
-        return this.view("status", { account_id: accountId || this.wallet.getAccountId() })
+    status(accountId?: AccountId): Promise<PoolUserStatus> {
+        return this.viewWithoutAccount("status", { account_id: accountId || this.wallet.getAccountId() })
     }
 
     /// Checks to see if an account is registered.
     storageBalance(accountId?: AccountId): Promise<StorageBalance> {
-        return this.view("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
+        return this.viewWithoutAccount("storage_balance_of", { account_id: accountId || this.wallet.getAccountId() })
     }
 
     /// Registers a user with the farm.
@@ -53,7 +54,6 @@ export class StakingPoolP3 extends SmartContract {
     }
 
     /// Stake attached &NEAR and returns total amount of stake.
-    // QUESTION: is it implemented yet?
     ft_transfer_call(amount: U128String): Promise<U128String> {
         return this.call("ft_transfer_call", {}, TGas(25), amount)
     }
@@ -61,9 +61,6 @@ export class StakingPoolP3 extends SmartContract {
     withdraw_nft(receiver_id:string):Promise<void>{
         return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"1"); //one-yocto attached
     }
-
-    // This function is generic, not a p3-staking function. Should be on a more generic place
-    
 
     /// Unstakes given amount of $NEAR and transfers it back to the user.
     /// Returns amount of staked tokens left after the call.
