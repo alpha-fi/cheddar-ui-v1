@@ -892,64 +892,46 @@ function calculateAmountHaveStaked(stakeRates: bigint[], amount: bigint, amountI
 	return amountToStake
 }
 
-function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
-	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
-  return totalAmountStakedWithThisStake * stakeRates[amountIndex] / stakeRates[newAmountIndex]
-	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
-	// const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
-	// return amountToStake > 0n ? amountToStake : 0n
+function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, inputIndex: number, outputIndex: number): bigint {
+	const totalAmountStakedWithThisStake = totalStaked[inputIndex] + amount
+  const amountToStake: bigint = totalAmountStakedWithThisStake * stakeRates[inputIndex] / stakeRates[outputIndex] - totalStaked[outputIndex]
+  return amountToStake > 0n ? amountToStake : 0n
 }
 
-// function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
-// 	const totalAmountStakedWithThisStake = totalStaked[amountIndex] + amount
-// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisStake, amountIndex, newAmountIndex)
-// 	const amountToStake = totalAmountToHaveStakedOfSecondaryToken - totalStaked[newAmountIndex]
-// 	return amountToStake > 0n ? amountToStake : 0n
-// }
 
 function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
-  const output = totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
-  return output > 0n ? output : BigInt(-1) * output
-	// const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
-	// const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
-	// return amountToUnstake > 0n ? amountToUnstake : 0n
+  const output = totalStaked[newIndex] - totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
+  return output > 0n ? output : 0n
 }
 
-// function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
-// 	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
-// 	const totalAmountToHaveStakedOfSecondaryToken = calculateAmountHaveStaked(stakeRates, totalAmountStakedWithThisUnstake, alreadySetIndex, newIndex)
-// 	const amountToUnstake = totalStaked[newIndex] - totalAmountToHaveStakedOfSecondaryToken
-// 	return amountToUnstake > 0n ? amountToUnstake : 0n
-// }
-
-function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, index: number) {
+function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, indexInputToken: number) {
   return async function (event: Event) {
     event.preventDefault()
     const value1 = (event.target as HTMLInputElement).value
     // const amountToStake = BigInt(value1)
     const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
-    const inputTokenMetadata = await stakeTokenContractList[index].getMetadata()
-    const amountToStake = BigInt(convertToBase(value1, inputTokenMetadata.decimals.toString()))
+    const inputTokenMetadata = await stakeTokenContractList[indexInputToken].getMetadata()
+    const amountToStakingOrUnstaking = BigInt(convertToBase(value1, inputTokenMetadata.decimals.toString()))
     const contractParams = await poolParams.stakingContractData.getContractParams()
     const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
     const stakeRates = contractParams.stake_rates.map((rate: U128String) => BigInt(rate)) 
-    const totalStaked = poolUserStatus.stake_tokens.map(total => BigInt(total))
-    for(let i = 0; i < inputs.length; i++) {
-      if(i != index) {
+    const totalStakedByUser = poolUserStatus.stake_tokens.map(total => BigInt(total))
+    for(let indexOutputToken = 0; indexOutputToken < inputs.length; indexOutputToken++) {
+      if(indexOutputToken != indexInputToken) {
         let amountToTransferSecondaryBN
         if(inputRoute.includes("unstake")) {
-          amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStaked, amountToStake, index, i)
+          amountToTransferSecondaryBN = calculateAmountToUnstake(stakeRates, totalStakedByUser, amountToStakingOrUnstaking, indexInputToken, indexOutputToken)
         } else {
-          amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStaked, amountToStake, index, i)
+          amountToTransferSecondaryBN = calculateAmountToStake(stakeRates, totalStakedByUser, amountToStakingOrUnstaking, indexInputToken, indexOutputToken)
           
         }
-        const currentStakeTokenMetadata = await stakeTokenContractList[i].getMetadata()
+        const currentStakeTokenMetadata = await stakeTokenContractList[indexOutputToken].getMetadata()
         const amountToStakeSecondary = convertToDecimals(amountToTransferSecondaryBN, currentStakeTokenMetadata.decimals, 5)
         // const amountToStakeSecondary
-        inputs.item(i).value = amountToStakeSecondary
+        inputs.item(indexOutputToken).value = amountToStakeSecondary
       }
     }
   }
