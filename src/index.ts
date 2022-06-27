@@ -717,7 +717,6 @@ function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newP
     dateInRangeIndicator.classList.add("offDate")
   }
   
-  //DUDA El valor que está dentro del detail-row expresa una cantidad de tokens. Te parece correcto sumar todas las cantidades de tokens para compararlas con 0?
   let allUnclaimedRewardsTotalAmount = 0
   let allUnclaimedRewardsDetails = newPool.querySelectorAll(".unclaimed-rewards-info-container .detail-row") as NodeListOf<Element>
   allUnclaimedRewardsDetails.forEach(unclaimedRewardDetail => {
