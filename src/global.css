@@ -1541,7 +1541,7 @@ input:checked + .slider:before {
   align-content: space-between;
 }
 
-.main-contract-information, .nft-basic-info-and-interaction {
+.main-contract-information, .nft-basic-info-and-interaction, .stats-container {
   width: 100%;
   font-weight: 600;
   font-size: 14px;
