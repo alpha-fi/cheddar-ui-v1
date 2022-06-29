@@ -1529,7 +1529,7 @@ input:checked + .slider:before {
 .stats-container li {
   display: flex;
   justify-content: space-between;
-  margin: 11px auto;
+  margin: 0 auto;
   position: relative;
   align-items: center;
 }
@@ -1541,7 +1541,7 @@ input:checked + .slider:before {
   align-content: space-between;
 }
 
-.main-contract-information, .nft-basic-info-and-interaction {
+.main-contract-information, .nft-basic-info-and-interaction, .stats-container {
   width: 100%;
   font-weight: 600;
   font-size: 14px;
@@ -1588,9 +1588,13 @@ h2.nft-name {
   border: 1px solid var(--second-new-grey);
   border-radius: 12px;
   margin: 10px 40px;
-  padding: 0 9px;
+  padding: 5px 9px;
 
   z-index: 1;
+}
+
+.total-staked-info-container {
+  transform: translateY(-56%);
 }
 
 
@@ -1607,6 +1611,7 @@ h2.nft-name {
   border-width: 0px 1px;
   border-radius: 12px;
   margin: 1px;
+  line-height: 18px;
 }
 
 .reward-tokens-value {
