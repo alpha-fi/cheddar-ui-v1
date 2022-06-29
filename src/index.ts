@@ -1,5 +1,5 @@
 import { baseDecode } from 'borsh';
-import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount, RequestSignTransactionsOptions, utils } from 'near-api-js'
+import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount } from 'near-api-js'
 import { Action, createTransaction, functionCall } from 'near-api-js/lib/transaction';
 import { PublicKey } from 'near-api-js/lib/utils'
 
@@ -43,7 +43,6 @@ export let wallet: WalletInterface = disconnectedWallet;
 
 let nearWebWalletConnection: WalletConnection;
 let nearConnectedWalletAccount: ConnectedWalletAccount;
-let requestSignTransOptions: RequestSignTransactionsOptions;
 let accountName;
 let isPaused = false;
 let loggedWithNarwallets = false
@@ -429,14 +428,14 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
         "to farm"
       )
 
-      if (loggedWithNarwallets) {
-        //clear form
-        stakeInput.value = ""
-        poolParams.resultParams.addStaked(ntoy(stakeAmount))
-        refreshPoolInfo(poolParams, newPool)//Question: shouldnt this be in refreshPoolInfo?
+      // if (loggedWithNarwallets) {
+      //   //clear form
+      //   stakeInput.value = ""
+      //   poolParams.resultParams.addStaked(ntoy(stakeAmount))
+      //   refreshPoolInfo(poolParams, newPool)//Question: shouldnt this be in refreshPoolInfo?
   
-        showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakeTokenMetaData.symbol)
-      }
+      //   showSuccess("Staked " + toStringDecMin(stakeAmount) + poolParams.stakeTokenMetaData.symbol)
+      // }
 
     }
     catch (ex) {
@@ -508,17 +507,17 @@ function unstakeSingle(poolParams: PoolParams, newPool: HTMLElement){
         )
       )
       
-      if (loggedWithNarwallets) {
-        //clear form
-        unstakeInput.value = ""
+      // if (loggedWithNarwallets) {
+      //   //clear form
+      //   unstakeInput.value = ""
   
-        //refresh acc info
-        refreshPoolInfo(poolParams, newPool)
+      //   //refresh acc info
+      //   refreshPoolInfo(poolParams, newPool)
 
-        poolUserStatus.addStaked(ntoy(unstakeAmount))
-        // refreshPoolInfoSingle(poolParams, newPool) //Esta línea la agregué porque pensé que corresponde pero realmente estoy confundido.
-        showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.stakeTokenMetaData.symbol)
-      }
+      //   poolUserStatus.addStaked(ntoy(unstakeAmount))
+      //   // refreshPoolInfoSingle(poolParams, newPool) //Esta línea la agregué porque pensé que corresponde pero realmente estoy confundido.
+      //   showSuccess("Unstaked " + toStringDecMin(unstakeAmount) + poolParams.stakeTokenMetaData.symbol)
+      // }
     }
     catch (ex) {
       showErr(ex as Error)
@@ -695,17 +694,6 @@ function showOrHideMaxButton(walletBalance: number, elem: HTMLElement) {
   }
 }
 
-function setAccountInfo(poolParams: PoolParams, accountInfo: string[]){
-  poolParams.resultParams.staked = BigInt(accountInfo[0])
-  poolParams.resultParams.real = BigInt(accountInfo[1])
-  poolParams.resultParams.computed = BigInt(accountInfo[1])
-  poolParams.resultParams.previous_timestamp = Number(accountInfo[2])
-}
-
-function refreshPoolInfo(poolParams: PoolParams, newPool: HTMLElement){
-  poolParams.resultParams.accName = poolParams.stakingContract.wallet.getAccountId()
-}
-
 function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
 
@@ -853,7 +841,7 @@ async function uptadeDetailIfNecesary(poolParams: PoolParams|PoolParamsP3, newPo
     
   const stakeTokenList = poolParams.stakeTokenContractList
   for(let i = 0; i < stakeTokenList.length && !doesPoolNeedDeposit; i++) {
-    const tokenContract = stakeTokenList[i].contract
+    const tokenContract = stakeTokenList[i].contract!
     const doesTokenNeedStorageDeposit = await needsStorageDeposit(tokenContract)
     if (doesTokenNeedStorageDeposit) {
       doesPoolNeedDeposit = true
@@ -1823,7 +1811,8 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
     if(pool instanceof PoolParams) {
       metadata = await pool.stakeTokenContract.ft_metadata()
     } else if(pool instanceof PoolParamsP3) {
-      metadata = await pool.stakeTokenContractList[index].contract.ft_metadata()
+      const stakeTokenContractList = await pool.stakingContractData.getStakeTokenContractList()
+      metadata = await stakeTokenContractList[index].contract!.ft_metadata()
     }
     if(!metadata) {
       // This if should never be true

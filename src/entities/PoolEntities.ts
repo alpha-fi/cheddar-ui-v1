@@ -14,13 +14,6 @@ async function getTokenContractList(wallet:WalletInterface, contractNameArray: s
     let tokenContractList = []
     for(let i = 0; i < contractNameArray.length; i++) {
         const tokenContractName = contractNameArray[i]
-        // let contract = new NEP141Trait(tokenContractName)
-        // contract.wallet = wallet
-        // let metaData = await contract.ft_metadata()
-        // let balance = await contract.ft_balance_of(wallet.getAccountId())
-        // if(metaData.symbol == "STNEAR") {
-        //     metaData.symbol = "stNEAR";
-        // }
         tokenContractList.push(new TokenContractData(wallet, tokenContractName, ""))
     }
     return tokenContractList
