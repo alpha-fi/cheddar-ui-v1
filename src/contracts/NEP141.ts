@@ -12,6 +12,7 @@ export type FungibleTokenMetadata = {
     spec: string;
     name: string;
     symbol: string;
+    symbolForHtml: string;
     icon: string|null;
     reference: string|null;
     reference_hash: string|null;

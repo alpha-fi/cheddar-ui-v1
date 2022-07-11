@@ -175,7 +175,8 @@ export class PoolParamsP3 {
             const iconData = await this.getIcon(farmTokenContract)
             const farmTokenMetadata: FungibleTokenMetadata = await farmTokenContract.getMetadata()
             const tokenName = farmTokenMetadata.name
-            const rewardsPerDayBN = BigInt(contractParams.farm_token_rates[i]) * 60n * 24n
+            // const rewardsPerDayBN = BigInt(contractParams.farm_token_rates[i]) * 60n * 24n
+            const rewardsPerDayBN = BigInt(contractParams.farm_unit_emission) * BigInt(contractParams.farm_token_rates[i]) * 60n * 24n / (BigInt(10) ** BigInt(24))
             const rewardsPerDay = convertToDecimals(rewardsPerDayBN, farmTokenMetadata.decimals, 5)
             const totalRewards = convertToDecimals(contractParams.total_farmed[i], farmTokenMetadata.decimals, 5)
             const userUnclaimedRewards = convertToDecimals(poolUserStatus.farmed_tokens[i], farmTokenMetadata.decimals, 5)
@@ -183,6 +184,7 @@ export class PoolParamsP3 {
             dataArray.push({
                 iconData,
                 tokenName,
+                rewardsPerDayBN,
                 rewardsPerDay,
                 totalRewards,
                 userUnclaimedRewards,

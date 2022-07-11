@@ -179,6 +179,11 @@ export class TokenContractData {
     async getMetadata(): Promise<FungibleTokenMetadata> {
         if(!this.metaData) {
             this.metaData = await this.metaDataPromise
+            if(this.metaData!.symbol.includes("$")) { // Meta symbol is $META, and this is bad for html selectors
+                this.metaData!.symbolForHtml = this.metaData!.symbol.replace("$", "")
+            } else {
+                this.metaData!.symbolForHtml = this.metaData!.symbol
+            }
         }
         return this.metaData!
     }

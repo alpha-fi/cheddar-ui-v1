@@ -226,6 +226,12 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
   return parseFloat(rewardTokenData.price) * parseFloat(currentRewardsDisplayable)
 }
 
+/**
+ * 
+ * @param tokenContractList 
+ * @param amountList array containing the amounts to be converted with the metadata decimals included
+ * @returns 
+ */
 async function convertToUSDMultiple(tokenContractList: TokenContractData[], amountList: U128String[]): Promise<string> {
   // const stakeTokenContractList = poolParams.stakeTokenContractList
   await Promise.all(
@@ -239,10 +245,10 @@ async function convertToUSDMultiple(tokenContractList: TokenContractData[], amou
   tokenContractList.forEach((tokenContract: TokenContractData, index: number) => {
     const metaData = tokenContract.getMetadataSync()
     const symbol = metaData.symbol
-    const unclaimedRewards = amountList[index]
+    const amount = amountList[index]
     
     // console.log(unclaimedRewards)
-    const currentRewardsDisplayable = convertToDecimals(unclaimedRewards, metaData.decimals, 5)
+    const currentRewardsDisplayable = convertToDecimals(amount, metaData.decimals, 5)
     const tokenData = rewardTokenDataMap.get(symbol.toLowerCase())
     amountInUsd += parseFloat(tokenData!.price) * parseFloat(currentRewardsDisplayable)
   })
@@ -785,7 +791,9 @@ async function refreshPoolInfoMultiple(poolParams: PoolParamsP3, newPool: HTMLEl
 
   await updateDetail(newPool, await stakeTokenContractList, contractParams.total_staked, "total-staked")
   // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
-  await updateDetail(newPool, farmTokenContractList, convertRewardsRates(contractParams.farm_token_rates), "rewards-per-day")
+  const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
+  const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
+  await updateDetail(newPool, farmTokenContractList, rewardsPerDay, "rewards-per-day")
   await updateDetail(newPool, farmTokenContractList, poolUserStatus.farmed_tokens, "unclaimed-rewards")
 
   const stakeBalances = await Promise.all(stakeTokenContractList.map(stakeCD => stakeCD.getBalance()))
@@ -824,6 +832,7 @@ function convertRewardsRates(rates: string[]) {
 }
 
 async function updateDetail(newPool: HTMLElement, contractList: TokenContractData[], totals: string[], baseClass: string) {
+  // CHECK 2
   const totalInUsd: string = await convertToUSDMultiple(contractList, totals)
   newPool.querySelector(`.${baseClass}-row .${baseClass}-value-usd`)!.innerHTML = `$ ${totalInUsd}`
   const totalDetailsElements: NodeListOf<HTMLElement> = newPool.querySelectorAll(`.${baseClass}-info-container .detail-row`)
@@ -1019,7 +1028,7 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   for(let i=0; i < stakeTokenContractList.length; i++){ // Harvest button listener
     const contractData = stakeTokenContractList[i]
     const currentStakeTokenMetadata = await contractData.getMetadata()
-    tokenSymbols.push(`${currentStakeTokenMetadata.symbol.toLowerCase()}`)
+    tokenSymbols.push(`${currentStakeTokenMetadata.symbolForHtml.toLowerCase()}`)
   }
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultiple(poolParams, newPool))
 
@@ -1055,16 +1064,10 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
-  const startTime = Date.now()
   const contractParams = await poolParams.stakingContractData.getContractParams()
-  const endTime2 = Date.now()
   const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
-  const endTime3 = Date.now()
   const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
-  const endTime4 = Date.now()
   const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
-  const endTime5 = Date.now()
-  const startTime2 = Date.now()
   await addHeader(poolParams, newPool)
   let tokenSymbols = []
   await poolParams.getWalletAvailable()
@@ -1075,7 +1078,7 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
     await addInput(newPool, contractData, "stake")
     await addInput(newPool, contractData, "unstake", poolUserStatus.stake_tokens[i])
     
-    tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
+    tokenSymbols.push(`${metaData.symbolForHtml.toLowerCase()}`)
   }
 
   //Show boost button patch (since simple pools will disapear and they have problems with the boost button)
@@ -1098,8 +1101,10 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   }
   
   const totalStakedInUsd: string = await convertToUSDMultiple(stakeTokenContractList, contractParams.total_staked)
-  // const totalFarmedInUsd: string = await convertToUSDMultiple(poolParams.farmTokenContractList, poolParams.contractParams.total_farmed)
-  const rewardsPerDay = contractParams.farm_token_rates.map(rate => (BigInt(rate) * 60n * 24n).toString())
+  
+  // CHECK!
+  const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
+  const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".total-staked-row .total-staked-value-usd")!.innerHTML = `$ ${totalStakedInUsd}`
   // newPool.querySelector(".apr-row .apr-value")!.innerHTML = `$ ${totalFarmedInUsd}`
@@ -1142,7 +1147,7 @@ async function addInput(newPool: HTMLElement, contractData: TokenContractData, a
   const metaData = await contractData.getMetadata()
   newInputContainer.classList.remove("generic-token-input-container")
   newInputContainer.classList.add("token-input-container")
-  newInputContainer.classList.add(`${metaData.symbol.toLowerCase()}-input`)
+  newInputContainer.classList.add(`${metaData.symbolForHtml.toLowerCase()}-input`)
   newInputContainer.classList.remove(`hidden`)
 
   newInputContainer.querySelector(".available-info span")!.innerHTML = `Available to ${action}`
@@ -1832,7 +1837,6 @@ async function unstakeResult(argsArray: [{amount: string, token: string}]) {
   
   for(let i = 0; i < argsArray.length; i++) {
     const args = argsArray[i]
-    console.log("UNSTAKE RESULT TOKEN: ", args.token)
     let contract = new NEP141Trait(args.token)
     contract.wallet = wallet
 

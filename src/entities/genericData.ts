@@ -31,6 +31,7 @@ export interface DetailRow {
 export interface RewardsTokenData {
     iconData: TokenIconData
     tokenName: string
+    rewardsPerDayBN: bigint|undefined
     rewardsPerDay: string
     totalRewards: string
     userUnclaimedRewards: string

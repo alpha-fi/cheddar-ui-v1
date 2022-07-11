@@ -13,6 +13,7 @@ export class P3ContractParams {
     owner_id: string = "";
     stake_tokens: string[] = [];
     stake_rates: U128String[] = [];
+    farm_unit_emission: U128String = "";
     farm_tokens: string[] = [];
     farm_token_rates: U128String[] = [];
     is_active: boolean = false;
