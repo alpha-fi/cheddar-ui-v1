@@ -1001,7 +1001,7 @@ async function addAllLogos(poolParams: PoolParams|PoolParamsP3, header: HTMLElem
     const metaData = await tokenIconData.getMetadata()
     addLogo(metaData, logoContainer, i)
   }
-  logoContainer.classList.add(`have-${i}-elements`)
+  logoContainer.classList.add(`have-${tokenContractDataArray.length - 1}-elements`)
 }
 
 async function addHeader(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {

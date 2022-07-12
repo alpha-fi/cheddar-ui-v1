@@ -82,11 +82,24 @@ export class PoolParamsP3 {
     async getPoolName() {
         let tokenNames: string[] = []
         const stakeTokenContractList: TokenContractData[] = await this.stakingContractData.getStakeTokenContractList()
+        // It was requested that cheddar goes last
+        let hasCheddar = false
+        let cheddarSymbol: string|undefined
         for(let i = 0; i < stakeTokenContractList.length; i++) {
             const tokenContractData = stakeTokenContractList[i]
             const tokenMetadata = await tokenContractData.getMetadata()
-            tokenNames.push(tokenMetadata.symbol)
+            const isCheddar = tokenMetadata.symbol.toUpperCase() == "CHEDDAR"
+            hasCheddar = hasCheddar || isCheddar
+            if(!isCheddar) {
+                tokenNames.push(tokenMetadata.symbol)
+            } else {
+                cheddarSymbol = tokenMetadata.symbol
+            }
         }
+        if(hasCheddar) {
+            tokenNames.push(cheddarSymbol!)
+        }
+        
         const names = tokenNames.join(" + ")
         if(names.length > 20) {
             return names.substring(0, 7) + "..." + names.substring(names.length - 7)
