@@ -1085,11 +1085,18 @@ section#my-account, section#faq {
   margin-left: 1rem;
 }
 
-#links a {
+#links a, #cheddar-checkers {
   font-family: Bubblegum Sans !important;
   font-weight: bold;
   font-size:  14px;
   white-space: nowrap;
+}
+
+#cheddar-checkers img {
+  position: relative;
+  top: 5px;
+  height: 19px;
+  aspect-ratio: 1;
 }
 
 /* The switch - the box around the slider */
@@ -1254,11 +1261,6 @@ input:checked + .slider:before {
     font-size     : 11px;
     padding-bottom: 3px;
   }
-
-  .user-info span {
-    font-size: 9px;
-  }
-
 }
 
 /* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
@@ -1877,7 +1879,7 @@ button.activate {
   }
 }
 
-@media screen and (max-width: 860px) {
+@media screen and (max-width: 960px) {
   /*Burger*/
   header nav {
     justify-content: center;
@@ -1913,6 +1915,22 @@ button.activate {
 
   .navbar-links > *:first-child {
     margin: 21px 0 29px 16px;
+  }
+
+  #cheddar-checkers {
+    order: 3;
+    border: black solid 1px;
+    position: relative;
+    width: 140px;
+    height: 48px;
+    background-color: var(--input);
+    margin-left: 14px;
+  }
+
+  #cheddar-checkers img {
+    position: absolute;
+    top: 14px;
+    right: 11px;
   }
 
   a.selected {
