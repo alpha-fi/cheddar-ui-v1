@@ -1085,14 +1085,14 @@ section#my-account, section#faq {
   margin-left: 1rem;
 }
 
-#links a, #cheddar-checkers {
+#links a, #coinFlip {
   font-family: Bubblegum Sans !important;
   font-weight: bold;
   font-size:  14px;
   white-space: nowrap;
 }
 
-#cheddar-checkers img {
+#coinFlip img {
   position: relative;
   top: 5px;
   height: 19px;
