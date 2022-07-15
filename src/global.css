@@ -1921,7 +1921,7 @@ button.activate {
     order: 3;
     border: black solid 1px;
     position: relative;
-    width: 140px;
+    width: 94px;
     height: 48px;
     background-color: var(--input);
     margin-left: 14px;
