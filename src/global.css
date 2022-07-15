@@ -1917,7 +1917,7 @@ button.activate {
     margin: 21px 0 29px 16px;
   }
 
-  #cheddar-checkers {
+  #coinFlip {
     order: 3;
     border: black solid 1px;
     position: relative;
@@ -1927,7 +1927,7 @@ button.activate {
     margin-left: 14px;
   }
 
-  #cheddar-checkers img {
+  #coinFlip img {
     position: absolute;
     top: 14px;
     right: 11px;
