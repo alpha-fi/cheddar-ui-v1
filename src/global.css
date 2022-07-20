@@ -213,6 +213,13 @@ header nav a {
   box-shadow: inset 0 -1px 0 0 rgb(14 14 44 / 40%);
 }
 
+#swap-icon {
+  border: solid 4px #6495ed70;
+  border-radius: 100%;
+  background-color: #6495ed70;
+  padding: 2px;
+}
+
 /* div {
   margin: 0px;
   padding: 0px;
@@ -1099,6 +1106,16 @@ section#my-account, section#faq {
   aspect-ratio: 1;
 }
 
+#checkers img {
+  height: 18px;
+  position: relative;
+  top: 4px;
+}
+
+#VRFarm svg {
+  top: 4px;
+}
+
 /* The switch - the box around the slider */
 .switch {
   position: relative;
@@ -1879,7 +1896,7 @@ button.activate {
   }
 }
 
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 1170px) {
   /*Burger*/
   header nav {
     justify-content: center;
@@ -1891,10 +1908,6 @@ button.activate {
     border-radius: 20%;
     height: 49px;
     aspect-ratio: 1;
-  }
-
-  .cheddar-main-logo-container {
-    display: block;
   }
 
   .navbar-links{
@@ -1913,23 +1926,34 @@ button.activate {
     transition: transform 0.4s ease-in-out;
   }
 
-  .navbar-links > *:first-child {
+  .cheddar-main-logo-container {
+    display: block;
     margin: 21px 0 29px 16px;
   }
 
-  #coinFlip {
+  #power-up {
+    width: 102px;
+  }
+
+  #ref-swap {
+    width: 110px;
+  }
+
+  #power-up, #ref-swap {
     order: 3;
     border: black solid 1px;
     position: relative;
-    width: 94px;
     height: 48px;
     background-color: var(--input);
-    margin-left: 14px;
+    margin: 6px 14px;
   }
 
-  #coinFlip img {
+  #ref-swap svg {
+    top: 12px;
+  }
+  
+  #power-up img, #ref-swap svg {
     position: absolute;
-    top: 14px;
     right: 11px;
   }
 
