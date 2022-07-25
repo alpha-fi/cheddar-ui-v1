@@ -53,7 +53,7 @@ export class NEP141Trait extends SmartContract {
                 token,
                 amount,
             }, 
-            new BN("300000000000000"), 
+            new BN("200000000000000"), 
             // new BN(gas), 
             new BN(1)
         )
