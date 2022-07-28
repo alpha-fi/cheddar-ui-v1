@@ -1560,6 +1560,27 @@ input:checked + .slider:before {
   align-content: space-between;
 }
 
+.multiple-nft-selection {
+  display: flex;
+  margin: 0 auto;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.stake-all-nft-button, .unstake-all-nft-button {
+  background: white;
+  border: var(--primary-selected) 2px solid;
+  color: var(--primary);
+}
+
+.stake-all-nft-button:hover, .unstake-all-nft-button:hover {
+  border: var(--light-gray) 2px solid;
+  background: var(--primary);
+  color: var(--bg);
+  box-shadow: inset 0 -1px 0 0 var(--primary);
+}
+
 .main-contract-information, .nft-basic-info-and-interaction, .stats-container {
   width: 100%;
   font-weight: 600;
