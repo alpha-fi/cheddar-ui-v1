@@ -33,6 +33,7 @@ import { StakingPoolP3 } from './contracts/p3-staking';
 import { StakingPoolP1 } from './contracts/p2-staking';
 import { callMulipleTransactions } from './contracts/multipleCall';
 import { TokenContractData } from './entities/PoolEntities';
+import { PoolParamsNFT } from './entities/poolParamsNFT';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -177,7 +178,7 @@ qs("#ended-filter").onclick=filterPools("inactive-pool")
 qs('#your-farms-filter').onclick= filterPools("your-farms")
 
 
-function activateClicked(poolParams: PoolParams|PoolParamsP3, pool: HTMLElement) {
+function activateClicked(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, pool: HTMLElement) {
   return async function (event: Event) {
     event.preventDefault()
     let TXs: TransactionData[] = []
@@ -700,7 +701,7 @@ function showOrHideMaxButton(walletBalance: number, elem: HTMLElement) {
   }
 }
 
-function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3,newPool: HTMLElement, isDateInRange: boolean) {
+function setDateInRangeVisualIndication(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT,newPool: HTMLElement, isDateInRange: boolean) {
   let dateInRangeIndicator = newPool.querySelector(".date-in-range-indicator circle") as HTMLElement
 
   if(isDateInRange) {
@@ -1063,6 +1064,10 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
 }
 
+async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
+
+}
+
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
   const contractParams = await poolParams.stakingContractData.getContractParams()
   const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
@@ -1320,7 +1325,7 @@ async function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLEle
   qs(".activeFilterButton").dispatchEvent(event)
 }
 
-async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: HTMLElement) {
+async function addFilterClasses(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT, newPool: HTMLElement) {
   // Cleaning classes in case of reset
   const classes = ["your-farms", "active-pool", "inactive-pool"]
   classes.forEach(className => newPool.classList.remove(className))
@@ -1341,7 +1346,7 @@ async function addFilterClasses(poolParams: PoolParams | PoolParamsP3, newPool: 
   }
 }
 
-async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
+async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): Promise<void> {
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
@@ -1353,12 +1358,14 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
   newPool.classList.add("pool-container")
 
   addFilterClasses(poolParams, newPool)
-  if (poolParams instanceof PoolParams) {
+  if (poolParams instanceof PoolParams && poolParams.type == "single") {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
-  } else {
+  } else if (poolParams instanceof PoolParamsP3 && poolParams.type == "multiple"){
     multiplePoolParams = poolParams
     await addPoolMultiple(multiplePoolParams, newPool)
+  } else if(poolParams instanceof PoolParamsNFT && poolParams.type == "nft") {
+    await addNFTPool(poolParams, newPool)
   }
   
   
@@ -1375,18 +1382,19 @@ async function addPool(poolParams: PoolParams | PoolParamsP3): Promise<void> {
     element.innerHTML = poolName
   })
 
+  
   if(newPool.classList.contains("inactive-pool")) {
     displayInactivePool(newPool)
   } else {
     await displayActivePool(poolParams, newPool)
   }
   await addRewardTokenIcons(poolParams, newPool)
-  
   await addTotalStakedDetail(poolParams, newPool)
-  // await addTotalFarmedDetail(poolParams, newPool)
   await addRewardsPerDayDetail(poolParams, newPool)
   await addRewardsTokenDetail(poolParams, newPool)
   await addUnclaimedRewardsDetail(poolParams, newPool)
+  
+  // await addTotalFarmedDetail(poolParams, newPool)
   
   let unixTimestamp = new Date().getTime() / 1000;
   // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
@@ -1433,7 +1441,7 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
-async function displayActivePool(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
@@ -1503,7 +1511,7 @@ function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index:
   container.append(newTokenLogoElement)
 }
 
-async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   const tokenIconDataArray: TokenIconData[] = await poolParams.getRewardTokenIconData()
   const container = newPool.querySelector(".reward-tokens-value-usd") as HTMLElement
   
@@ -1515,7 +1523,7 @@ async function addRewardTokenIcons(poolParams: PoolParams|PoolParamsP3, newPool:
   }
 }
 
-async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   const stakeTokenDataArray = await poolParams.getStakeTokensDetail()
   let totalStakedRows: DetailRowElements = {
     parentClass: "total-staked-info-container",
@@ -1535,7 +1543,7 @@ async function addTotalStakedDetail(poolParams: PoolParams|PoolParamsP3, newPool
   addDetailRows(newPool, totalStakedRows) 
 }
 
-async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   convertAndAddRewardDataRows(poolParams, newPool, "rewards-per-day-info-container", "rewardsPerDay")
 }
 
@@ -1543,7 +1551,7 @@ async function addRewardsPerDayDetail(poolParams: PoolParams|PoolParamsP3, newPo
 //   convertAndAddRewardDataRows(poolParams, newPool, "apr-info-container", "totalRewards")
 // }
 
-async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement, parentClass: string, key: string) {
+async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement, parentClass: string, key: string) {
   const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   let rewardsPerDayRows: DetailRowElements = {
     parentClass,
@@ -1562,7 +1570,7 @@ async function convertAndAddRewardDataRows(poolParams: PoolParams|PoolParamsP3, 
   addDetailRows(newPool, rewardsPerDayRows)  
 }
 
-async function addRewardsTokenDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addRewardsTokenDetail(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   convertAndAddRewardDataRows(poolParams, newPool, "reward-tokens-info-container", "tokenName")
 }
 
@@ -1588,7 +1596,7 @@ function addDetailRows(newPool: HTMLElement, rowsData: DetailRowElements) {
   }
 }
 
-async function addUnclaimedRewardsDetail(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+async function addUnclaimedRewardsDetail(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   convertAndAddRewardDataRows(poolParams, newPool, "unclaimed-rewards-info-container", "userUnclaimedRewards")
 }
 
@@ -1652,7 +1660,7 @@ function inputMaxButtonClicked(newInputContainer: HTMLElement) {
 }
 
 
-async function addPoolList(poolList: Array<PoolParams|PoolParamsP3>) {
+async function addPoolList(poolList: Array<PoolParams|PoolParamsP3|PoolParamsNFT>) {
   qs("#pool_list").innerHTML = ""
   for (let i = 0; i < poolList.length; i++) {
     await addPool(poolList[i]);

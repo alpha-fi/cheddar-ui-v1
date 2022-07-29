@@ -14,7 +14,7 @@ const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
-export const ENV = MAINNET_NETWORKID
+export const ENV = TESTNET_NETWORKID
 
 export type FarmData = {
   index?: number;
@@ -230,6 +230,13 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'ref',
           contractName: 'p2-ref.cheddar.testnet',
           tokenContractName: 'ref.fakes.testnet',
+        },
+        {
+          index: 4,
+          poolType: 'nft',
+          poolName : 'Cheddy-nft',
+          contractName: 'cheddy-nft.cheddar.testnet',
+          tokenContractName: 'token-v3.cheddar.testnet',
         },
       ]
     }

@@ -28,19 +28,24 @@ export class SmartContract {
     }
 
     async viewWithoutAccount(method: string, args: any = {}): Promise<any> {
-        const argsAsString = JSON.stringify(args)
-        let argsBase64 = Buffer.from(argsAsString).toString("base64")
-        const rawResult = await this.provider.query({
-            request_type: "call_function",
-            account_id: this.contractId,
-            method_name: method,
-            args_base64: argsBase64,
-            finality: "optimistic",
-          });
+        try {
+            const argsAsString = JSON.stringify(args)
+            let argsBase64 = Buffer.from(argsAsString).toString("base64")
+            const rawResult = await this.provider.query({
+                request_type: "call_function",
+                account_id: this.contractId,
+                method_name: method,
+                args_base64: argsBase64,
+                finality: "optimistic",
+            });
         
-          // format result
-          const res = JSON.parse(Buffer.from(rawResult.result).toString());
-          return res
+            // format result
+            const res = JSON.parse(Buffer.from(rawResult.result).toString());
+            return res
+        } catch(err) {
+            console.error("Derror", err)
+        }
+        
     }
 
     view(method:string, args?:any) : Promise<any> {

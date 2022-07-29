@@ -4,6 +4,7 @@ import { StakingPoolP1 } from "../contracts/p2-staking";
 import { StakingPoolP3 } from "../contracts/p3-staking";
 import { HtmlPoolParams, PoolParams, UserStatusP2 } from "../entities/poolParams";
 import { WalletInterface } from "../wallet-api/wallet-interface";
+import { PoolParamsNFT } from "./poolParamsNFT";
 import { PoolParamsP3 } from "./poolParamsP3";
 
 
@@ -24,11 +25,16 @@ async function generatePoolList(wallet: WalletInterface) {
             // contract = new StakingPoolP3(nearConfig.farms[i].contractName);
             // poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, nearConfig.nftContractAddress, wallet);
             poolParams = new PoolParamsP3(wallet, nearConfig.farms[i], nearConfig.nftContractAddress)
-        } else {
+        } else if(nearConfig.farms[i].poolType == "single"){
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
             poolParams = new PoolParams(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
             // poolParams = new PoolParams(index, type, poolHtml, contract, cheddarContractName, tokenContractName, new PoolResultParams(), wallet, nearConfig.farms[i].poolName);
 
+        } else if(nearConfig.farms[i].poolType == "nft") {
+            contract = new StakingPoolP1(nearConfig.farms[i].contractName);
+            poolParams = new PoolParamsNFT(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
+        } else {
+            continue
         }
         await poolParams.setAllExtraData();
 
@@ -36,7 +42,7 @@ async function generatePoolList(wallet: WalletInterface) {
     }
 }
 
-export async function getPoolList(wallet: WalletInterface): Promise<(PoolParams | PoolParamsP3)[]> {
+export async function getPoolList(wallet: WalletInterface): Promise<(PoolParams | PoolParamsP3 | PoolParamsNFT)[]> {
     if(!poolList || poolList.length == 0) {
         await generatePoolList(wallet);
         await Promise.all(
