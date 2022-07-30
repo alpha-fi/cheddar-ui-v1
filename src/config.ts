@@ -22,11 +22,12 @@ export type FarmData = {
   poolName:string;
   contractName:string;
   tokenContractName:string;
-  
+  nftBaseUrl?: string;
 }
 
 type GetConfigResults = {
   nftContractAddress: string
+  cheddarNFTBaseUrl: string
   networkId:string;
   nodeUrl:string;
   keyPath?:string;
@@ -45,6 +46,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'mainnet':
     return {
       nftContractAddress: "nft.cheddar.near",
+      cheddarNFTBaseUrl: "https://bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice.ipfs.nftstorage.link/",
       networkId: MAINNET_NETWORKID,
       nodeUrl: MAINNET_NODEURL,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
@@ -194,6 +196,7 @@ export function getConfig(env:string):GetConfigResults {
   case 'testnet':
     return {
       nftContractAddress: "nft.cheddar.testnet",
+      cheddarNFTBaseUrl: "https://bafybeibghcllcmurku7lxyg4wgxn2zsu5qqk7h4r6bmyhpztmyd564cx54.ipfs.nftstorage.link/",
       networkId: TESTNET_NETWORKID,
       nodeUrl: TESTNET_NODEURL,
       cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
@@ -237,6 +240,7 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'Cheddy-nft',
           contractName: 'cheddy-nft.cheddar.testnet',
           tokenContractName: 'token-v3.cheddar.testnet',
+          nftBaseUrl: 'https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i'
         },
       ]
     }

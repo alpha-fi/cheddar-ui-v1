@@ -12,11 +12,11 @@ import {NFTStakingContractParams} from '../contracts/nft-structures';
 import {P3ContractParams, PoolUserStatus as UserStatusP3} from '../contracts/p3-structures';
 
 
-async function getNFTContractList(wallet:WalletInterface, contractNameArray: string[]): Promise<NFTContractData[]> {
+async function getNFTContractList(wallet:WalletInterface, contractNameArray: string[], nftBaseUrl: string): Promise<NFTContractData[]> {
     let NFTContractList = []
     for(let i = 0; i < contractNameArray.length; i++) {
         const NFTContractName = contractNameArray[i]
-        NFTContractList.push(new NFTContractData(wallet, NFTContractName, ""))
+        NFTContractList.push(new NFTContractData(wallet, NFTContractName, nftBaseUrl, ""))
     }
     return NFTContractList
 }
@@ -40,12 +40,12 @@ export class StakingContractDataNFT {
     private stakeNFTContractList: NFTContractData[] = [];
     private farmTokenContractList: TokenContractData[] = [];
 
-    constructor(wallet: WalletInterface, contractId: string) {
+    constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string) {
         this.contract = new StakingPoolNFT(contractId)
         this.contract.wallet = wallet
         this.refreshData()
         this.stakeTokenContractListPromise = this.getStakeTokenContractListPromise()
-        this.stakeNFTContractListPromise = this.getStakeNFTContractListPromise()
+        this.stakeNFTContractListPromise = this.getStakeNFTContractListPromise(nftBaseUrl)
     }
 
     refreshData() {
@@ -84,10 +84,10 @@ export class StakingContractDataNFT {
         return getTokenContractList(this.contract.wallet, [contractParams.cheddar])
     }
 
-    private async getStakeNFTContractListPromise(): Promise<NFTContractData[]> {
+    private async getStakeNFTContractListPromise(nftBaseUrl: string): Promise<NFTContractData[]> {
         const contractParams = await this.getContractParams();
         // On NFT staking contract, cheddar is always the staked token, besides the NFT's
-        return getNFTContractList(this.contract.wallet, contractParams.stake_tokens)
+        return getNFTContractList(this.contract.wallet, contractParams.stake_tokens, nftBaseUrl)
     }
 
     async getStakeTokenContractList(): Promise<TokenContractData[]> {
@@ -126,10 +126,10 @@ export class NFTContractData {
     private tokensForOwner: NFT[] | undefined
     // private balance: U128String | undefined
 
-    constructor(wallet: WalletInterface, contractId: string, poolName: string = "") {
+    constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string, poolName: string = "") {
         this.wallet = wallet
         
-        this.contract = new NFTContract(contractId)
+        this.contract = new NFTContract(contractId, nftBaseUrl!)
         this.contract.wallet = wallet
         this.tokensForOwnerPromise = this.contract.nft_tokens_for_owner(wallet.getAccountId())
         // this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())

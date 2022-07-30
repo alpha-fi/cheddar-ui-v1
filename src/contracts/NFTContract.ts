@@ -3,15 +3,22 @@ import {SmartContract} from "../wallet-api/base-smart-contract"
 import * as nearAPI from "near-api-js"
 
 import {ntoy, TGas} from "../util/conversions"
-import { BN } from "bn.js";
 import { NFT } from "./nft-structs";
 
 type U128String = string;
 type U64String = string;
 
-export const nftBaseUrl = "https://nftstorage.link/ipfs/bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice/"
+// export const nftBaseUrl = "https://nftstorage.link/ipfs/bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice/"
 
 export class NFTContract extends SmartContract {
+    
+    constructor( 
+        public contractId:string,
+        public baseUrl: string
+    )
+    {
+        super(contractId)
+    }
 
     async nft_transfer_call(receiver_id:string, token_id:U128String):Promise<any>{
         return this.call("nft_transfer_call",{receiver_id:receiver_id, token_id:token_id, msg:"to boost"},TGas(200),"1"); //one-yocto attached

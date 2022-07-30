@@ -26,7 +26,7 @@ import { getTokenData, getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
 import { P3ContractParams, PoolUserStatus } from './contracts/p3-structures';
-import { nftBaseUrl, NFTContract } from './contracts/NFTContract';
+import { NFTContract } from './contracts/NFTContract';
 import { newNFT, NFT } from './contracts/nft-structs';
 import { BN } from 'bn.js';
 import { StakingPoolP3 } from './contracts/p3-staking';
@@ -2025,13 +2025,16 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
   
   if(poolParams instanceof PoolParamsP3){
     nftContract = poolParams.nftContract
+    
+    
   } else if (poolParams instanceof PoolParamsNFT) {
     nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
+    
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
-
+  const nftBaseUrl = nftContract.baseUrl
 
   
 
@@ -2044,15 +2047,15 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
   }
   if(poolHasStaked) {
     const stakedNft = newNFT(userStatus.cheddy_nft)
-    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, true)
+    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, true)
   }
 
   nftCollection.forEach(nft => {
-    addNFT(poolParams, NFTContainer, nft, poolHasStaked)
+    addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl)
   });
 }
 
-function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, staked: boolean = false) {
+function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, nftBaseUrl: string, staked: boolean = false) {
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement
   
@@ -2075,7 +2078,9 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
   }
 
   let imgElement = newNFTCard.querySelector(".nft-img-container img")
-  imgElement?.setAttribute("src", nftBaseUrl + nft.metadata.media)
+  // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
+  
+  imgElement?.setAttribute("src", nftBaseUrl + "/" + nft.metadata.media)
   imgElement!.setAttribute("alt", nft.metadata.media)
 
   let stakeButton = newNFTCard.querySelector(".stake-nft-button")

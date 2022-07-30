@@ -20,17 +20,17 @@ export class PoolParamsNFT {
     stakeNFTContractList: NFTContractData[] = [];
     farmTokenContractList: TokenContractData[] = [];
 
-    nftContract: NFTContract
+    nftContractForBoosting: NFTContract
 
     constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string) {
         this.wallet = wallet
         this.type = farmData.poolType;
 
         this.html = new HtmlPoolParams(farmData.poolName);
-        this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName)
+        this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName, farmData.nftBaseUrl!)
 
-        this.nftContract = new NFTContract(nftContract)
-        this.nftContract.wallet = this.wallet
+        this.nftContractForBoosting = new NFTContract(nftContract, )
+        this.nftContractForBoosting.wallet = this.wallet
     }
 
     async userHasStakedTokens() {
