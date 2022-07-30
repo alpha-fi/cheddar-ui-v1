@@ -6,7 +6,8 @@ import { convertToDecimals } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, RewardsTokenData, TokenIconData } from "./genericData";
-import { StakingContractDataNFT, StakingContractDataP3, TokenContractData } from "./PoolEntities";
+import { TokenContractData } from "./PoolEntities";
+import { NFTContractData, StakingContractDataNFT } from "./PoolEntitiesNFT";
 import { HtmlPoolParams } from "./poolParams";
 
 export class PoolParamsNFT {
@@ -16,6 +17,7 @@ export class PoolParamsNFT {
 
     stakingContractData: StakingContractDataNFT
     stakeTokenContractList: TokenContractData[] = [];
+    stakeNFTContractList: NFTContractData[] = [];
     farmTokenContractList: TokenContractData[] = [];
 
     nftContract: NFTContract

@@ -21,8 +21,8 @@ export class NFTContract extends SmartContract {
         return this.view("nft_tokens_for_owner", {account_id: accountId})
     }
 
-    async ft_balance_of(accountId:string) : Promise<U128String> {
-        return this.view("ft_balance_of",{account_id:accountId }) 
-    }
+    // async ft_balance_of(accountId:string) : Promise<U128String> {
+    //     return this.view("ft_balance_of",{account_id:accountId }) 
+    // }
 
 }

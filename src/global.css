@@ -928,11 +928,19 @@ li {
 
 .main-contract-footer {
   width: 100%;
+
+  display: flex;
+  flex-direction: column;
   justify-content: center;
 }
 
 .main-contract-footer .button {
   min-width: none;
+}
+
+#stake-unstake-nft {
+  max-width: 180px;
+  align-self: center;
 }
 
 .boost-button {

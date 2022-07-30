@@ -26,7 +26,7 @@ import { getTokenData, getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
 import { P3ContractParams, PoolUserStatus } from './contracts/p3-structures';
-import { nftBaseUrl } from './contracts/NFTContract';
+import { nftBaseUrl, NFTContract } from './contracts/NFTContract';
 import { newNFT, NFT } from './contracts/nft-structs';
 import { BN } from 'bn.js';
 import { StakingPoolP3 } from './contracts/p3-staking';
@@ -34,6 +34,7 @@ import { StakingPoolP1 } from './contracts/p2-staking';
 import { callMulipleTransactions } from './contracts/multipleCall';
 import { TokenContractData } from './entities/PoolEntities';
 import { PoolParamsNFT } from './entities/poolParamsNFT';
+import { StakingContractDataNFT } from './entities/PoolEntitiesNFT';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -1050,11 +1051,8 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   let refreshIntervalId = -1
   if(isDateInRange) {
     refreshIntervalId = window.setInterval(refreshPoolInfoMultiple.bind(null, poolParams, newPool), refreshTime)
-  }
-
-  let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
-  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams))
-
+  }  
+  
   //Info to transfer so we can check what pool is loading the NFTs
   let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
   boostButton.addEventListener("click", showNFTGrid(poolParams))
@@ -1069,6 +1067,8 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
 
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
 
+  let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
+  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams))
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1219,7 +1219,7 @@ function hideAllDynamicElements(newPool: HTMLElement) {
   })
 }
 
-function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTMLElement) {
+function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
   
@@ -1228,7 +1228,7 @@ function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3, newPool: HTM
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
   const isUserFarming = newPool.classList.contains("your-farms")
-  if(isUserFarming) { // Displays staking/unstaking when hovering on the pool
+  if(isUserFarming && !(poolParams instanceof PoolParamsNFT)) { // Displays staking/unstaking when hovering on the pool
     let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
     vanishingIndicator?.classList.remove("transparent")
     vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
@@ -1444,6 +1444,34 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
+function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean) {
+  if(isAccountRegistered) {
+    let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement;
+    stakeUnstakeNftButton.classList.remove("hidden")
+  }
+}
+
+function displayIfTokenPool(newPool: HTMLElement, isAccountRegistered: boolean){
+
+  if(isAccountRegistered) {
+    toggleStakeUnstakeSection(newPool)
+    
+          let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
+          let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
+          let staking = newPool.querySelector(".main-stake")! as HTMLElement;
+          let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
+          let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
+          let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
+    
+          setUnstakeTabListeners(newPool)
+    
+          stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
+          stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
+          stakeTabButton.addEventListener("click", setActiveColor);
+          stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
+  }
+}
+
 async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
@@ -1452,30 +1480,25 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
   if(wallet != disconnectedWallet) {
     let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-    if(isAccountRegistered) {
-      toggleStakeUnstakeSection(newPool)
-
-      let stakeTabButton = newPool.querySelector(".staking")! as HTMLElement;
-      let unstakeTabButton = newPool.querySelector(".unstaking")! as HTMLElement;
-      let staking = newPool.querySelector(".main-stake")! as HTMLElement;
-      let unstaking = newPool.querySelector(".main-unstake")! as HTMLElement;
-      let stakeButton = newPool.querySelector("#stake-button")! as HTMLElement;
-      let unstakeButton = newPool.querySelector("#unstake-button")! as HTMLElement;
-
-      setUnstakeTabListeners(newPool)
-
-      stakeTabButton.addEventListener("click", showElementHideAnother(staking, unstaking));
-      stakeTabButton.addEventListener("click", showElementHideAnother(stakeButton, unstakeButton));
-      stakeTabButton.addEventListener("click", setActiveColor);
-      stakeTabButton.addEventListener("click", cancelActiveColor(unstakeTabButton));
-    } else {
+    
+    if(!isAccountRegistered) {
       activateButtonContainer.classList.remove("hidden")
-      activateButton.addEventListener("click", activateClicked(poolParams, newPool))
+      activateButton.addEventListener("click", activateClicked(poolParams, newPool))//DUDA DANI esto es igual?
 
       if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
         let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
         newPool.querySelector("#depositWarning")!.innerHTML = warningText 
       }
+    }
+    
+    if(poolParams instanceof PoolParams || poolParams instanceof PoolParamsP3){
+
+      displayIfTokenPool(newPool, isAccountRegistered)
+
+    } else if(poolParams instanceof PoolParamsNFT) {
+
+      displayIfNftPool(newPool, isAccountRegistered)
+
     }
   }
 
@@ -1998,7 +2021,14 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
   NFTContainer.innerHTML = ""
   
   const accountId = poolParams.wallet.getAccountId()
-  const nftContract = poolParams.nftContract
+  let nftContract: NFTContract
+  
+  if(poolParams instanceof PoolParamsP3){
+    nftContract = poolParams.nftContract
+  } else (poolParams instanceof PoolParamsNFT && poolParams.stakingContractData instanceof StakingContractDataNFT) {
+    // @ts-ignore
+    nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0]
+  }
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
 
 
