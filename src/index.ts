@@ -2025,9 +2025,10 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
   
   if(poolParams instanceof PoolParamsP3){
     nftContract = poolParams.nftContract
-  } else (poolParams instanceof PoolParamsNFT && poolParams.stakingContractData instanceof StakingContractDataNFT) {
-    // @ts-ignore
-    nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0]
+  } else if (poolParams instanceof PoolParamsNFT) {
+    nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
+  } else {
+    throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
 
