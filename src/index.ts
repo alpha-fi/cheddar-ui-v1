@@ -1055,7 +1055,8 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   
   //Info to transfer so we can check what pool is loading the NFTs
   let boostButton = newPool.querySelector(".boost-button")! as HTMLElement;
-  boostButton.addEventListener("click", showNFTGrid(poolParams))
+  let boostButtonId = boostButton.id
+  boostButton.addEventListener("click", showNFTGrid(poolParams, boostButtonId))
 
   // Hover events
   standardHoverToDisplayExtraInfo(newPool, "total-staked")
@@ -1068,7 +1069,8 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
 
   let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
-  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams))
+  let stakeUnstakeNftButtonId = stakeUnstakeNftButton.id
+  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId))
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1483,7 +1485,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
     
     if(!isAccountRegistered) {
       activateButtonContainer.classList.remove("hidden")
-      activateButton.addEventListener("click", activateClicked(poolParams, newPool))//DUDA DANI esto es igual?
+      activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
       if (poolParams.html.formId == "nearcon" || poolParams.html.formId == "cheddar") {
         let warningText = "ONLY ACTIVATE IF PREVIOUSLY STAKED<br>0.06 NEAR storage deposit, gets refunded."
@@ -1753,6 +1755,7 @@ window.onload = async function () {
       const amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
       qsInnerText("#my-account #wallet-available", amountAvailable)
       qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
+      qsInnerText("#nft-pools-section .cheddar-balance-container .cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 
       let circulatingSupply = await cheddarContract.ft_total_supply()
       document.querySelector("#circulatingSupply span")!.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
@@ -1961,13 +1964,22 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
   }
 }
 
-async function loadAndShowNfts(poolParams: PoolParamsP3|PoolParamsNFT) {
-  await loadNFTs(poolParams)
+async function loadAndShowNfts(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
+  await loadNFTs(poolParams, buttonId)
   var body = document.body as HTMLElement
   body.classList.toggle('noscroll')
   qs("#nft-pools-section").classList.remove("hidden")
 }
 
+
+function displayCheddarNeededToStakeNFTs() {
+  const nftPoolSection = qs("#nft-pools-section") as HTMLElement
+
+  let countSelectedNfts = (nftPoolSection.querySelectorAll(".stake-nft-button.selected")).length as number
+
+  const amountNeededToStakeAllNfts = nftPoolSection.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
+  amountNeededToStakeAllNfts.innerHTML = (countSelectedNfts * 5).toString()
+}
 
 
 function selectAllActionNftButtons(action: string){
@@ -1987,12 +1999,16 @@ function selectAllActionNftButtons(action: string){
     const allActionNftButtons = nftPoolsSection.querySelectorAll(`.${action}-nft-button`)
 
     allActionNftButtons.forEach(button => {
-      !button.classList.contains("hidden") && button.classList.add("selected")
+      if(!button.classList.contains("hidden")) {
+        button.classList.add("selected")
+      }
     });
+
+    displayCheddarNeededToStakeNFTs()
   }
 }
 
-function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT) {
+function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
   return async function () {
     const multipleNftSelectionButtons = qs(".multiple-nft-selection") as HTMLElement
     multipleNftSelectionButtons.classList.remove("hidden")
@@ -2000,34 +2016,41 @@ function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT) {
     const confirmButton = qs("#confirm-stake-unstake") as HTMLButtonElement
     confirmButton.classList.remove("hidden")
 
+    const cancelButton = qs("#cancel-stake-unstake") as HTMLButtonElement
+    cancelButton.classList.remove("hidden")
+
     const unstakeAllNftsButton = qs(".unstake-all-nft-button") as HTMLButtonElement
     unstakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("unstake"))
 
     const stakeAllNftsButton = qs(".stake-all-nft-button") as HTMLButtonElement
     stakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("stake"))
 
-    loadAndShowNfts(poolParams)
+    displayCheddarNeededToStakeNFTs()
+
+    loadAndShowNfts(poolParams, buttonId)
   }
 }
 
-function showNFTGrid(poolParams: PoolParamsP3|PoolParamsNFT) {
+function showNFTGrid(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
   return async function () {
-    loadAndShowNfts(poolParams)
+    loadAndShowNfts(poolParams,buttonId)
   }
 }
 
-async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
+async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
   const NFTContainer = qs(".nft-flex") as HTMLElement
   NFTContainer.innerHTML = ""
   
   const accountId = poolParams.wallet.getAccountId()
   let nftContract: NFTContract
+
+  //Use conditional to check if the pressed button was boost or stake/unstake so the correct nft are loaded
   
-  if(poolParams instanceof PoolParamsP3){
+  if(buttonId === "boost-button"){
     nftContract = poolParams.nftContract
     
     
-  } else if (poolParams instanceof PoolParamsNFT) {
+  } else if (buttonId === "stake-unstake-nft") {
     nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
     
   } else {
@@ -2047,15 +2070,98 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT) {
   }
   if(poolHasStaked) {
     const stakedNft = newNFT(userStatus.cheddy_nft)
-    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, true)
+    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, buttonId, true)
   }
 
   nftCollection.forEach(nft => {
-    addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl)
+    addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl, buttonId)
   });
 }
 
-function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, nftBaseUrl: string, staked: boolean = false) {
+function toggleClassSelected (button: HTMLElement) {
+  button!.classList.toggle("selected")
+}
+
+function stakeAndUstakeNFTButtonHanddler (button: HTMLElement) {
+  return function () {
+    toggleClassSelected(button)
+    displayCheddarNeededToStakeNFTs()
+  }
+}
+
+function confirmStakeUnstakeNFTButtonHandler () {
+  return function () {
+    //If used don´t have enough cheddar to stake all the selected NFTs show error msg and return
+    let cheddarBalanceContainer = document.querySelector(".cheddar-balance") as HTMLElement
+    let cheddarBalance = parseInt(cheddarBalanceContainer.innerHTML) as number
+
+    let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
+    let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
+
+    let notEnoughCheddarWarning = document.querySelector(".not-enough-cheddar-warning") as HTMLElement
+
+    if(cheddarBalance < cheddarNeededToStakeNFTs) {
+      notEnoughCheddarWarning.classList.remove("hidden")
+      notEnoughCheddarWarning.scrollIntoView()
+      return
+    } else {
+      notEnoughCheddarWarning.classList.add("hidden")
+    }
+
+    let nftsNamesSelectedToStake = [] as string[]
+    let nftsNamesSelectedToUnstake = [] as string[]
+
+    let allNfts = NFTPoolSection.querySelectorAll(".nft-card")
+
+    allNfts.forEach(nft => {
+      let nftNameContainer = nft.querySelector(".nft-name") as HTMLElement
+      let nftName = nftNameContainer!.innerHTML as string
+
+      let buttonSelected = nft.querySelector(".selected")
+      if(buttonSelected?.classList.contains("stake-nft-button")){
+        nftsNamesSelectedToStake.push(nftName)
+      } else if(buttonSelected?.classList.contains("unstake-nft-button"))
+        nftsNamesSelectedToUnstake.push(nftName)
+    });
+
+    let allActionsSelected = [nftsNamesSelectedToStake, nftsNamesSelectedToUnstake]
+  }
+}
+
+function displayNFTPoolSectionForStakeUnstakeNFT(stakeButton: HTMLElement, unstakeButton: HTMLElement) {
+
+  const NFTStakeTitle = NFTPoolSection.querySelector(".stake-nfts-title") as HTMLElement
+  const cheddarBalanceContainer = NFTPoolSection.querySelector(".cheddar-balance-container") as HTMLElement
+
+  NFTStakeTitle.classList.remove("hidden")
+  cheddarBalanceContainer.classList.remove("hidden")
+
+  stakeButton.addEventListener("click", stakeAndUstakeNFTButtonHanddler(stakeButton))
+  unstakeButton.addEventListener("click", stakeAndUstakeNFTButtonHanddler(unstakeButton))
+}
+
+function displayNFTPoolSectionForNFTBoost(poolParams: PoolParamsP3, poolHasStaked: boolean, staked:boolean, newNFTCard: HTMLElement,i: number, stakeButton: HTMLElement, unstakeButton: HTMLElement) {
+
+  const NFTPoolSectionInfoRow = NFTPoolSection.querySelector(".nft-farm-info") as HTMLElement
+
+  //Only if user have more than 1 NFT the legend "You can only boost one NFT is shown"
+  if (i > 1) {
+    NFTPoolSectionInfoRow.classList.remove("hidden")
+  }
+
+  stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+  if(staked){
+    unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+  }
+
+  if(poolHasStaked) {
+    stakeButton!.setAttribute("disabled", "disabled")
+  } else {
+    stakeButton!.removeAttribute("disabled")
+  }
+}
+
+function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, nftBaseUrl: string, buttonId: string, staked: boolean = false) {
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement
   
@@ -2064,45 +2170,72 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
     newNFTCard.querySelectorAll(".nft-name")[i].innerHTML = nft.token_id
   }
 
-  //Only if user have more than 1 NFT the legend "You can only boost one NFT is shown"
-  const NFTPoolSection = qs("#nft-pools-section") as HTMLElement
-  const NFTPoolSectionInfoRow = NFTPoolSection.querySelector("h2") as HTMLElement
+  const NFTPoolSectionInfoRow = NFTPoolSection.querySelector(".nft-farm-info") as HTMLElement
 
-  const multipleNftSelectionSection = NFTPoolSection.querySelector(".multiple-nft-selection")
-  const isMultipleNftSelectionShown = multipleNftSelectionSection?.classList.contains("hidden")
-
-  if (i > 1 && isMultipleNftSelectionShown) {
-    NFTPoolSectionInfoRow.classList.remove("hidden")
-  } else {
-    NFTPoolSectionInfoRow.classList.add("hidden")
-  }
+  NFTPoolSectionInfoRow.classList.add("hidden")
 
   let imgElement = newNFTCard.querySelector(".nft-img-container img")
   // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
   
+  console.log("NFTBASEURL: ", nftBaseUrl)
   imgElement?.setAttribute("src", nftBaseUrl + "/" + nft.metadata.media)
   imgElement!.setAttribute("alt", nft.metadata.media)
 
-  let stakeButton = newNFTCard.querySelector(".stake-nft-button")
-  if(isMultipleNftSelectionShown){
-    stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
-  }
-
+  
+  let stakeButton = newNFTCard.querySelector(".stake-nft-button") as HTMLElement
+  let unstakeButton = newNFTCard.querySelector(".unstake-nft-button") as HTMLElement
   if(staked) {
-    let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
-    unstakeButton!.classList.remove("hidden")
-    if(isMultipleNftSelectionShown){
-      unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
-    }
-
+    unstakeButton!.classList.remove("hidden")    
     stakeButton!.classList.add("hidden")
   }
+  
+  //TODO MARTIN Make function to segregate the display and set of buttons listeners of the NFTs considering the button id of the params
 
-  if (poolHasStaked && isMultipleNftSelectionShown) {
-    stakeButton!.setAttribute("disabled", "disabled")
-  } else if(!poolHasStaked && isMultipleNftSelectionShown) {
-    stakeButton!.removeAttribute("disabled")
+  if(buttonId === "boost-button") {
+    displayNFTPoolSectionForNFTBoost(poolParams, poolHasStaked, staked, newNFTCard, i, stakeButton, unstakeButton)
+  } else if(buttonId === "stake-unstake-nft"){
+    displayNFTPoolSectionForStakeUnstakeNFT(stakeButton, unstakeButton)
   }
+
+  // //Only if user have more than 1 NFT the legend "You can only boost one NFT is shown"
+  // const NFTPoolSection = qs("#nft-pools-section") as HTMLElement
+  // const NFTPoolSectionInfoRow = NFTPoolSection.querySelector("h2") as HTMLElement
+
+  // const multipleNftSelectionSection = NFTPoolSection.querySelector(".multiple-nft-selection")
+  // const isMultipleNftSelectionNotBeenShown = multipleNftSelectionSection?.classList.contains("hidden")
+
+  // if (i > 1 && isMultipleNftSelectionNotBeenShown) {
+  //   NFTPoolSectionInfoRow.classList.remove("hidden")
+  // } else {
+  //   NFTPoolSectionInfoRow.classList.add("hidden")
+  // }
+
+  // let imgElement = newNFTCard.querySelector(".nft-img-container img")
+  // // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
+  
+  // imgElement?.setAttribute("src", nftBaseUrl + "/" + nft.metadata.media)
+  // imgElement!.setAttribute("alt", nft.metadata.media)
+
+  // let stakeButton = newNFTCard.querySelector(".stake-nft-button")
+  // if(isMultipleNftSelectionNotBeenShown){
+  //   stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
+  // }
+
+  // if(staked) {
+  //   let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
+  //   unstakeButton!.classList.remove("hidden")
+  //   if(isMultipleNftSelectionNotBeenShown){
+  //     unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
+  //   }
+
+  //   stakeButton!.classList.add("hidden")
+  // }
+
+  // if (poolHasStaked && isMultipleNftSelectionNotBeenShown) {
+  //   stakeButton!.setAttribute("disabled", "disabled")
+  // } else if(!poolHasStaked && isMultipleNftSelectionNotBeenShown) {
+  //   stakeButton!.removeAttribute("disabled")
+  // }
 
   container.append(newNFTCard)    
   toggleGenericClass(newNFTCard)
@@ -2167,22 +2300,47 @@ function quitNFTFlex() {
     
     let element = event.target as HTMLElement
     
-    if (element.getAttribute("id") == "nft-pools-section") {
+    if (element.getAttribute("id") == "nft-pools-section" || element.getAttribute("id") == "cancel-stake-unstake") {
       body.classList.toggle('noscroll')
 
       qs(".nft-flex").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
+
+      const NFTStakeTitle = NFTPoolSection.querySelector(".stake-nfts-title") as HTMLElement
+      NFTStakeTitle.classList.add("hidden")
+
+      const stakeAllNftsButton = qs(".stake-all-nft-button")
+      stakeAllNftsButton.classList.remove("selected")
+
+      const unstakeAllNftsButton = qs(".unstake-all-nft-button")
+      unstakeAllNftsButton.classList.remove("selected")
 
       const multipleNftSelectionButtons = qs(".multiple-nft-selection") as HTMLElement
       multipleNftSelectionButtons.classList.add("hidden")
 
       const confirmButton = qs("#confirm-stake-unstake") as HTMLButtonElement
       confirmButton.classList.add("hidden")
+
+      const cancelButton = qs("#cancel-stake-unstake") as HTMLButtonElement
+      cancelButton.classList.add("hidden")
+
+      const cheddarBalance = qs(".cheddar-balance-container") as HTMLElement
+      cheddarBalance.classList.add("hidden")
+
+      const notEnoughCheddarWarningContainer = NFTPoolSection.querySelector(".not-enough-cheddar-warning") as HTMLElement
+      notEnoughCheddarWarningContainer.classList.add("hidden")
     }
   }
 }
 
-qs("#nft-pools-section").addEventListener("click", quitNFTFlex())
+const NFTPoolSection = qs("#nft-pools-section") as HTMLElement 
+NFTPoolSection.addEventListener("click", quitNFTFlex())
+
+let confirmStakeUnstakeNFTButton = NFTPoolSection.querySelector("#confirm-stake-unstake")
+let cancelStakeUnstakeNFTButton = NFTPoolSection.querySelector("#cancel-stake-unstake")
+
+confirmStakeUnstakeNFTButton!.addEventListener("click", confirmStakeUnstakeNFTButtonHandler())
+cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
 
 //Burger button
 const burgerButton = qs(".burger-button") as HTMLElement

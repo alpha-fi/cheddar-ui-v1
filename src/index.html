@@ -20,7 +20,7 @@
       <a class="btn btn-outline-none" href="https://draw.cheddar.farm" target="_blank">Draw 🎨</a>
       <a href="https://vps179324.iceservers.net/" target="_blank" id="coinFlip" class="btn btn-outline-none">CoinFlip <img src="./assets/cheddar.svg" alt="coin flip icon"></a>
       <a href="https://checkers.cheddar.farm/" target="_blank" id="checkers" class="btn btn-outline-none">Checkers <img src="./assets/checkers-icon.png" alt="checkers icon"></a>
-      <a href="https://nearhub.club/cdcUv8P/cheddar-farm" target="_blank" id="VRFarm" class="btn btn-outline-none">
+      <a href="https://nearhub.club/qEmhFPF/cheddar-farm-scavengerhunt001" target="_blank" id="VRFarm" class="btn btn-outline-none">
         VRFarm 
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-controller" viewBox="0 0 16 16">
           <path d="M11.5 6.027a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm2.5-.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0zm-1.5 1.5a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1zm-6.5-3h1v1h1v1h-1v1h-1v-1h-1v-1h1v-1z"/>
@@ -374,7 +374,7 @@
           <div class="dynamic-display-element harvest-section hidden">
             <div class="equal-width-than-boost-button"><!-- Structural div. Do not delete --></div>
             <button class="button" id="harvest-button">HARVEST</button>
-            <div class="boost-button hidden">
+            <div id="boost-button" class="boost-button hidden">
               <!-- Next elements class gets overwritten  -->
               <svg class="empty" width="19" height="23" viewBox="0 0 19 23" xmlns="http://www.w3.org/2000/svg">
                 <path d="M15.6841 2.60303C16.2051 1.94403 15.7141 1.00003 14.8481 1.00003H8.13205C7.9502 0.9987 7.77107 1.04418 7.61187 1.1321C7.45268 1.22001 7.31878 1.34741 7.22305 1.50203L2.14105 9.95803C1.74005 10.624 2.24405 11.455 3.04905 11.455H6.47805L3.24805 19.52C2.78105 20.54 4.04305 21.473 4.89105 20.735L18.0001 8.33103H11.1511L15.6841 2.60303V2.60303Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -600,17 +600,39 @@
 
 
   <section id="nft-pools-section" class="hidden">
+    <!-- Add information as Dani´s img (Section name, cheddar balance and deposit required) -->
     <!-- NFT farming -->
     <div class="nft-pools-container">
+      <div class="hidden cheddar-balance-container">
+        <span>Cheddar balance: </span>
+        <img src="assets/cheddar.svg" alt="cheddar icon">
+        <span class="cheddar-balance"></span>
+      </div>
+      <h2 class="hidden stake-nfts-title">Stake NFT's</h2>
       <h2 class="hidden nft-farm-info">You can only boost one NFT</h2>
       <div class="multiple-nft-selection hidden">
-        <button class="button unstake-all-nft-button">UNSTAKE ALL</button>
-        <button class="button stake-all-nft-button">STAKE ALL</button>
+        <div class="multiple-nft-selection-structural-div"><!-- STRUCTURAL DIV, DO NOT DELETE. MUST HAVE SAME WIDTH THAN select-multiple-info --></div>
+        <div class="select-multiple-nfts-buttons-container">
+          <button class="button unstake-all-nft-button">UNSTAKE ALL</button>
+          <button class="button stake-all-nft-button">STAKE ALL</button>
+        </div>
+        <div class="select-multiple-info">
+          <p>Cheddar deposit required:</p>
+          <div class="cheddar-needed-container">
+            <img src="assets/cheddar.svg" alt="cheddar icon">
+            <span class="cheddar-needed-to-stake-all-nfts">0</span>
+          </div>
+          <p class="needed-to-stake-each-nft">5 per NFT staked</p>
+        </div>
       </div>
       <div class="nft-flex">
        <!-- This will be filled with users NFT cards -->
       </div>
-      <button id="confirm-stake-unstake" class="button hidden">CONFIRM</button>
+      <div class="confirm-or-cancel-stake-or-unstake-nft-container">
+        <button id="confirm-stake-unstake" class="button hidden">CONFIRM</button>
+        <button id="cancel-stake-unstake" class="button hidden">CANCEL</button>
+      </div>
+      <span class="hidden not-enough-cheddar-warning">Not enough cheddar</span>
     </div>
   </section>
 

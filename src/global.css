@@ -1574,10 +1574,44 @@ input:checked + .slider:before {
 
 .multiple-nft-selection {
   display: flex;
-  margin: 0 auto;
+  margin: 0 auto 10px auto;
   flex-wrap: nowrap;
-  justify-content: center;
   align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.select-multiple-nfts-buttons-container {
+  display: flex; 
+}
+
+.multiple-nft-selection-structural-div, .select-multiple-info {
+  width: 20%;
+}
+
+.cheddar-needed-container {
+  background-color: var(--bg);
+  border-radius: 10px;
+}
+
+.select-multiple-info p {
+  font-weight: 900;
+}
+
+.select-multiple-info img {
+  margin-left: 5px;
+  display: inline-block;
+  height: 26px;
+}
+
+.cheddar-needed-to-stake-all-nfts {
+  line-height: 26px;
+  vertical-align: top;
+  font-weight: 600;
+}
+
+.needed-to-stake-each-nft {
+  text-align: center;
 }
 
 .nft-pools-container .selected {
@@ -1587,7 +1621,7 @@ input:checked + .slider:before {
 }
 
 .stake-all-nft-button, .unstake-all-nft-button {
-  margin: 0px 5px 1rem 5px;
+  margin: 0px 5px;
   min-width: 42%;
 }
 
@@ -1836,6 +1870,8 @@ button.activate {
 }
 
 .nft-pools-container {
+  position: relative;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1849,14 +1885,29 @@ button.activate {
   background-color: var(--second-new-grey);
 }
 
-.nft-farm-info {
+.cheddar-balance-container {
+  font-weight: 800;
+  position: absolute;
+  top: 6px;
+  right: 17px;
+  width: max-content;
+}
+
+.cheddar-balance-container img {
+  height: 26px;
+  display: inline-block;
+  position: relative;
+  top: 7px;
+}
+
+.nft-farm-info, .stake-nfts-title {
   font-family: 'Inter';
   font-style: normal;
   font-weight: 700;
   font-size: 32px;
   line-height: 39px;
   text-align: center;
-  margin-bottom: 33px;
+  margin-bottom: 20px;
 }
 
 .nft-flex {
@@ -1908,13 +1959,30 @@ button.activate {
   height: 34px;
 }
 
+.confirm-or-cancel-stake-or-unstake-nft-container {
+  display: flex;
+  min-width: 50%;
+  max-width: 100%;
+}
+
 .nft-actions-container button.button {
-  min-width: 45%;
   height: 34px;
 }
 
-#confirm-stake-unstake {
+#confirm-stake-unstake, #cancel-stake-unstake {
   margin-top: 20px;
+  width: 100%;
+  min-width: auto;
+}
+
+.not-enough-cheddar-warning {
+  color: rgb(255 0 0 / 73%);
+  font-size: large;
+  margin-top: 5px;
+  padding: 10px;
+  background-color: var(--bg);
+  border-radius: 10px;
+  font-weight: 700;
 }
 
 @media screen and (max-width: 1630px) {
@@ -1941,7 +2009,7 @@ button.activate {
   }
 }
 
-@media screen and (max-width: 1170px) {
+@media screen and (max-width: 1210px) {
   /*Burger*/
   header nav {
     justify-content: center;
