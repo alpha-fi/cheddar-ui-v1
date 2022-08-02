@@ -8,7 +8,7 @@ import { PoolParamsNFT } from "./poolParamsNFT";
 import { PoolParamsP3 } from "./poolParamsP3";
 
 
-let poolList: Array<PoolParams|PoolParamsP3>;
+let poolList: Array<PoolParams|PoolParamsP3|PoolParamsNFT>;
 
 async function generatePoolList(wallet: WalletInterface) {
     poolList = [];
@@ -24,7 +24,7 @@ async function generatePoolList(wallet: WalletInterface) {
         if(nearConfig.farms[i].poolType == "multiple") {
             // contract = new StakingPoolP3(nearConfig.farms[i].contractName);
             // poolParams = new PoolParamsP3(index, type, poolHtml, contract, cheddarContractName, nearConfig.nftContractAddress, wallet);
-            poolParams = new PoolParamsP3(wallet, nearConfig.farms[i], nearConfig.nftContractAddress)
+            poolParams = new PoolParamsP3(wallet, nearConfig.farms[i], nearConfig.nftContractAddress, nearConfig.cheddarNFTBaseUrl)
         } else if(nearConfig.farms[i].poolType == "single"){
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
             poolParams = new PoolParams(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
@@ -32,7 +32,7 @@ async function generatePoolList(wallet: WalletInterface) {
 
         } else if(nearConfig.farms[i].poolType == "nft") {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
-            poolParams = new PoolParamsNFT(wallet, nearConfig.farms[i], nearConfig.cheddarContractName);
+            poolParams = new PoolParamsNFT(wallet, nearConfig.farms[i], nearConfig.cheddarContractName, nearConfig.cheddarNFTBaseUrl);
         } else {
             continue
         }

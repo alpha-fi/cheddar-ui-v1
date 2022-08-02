@@ -1067,10 +1067,17 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
 }
 
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
+  const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
 
   let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
   let stakeUnstakeNftButtonId = stakeUnstakeNftButton.id
   stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId))
+
+  const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
+  const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
+  const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
+  newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
+  
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -2027,7 +2034,7 @@ function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
 
     displayCheddarNeededToStakeNFTs()
 
-    loadAndShowNfts(poolParams, buttonId)
+    await loadAndShowNfts(poolParams, buttonId)
   }
 }
 
@@ -2047,16 +2054,15 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   //Use conditional to check if the pressed button was boost or stake/unstake so the correct nft are loaded
   
   if(buttonId === "boost-button"){
-    nftContract = poolParams.nftContract
-    
-    
-  } else if (buttonId === "stake-unstake-nft") {
+    nftContract = poolParams.nftContractForBoosting
+  } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
     nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
     
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
+  console.log(nftContract)
   const nftBaseUrl = nftContract.baseUrl
 
   
@@ -2248,7 +2254,7 @@ function stakeNFT(poolParams: PoolParamsP3, card: HTMLElement){
       showWait("Staking NFT...")
       
       const tokenId = card.querySelector(".nft-name")!.innerHTML
-      await poolParams.nftContract.nft_transfer_call(poolParams.stakingContractData.contract.contractId, tokenId)
+      await poolParams.nftContractForBoosting.nft_transfer_call(poolParams.stakingContractData.contract.contractId, tokenId)
       showSuccess("NFT staked successfully")
       
       let allNFTCards = qsa(".nft-card")

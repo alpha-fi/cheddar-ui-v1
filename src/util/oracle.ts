@@ -2,6 +2,7 @@ import { ENV } from "../config";
 import { RefTokenData } from "../entities/refResponse";
 
 let tokenDataArray: RefTokenData[]
+let testTokensSymbols = ["afi-tt", "gua"]
 
 async function setAllTokensData(): Promise<void> {
     const url = "https://api.stats.ref.finance/api/top-tokens"
@@ -19,7 +20,7 @@ export async function getTokenData(token: string, reloadData: boolean = false): 
 function getPriceWithData(tokenSymbol: string): RefTokenData {
     tokenSymbol = tokenSymbol.toLowerCase()
     //@ts-ignore
-    if(ENV == "testnet" && tokenSymbol == "afi-tt") {
+    if(ENV == "testnet" && testTokensSymbols.includes(tokenSymbol)) {
         // AFI-TT doesn't exists in mainnet so this is a patch for testing purposes, selecting the token
         // NUT arbitrarily
         tokenSymbol = "nut".toLowerCase()

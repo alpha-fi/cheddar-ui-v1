@@ -22,14 +22,14 @@ export class PoolParamsNFT {
 
     nftContractForBoosting: NFTContract
 
-    constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string) {
+    constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string, nftBaseUrlForBoosting: string) {
         this.wallet = wallet
         this.type = farmData.poolType;
 
         this.html = new HtmlPoolParams(farmData.poolName);
         this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName, farmData.nftBaseUrl!)
 
-        this.nftContractForBoosting = new NFTContract(nftContract, )
+        this.nftContractForBoosting = new NFTContract(nftContract, farmData.nftBaseUrl!)
         this.nftContractForBoosting.wallet = this.wallet
     }
 
