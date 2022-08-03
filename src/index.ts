@@ -2186,12 +2186,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   });
 }
 
-
-//DUDA puedo hacer esto más corto? TODO MARTIN FIX
-function checkIfMultipleSelectionButtonsAreSelected() {
-  const nftPoolsSection = document.querySelector("#nft-pools-section") as HTMLElement
-
-  
+function countSelectedPerAction(nftPoolsSection: HTMLElement) {
   let allSelectedNFTs = nftPoolsSection.querySelectorAll(".nft-card.selected")
 
   let stakedSelected: number = 0;
@@ -2199,58 +2194,65 @@ function checkIfMultipleSelectionButtonsAreSelected() {
 
   allSelectedNFTs.forEach(nft => {
     let stakeNFTButton = nft.querySelector(".stake-nft-button") as HTMLElement
-    //If the stake button is hidden then the nft is staked
-    //If not vicebersa
+    
     if(stakeNFTButton.classList.contains("hidden")){
-      stakedSelected++
-    } else {
       unstakedSelected++
+    } else {
+      stakedSelected++
     }
   });
+  return [stakedSelected, unstakedSelected]
+}
 
-  let allNFTCards = nftPoolsSection.querySelectorAll(".nft-card")
+function countStakedAndUnstakedNFTs(nftPoolSection: HTMLElement) {
+  let allNFTCards = nftPoolSection.querySelectorAll(".nft-card")
 
   let staked: number = 0;
   let unstaked: number = 0;
 
   allNFTCards.forEach(nft => {
     let stakeNFTButton = nft.querySelector(".stake-nft-button") as HTMLElement
-    //If the stake button is hidden then the nft is staked
-    //If not vicebersa
+    
     if(stakeNFTButton.classList.contains("hidden")){
-      staked++
-    } else {
       unstaked++
+    } else {
+      staked++
     }
   });
 
+  return [staked, unstaked]
+}
 
-  //TODO MARTIN hacer esto más corto
-  let unstakeAllSelected = qs(".unstake-all-nft-button .selected") as HTMLElement|null
+//DUDA puedo hacer esto más corto? Nombres?
+function checkIfMultipleSelectionButtonsMostBeSelected() {
+  const nftPoolsSection = document.querySelector("#nft-pools-section") as HTMLElement
 
-  if(unstakeAllSelected != null) {
-    unstakeAllSelected.classList.remove("selected")
-    if(unstakedSelected == unstaked){
-      unstakeAllSelected.classList.add("selected")
-    }
+  let allSelectedNFTs = countSelectedPerAction(nftPoolsSection)
+  let allNFTsToStakeOrUnstake = countStakedAndUnstakedNFTs(nftPoolsSection)
+
+  let stakeAll = qs(".stake-all-nft-button") as HTMLElement
+  
+  if(allNFTsToStakeOrUnstake[0] == allSelectedNFTs[0] && allNFTsToStakeOrUnstake[0] != 0) {
+    stakeAll.classList.add("selected")
+  } else {
+    stakeAll.classList.remove("selected")
   }
 
-  let stakeAllSelected = qs(".stake-all-nft-button .selected") as HTMLElement|null
+  let unstakeAll = qs(".unstake-all-nft-button") as HTMLElement
 
-  if(stakeAllSelected != null) {
-    stakeAllSelected.classList.remove("selected")
-    if(stakedSelected == staked){
-      stakeAllSelected.classList.add("selected")
-    }
+  if(allNFTsToStakeOrUnstake[1] == allSelectedNFTs[1] && allNFTsToStakeOrUnstake[1] != 0) {
+    unstakeAll.classList.add("selected")
+  } else {
+    unstakeAll.classList.remove("selected")
   }
 }
 
 function stakeAndUstakeNFTButtonHanddler (newNFTCard: HTMLElement) {
-  return function () {
-
-    checkIfMultipleSelectionButtonsAreSelected()
-
+  return function () {    
     newNFTCard.classList.toggle("selected")
+
+    checkIfMultipleSelectionButtonsMostBeSelected()
+
     displayCheddarNeededToStakeNFTs()
   }
 }
@@ -2264,14 +2266,8 @@ function confirmStakeUnstakeNFTButtonHandler () {
     let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
     let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
 
-    let notEnoughCheddarWarning = document.querySelector(".not-enough-cheddar-warning") as HTMLElement
-
     if(cheddarBalance < cheddarNeededToStakeNFTs) {
-      notEnoughCheddarWarning.classList.remove("hidden")
-      notEnoughCheddarWarning.scrollIntoView()
-      return
-    } else {
-      notEnoughCheddarWarning.classList.add("hidden")
+      showError("Not enough cheddar to stake selected NFTs")
     }
 
     let nftsNamesSelectedToStake = [] as string[]
@@ -2466,6 +2462,22 @@ function unstakeNFT(poolParams: PoolParamsP3|PoolParamsNFT, card: HTMLElement) {
   }
 }
 
+function hideNFTFlexComponents() {
+  const hideNFTFlexComponents = NFTPoolSection.querySelectorAll(".hiddenByDefault") as NodeListOf<Element>
+
+  for(let i = 0; i < hideNFTFlexComponents.length; i++){
+    hideNFTFlexComponents[i].classList.add("hidden")
+  }
+}
+
+function showNFTFlexComponents() {
+  const showNFTFlexComponents = NFTPoolSection.querySelectorAll(".shownUnselectedByDefault") as NodeListOf<Element>
+      
+  for(let i = 0; i < showNFTFlexComponents.length; i++){
+    showNFTFlexComponents[i].classList.remove("selected")
+  }
+}
+
 function quitNFTFlex() {  
   return function (event: Event){
     event.preventDefault();
@@ -2480,29 +2492,8 @@ function quitNFTFlex() {
       qs(".nft-flex").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
 
-      const NFTStakeTitle = NFTPoolSection.querySelector(".stake-nfts-title") as HTMLElement
-      NFTStakeTitle.classList.add("hidden")
-
-      const stakeAllNftsButton = qs(".stake-all-nft-button")
-      stakeAllNftsButton.classList.remove("selected")
-
-      const unstakeAllNftsButton = qs(".unstake-all-nft-button")
-      unstakeAllNftsButton.classList.remove("selected")
-
-      const multipleNftSelectionButtons = qs(".multiple-nft-selection") as HTMLElement
-      multipleNftSelectionButtons.classList.add("hidden")
-
-      const confirmButton = qs("#confirm-stake-unstake") as HTMLButtonElement
-      confirmButton.classList.add("hidden")
-
-      const cancelButton = qs("#cancel-stake-unstake") as HTMLButtonElement
-      cancelButton.classList.add("hidden")
-
-      const cheddarBalance = qs(".cheddar-balance-container") as HTMLElement
-      cheddarBalance.classList.add("hidden")
-
-      const notEnoughCheddarWarningContainer = NFTPoolSection.querySelector(".not-enough-cheddar-warning") as HTMLElement
-      notEnoughCheddarWarningContainer.classList.add("hidden")
+      hideNFTFlexComponents()
+      showNFTFlexComponents()
     }
   }
 }

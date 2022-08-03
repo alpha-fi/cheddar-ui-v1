@@ -602,18 +602,18 @@
   <section id="nft-pools-section" class="hidden">
     <!-- NFT farming -->
     <div class="nft-pools-container">
-      <div class="hidden cheddar-balance-container">
+      <div class="hidden hiddenByDefault cheddar-balance-container">
         <span>Cheddar balance: </span>
         <img src="assets/cheddar.svg" alt="cheddar icon">
         <span class="cheddar-balance"></span>
       </div>
-      <h2 class="hidden stake-nfts-title">Stake NFT's</h2>
+      <h2 class="hidden hiddenByDefault stake-nfts-title">Stake NFT's</h2>
       <h2 class="hidden nft-farm-info">You can only boost one NFT</h2>
-      <div class="multiple-nft-selection hidden">
+      <div class="multiple-nft-selection hiddenByDefault hidden">
         <div class="multiple-nft-selection-structural-div"><!-- STRUCTURAL DIV, DO NOT DELETE. MUST HAVE SAME WIDTH THAN select-multiple-info --></div>
         <div class="select-multiple-nfts-buttons-container">
-          <button class="button unstake-all-nft-button">UNSTAKE ALL</button>
-          <button class="button stake-all-nft-button">STAKE ALL</button>
+          <button class="button shownUnselectedByDefault unstake-all-nft-button">UNSTAKE ALL</button>
+          <button class="button shownUnselectedByDefault stake-all-nft-button">STAKE ALL</button>
         </div>
         <div class="select-multiple-info">
           <p>Cheddar deposit required:</p>
@@ -628,10 +628,9 @@
        <!-- This will be filled with users NFT cards -->
       </div>
       <div class="confirm-or-cancel-stake-or-unstake-nft-container">
-        <button id="confirm-stake-unstake" class="button hidden">CONFIRM</button>
-        <button id="cancel-stake-unstake" class="button hidden">CANCEL</button>
+        <button id="confirm-stake-unstake" class="button hiddenByDefault hidden">CONFIRM</button>
+        <button id="cancel-stake-unstake" class="button hiddenByDefault hidden">CANCEL</button>
       </div>
-      <span class="hidden not-enough-cheddar-warning">Not enough cheddar</span>
     </div>
   </section>
 
