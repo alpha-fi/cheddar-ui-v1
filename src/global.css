@@ -1614,7 +1614,7 @@ input:checked + .slider:before {
   text-align: center;
 }
 
-.nft-pools-container .selected {
+.select-multiple-nfts-buttons-container .button.selected, .nft-pools-container .selected .nft-actions-container .button {
   background: white !important;
   border: var(--primary-selected) 2px solid !important;
   color: var(--primary) !important;

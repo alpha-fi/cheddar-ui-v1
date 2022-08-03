@@ -18,7 +18,7 @@ export class NFTContract extends SmartContract {
     )
     {
         super(contractId)
-        console.log("DBase url", this.baseUrl)
+        // console.log("DBase url", this.baseUrl)
     }
 
     async nft_transfer_call(receiver_id:string, token_id:U128String):Promise<any>{
