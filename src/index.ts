@@ -19,7 +19,7 @@ import { PoolParams, UserStatusP2 } from './entities/poolParams';
 import { getPoolList } from './entities/poolList';
 import { PoolParamsP3 } from './entities/poolParamsP3';
 import { U128String } from './wallet-api/util';
-import { DetailRowElements, HTMLTokenInputData, TokenIconData } from './entities/genericData';
+import {DetailRowElements, HTMLTokenInputData, TokenIconData, UnclaimedRewardsData, RewardsTokenData} from './entities/genericData';
 
 import * as nearAPI from "near-api-js"
 import { getTokenData, getTokenDataArray } from './util/oracle';
@@ -35,6 +35,7 @@ import { callMulipleTransactions } from './contracts/multipleCall';
 import { TokenContractData } from './entities/PoolEntities';
 import { PoolParamsNFT } from './entities/poolParamsNFT';
 import { NFTContractData, StakingContractDataNFT } from './entities/PoolEntitiesNFT';
+import { NFTStakingContractParams } from './contracts/nft-structures';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -236,6 +237,7 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
  */
 async function convertToUSDMultiple(tokenContractList: TokenContractData[], amountList: U128String[]): Promise<string> {
   // const stakeTokenContractList = poolParams.stakeTokenContractList
+  //TODO DANI make better
   await Promise.all(
     tokenContractList.map(
       (tokenContract: TokenContractData) => tokenContract.getMetadata()
@@ -1133,7 +1135,7 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
 }
 
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
-  const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
+  const farmTokenContractList: TokenContractData[] = await poolParams.stakingContractData.getFarmTokenContractList()
 
   await addHeader(poolParams, newPool)
 
@@ -1146,9 +1148,18 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
 
-  //TODO MARTIN
-  // const apr = emission_rate * minutes * hours * 365 / <number of NFT's deposited> * 100
-  // newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
+  //TODO DANI
+  let contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
+  // let farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
+  let farmedTokensInUSD = await convertToUSDMultiple(farmTokenContractList, contractParams.farm_token_rates)
+  let NFTDepositedx100 = Number(contractParams.total_staked[0]) * 100
+
+  const now = Date.now() / 1000
+  const isDateInRange = now < contractParams.farming_end
+
+  // const apr =  rewards. emission_rate * minutes * hours * 365 / <number of NFT's deposited> * 100
+  let apr = calculateAPR(farmedTokensInUSD, NFTDepositedx100.toString(), isDateInRange)
+  newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   addNFTPoolListeners(poolParams, newPool)  
 }
@@ -2186,22 +2197,19 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   });
 }
 
-function countSelectedPerAction(nftPoolsSection: HTMLElement) {
-  let allSelectedNFTs = nftPoolsSection.querySelectorAll(".nft-card.selected")
+function countSelectedForAction(nftPoolsSection: HTMLElement, isStaked: boolean) {
+   let allSelectedNFTs = nftPoolsSection.querySelectorAll(".nft-card.selected")
 
-  let stakedSelected: number = 0;
-  let unstakedSelected: number = 0;
+   let actionSelected: number = 0
 
-  allSelectedNFTs.forEach(nft => {
-    let stakeNFTButton = nft.querySelector(".stake-nft-button") as HTMLElement
-    
-    if(stakeNFTButton.classList.contains("hidden")){
-      unstakedSelected++
-    } else {
-      stakedSelected++
-    }
-  });
-  return [stakedSelected, unstakedSelected]
+   allSelectedNFTs .forEach(nft => {
+      let buttons = nft.querySelector(`.${isStaked ? "stake" : "unstake"}-nft-button`)
+
+      if(buttons! .classList.contains("hidden")) {
+          actionSelected++
+      }
+   })
+   return actionSelected
 }
 
 function countStakedAndUnstakedNFTs(nftPoolSection: HTMLElement) {
@@ -2223,27 +2231,28 @@ function countStakedAndUnstakedNFTs(nftPoolSection: HTMLElement) {
   return [staked, unstaked]
 }
 
-//DUDA puedo hacer esto más corto? Nombres?
-function checkIfMultipleSelectionButtonsMostBeSelected() {
+
+function checkIfMultipleSelectionButtonsMustBeSelected() {
   const nftPoolsSection = document.querySelector("#nft-pools-section") as HTMLElement
 
-  let allSelectedNFTs = countSelectedPerAction(nftPoolsSection)
+  //Can be improved. Make allNFTsToStakeOrUnstake equal than allSelectedNFTs
+  let allSelectedNFTs = [countSelectedForAction(nftPoolsSection, false), countSelectedForAction(nftPoolsSection, true)]
   let allNFTsToStakeOrUnstake = countStakedAndUnstakedNFTs(nftPoolsSection)
 
-  let stakeAll = qs(".stake-all-nft-button") as HTMLElement
+  let stakeAllButton = qs(".stake-all-nft-button") as HTMLElement
   
   if(allNFTsToStakeOrUnstake[0] == allSelectedNFTs[0] && allNFTsToStakeOrUnstake[0] != 0) {
-    stakeAll.classList.add("selected")
+    stakeAllButton.classList.add("selected")
   } else {
-    stakeAll.classList.remove("selected")
+    stakeAllButton.classList.remove("selected")
   }
 
-  let unstakeAll = qs(".unstake-all-nft-button") as HTMLElement
+  let unstakeAllButton = qs(".unstake-all-nft-button") as HTMLElement
 
   if(allNFTsToStakeOrUnstake[1] == allSelectedNFTs[1] && allNFTsToStakeOrUnstake[1] != 0) {
-    unstakeAll.classList.add("selected")
+    unstakeAllButton.classList.add("selected")
   } else {
-    unstakeAll.classList.remove("selected")
+    unstakeAllButton.classList.remove("selected")
   }
 }
 
@@ -2251,7 +2260,7 @@ function stakeAndUstakeNFTButtonHanddler (newNFTCard: HTMLElement) {
   return function () {    
     newNFTCard.classList.toggle("selected")
 
-    checkIfMultipleSelectionButtonsMostBeSelected()
+    checkIfMultipleSelectionButtonsMustBeSelected()
 
     displayCheddarNeededToStakeNFTs()
   }
