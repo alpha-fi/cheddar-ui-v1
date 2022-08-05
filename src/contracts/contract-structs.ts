@@ -11,7 +11,7 @@ export class ContractParams {
         this.rewards_per_day = this.farming_rate * 60n * 24n
     }
 
-
+    accounts_registered: number = 0;
     owner_id: string = "";
     token_contract: string = "cheddar.token";
     // This value comes from the contract with (metadata.decimals - 5) decimals

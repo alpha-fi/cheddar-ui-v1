@@ -974,6 +974,8 @@ async function addPoolSingle(poolParams: PoolParams, newPool: HTMLElement): Prom
   } else {
     newPool.querySelector(".unclaimed-rewards-value-usd")!.innerHTML = `$ -`
   }
+
+
   const totalStakedInUsd = await convertToUSDMultiple([stakeTokenContractData], [contractParams.total_staked])
   const rewardsPerDayInUsd = await convertToUSDMultiple([farmTokenContractData], [(BigInt(contractParams.farming_rate) * 60n * 24n).toString()])
 
@@ -1204,6 +1206,21 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   const totalStakedInUsd: string = await convertToUSDMultiple(stakeTokenContractList, contractParams.total_staked)
   
   // CHECK!
+
+  const legendContainer = newPool.querySelector(".pool-legend") as HTMLElement
+  let poolLegend = poolParams.poolDescription;
+  if(poolLegend != undefined){
+    const descriptionLink = poolParams.poolDescription;    
+    
+    if(descriptionLink != undefined){
+      poolLegend += `<a href="${descriptionLink} target="_blank"> here</a>`
+    }
+    
+    legendContainer.innerHTML = poolLegend
+    legendContainer.classList.remove("hidden")
+  }
+
+
   const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
@@ -1498,6 +1515,9 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   let showContractStart = newPool.querySelector("#contract-start")
   let showContractEnd = newPool.querySelector("#contract-end")
   const contractParams = await poolParams.stakingContractData.getContractParams()
+
+  const accountRegistered = contractParams.accounts_registered
+  newPool.querySelector(".accounts-registered-value-usd")!.innerHTML = `${accountRegistered} accounts`
   
   showContractStart!.innerHTML = new Date(contractParams.farming_start * 1000).toLocaleString()
   showContractEnd!.innerHTML = new Date(contractParams.farming_end * 1000).toLocaleString()
@@ -1825,6 +1845,24 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3|PoolParamsNFT
   isPaused = false;
 }
 
+let closePublicityButton = qs(".close-publicity") as HTMLElement
+
+function closePublicityButtonHandler() {
+  return function () {
+    closePublicityButton.classList.add("hidden")
+
+    let publicityContainer = qs(".publicity-container") as HTMLElement
+    publicityContainer.classList.add("hidden")
+
+    let publicityDecoration = qs(".publicity-decoration") as HTMLElement
+    publicityDecoration.classList.add("no-publicity-position")
+
+    let header = qs("header") as HTMLElement
+    header.classList.add("no-publicity-position")
+  }
+}
+
+
 window.onload = async function () {
   try {
     let env = ENV //default
@@ -1842,6 +1880,16 @@ window.onload = async function () {
           nearConfig
       )
     )
+
+    
+    closePublicityButton.addEventListener("click", closePublicityButtonHandler())
+    //Path tag is part of the svg tag and also need the event
+    closePublicityButton.querySelector("path")!.addEventListener("click", closePublicityButtonHandler())
+
+    let headerCheddarValueDisplayerContainer = qs(".header-extension_cheddar-value") as HTMLElement
+    let cheddarValue = Number((await getTokenData("cheddar")).price).toFixed(7)
+    headerCheddarValueDisplayerContainer.innerHTML = `$ ${cheddarValue}`
+
 
     var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
     var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)

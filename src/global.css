@@ -26,12 +26,13 @@ html {
   --shadow                   : #e6e6e6;
   background-color           : var(--bg);
   font-family                : 'Inter', sans-serif;
+  --publicity-height         : 130px;
   /*body font*/   
   font-size                  : 13px;
   font-weight                : 500;
   /* identical to box height, or 123% */
   color                      : var(--fg);
-  background     : url(assets/cheddar-farm-background.svg) top center / contain no-repeat;
+  background     : url(assets/newFarmBackground.png) top center / contain no-repeat;
   background-size: 100% auto;
   background-color: #5e8c01;
   /* Fill width, retain proportions */
@@ -70,11 +71,58 @@ body {
   margin: 0 auto;
 }
 
+.publicity-container {
+  width: 100vw;
+  height: var(--publicity-height);
+  background: radial-gradient(var(--primary-selected), var(--primary));
+  /* border-bottom: solid black 3px; */
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.publicity-container p {
+  font-size: xx-large;
+  font-weight: 700;
+}
+
+.close-publicity {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--bg);
+}
+
+.publicity-decoration {
+  position: absolute;
+  top: var(--publicity-height);
+  left: 0;
+  height: 30px;
+  z-index: 0;
+  width: 100vw;
+  background: linear-gradient(180deg, var(--primary), transparent);
+}
+
+.publicity-decoration.no-publicity-position {
+  top: 0;
+}
+
 header {
   display    : flex;
   flex-flow  : row;
   align-items: center;
-  margin     : 15px 15px 0px 15px;
+  margin     : 173px 15px 0px 15px;
+}
+
+header.no-publicity-position {
+  margin: 38px 15px 0px 15px;
+}
+
+.header-extension {
+  display: flex;
 }
 
 h1 {
@@ -144,6 +192,8 @@ p {
   margin-bottom: 0;
   font-weight  : 400;
 }
+
+
 
 header div.title {
   font-weight: bold;
@@ -1077,7 +1127,7 @@ section#my-account, section#faq {
   display    : flex;
   flex-flow  : row;
   align-items: center;
-  margin     : 5px 15px 15px 15px;
+  margin     : 5px 15px 0px 15px;
 }
 
 #circulatingSupply span {
@@ -1098,6 +1148,24 @@ section#my-account, section#faq {
   outline-color: (--primary);
   box-shadow   : none;
   outline-width: 0px;
+}
+
+.header-extension_cheddar-value-container {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.header-extension_cheddar-value-container svg {
+  background: var(--bg);
+  padding: 3px;
+  border-radius: 100%;
+  border: 1px var(--primary) solid;
+  margin-right: 5px;
+}
+
+.header-extension_cheddar-value-container span {
+  font-weight: 700;
 }
 
 #links {
@@ -1324,11 +1392,23 @@ input:checked + .slider:before {
 }
 
 .news {
+  transition: all 0.3s ease-in;
   text-align: center;
-  color: #8542eb;
-  font-size: 1.5rem;
+  color: var(--fg);
+  font-size: 2.5rem;
   padding: 14px;
   text-decoration: underline;
+  background-color: var(--second-yellow);
+  width: max-content;
+  margin: 0 auto;
+  border-radius: 80px;
+  box-shadow: inset -1px -2px 3px -1px rgb(14 14 44 / 40%);
+  line-height: 40px;
+}
+
+.news:hover {
+  font-size: 2.45rem;
+  box-shadow: inset -1px -1px 12px 5px rgb(14 14 44 / 40%);
 }
 
 .pool-filter-container {
@@ -1354,6 +1434,7 @@ input:checked + .slider:before {
   border-radius: 10px;
   line-height: 42px;
   cursor: pointer;
+  user-select: none;
 }
 
 .pool-filter-container li:hover, .activeFilterButton {
@@ -1659,6 +1740,11 @@ h2.nft-name {
 
 .nft-name-row h3 {
   line-height: 32px;
+}
+
+.pool-legend {
+  font-weight: 400;
+  line-height: 21px;
 }
 
 .unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .apr-info-container {
