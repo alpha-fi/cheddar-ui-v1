@@ -32,13 +32,13 @@ export class NEP141Trait extends SmartContract {
         return this.call("ft_transfer_call",{receiver_id:receiver_id, amount:amount, memo:memo, msg:msg},TGas(200),"1"); //one-yocto attached
     }
 
-    async ft_transfer_call_without_send(receiver_id:string, amount:U128String):Promise<nearAPI.transactions.Action>{
+    async ft_transfer_call_without_send(receiver_id:string, amount:U128String, msg: string = "to farm"):Promise<nearAPI.transactions.Action>{
         return nearAPI.transactions.functionCall(
             "ft_transfer_call", 
             {
                 receiver_id: receiver_id,
                 amount: amount,
-                msg: "to farm" 
+                msg
             }, 
             new BN("200000000000000"), 
             // new BN(gas), 
@@ -64,7 +64,7 @@ export class NEP141Trait extends SmartContract {
     }
 
     async ft_balance_of(accountId:string) : Promise<U128String> {
-        return this.viewWithoutAccount("ft_balance_of",{account_id:accountId }) 
+        return this.viewWithoutAccount("ft_balance_of", { account_id:accountId }) 
     }
 
     async ft_metadata() :Promise<FungibleTokenMetadata>{

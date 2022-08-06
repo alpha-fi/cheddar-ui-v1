@@ -38,8 +38,8 @@ export class PoolUserStatus {
 
     // This constructor should only be used when user is not registered, hence userStatus is null
     constructor(stakeTokensLength: number = 0, farmTokensLength: number = 0) {
-        this.stake_tokens = new Array(stakeTokensLength).fill("")
-        this.farmed_tokens = new Array(stakeTokensLength).fill("")
+        this.stake_tokens = new Array(stakeTokensLength).fill("0")
+        this.farmed_tokens = new Array(farmTokensLength).fill("0")
     }
 }
 

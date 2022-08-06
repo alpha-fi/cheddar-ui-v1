@@ -43,7 +43,7 @@ export class SmartContract {
             const res = JSON.parse(Buffer.from(rawResult.result).toString());
             return res
         } catch(err) {
-            console.error("Derror", err)
+            console.error(`Error calling function ${method} from contract ${this.contractId} with params ${JSON.stringify(args)}`, err)
         }
         
     }

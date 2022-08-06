@@ -260,6 +260,59 @@ async function convertToUSDMultiple(tokenContractList: TokenContractData[], amou
   return amountInUsd.toFixed(5)
 }
 
+function confirmMultipleStakeOrUnstakeNFT(poolParams: PoolParamsNFT, newPool: HTMLElement) {
+  return async function (event: Event){
+    event?.preventDefault()
+    showWait("Staking NFT's...")
+    
+    // let stakeContainerList = newPool.querySelectorAll(".main-stake .input-container")  
+    let inputArray: HTMLInputElement[] = []
+
+    try {
+      let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+      const contractParams = await poolParams.stakingContractData.getContractParams()
+      // const contractParams = poolParams.contractParams
+      // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      const selectedElements: Element[] = Array.from(qsa(".nft-card.selected"))
+      if(!selectedElements) throw new Error("You must stake/unstake at least 1 NFT")
+      const nftsToStake: Element[] = selectedElements.filter(elem => !elem.querySelector(".stake-nft-button")?.classList.contains("hidden"))
+      const nftsToUnstake: Element[] = selectedElements.filter(elem => !elem.querySelector(".unstake-nft-button")?.classList.contains("hidden"))
+      const isDateInRange = unixTimestamp < contractParams.farming_end
+      if (!isDateInRange && nftsToStake.length) throw Error("Pools is Closed.")
+      // const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: stakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "stake")
+      // inputArray = htmlInputArray
+      
+      qsaAttribute("input", "disabled", "disabled")
+      qsaAttribute("button", "disabled", "disabled")
+
+      //get amount
+      const min_deposit_amount = 1;
+            
+      await poolParams.stake(amountValues)
+      if (loggedWithNarwallets) {
+        //clear form
+        for(let i = 0; i < inputArray.length; i++) {
+          inputArray[i].value = ""  
+        }
+        
+        // const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+        // poolUserStatus.addStaked(amountValues)
+        poolParams.stakingContractData.refreshData()
+
+        showSuccess(`Staked ${stakedAmountWithSymbol.join(" - ")}`)
+      }
+
+    }
+    catch (ex) {
+      showErr(ex as Error)
+    }
+    // re-enable the form, whether the call succeeded or failed
+    inputArray.forEach(input => {
+      input.removeAttribute("disabled")
+    });
+  }
+}
+
 function stakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
   return async function (event: Event){
     event?.preventDefault()
@@ -1134,6 +1187,12 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
   standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
   standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
+
+  let confirmStakeUnstakeNFTButton = NFTPoolSection.querySelector("#confirm-stake-unstake")
+  let cancelStakeUnstakeNFTButton = NFTPoolSection.querySelector("#cancel-stake-unstake")
+
+  confirmStakeUnstakeNFTButton!.addEventListener("click", confirmStakeUnstakeNFTButtonHandler(poolParams))
+  cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
 }
 
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
@@ -1489,6 +1548,7 @@ async function addFilterClasses(poolParams: PoolParams | PoolParamsP3 | PoolPara
 }
 
 async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): Promise<void> {
+  console.log(0)
   var genericPoolElement = qs("#generic-pool-container") as HTMLElement;
   let singlePoolParams: PoolParams
   let multiplePoolParams: PoolParamsP3
@@ -1904,7 +1964,7 @@ window.onload = async function () {
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
 
-
+    
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
@@ -1914,6 +1974,7 @@ window.onload = async function () {
       // await addPoolList(poolList)
 
       accountName = wallet.getAccountId()
+      console.log(-1, accountName)
       qsInnerText("#account-id", accountName)
       await signedInFlow(wallet)
       const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
@@ -2314,42 +2375,60 @@ function stakeAndUstakeNFTButtonHanddler (newNFTCard: HTMLElement) {
   }
 }
 
-function confirmStakeUnstakeNFTButtonHandler () {
-  return function () {
-    //If used don´t have enough cheddar to stake all the selected NFTs show error msg and return
-    let cheddarBalanceContainer = document.querySelector(".cheddar-balance") as HTMLElement
-    let cheddarBalance = parseInt(cheddarBalanceContainer.innerHTML) as number
+function confirmStakeUnstakeNFTButtonHandler(poolParams: PoolParamsNFT) {
+  return async function (event: Event) {
+    try {
+      event.preventDefault()
 
-    let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
-    let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
+      const contractParams = await poolParams.stakingContractData.getContractParams()
+      //If used don´t have enough cheddar to stake all the selected NFTs show error msg and return
+      let cheddarBalanceContainer = document.querySelector(".cheddar-balance") as HTMLElement
+      let cheddarBalance = parseInt(cheddarBalanceContainer.innerHTML) as number
 
-    if(cheddarBalance < cheddarNeededToStakeNFTs) {
-      showError("Not enough cheddar to stake selected NFTs")
-    }
+      let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
+      let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
 
-    let nftsNamesSelectedToStake = [] as string[]
-    let nftsNamesSelectedToUnstake = [] as string[]
-
-    let allNfts = NFTPoolSection.querySelectorAll(".nft-card")
-
-    allNfts.forEach(nft => {
-      if(nft.classList.contains("selected")){
-        let nftNameContainer = nft.querySelector(".nft-name") as HTMLElement
-        let nftName = nftNameContainer!.innerHTML as string
-
-        let thisNFTStakeButton = nft.querySelector(".stake-nft-button")
-
-        //If the stake button is hidden the pool needs to be unstaked
-        //If not it needs to be staked
-        if(thisNFTStakeButton?.classList.contains("hidden")) {
-          nftsNamesSelectedToUnstake.push(nftName)
-        } else {
-          nftsNamesSelectedToStake.push(nftName)
-        }
+      if(cheddarBalance < cheddarNeededToStakeNFTs) {
+        showError("Not enough cheddar to stake selected NFTs")
       }
-    });
 
-    let allActionsSelected = [nftsNamesSelectedToStake, nftsNamesSelectedToUnstake]
+      const {nftsToStake, nftsToUnstake} = getNFTsToStakeAndUnstake()
+
+      let unixTimestamp = new Date().getTime() / 1000; 
+      const isDateInRange = unixTimestamp < contractParams.farming_end
+      if (!isDateInRange && nftsToStake.length > 0) throw Error("Pools is Closed.")
+
+      poolParams.stakeUnstakeNFTs(nftsToStake, nftsToUnstake)
+      
+    } catch(err) {
+      showErr(err as Error)
+    }
+  }
+}
+
+function getNFTsToStakeAndUnstake(): {nftsToStake: string[], nftsToUnstake: string[]} {
+  let nftsToStake = [] as string[]
+  let nftsToUnstake = [] as string[]
+
+  let allSelectedNfts = NFTPoolSection.querySelectorAll(".nft-card.selected")
+
+  allSelectedNfts.forEach(nft => {
+    let nftNameContainer = nft.querySelector(".nft-name") as HTMLElement
+    let nftName = nftNameContainer!.innerHTML
+
+    let thisNFTStakeButton = nft.querySelector(".stake-nft-button")
+
+    //If the stake button is hidden the pool needs to be unstaked
+    //If not it needs to be staked
+    if(thisNFTStakeButton?.classList.contains("hidden")) {
+      nftsToUnstake.push(nftName)
+    } else {
+      nftsToStake.push(nftName)
+    }
+  });
+  return {
+    nftsToStake,
+    nftsToUnstake
   }
 }
 
@@ -2557,12 +2636,6 @@ function quitNFTFlex() {
 
 const NFTPoolSection = qs("#nft-pools-section") as HTMLElement 
 NFTPoolSection.addEventListener("click", quitNFTFlex())
-
-let confirmStakeUnstakeNFTButton = NFTPoolSection.querySelector("#confirm-stake-unstake")
-let cancelStakeUnstakeNFTButton = NFTPoolSection.querySelector("#cancel-stake-unstake")
-
-confirmStakeUnstakeNFTButton!.addEventListener("click", confirmStakeUnstakeNFTButtonHandler())
-cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
 
 //Burger button
 const burgerButton = qs(".burger-button") as HTMLElement

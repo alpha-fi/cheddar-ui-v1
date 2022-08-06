@@ -63,6 +63,18 @@ export class StakingPoolNFT extends SmartContract {
         return this.call("withdraw_nft",{receiver_id:receiver_id},TGas(200),"1"); //one-yocto attached
     }
 
+    async unstake_without_send(nft_contract_id:string, token_id: string):Promise<nearAPI.transactions.Action>{
+        return nearAPI.transactions.functionCall(
+            "unstake", 
+            {
+                nft_contract_id,
+                token_id
+            },
+            new BN(TGas(200)),
+            new BN(1)
+        )
+    }
+
     /// Unstakes given amount of $NEAR and transfers it back to the user.
     /// Returns amount of staked tokens left after the call.
     /// Panics if the caller doesn't stake anything or if he doesn't have enough staked tokens.
