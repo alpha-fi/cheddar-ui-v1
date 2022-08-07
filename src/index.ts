@@ -2272,33 +2272,35 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   
   const accountId = poolParams.wallet.getAccountId()
   let nftContract: NFTContract
-
+  let stakedOrBoostingNFTsToAdd: NFT[] = []
   //Use conditional to check if the pressed button was boost or stake/unstake so the correct nft are loaded
-  
+  let userStatus: PoolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  let poolHasStaked: boolean = false
   if(buttonId === "boost-button"){
     nftContract = poolParams.nftContractForBoosting
+    poolHasStaked = userStatus.cheddy_nft != ''
+    stakedOrBoostingNFTsToAdd.push(newNFT(userStatus.cheddy_nft))
   } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
     nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
-    
+    poolHasStaked = userStatus.stake_tokens.some(a => a.length > 0)
+    stakedOrBoostingNFTsToAdd = userStatus.stake_tokens.map(tokenId => newNFT(tokenId))
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
+  
   let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
   console.log(nftContract)
   const nftBaseUrl = nftContract.baseUrl
 
   
-
-  let userStatus: PoolUserStatus = await poolParams.stakingContractData.getUserStatus()
-
-  const poolHasStaked = userStatus.cheddy_nft != ''
   if(nftCollection.length == 0 && !poolHasStaked) {
     NFTContainer.innerHTML = "You don't have any NFT's"
     return
   }
   if(poolHasStaked) {
-    const stakedNft = newNFT(userStatus.cheddy_nft)
-    addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, buttonId, true)
+    // const stakedNft = newNFT(userStatus.cheddy_nft)
+    stakedOrBoostingNFTsToAdd.forEach(nft => addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl, buttonId, true))
+    // addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, buttonId, true)
   }
 
   nftCollection.forEach(nft => {
@@ -2466,6 +2468,7 @@ function displayNFTPoolSectionForNFTBoost(poolParams: PoolParamsP3|PoolParamsNFT
 }
 
 function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, nftBaseUrl: string, buttonId: string, staked: boolean = false) {
+  // TODO MARTIN add class to nft-card containing the contractId from the nftContract (don't passed as a parameter yet)
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement
   
