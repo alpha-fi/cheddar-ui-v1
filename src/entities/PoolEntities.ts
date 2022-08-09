@@ -6,7 +6,7 @@ import { StakingPoolNFT } from "../contracts/nft-staking";
 import { NFTStakingContractParams } from "../contracts/nft-structures";
 import { StakingPoolP1 } from "../contracts/p2-staking";
 import { StakingPoolP3 } from "../contracts/p3-staking";
-import { P3ContractParams, PoolUserStatus as UserStatusP3 } from "../contracts/p3-structures";
+import { P3ContractParams, PoolUserStatusP3 as UserStatusP3 } from "../contracts/p3-structures";
 import { disconnectedWallet } from "../wallet-api/disconnected-wallet";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";

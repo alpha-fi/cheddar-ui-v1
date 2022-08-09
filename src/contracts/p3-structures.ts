@@ -26,7 +26,7 @@ export class P3ContractParams {
 
 }
 
-export class PoolUserStatus {
+export class PoolUserStatusP3 {
     // Amount of each token staked by user
     stake_tokens: U128String[] = [];
     stake: U128String = "";
@@ -42,6 +42,25 @@ export class PoolUserStatus {
         this.farmed_tokens = new Array(farmTokensLength).fill("0")
     }
 }
+
+export class PoolUserStatusP3NFT {
+    // Amount of each token staked by user
+    stake_tokens: U128String[] = [];
+    stake: U128String = "";
+    farmed_units: U128String = "";
+    // Amount of each token in farm, waiting to be harvested
+    farmed_tokens: U128String[] = [];
+    boost_nfts: string = ""
+    timestamp: number = 0;
+
+    // This constructor should only be used when user is not registered, hence userStatus is null
+    constructor(stakeTokensLength: number = 0, farmTokensLength: number = 0) {
+        this.stake_tokens = new Array(stakeTokensLength).fill("0")
+        this.farmed_tokens = new Array(farmTokensLength).fill("0")
+    }
+}
+
+
 
 export class TokenParams {
     decimals: string = "24";

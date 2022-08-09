@@ -32,7 +32,7 @@ async function generatePoolList(wallet: WalletInterface) {
 
         } else if(nearConfig.farms[i].poolType == "nft") {
             contract = new StakingPoolP1(nearConfig.farms[i].contractName);
-            poolParams = new PoolParamsNFT(wallet, nearConfig.farms[i], nearConfig.cheddarContractName, nearConfig.cheddarNFTBaseUrl);
+            poolParams = new PoolParamsNFT(wallet, nearConfig.farms[i], nearConfig.cheddarNFTContractName, nearConfig.cheddarNFTBaseUrl);
         } else {
             continue
         }

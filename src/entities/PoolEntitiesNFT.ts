@@ -1,15 +1,10 @@
-import {NO_CONTRACT_DEPOSIT_NEAR} from '../config';
-import {getNearMetadata} from '../contracts/nearHardcodedObjects';
-import {FungibleTokenMetadata, NEP141Trait} from '../contracts/NEP141';
 import { NFT } from '../contracts/nft-structs';
 import { NFTContract } from '../contracts/NFTContract';
-import {disconnectedWallet} from '../wallet-api/disconnected-wallet';
-import {U128String} from '../wallet-api/util';
 import {WalletInterface} from '../wallet-api/wallet-interface';
 import {getTokenContractList, TokenContractData} from './PoolEntities';
 import {StakingPoolNFT} from '../contracts/nft-staking';
 import {NFTStakingContractParams} from '../contracts/nft-structures';
-import {P3ContractParams, PoolUserStatus as UserStatusP3} from '../contracts/p3-structures';
+import {P3ContractParams, PoolUserStatusP3, PoolUserStatusP3NFT} from '../contracts/p3-structures';
 
 
 async function getNFTContractList(wallet:WalletInterface, contractNameArray: string[], nftBaseUrl: string): Promise<NFTContractData[]> {
@@ -30,12 +25,12 @@ export class StakingContractDataNFT {
     private contractParamsPromise: Promise<NFTStakingContractParams>
     // User parameters of staking contract
     // @ts-ignore
-    private userStatusPromise: Promise<UserStatusP3>
+    private userStatusPromise: Promise<PoolUserStatusP3NFT>
     // List of tokens accepted by staking contract 
     private stakeTokenContractListPromise: Promise<TokenContractData[]>
     private stakeNFTContractListPromise: Promise<NFTContractData[]>
     private contractParams: NFTStakingContractParams | undefined
-    private userStatus: UserStatusP3 | undefined
+    private userStatus: PoolUserStatusP3NFT | undefined
     private stakeTokenContractList: TokenContractData[] = [];
     private stakeNFTContractList: NFTContractData[] = [];
     private farmTokenContractList: TokenContractData[] = [];
@@ -66,13 +61,13 @@ export class StakingContractDataNFT {
         return this.contractParams!
     }
 
-    async getUserStatus(): Promise<UserStatusP3> {
+    async getUserStatus(): Promise<PoolUserStatusP3NFT> {
         if(this.userStatus === undefined) {
             this.userStatus = await this.userStatusPromise
             if(this.userStatus == null) { // When user is not registered, user status is null
                 const contractParams = await this.getContractParams()
                 // There is always only one staked token in this case that is cheddar (besides the NFT)
-                this.userStatus = new UserStatusP3(1, contractParams.farm_tokens.length)
+                this.userStatus = new PoolUserStatusP3NFT(1, contractParams.farm_tokens.length)
             }
         }
         return this.userStatus

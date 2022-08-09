@@ -6,7 +6,7 @@
 import { ntoy, TGas } from "../util/conversions"
 import { SmartContract } from "../wallet-api/base-smart-contract"
 
-import { P3ContractParams, PoolUserStatus as PoolUserStatus, TransferTokenData } from "./p3-structures"
+import { P3ContractParams, PoolUserStatusP3 as PoolUserStatusP3, PoolUserStatusP3NFT, TransferTokenData } from "./p3-structures"
 import { U128String } from "../wallet-api/util"
 
 import * as nearAPI from "near-api-js"
@@ -30,7 +30,7 @@ export class StakingPoolNFT extends SmartContract {
     }
 
     /// Returns amount of staked NEAR and farmed CHEDDAR of given account.
-    status(accountId?: AccountId): Promise<PoolUserStatus> {
+    status(accountId?: AccountId): Promise<PoolUserStatusP3NFT> {
         return this.viewWithoutAccount("status", { account_id: accountId || this.wallet.getAccountId() })
     }
 

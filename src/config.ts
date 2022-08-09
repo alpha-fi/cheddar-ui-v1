@@ -1,5 +1,7 @@
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
+export const CHEDDAR_NFT_CONTRACT_NAME = 'cheddar nft in mainnet is not set yet'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
+export const TESTNET_CHEDDAR_NFT_CONTRACT_NAME = 'nft.cheddar.testnet'
 export const NO_CONTRACT_DEPOSIT_NEAR = "no-contract-deposit-near"
 
 const MAINNET_NETWORKID = 'mainnet'
@@ -34,6 +36,7 @@ type GetConfigResults = {
   nodeUrl:string;
   keyPath?:string;
   cheddarContractName:string;
+  cheddarNFTContractName: string
   walletUrl:string;
   helperUrl?:string;
   explorerUrl?:string;
@@ -52,6 +55,7 @@ export function getConfig(env:string):GetConfigResults {
       networkId: MAINNET_NETWORKID,
       nodeUrl: MAINNET_NODEURL,
       cheddarContractName: CHEDDAR_CONTRACT_NAME,
+      cheddarNFTContractName: CHEDDAR_NFT_CONTRACT_NAME,
       walletUrl: MAINNET_WALLETURL,
       helperUrl: MAINNET_HELPERURL,
       explorerUrl: MAINNET_EXPLORERURL,
@@ -202,6 +206,7 @@ export function getConfig(env:string):GetConfigResults {
       networkId: TESTNET_NETWORKID,
       nodeUrl: TESTNET_NODEURL,
       cheddarContractName: TESTNET_CHEDDAR_CONTRACT_NAME,
+      cheddarNFTContractName: TESTNET_CHEDDAR_NFT_CONTRACT_NAME,
       walletUrl: TESTNET_WALLETURL,
       helperUrl: TESTNET_HELPERURL,
       explorerUrl: TESTNET_EXPLORERURL,

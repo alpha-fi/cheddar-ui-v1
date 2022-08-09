@@ -25,7 +25,7 @@ import * as nearAPI from "near-api-js"
 import { getTokenData, getTokenDataArray } from './util/oracle';
 import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
-import { P3ContractParams, PoolUserStatus } from './contracts/p3-structures';
+import { P3ContractParams, PoolUserStatusP3, PoolUserStatusP3NFT } from './contracts/p3-structures';
 import { NFTContract } from './contracts/NFTContract';
 import { newNFT, NFT } from './contracts/nft-structs';
 import { BN } from 'bn.js';
@@ -237,7 +237,7 @@ async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<n
  */
 async function convertToUSDMultiple(tokenContractList: TokenContractData[], amountList: U128String[]): Promise<string> {
   // const stakeTokenContractList = poolParams.stakeTokenContractList
-  //TODO DANI make better
+  //TODO DANI make better. Avoid calling the promise
   await Promise.all(
     tokenContractList.map(
       (tokenContract: TokenContractData) => tokenContract.getMetadata()
@@ -1157,10 +1157,11 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
 
+
   newPool.querySelector(".boost-button")!.classList.remove("hidden")
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
-  
-  //TODO DANI
+
+  //TODO DANI check apr and staked value
   let contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
   // let farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
   let farmedTokensInUSD = await convertToUSDMultiple(farmTokenContractList, contractParams.farm_token_rates)
@@ -1251,8 +1252,17 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
 }
 
 async function setBoostDisplay(poolParams: PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
-  const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
-  const hasNFTStaked = poolUserStatus.cheddy_nft != ''
+  const poolUserStatus: PoolUserStatusP3|PoolUserStatusP3NFT = await poolParams.stakingContractData.getUserStatus()
+  let hasNFTStaked
+  if("boost_nfts" in poolUserStatus) {
+    console.log("D1", poolUserStatus)
+    hasNFTStaked = poolUserStatus.boost_nfts != ''
+  } else {
+    console.log("D2", poolUserStatus)
+    hasNFTStaked = poolUserStatus.cheddy_nft != ''
+  }
+  console.log("Dstaked", hasNFTStaked)
+  // hasNFTStaked = poolUserStatus.cheddy_nft != ''
   if(hasNFTStaked) {
     newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
     newPool.querySelector(".boost-button span")!.innerHTML = "BOOSTED"
@@ -2237,12 +2247,21 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   let nftContract: NFTContract
   let stakedOrBoostingNFTsToAdd: NFT[] = []
   //Use conditional to check if the pressed button was boost or stake/unstake so the correct nft are loaded
-  let userStatus: PoolUserStatus = await poolParams.stakingContractData.getUserStatus()
+  let userStatus: PoolUserStatusP3|PoolUserStatusP3NFT = await poolParams.stakingContractData.getUserStatus()
   let poolHasStaked: boolean = false
   if(buttonId === "boost-button"){
     nftContract = poolParams.nftContractForBoosting
-    poolHasStaked = userStatus.cheddy_nft != ''
-    stakedOrBoostingNFTsToAdd.push(newNFT(userStatus.cheddy_nft))
+    let tokenId: string
+    if(userStatus instanceof PoolUserStatusP3NFT) {
+      poolHasStaked = userStatus.boost_nfts != ''
+      tokenId = userStatus.boost_nfts
+    } else {
+      poolHasStaked = userStatus.cheddy_nft != ''
+      tokenId = userStatus.cheddy_nft
+    }
+    // poolHasStaked = userStatus.cheddy_nft != '' || userStatus.boost_nfts != ''
+    if(poolHasStaked) stakedOrBoostingNFTsToAdd.push(newNFT(tokenId))
+    
   } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
     nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
     poolHasStaked = userStatus.stake_tokens.some(a => a.length > 0)
