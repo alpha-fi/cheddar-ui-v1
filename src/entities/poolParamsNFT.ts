@@ -16,6 +16,9 @@ export class PoolParamsNFT {
     type: string
     html: HtmlPoolParams;
 
+    poolDescription: string[]|undefined;
+    descriptionLink: string[]|undefined;
+
     stakingContractData: StakingContractDataNFT
     // stakeTokenContractList: TokenContractData[] = [];
     stakeNFTContractList: NFTContractData[] = [];
@@ -26,6 +29,9 @@ export class PoolParamsNFT {
     constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string, nftBaseUrlForBoosting: string) {
         this.wallet = wallet
         this.type = farmData.poolType;
+
+        this.poolDescription = farmData.description;
+        this.descriptionLink = farmData.descriptionLink;
 
         this.html = new HtmlPoolParams(farmData.poolName);
         this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName, farmData.nftBaseUrl!)

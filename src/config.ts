@@ -219,8 +219,6 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'tt',
           contractName: 'p3-tt.cheddar.testnet',
           tokenContractName: 'test-token.cheddar.testnet',
-          description: ["META is a governance token that is rewarded to users of stNEAR through its' partners. Learn more about META"],
-          descriptionLink: ["https://medium.com/meta-pool/meta-token-updates-new-incentives-governance-for-the-community-db6cf3fea627"]
         },
         {
           index: 1,
@@ -249,7 +247,7 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'Cheddy-nft',
           contractName: 'cheddy-nft.cheddar.testnet',
           tokenContractName: 'token-v3.cheddar.testnet',
-          nftBaseUrl: 'https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i'
+          nftBaseUrl: 'https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i',
         },
       ]
     }

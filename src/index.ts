@@ -1143,6 +1143,23 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
   cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
 }
 
+function addPoolTokensDescription (newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3|PoolParamsNFT) {
+  const legendContainer = newPool.querySelector(".pool-legend") as HTMLElement
+  let poolLegends = poolParams.poolDescription;
+  if(poolLegends != undefined){
+    for(let i=0; i < poolLegends.length; i++){
+      const descriptionLinks = poolParams.descriptionLink;
+      
+      if(descriptionLinks != undefined){
+        poolLegends[i] += `<a href="${descriptionLinks[i]}" target="_blank"> here.</a></br>`
+      }
+
+      legendContainer.innerHTML += poolLegends[i]
+      legendContainer.classList.remove("hidden")
+    }
+  }
+}
+
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
   const farmTokenContractList: TokenContractData[] = await poolParams.stakingContractData.getFarmTokenContractList()
 
@@ -1219,7 +1236,6 @@ async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): 
   const totalStakedInUsd: string = await convertToUSDMultiple(stakeTokenContractList, contractParams.total_staked)
   
   // CHECK!
-  //DUDA está bien esto? Recuerdo que sólo está aplicandose en los pools Multiples.
   const legendContainer = newPool.querySelector(".pool-legend") as HTMLElement
   let poolLegends = poolParams.poolDescription;
   if(poolLegends != undefined){
@@ -1255,10 +1271,8 @@ async function setBoostDisplay(poolParams: PoolParamsP3|PoolParamsNFT, newPool: 
   const poolUserStatus: PoolUserStatusP3|PoolUserStatusP3NFT = await poolParams.stakingContractData.getUserStatus()
   let hasNFTStaked
   if("boost_nfts" in poolUserStatus) {
-    console.log("D1", poolUserStatus)
     hasNFTStaked = poolUserStatus.boost_nfts != ''
   } else {
-    console.log("D2", poolUserStatus)
     hasNFTStaked = poolUserStatus.cheddy_nft != ''
   }
   console.log("Dstaked", hasNFTStaked)
@@ -1533,6 +1547,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   } else if(poolParams instanceof PoolParamsNFT && poolParams.type == "nft") {
     await addNFTPool(poolParams, newPool)
   }
+
+  addPoolTokensDescription(newPool, poolParams)
   
   
   // New code
@@ -2252,7 +2268,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   if(buttonId === "boost-button"){
     nftContract = poolParams.nftContractForBoosting
     let tokenId: string
-    if(userStatus instanceof PoolUserStatusP3NFT) {
+    if("boost_nfts" in userStatus) {
       poolHasStaked = userStatus.boost_nfts != ''
       tokenId = userStatus.boost_nfts
     } else {

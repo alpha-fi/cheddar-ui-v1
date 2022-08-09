@@ -67,7 +67,7 @@ export class PoolParamsP3 {
         this.type = farmData.poolType;
         
         this.poolDescription = farmData.description;
-        this.descriptionLink = farmData.descriptionLink
+        this.descriptionLink = farmData.descriptionLink;
 
         this.html = new HtmlPoolParams(farmData.poolName);
         this.stakingContractData = new StakingContractDataP3(wallet, farmData.contractName)

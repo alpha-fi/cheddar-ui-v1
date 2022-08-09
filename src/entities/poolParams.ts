@@ -66,6 +66,10 @@ export class PoolParams {
     wallet: WalletInterface
     type: string
     html: HtmlPoolParams;
+
+    poolDescription: string[]|undefined;
+    descriptionLink: string[]|undefined;
+    
     stakingContractData: StakingContractDataP2
     poolName: string
     stakeTokenMetaData: FungibleTokenMetadata;
@@ -81,6 +85,9 @@ export class PoolParams {
         this.type = farmData.poolType;
         this.html = new HtmlPoolParams(farmData.poolName)
         this.poolName = farmData.poolName
+
+        this.poolDescription = farmData.description;
+        this.descriptionLink = farmData.descriptionLink;
         
         this.stakingContractData = new StakingContractDataP2(wallet, farmData.contractName, farmData.tokenContractName, farmData.poolName);
         this.stakingContractData.contract
