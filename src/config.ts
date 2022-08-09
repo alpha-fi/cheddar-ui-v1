@@ -24,7 +24,7 @@ export type FarmData = {
   poolName:string;
   contractName:string;
   tokenContractName:string;
-  nftBaseUrl?: string;
+  nftBaseUrl?: string[];
   description?: string[];
   descriptionLink?: string[];
 }
@@ -247,7 +247,10 @@ export function getConfig(env:string):GetConfigResults {
           poolName : 'Cheddy-nft',
           contractName: 'cheddy-nft.cheddar.testnet',
           tokenContractName: 'token-v3.cheddar.testnet',
-          nftBaseUrl: 'https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i',
+          nftBaseUrl: [
+            'https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i'
+          ]
+
         },
       ]
     }

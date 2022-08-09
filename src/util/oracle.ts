@@ -22,8 +22,8 @@ function getPriceWithData(tokenSymbol: string): RefTokenData {
     //@ts-ignore
     if(ENV == "testnet" && testTokensSymbols.includes(tokenSymbol)) {
         // AFI-TT doesn't exists in mainnet so this is a patch for testing purposes, selecting the token
-        // NUT arbitrarily
-        tokenSymbol = "nut".toLowerCase()
+        // PEM arbitrarily
+        tokenSymbol = "pem".toLowerCase()
     }
     if(tokenSymbol == "near" || tokenSymbol == "nearcon") {
         tokenSymbol = "wnear"

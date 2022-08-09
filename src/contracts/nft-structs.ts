@@ -5,6 +5,11 @@ export interface NFT {
     approved_account_ids: object
 }
 
+export interface NFTWithMetadata extends NFT {
+    contract_id: string
+    base_url: string
+}
+
 export interface NFTMetadata {
     title: string
     description: string|null
@@ -20,8 +25,10 @@ export interface NFTMetadata {
     reference_hash: string|null
 }
 
-export function newNFT(tokenId: string): NFT {
+export function newNFT(tokenId: string, baseUrl: string, contractId: string): NFTWithMetadata {
     return {
+        contract_id: contractId,
+        base_url: baseUrl,
         token_id: tokenId,
         owner_id: "",
         metadata: {

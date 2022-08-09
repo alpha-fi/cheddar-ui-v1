@@ -27,7 +27,7 @@ import { RefTokenData } from './entities/refResponse';
 import { ContractParams, TransactionData } from './contracts/contract-structs';
 import { P3ContractParams, PoolUserStatusP3, PoolUserStatusP3NFT } from './contracts/p3-structures';
 import { NFTContract } from './contracts/NFTContract';
-import { newNFT, NFT } from './contracts/nft-structs';
+import { newNFT, NFT, NFTWithMetadata } from './contracts/nft-structs';
 import { BN } from 'bn.js';
 import { StakingPoolP3 } from './contracts/p3-staking';
 import { StakingPoolP1 } from './contracts/p2-staking';
@@ -1181,19 +1181,21 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   //TODO DANI check apr and staked value
   let contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
   // let farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
-  let farmedTokensInUSD = await convertToUSDMultiple(farmTokenContractList, contractParams.farm_token_rates)
-  let NFTDepositedx100 = Number(contractParams.total_staked[0]) * 100
-
+  
   const now = Date.now() / 1000
   const isDateInRange = now < contractParams.farming_end
-
+  
+  let farmTokenRateInUSD = await convertToUSDMultiple(farmTokenContractList, contractParams.farm_token_rates)
+  let NFTDepositedx100 = Number(contractParams.total_staked[0]) * 100
   // const apr =  rewards. emission_rate * minutes * hours * 365 / <number of NFT's deposited> * 100
-  let apr = calculateAPR(farmedTokensInUSD, NFTDepositedx100.toString(), isDateInRange)
+  let apr = calculateAPR(farmTokenRateInUSD, NFTDepositedx100.toString(), isDateInRange)
   newPool.querySelector(".apr-value")!.innerHTML = `${apr}%`
 
   setBoostDisplay(poolParams, newPool)
 
   addNFTPoolListeners(poolParams, newPool)  
+
+  refreshNFTOrMultiplePoolInfo(poolParams, newPool)
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -2261,12 +2263,22 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   
   const accountId = poolParams.wallet.getAccountId()
   let nftContract: NFTContract
-  let stakedOrBoostingNFTsToAdd: NFT[] = []
+  let stakedOrBoostingNFTsToAdd: NFTWithMetadata[] = []
   //Use conditional to check if the pressed button was boost or stake/unstake so the correct nft are loaded
+  let userUnstakedNFTsWithMetadata: NFTWithMetadata[] = []
   let userStatus: PoolUserStatusP3|PoolUserStatusP3NFT = await poolParams.stakingContractData.getUserStatus()
   let poolHasStaked: boolean = false
   if(buttonId === "boost-button"){
     nftContract = poolParams.nftContractForBoosting
+    const userUnstakedNFTs: NFT[] = await nftContract.nft_tokens_for_owner(accountId)
+    const mapped: NFTWithMetadata[] = userUnstakedNFTs.map((nft: NFT) => {
+      return {
+        ...nft,
+        contract_id: nftContract.contractId,
+        base_url: nftContract.baseUrl
+      }
+    })
+    userUnstakedNFTsWithMetadata = userUnstakedNFTsWithMetadata.concat(mapped)
     let tokenId: string
     if("boost_nfts" in userStatus) {
       poolHasStaked = userStatus.boost_nfts != ''
@@ -2276,33 +2288,53 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
       tokenId = userStatus.cheddy_nft
     }
     // poolHasStaked = userStatus.cheddy_nft != '' || userStatus.boost_nfts != ''
-    if(poolHasStaked) stakedOrBoostingNFTsToAdd.push(newNFT(tokenId))
+    if(poolHasStaked) stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, nftContract.baseUrl, nftContract.contractId))
     
   } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
-    nftContract = (await poolParams.stakingContractData.getStakeNFTContractList())[0].contract
+    const nftContractList = await poolParams.stakingContractData.getStakeNFTContractList()
+    for(let i = 0; i < nftContractList.length; i++) {
+      const contract = nftContractList[i].contract
+      const userUnstakedNFTs: NFT[] = await contract.nft_tokens_for_owner(accountId)
+      userUnstakedNFTsWithMetadata = userUnstakedNFTsWithMetadata.concat(userUnstakedNFTs.map((nft: NFT) => {
+        return {
+          ...nft,
+          contract_id: contract.contractId,
+          base_url: contract.baseUrl
+        }
+      }))
+      // userUnstakedNFTsWithMetadata.concat(await contract.nft_tokens_for_owner(accountId))
+    }
+    // nftContract = (nftContractList)[0].contract
     poolHasStaked = userStatus.stake_tokens.some(a => a.length > 0)
-    stakedOrBoostingNFTsToAdd = userStatus.stake_tokens.map(tokenId => newNFT(tokenId))
+    // @ts-ignore
+    userStatus.stake_tokens.forEach((contractTokens: string[], index: number) => {
+      contractTokens.forEach((tokenId: string) => {
+        const contract: NFTContract = nftContractList[index].contract
+        stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, contract.baseUrl, contract.contractId))
+      })
+    })
+    console.log("D0", stakedOrBoostingNFTsToAdd)
+    // stakedOrBoostingNFTsToAdd = userStatus.stake_tokens.map(tokenId => newNFT(tokenId))
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
   
-  let nftCollection = await nftContract.nft_tokens_for_owner(accountId)
   // console.log(nftContract)
-  const nftBaseUrl = nftContract.baseUrl
+  // const nftBaseUrl = nftContract.baseUrl
 
   
-  if(nftCollection.length == 0 && !poolHasStaked) {
+  if(userUnstakedNFTsWithMetadata.length == 0 && !poolHasStaked) {
     NFTContainer.innerHTML = "You don't have any NFT's"
     return
   }
-  if(poolHasStaked) {
-    // const stakedNft = newNFT(userStatus.cheddy_nft)
-    stakedOrBoostingNFTsToAdd.forEach(nft => addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl, buttonId, nftContract.contractId, true))
-    // addNFT(poolParams, NFTContainer, stakedNft, poolHasStaked, nftBaseUrl, buttonId, true)
+  if(stakedOrBoostingNFTsToAdd.length > 0) {
+    stakedOrBoostingNFTsToAdd.forEach((nft: NFTWithMetadata) => {
+      addNFT(poolParams, NFTContainer, nft, poolHasStaked, "", buttonId, "", true)
+    })
+    
   }
-
-  nftCollection.forEach(nft => {
-    addNFT(poolParams, NFTContainer, nft, poolHasStaked, nftBaseUrl, buttonId, nftContract.contractId)
+  userUnstakedNFTsWithMetadata.forEach(nft => {
+    addNFT(poolParams, NFTContainer, nft, poolHasStaked, "", buttonId, "", false)
   });
 }
 
@@ -2360,13 +2392,14 @@ function confirmStakeUnstakeNFTButtonHandler(poolParams: PoolParamsNFT) {
         showError("Not enough cheddar to stake selected NFTs")
       }
 
-      const {nftsToStake, nftsToUnstake} = getNFTsToStakeAndUnstake()
-
+      const stakeUnstakeNFTsMap = await getNFTsToStakeAndUnstake(poolParams)
+      const haveNftsToStake = Array.from(stakeUnstakeNFTsMap.values()).some((entry: NFTStakeUnstakeData) => entry.nftsToStake.length > 0)
+      
       let unixTimestamp = new Date().getTime() / 1000; 
       const isDateInRange = unixTimestamp < contractParams.farming_end
-      if (!isDateInRange && nftsToStake.length > 0) throw Error("Pools is Closed.")
+      if (!isDateInRange && haveNftsToStake) throw Error("Pools is Closed.")
 
-      poolParams.stakeUnstakeNFTs(nftsToStake, nftsToUnstake)
+      poolParams.stakeUnstakeNFTs(stakeUnstakeNFTsMap)
       
     } catch(err) {
       showErr(err as Error)
@@ -2374,9 +2407,24 @@ function confirmStakeUnstakeNFTButtonHandler(poolParams: PoolParamsNFT) {
   }
 }
 
-function getNFTsToStakeAndUnstake(): {nftsToStake: string[], nftsToUnstake: string[]} {
-  let nftsToStake = [] as string[]
-  let nftsToUnstake = [] as string[]
+export interface NFTStakeUnstakeData {
+  nftsToStake: string[]
+  nftsToUnstake: string[]
+}
+
+async function getNFTsToStakeAndUnstake(poolParams: PoolParamsNFT): Promise<Map<string, NFTStakeUnstakeData>> {
+  // let nftsToStake = [] as string[]
+  // let nftsToUnstake = [] as string[]
+  const stakeNFTContractList: NFTContractData[] = await poolParams.stakingContractData.getStakeNFTContractList()
+  let output: Map<string, NFTStakeUnstakeData> = new Map<string, NFTStakeUnstakeData>()
+  stakeNFTContractList.forEach((nftContractData: NFTContractData) => {
+    const contractId: string = nftContractData.contract.contractId
+    output.set(contractId, {
+        nftsToStake: [],
+        nftsToUnstake: []
+      }
+    )
+  })
 
   let allSelectedNfts = NFTPoolSection.querySelectorAll(".nft-card.selected")
 
@@ -2385,19 +2433,17 @@ function getNFTsToStakeAndUnstake(): {nftsToStake: string[], nftsToUnstake: stri
     let nftName = nftNameContainer!.innerHTML
 
     let thisNFTStakeButton = nft.querySelector(".stake-nft-button")
-
+    let contractId: string = nft.getAttribute("contract_id")!
+    let contractStakeUnstakeData: NFTStakeUnstakeData = output.get(contractId)!
     //If the stake button is hidden the pool needs to be unstaked
     //If not it needs to be staked
     if(thisNFTStakeButton?.classList.contains("hidden")) {
-      nftsToUnstake.push(nftName)
+      contractStakeUnstakeData.nftsToUnstake.push(nftName)
     } else {
-      nftsToStake.push(nftName)
+      contractStakeUnstakeData.nftsToStake.push(nftName)
     }
   });
-  return {
-    nftsToStake,
-    nftsToUnstake
-  }
+  return output
 }
 
 function displayNFTPoolSectionForStakeUnstakeNFT(newNFTCard: HTMLElement, stakeButton: HTMLElement, unstakeButton: HTMLElement) {
@@ -2433,11 +2479,11 @@ function displayNFTPoolSectionForNFTBoost(poolParams: PoolParamsP3|PoolParamsNFT
   }
 }
 
-function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFT, poolHasStaked: boolean, nftBaseUrl: string, buttonId: string, contractId: string, staked: boolean = false) {
+function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, nft: NFTWithMetadata, poolHasStaked: boolean, nftBaseUrl: string, buttonId: string, contractId: string, staked: boolean = false) {
   const genericNFTCard = qs(".generic-nft-card")
   const newNFTCard = genericNFTCard.cloneNode(true) as HTMLElement
   
-  newNFTCard.classList.add(contractId)
+  newNFTCard.setAttribute("contract_id", nft.contract_id)
 
   let i = 0
   for (; i < newNFTCard.querySelectorAll(".nft-name").length; i++){
@@ -2451,8 +2497,7 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
   let imgElement = newNFTCard.querySelector(".nft-img-container img")
   // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
   
-  console.log("NFTBASEURL: ", nftBaseUrl)
-  imgElement?.setAttribute("src", nftBaseUrl + "/" + nft.metadata.media)
+  imgElement?.setAttribute("src", nft.base_url + "/" + nft.metadata.media)
   imgElement!.setAttribute("alt", nft.metadata.media)
 
   
@@ -2483,46 +2528,6 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
   } else if(buttonId === "stake-unstake-nft"){
     displayNFTPoolSectionForStakeUnstakeNFT(newNFTCard, stakeButton, unstakeButton)
   }
-
-  // //Only if user have more than 1 NFT the legend "You can only boost one NFT is shown"
-  // const NFTPoolSection = qs("#nft-pools-section") as HTMLElement
-  // const NFTPoolSectionInfoRow = NFTPoolSection.querySelector("h2") as HTMLElement
-
-  // const multipleNftSelectionSection = NFTPoolSection.querySelector(".multiple-nft-selection")
-  // const isMultipleNftSelectionNotBeenShown = multipleNftSelectionSection?.classList.contains("hidden")
-
-  // if (i > 1 && isMultipleNftSelectionNotBeenShown) {
-  //   NFTPoolSectionInfoRow.classList.remove("hidden")
-  // } else {
-  //   NFTPoolSectionInfoRow.classList.add("hidden")
-  // }
-
-  // let imgElement = newNFTCard.querySelector(".nft-img-container img")
-  // // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
-  
-  // imgElement?.setAttribute("src", nftBaseUrl + "/" + nft.metadata.media)
-  // imgElement!.setAttribute("alt", nft.metadata.media)
-
-  // let stakeButton = newNFTCard.querySelector(".stake-nft-button")
-  // if(isMultipleNftSelectionNotBeenShown){
-  //   stakeButton?.addEventListener("click", stakeNFT(poolParams, newNFTCard))
-  // }
-
-  // if(staked) {
-  //   let unstakeButton = newNFTCard.querySelector(".unstake-nft-button")
-  //   unstakeButton!.classList.remove("hidden")
-  //   if(isMultipleNftSelectionNotBeenShown){
-  //     unstakeButton!.addEventListener("click", unstakeNFT(poolParams, newNFTCard))
-  //   }
-
-  //   stakeButton!.classList.add("hidden")
-  // }
-
-  // if (poolHasStaked && isMultipleNftSelectionNotBeenShown) {
-  //   stakeButton!.setAttribute("disabled", "disabled")
-  // } else if(!poolHasStaked && isMultipleNftSelectionNotBeenShown) {
-  //   stakeButton!.removeAttribute("disabled")
-  // }
 
   container.append(newNFTCard)    
   toggleGenericClass(newNFTCard)
