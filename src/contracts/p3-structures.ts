@@ -45,7 +45,7 @@ export class PoolUserStatusP3 {
 
 export class PoolUserStatusP3NFT {
     // Amount of each token staked by user
-    stake_tokens: U128String[] = [];
+    stake_tokens: string[][] = [];
     stake: U128String = "";
     farmed_units: U128String = "";
     // Amount of each token in farm, waiting to be harvested

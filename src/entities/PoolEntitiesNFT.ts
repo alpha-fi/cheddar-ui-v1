@@ -7,11 +7,11 @@ import {NFTStakingContractParams} from '../contracts/nft-structures';
 import {P3ContractParams, PoolUserStatusP3, PoolUserStatusP3NFT} from '../contracts/p3-structures';
 
 
-async function getNFTContractList(wallet:WalletInterface, contractNameArray: string[], nftBaseUrl: string): Promise<NFTContractData[]> {
+async function getNFTContractList(wallet:WalletInterface, contractNameArray: string[], nftBaseUrl: string[]): Promise<NFTContractData[]> {
     let NFTContractList = []
     for(let i = 0; i < contractNameArray.length; i++) {
         const NFTContractName = contractNameArray[i]
-        NFTContractList.push(new NFTContractData(wallet, NFTContractName, nftBaseUrl, ""))
+        NFTContractList.push(new NFTContractData(wallet, NFTContractName, nftBaseUrl[i], ""))
     }
     return NFTContractList
 }
@@ -35,7 +35,7 @@ export class StakingContractDataNFT {
     private stakeNFTContractList: NFTContractData[] = [];
     private farmTokenContractList: TokenContractData[] = [];
 
-    constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string) {
+    constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string[]) {
         this.contract = new StakingPoolNFT(contractId)
         this.contract.wallet = wallet
         this.refreshData()
@@ -79,7 +79,7 @@ export class StakingContractDataNFT {
         return getTokenContractList(this.contract.wallet, [contractParams.cheddar])
     }
 
-    private async getStakeNFTContractListPromise(nftBaseUrl: string): Promise<NFTContractData[]> {
+    private async getStakeNFTContractListPromise(nftBaseUrl: string[]): Promise<NFTContractData[]> {
         const contractParams = await this.getContractParams();
         // On NFT staking contract, cheddar is always the staked token, besides the NFT's
         return getNFTContractList(this.contract.wallet, contractParams.stake_tokens, nftBaseUrl)
