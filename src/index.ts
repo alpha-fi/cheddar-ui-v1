@@ -816,8 +816,11 @@ async function refreshNFTOrMultiplePoolInfo(poolParams: PoolParamsP3|PoolParamsN
   const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
   const farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
 
-
-  await updateDetail(newPool, await stakeTokenContractList, contractParams.total_staked, "total-staked")
+  if(poolParams instanceof PoolParamsP3) {
+    await updateDetail(newPool, await stakeTokenContractList, contractParams.total_staked, "total-staked")
+  } else if(poolParams instanceof PoolParamsNFT) {
+    newPool.querySelector(".total-staked-value-usd")!.innerHTML = `${contractParams.total_staked} NFT's`
+  }
   // updateDetail(newPool, poolParams.farmTokenContractList, poolParams.contractParams.total_farmed, "apr")
   const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
@@ -830,7 +833,8 @@ async function refreshNFTOrMultiplePoolInfo(poolParams: PoolParamsP3|PoolParamsN
   if(poolParams instanceof PoolParamsP3) {
     const stakeBalances = await Promise.all(stakeTokenContractList.map(stakeCD => stakeCD.getBalance()))
     await refreshInputAmounts(poolParams, newPool, "main-stake", stakeBalances)
-    await refreshInputAmounts(poolParams, newPool, "main-unstake", poolUserStatus.stake_tokens)
+    // On PoolParamsP3 the poolUserStatus.stake_tokens is always a string[]
+    await refreshInputAmounts(poolParams, newPool, "main-unstake", poolUserStatus.stake_tokens as string[])
 
     if(!isDateInRange) {
       resetMultiplePoolListener(poolParams, newPool, refreshNFTOrMultiplePoolInfo, -1)
@@ -1185,6 +1189,7 @@ function addPoolTokensDescription (newPool: HTMLElement, poolParams: PoolParams|
 
 async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Promise<void> {
   const farmTokenContractList: TokenContractData[] = await poolParams.stakingContractData.getFarmTokenContractList()
+  let contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
 
   await addHeader(poolParams, newPool)
 
@@ -1196,13 +1201,12 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
-
+  
 
   newPool.querySelector(".boost-button")!.classList.remove("hidden")
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
 
   //TODO DANI check apr and staked value
-  let contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
   // let farmTokenContractList = await poolParams.stakingContractData.getFarmTokenContractList()
   
   const now = Date.now() / 1000
@@ -2312,8 +2316,6 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
     }
     // poolHasStaked = userStatus.cheddy_nft != '' || userStatus.boost_nfts != ''
     if(poolHasStaked) stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, nftContract.baseUrl, nftContract.contractId))
-    //DUDA el problema está con esto pero no entiendo cómo se arma
-    console.log("stakedOrBoostingNFTsToAdd", stakedOrBoostingNFTsToAdd)
     
   } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
     const nftContractList = await poolParams.stakingContractData.getStakeNFTContractList()
@@ -2517,8 +2519,9 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
   newNFTCard.setAttribute("contract_id", nft.contract_id)
 
   let i = 0
+  const nftName: string = nft.token_id.indexOf("@") != -1 ? nft.token_id.split("@")[1] : nft.token_id
   for (; i < newNFTCard.querySelectorAll(".nft-name").length; i++){
-    newNFTCard.querySelectorAll(".nft-name")[i].innerHTML = nft.token_id
+    newNFTCard.querySelectorAll(".nft-name")[i].innerHTML = nftName
   }
 
   const NFTPoolSectionInfoRow = NFTPoolSection.querySelector(".nft-farm-info") as HTMLElement
@@ -2528,7 +2531,8 @@ function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLElement, 
   let imgElement = newNFTCard.querySelector(".nft-img-container img")
   // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
   
-  imgElement?.setAttribute("src", nft.base_url + "/" + nft.metadata.media)
+  const nftMedia: string = nft.metadata.media.indexOf("@") != -1 ? nft.metadata.media.split("@")[1] : nft.metadata.media
+  imgElement?.setAttribute("src", nft.base_url + "/" + nftMedia)
   imgElement!.setAttribute("alt", nft.metadata.media)
 
   

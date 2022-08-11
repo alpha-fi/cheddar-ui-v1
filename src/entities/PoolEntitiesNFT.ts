@@ -66,8 +66,7 @@ export class StakingContractDataNFT {
             this.userStatus = await this.userStatusPromise
             if(this.userStatus == null) { // When user is not registered, user status is null
                 const contractParams = await this.getContractParams()
-                // There is always only one staked token in this case that is cheddar (besides the NFT)
-                this.userStatus = new PoolUserStatusP3NFT(1, contractParams.farm_tokens.length)
+                this.userStatus = new PoolUserStatusP3NFT(contractParams.stake_tokens.length, contractParams.farm_tokens.length)
             }
         }
         return this.userStatus

@@ -171,6 +171,7 @@ export class TokenContractData {
             this.contract.wallet = wallet
 
             this.metaDataPromise = this.contract.ft_metadata()
+            // TODO Dani check if user is logged
             this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
         } else {
             this.metaData = getNearMetadata(poolName)

@@ -4,6 +4,7 @@ import { FarmData } from "../config";
 import { callMulipleTransactions } from "../contracts/multipleCall";
 import { FungibleTokenMetadata } from "../contracts/NEP141";
 import { NFTContract } from "../contracts/NFTContract";
+import { PoolUserStatusP3NFT } from "../contracts/p3-structures";
 import { convertToDecimals } from "../util/conversions";
 import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
@@ -43,7 +44,7 @@ export class PoolParamsNFT {
     }
 
     async userHasStakedTokens() {
-        const poolUserStatus = await this.stakingContractData.getUserStatus()
+        const poolUserStatus: PoolUserStatusP3NFT = await this.stakingContractData.getUserStatus()
         let hasStakedTokens = false
         for(let i = 0; i < poolUserStatus.stake_tokens.length; i++) {
             hasStakedTokens ||= poolUserStatus.stake_tokens[i].some(token => Number(token) > 0)
