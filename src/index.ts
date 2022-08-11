@@ -2312,6 +2312,8 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
     }
     // poolHasStaked = userStatus.cheddy_nft != '' || userStatus.boost_nfts != ''
     if(poolHasStaked) stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, nftContract.baseUrl, nftContract.contractId))
+    //DUDA el problema está con esto pero no entiendo cómo se arma
+    console.log("stakedOrBoostingNFTsToAdd", stakedOrBoostingNFTsToAdd)
     
   } else if (buttonId === "stake-unstake-nft" && poolParams instanceof PoolParamsNFT) {
     const nftContractList = await poolParams.stakingContractData.getStakeNFTContractList()
@@ -2336,7 +2338,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
         stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, contract.baseUrl, contract.contractId))
       })
     })
-    console.log("D0", stakedOrBoostingNFTsToAdd)
+    // console.log("D0", stakedOrBoostingNFTsToAdd)
     // stakedOrBoostingNFTsToAdd = userStatus.stake_tokens.map(tokenId => newNFT(tokenId))
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
@@ -2347,7 +2349,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
 
   
   if(userUnstakedNFTsWithMetadata.length == 0 && !poolHasStaked) {
-    NFTContainer.innerHTML = "You don't have any NFT's"
+    NFTContainer.innerHTML = "You don't have any cheddar NFT"
     return
   }
   if(stakedOrBoostingNFTsToAdd.length > 0) {
@@ -2400,32 +2402,38 @@ function stakeAndUstakeNFTButtonHanddler (newNFTCard: HTMLElement) {
 
 function confirmStakeUnstakeNFTButtonHandler(poolParams: PoolParamsNFT) {
   return async function (event: Event) {
-    try {
-      event.preventDefault()
+    let isAnyNFTSelected = qsa(".nft-flex .selected").length > 0
 
-      const contractParams = await poolParams.stakingContractData.getContractParams()
-      //If used don´t have enough cheddar to stake all the selected NFTs show error msg and return
-      let cheddarBalanceContainer = document.querySelector(".cheddar-balance") as HTMLElement
-      let cheddarBalance = parseInt(cheddarBalanceContainer.innerHTML) as number
-
-      let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
-      let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
-
-      if(cheddarBalance < cheddarNeededToStakeNFTs) {
-        showError("Not enough cheddar to stake selected NFTs")
+    if(isAnyNFTSelected){
+      try {
+        event.preventDefault()
+  
+        const contractParams = await poolParams.stakingContractData.getContractParams()
+        //If used don´t have enough cheddar to stake all the selected NFTs show error msg and return
+        let cheddarBalanceContainer = document.querySelector(".cheddar-balance") as HTMLElement
+        let cheddarBalance = parseInt(cheddarBalanceContainer.innerHTML) as number
+  
+        let cheddarNeededToStakeNFTsContainer = document.querySelector(".cheddar-needed-to-stake-all-nfts") as HTMLElement
+        let cheddarNeededToStakeNFTs = parseInt(cheddarNeededToStakeNFTsContainer.innerHTML) as number
+  
+        if(cheddarBalance < cheddarNeededToStakeNFTs) {
+          showError("Not enough cheddar to stake selected NFTs")
+        }
+  
+        const stakeUnstakeNFTsMap = await getNFTsToStakeAndUnstake(poolParams)
+        const haveNftsToStake = Array.from(stakeUnstakeNFTsMap.values()).some((entry: NFTStakeUnstakeData) => entry.nftsToStake.length > 0)
+        
+        let unixTimestamp = new Date().getTime() / 1000; 
+        const isDateInRange = unixTimestamp < contractParams.farming_end
+        if (!isDateInRange && haveNftsToStake) throw Error("Pools is Closed.")
+  
+        poolParams.stakeUnstakeNFTs(stakeUnstakeNFTsMap)
+        
+      } catch(err) {
+        showErr(err as Error)
       }
-
-      const stakeUnstakeNFTsMap = await getNFTsToStakeAndUnstake(poolParams)
-      const haveNftsToStake = Array.from(stakeUnstakeNFTsMap.values()).some((entry: NFTStakeUnstakeData) => entry.nftsToStake.length > 0)
-      
-      let unixTimestamp = new Date().getTime() / 1000; 
-      const isDateInRange = unixTimestamp < contractParams.farming_end
-      if (!isDateInRange && haveNftsToStake) throw Error("Pools is Closed.")
-
-      poolParams.stakeUnstakeNFTs(stakeUnstakeNFTsMap)
-      
-    } catch(err) {
-      showErr(err as Error)
+    } else {
+      showError("Select NFT's to stake or unstake")
     }
   }
 }

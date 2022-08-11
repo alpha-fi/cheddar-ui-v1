@@ -37,7 +37,7 @@ export class PoolParamsNFT {
         this.html = new HtmlPoolParams(farmData.poolName);
         this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName, farmData.nftBaseUrl!)
 
-        console.log("DContract", nftContract)
+        // console.log("DContract", nftContract)
         this.nftContractForBoosting = new NFTContract(nftContract, nftBaseUrlForBoosting)
         this.nftContractForBoosting.wallet = this.wallet
     }
