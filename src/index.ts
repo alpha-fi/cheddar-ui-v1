@@ -105,6 +105,21 @@ qs('#my-account').onclick =
     }
   }
 
+let moreGamesButton = qs(".games-dropdown") as HTMLElement
+moreGamesButton.addEventListener("click", gamesDropdownHandler())
+
+let noLivePoolsMsg = qs(".no-live-pools-msg") as HTMLElement
+noLivePoolsMsg.addEventListener("click", gamesDropdownHandler())
+
+function gamesDropdownHandler() {
+  return function(){
+    let gamesLinksContainer = qs(".games-links-container") as HTMLElement
+  
+    gamesLinksContainer.classList.toggle("games-dropdown-hidden-position")
+    moreGamesButton.querySelector("svg")!.classList.toggle("flipped")  
+  }
+}
+
 //generic nav handler
 function navClickHandler_ConnectFirst(event: Event) {
   event.preventDefault()
@@ -147,7 +162,8 @@ function filterPools(className: string){
     filterButtonClicked(event)
     hideAllPools()
     let livePools = qsa(`.${className}`)
-    showSelectedPools(livePools)
+    // let livePools = qsa("test-no-live-pools-msg")
+    showSelectedPools(livePools, className)
   }
 }
 
@@ -167,10 +183,17 @@ function hideAllPools() {
   });
 }
 
-function showSelectedPools(selectedPools: NodeListOf<Element>) {
-  selectedPools.forEach(pool => {
-    pool.classList.remove("hidden")
-  });
+function showSelectedPools(selectedPools: NodeListOf<Element>, className: string) {
+  if(selectedPools.length > 0){
+    qs(".no-live-pools-msg").classList.add("hidden")
+
+    selectedPools.forEach(pool => {
+      pool.classList.remove("hidden")
+    });
+
+  } else if (className == "active-pool") {
+    qs(".no-live-pools-msg").classList.remove("hidden")
+  }
 }
 
 
