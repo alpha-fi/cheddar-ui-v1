@@ -609,7 +609,7 @@ function showSection(selector: string) {
 
   //hide burger button
   qs(".burger-button").classList.remove("burger-button--toggle")
-  qs(".navbar-links").classList.remove("show-navbar__links")
+  qs(".navbar-links").classList.remove("show-right__nav")
 }
 
 function selectNav(selector: string) {
@@ -1928,6 +1928,9 @@ function closePublicityButtonHandler() {
 
     let header = qs("header") as HTMLElement
     header.classList.add("no-publicity-position")
+
+    let burguer = qs("#burguer") as HTMLElement
+    burguer.classList.add("no-publicity-position")
   }
 }
 
@@ -1995,7 +1998,10 @@ window.onload = async function () {
       qsInnerText("#nft-pools-section .cheddar-balance-container .cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 
       let circulatingSupply = await cheddarContract.ft_total_supply()
-      document.querySelector("#circulatingSupply span")!.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
+      let allSuplyTextContainersToFill = document.querySelectorAll("#circulatingSupply span") as NodeListOf<HTMLElement>
+      allSuplyTextContainersToFill.forEach(textContainer => {
+        textContainer.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
+      });
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
@@ -2659,15 +2665,17 @@ const NFTPoolSection = qs("#nft-pools-section") as HTMLElement
 NFTPoolSection.addEventListener("click", quitNFTFlex())
 
 //Burger button
-const burgerButton = qs(".burger-button") as HTMLElement
-burgerButton.addEventListener('click', () => {
-  toggleBurgerNav();
+const burgerTogglers = qsa(".toggleBurguer") as NodeListOf<HTMLElement>
+burgerTogglers.forEach(toggler => {
+  toggler.addEventListener('click', () => {
+    toggleBurgerNav();
+  });
 });
 
-
-const navbarLinks = qs('.navbar-links') as HTMLElement
-
 const toggleBurgerNav = () => {
-  navbarLinks.classList.toggle('show-navbar__links')
+  const burgerButton = qs(".burger-button") as HTMLElement
+  const rightNav = qs('.burguer-content') as HTMLElement
+
+  rightNav.classList.toggle('show-right__nav')
   burgerButton.classList.toggle('burger-button--toggle')
 };

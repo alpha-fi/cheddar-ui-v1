@@ -131,7 +131,7 @@ main {
 }
 
 header.no-publicity-position {
-  margin: 38px 15px 0px 15px;
+  margin: 33px 15px 0px 15px;
 }
 
 .header-extension {
@@ -217,14 +217,27 @@ header div.title {
   margin-left: 18px;
 }
 
-header nav {
+nav {
+  width: calc(100% - 175px);
+  display: flex;
+  justify-content: space-between;
+}
+
+#burguer {
+  width: calc(100% - 88.5px);
+}
+
+.burguer-content {
   flex           : 1 1 30%;
   display        : flex;
   flex-flow      : row wrap;
   justify-content: space-between;
   align-items    : center;
-  
-  z-index: 19;
+}
+
+.left-on-full-screen {
+  align-self: flex-start !important;
+  flex-direction: row !important;
 }
 
 #navigation {
@@ -266,7 +279,7 @@ a.selected {
   font-weight: bold;
 }
 
-header nav a {
+.burguer-content a {
   flex         : 0 1 auto;
 }
 
@@ -275,7 +288,7 @@ header nav a {
   align-self: center;
 }
 
-.right-nav {
+.burguer-content .navbar-links {
   flex-direction: column;
   align-items: center;
   transform: translateY(20px);
@@ -1023,6 +1036,7 @@ li {
 }
 
 .boost-button {
+  user-select: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1152,6 +1166,14 @@ section#my-account, section#faq {
   color: rgba(80,41,254,0.88);
 }
 
+.show-smaller-screens {
+  display: none;
+}
+
+.show-bigger-screens {
+  display: block;
+}
+
 #circulatingSupply {
   display    : flex;
   flex-flow  : row;
@@ -1164,6 +1186,7 @@ section#my-account, section#faq {
   font-weight: bold;
   font-size:  13px;
   margin:  0 0.2rem 0 0.2rem;
+  white-space: nowrap;
 }
 
 #circulatingSupply a{
@@ -1198,7 +1221,7 @@ section#my-account, section#faq {
 }
 
 #game-links {
-  margin-top: 4.5px;
+  margin-top: 9px;
   position: relative;
   margin-left: 1rem;
 }
@@ -1231,6 +1254,7 @@ section#my-account, section#faq {
   text-align: center;
   width: max-content;
   margin: 5px;
+  user-select: none;
 }
 
 .games-dropdown svg {
@@ -1430,7 +1454,7 @@ input:checked + .slider:before {
     margin-left: 2px;
   }
 
-  header nav a {
+  .burguer-content a {
     font-size     : 11px;
     padding-bottom: 3px;
   }
@@ -1501,6 +1525,7 @@ input:checked + .slider:before {
   line-height: 42px;
   cursor: pointer;
   user-select: none;
+  max-width: 30vw;
 }
 
 .pool-filter-container li:hover, .activeFilterButton {
@@ -2179,10 +2204,22 @@ button.activate {
 
 @media screen and (max-width: 1210px) {
   /*Burger*/
-  header nav {
+
+  .close-burguer {
+    color: var(--gray);
+    position: absolute;
+    right: 20px;
+    top: 2vw;
+    display: block !important;
+    z-index: 1;
+  }
+
+  #burguer {
+    z-index: 40;
+    width: auto;
     justify-content: center;
     position: fixed;
-    top: 11px;
+    top: 40px;
     right: 11px;
     background-color: #ffffffc9;
     padding: 10px;
@@ -2191,7 +2228,18 @@ button.activate {
     aspect-ratio: 1;
   }
 
-  .navbar-links{
+  .burger-button {
+    margin: 4px auto;
+    width: max-content;
+  }
+
+  #burguer.no-publicity-position {
+    top: 26px;
+  }
+
+  .burguer-content {
+    z-index: 2;
+
     display: flex;
     position: fixed;
     right: 0;
@@ -2205,6 +2253,18 @@ button.activate {
     justify-content: flex-start;
     transform: translateX(110%);
     transition: transform 0.4s ease-in-out;
+  }
+
+  .top-in-burguer {
+    order: 1;
+    width: 100%;
+    align-items: flex-start !important;
+  }
+
+  #other-links {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
   }
 
   .games-dropdown {
@@ -2222,15 +2282,26 @@ button.activate {
 
   .cheddar-main-logo-container {
     display: block;
-    margin: 21px 0 29px 16px;
+    margin: 5px 0 0px 16px;
+    order: 0;
   }
 
   #power-up {
-    width: 102px;
+    width: 131px;
   }
 
   #ref-swap {
     width: 110px;
+  }
+
+  .left-on-full-screen {
+    order: 2;
+    flex-direction: column-reverse !important;
+    width: 100%;
+  }
+
+  .left-on-full-screen .navButton {
+    align-self: self-start;
   }
 
   #power-up, #ref-swap {
@@ -2263,9 +2334,16 @@ button.activate {
     padding: 12px 0px 12px 16px;
     box-shadow: none;
     margin: 0;
+    order: 2;
+    width: 100%;
   }
 
-  .show-navbar__links {
+  .header-extension_cheddar-value-container {
+    padding: 12px 0 12px 16px;
+    order: 1;
+  }
+
+  .show-right__nav {
     transform: translateX(0);
   }
 
@@ -2279,7 +2357,7 @@ button.activate {
 
   .burger-button--toggle .line1{
       margin-bottom: 0 !important;
-      transform: rotate(-45deg) translate(-4px, 2.5px);
+      transform: rotate(-45deg) translate(-7px, 5.5px);
   }
 
   .burger-button--toggle .line2{
@@ -2287,7 +2365,7 @@ button.activate {
   }
 
   .burger-button--toggle .line3{
-      transform: rotate(45deg) translate(-5.6px, -4.5px);
+      transform: rotate(45deg) translate(-2.6px, -1.5px);
   }
 }
 
@@ -2295,6 +2373,18 @@ button.activate {
 @media screen and (max-width: 750px) {
   .grid{
     grid-template-columns: repeat(1, 1fr);
+  }
+
+  .publicity-container {
+    width: 100%;
+  }
+  
+  .publicity-container p {
+    font-size: 3rem;
+  }
+
+  .publicity-decoration {
+    width: 100%;
   }
 
 
@@ -2349,7 +2439,7 @@ button.activate {
     margin: 0;
   }
 
-  .show-navbar__links {
+  .show-right__nav {
     transform: translateX(0);
   }
 
@@ -2375,4 +2465,23 @@ button.activate {
   } */
 
   
+}
+
+@media screen and (max-width: 600px) {
+  .show-smaller-screens {
+    display: block;
+  }
+
+  .show-bigger-screens {
+    display: none;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  main {
+    margin-top: 52px;
+  }
 }
