@@ -79,8 +79,8 @@ export class StakingPoolNFT extends SmartContract {
     /// Returns amount of staked tokens left after the call.
     /// Panics if the caller doesn't stake anything or if he doesn't have enough staked tokens.
     /// Requires 1 yNEAR payment for wallet validation.
-    unstake(token: string, amount: string): Promise<void> {
-        return this.call("unstake", { token: token, amount: amount }, TGas(125), "1")
+    unstake(nft_contract_id: string, token_id: string): Promise<void> {
+        return this.call("withdraw_boost_nft", { /*nft_contract_id, token_id*/ }, TGas(125), "1")
     }
 
     /// Unstakes everything and close the account. Sends all farmed CHEDDAR using a ft_transfer

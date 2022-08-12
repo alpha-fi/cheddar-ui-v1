@@ -1,5 +1,5 @@
 export const CHEDDAR_CONTRACT_NAME = 'token.cheddar.near'
-export const CHEDDAR_NFT_CONTRACT_NAME = 'cheddar nft in mainnet is not set yet'
+export const CHEDDAR_NFT_CONTRACT_NAME = 'nft.cheddar.near'
 export const TESTNET_CHEDDAR_CONTRACT_NAME = 'token-v3.cheddar.testnet'
 export const TESTNET_CHEDDAR_NFT_CONTRACT_NAME = 'nft.cheddar.testnet'
 export const NO_CONTRACT_DEPOSIT_NEAR = "no-contract-deposit-near"
@@ -16,7 +16,7 @@ const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
-export const ENV = TESTNET_NETWORKID
+export const ENV = MAINNET_NETWORKID
 
 export type FarmData = {
   index?: number;

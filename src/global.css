@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Titillium Web');
 
 * {
   -webkit-font-smoothing: antialiased;
@@ -25,7 +26,7 @@ html {
   --light-gray               : #ccc;
   --shadow                   : #e6e6e6;
   background-color           : var(--bg);
-  font-family                : 'Inter', sans-serif;
+  font-family                : 'Titillium Web', sans-serif;
   --publicity-height         : 130px;
   /*body font*/   
   font-size                  : 13px;
@@ -658,6 +659,10 @@ button.hollow {
 .btn-outline-none {
   border: none;
   line-height: 32px;
+}
+
+#other-links .btn-outline-none {
+  margin-right: 6px !important;
 }
 
 .btn-outline-none svg {
@@ -1481,6 +1486,17 @@ input:checked + .slider:before {
   align-items: stretch;
 }
 
+#pool_list .no-pools {
+  text-align: center; 
+  margin: 0 auto; 
+  width: 120%; 
+  color: #8542eb; 
+  outline: double; 
+  padding: 1rem;
+  /* text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; /
+    / background-color: #333; */
+}
+
 .pool-container {
   border-width: 12px;
 }
@@ -1534,15 +1550,17 @@ input:checked + .slider:before {
 }
 
 .no-live-pools-msg h2 {
+  color: var(--primary);
   transition: all 0.3s linear;
-  font-size: xx-large;
+  font-size: x-large;
   margin: 50px auto;
   width: max-content;
   background-color: var(--second-new-grey);
   padding: 20px;
   border-radius: 100px;
   box-shadow: 4px 4px 4px #00000073;
-}
+} 
+
 
 .no-live-pools-msg:hover {
   transform: scale(1.01);

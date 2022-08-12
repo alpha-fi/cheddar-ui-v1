@@ -346,8 +346,8 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       const contractParams = await poolParams.stakingContractData.getContractParams()
       // const contractParams = poolParams.contractParams
       // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-      const isDateInRange = unixTimestamp < contractParams.farming_end
-      if (!isDateInRange) throw Error("Pools is Closed.")
+      const isDateInRange = unixTimestamp > contractParams.farming_start
+      if (!isDateInRange) throw Error("Pools is not open yet.")
       
       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: unstakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "unstake")
       inputArray = htmlInputArray
@@ -1906,7 +1906,7 @@ async function addPoolList(poolList: Array<PoolParams|PoolParamsP3|PoolParamsNFT
   qs("#pool_list").style.display = "grid"
 
   if (qs("#pool_list").childElementCount == 0) {
-    qs("#pool_list").innerHTML = "<h2 style='color: #8542EB;text-shadow: white 0px 1px 5px;margin-top:5rem;'>You have No Staked Pools.</h2>"
+    qs("#pool_list").innerHTML = `<h2 class="no-pools">New Pools SoonTM...⚙️ Try our games!🕹️</h2>`
   }
 
   // qs(".loader").style.display = "none"
@@ -2111,22 +2111,33 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
   showSuccess(message, "Stake")
 }
 
-async function unstakeResult(argsArray: [{amount: string, token: string}]) {
-  let message = "Unstaked: "
-  let tokensUnstakedMessage: string[] = []
-  
-  for(let i = 0; i < argsArray.length; i++) {
-    const args = argsArray[i]
-    let contract = new NEP141Trait(args.token)
-    contract.wallet = wallet
+interface NFTUnstakeResult {
+  nft_contract_id: string
+  token: string
+  token_id: string
+}
 
-    const metaData = await contract.ft_metadata()
-    const amount = convertToDecimals(args.amount, metaData.decimals, 5)
-    tokensUnstakedMessage.push(
-      `${amount} ${metaData.symbol}`
-    )
+async function unstakeResult(argsArray: [{amount: string, token: string}] | NFTUnstakeResult[]) {
+  let message = "Unstaked: "
+  if("nft_contract_id" in argsArray[0]) {
+    message += `deposited cheddar and ${argsArray.length} NFTs have been refunded`
+  } else if("token" in argsArray[0]){
+    let tokensUnstakedMessage: string[] = []
+    
+    for(let i = 0; i < argsArray.length; i++) {
+      const args = argsArray[i]
+      let contract = new NEP141Trait(args.token)
+      contract.wallet = wallet
+
+      const metaData = await contract.ft_metadata()
+      // @ts-ignore
+      const amount = convertToDecimals(args.amount, metaData.decimals, 5)
+      tokensUnstakedMessage.push(
+        `${amount} ${metaData.symbol}`
+      )
+    }
+    message += tokensUnstakedMessage.join(" - ")
   }
-  message += tokensUnstakedMessage.join(" - ")
   showSuccess(message, "Unstake")
 }
 
@@ -2606,7 +2617,11 @@ function unstakeNFT(poolParams: PoolParamsP3|PoolParamsNFT, card: HTMLElement) {
       event.preventDefault()
       showWait("Unstaking NFT...")
 
-      await poolParams.stakingContractData.contract.withdraw_nft(poolParams.wallet.getAccountId())
+      if(poolParams instanceof PoolParamsP3) {
+        await poolParams.stakingContractData.contract.withdraw_nft(poolParams.wallet.getAccountId())
+      } else if(poolParams instanceof PoolParamsNFT) {
+        await poolParams.withdrawBoost()
+      }
       showSuccess("NFT unstaked successfully")
       card.querySelector(".unstake-nft-button")!.classList.add("hidden")
 

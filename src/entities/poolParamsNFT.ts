@@ -64,45 +64,85 @@ export class PoolParamsNFT {
     async refreshAllExtraData() {
     }
 
+    async withdrawBoost(): Promise<any> {
+        const poolUserStatus: PoolUserStatusP3NFT = await this.stakingContractData.getUserStatus()
+        const tokenId: string = poolUserStatus.boost_nfts.split("@")[1]
+        return this.stakingContractData.contract.unstake(this.nftContractForBoosting.contractId, tokenId)
+    }
+
+    async transferCheddar() {
+        const contractParams = await this.stakingContractData.getContractParams()
+        const cheddarContract = (await this.stakingContractData.getStakeTokenContractList())[0].contract!
+        const amount = contractParams.cheddar_rate
+        const promise = cheddarContract.ft_transfer_call_without_send(
+            this.stakingContractData.contract.contractId,
+            amount,
+            "cheddar stake" // required like this from staking contract
+        )
+
+        const promiseWithContract = {
+            promise,
+            contractName: cheddarContract.contractId
+        }
+
+        return promiseWithContract
+    }
+
+    transferNFT(stakeNFTContract: NFTContractData, contractId: string, tokenId: string) {
+        const promise = stakeNFTContract.contract.nft_transfer_call_without_send(
+            this.stakingContractData.contract.contractId,
+            tokenId
+        )
+
+        const promiseWithContract = {
+            promise,
+            contractName: contractId
+        }
+        return promiseWithContract
+
+    }
+
     async stakeUnstakeNFTs(stakeUnstakeNFTsMap: Map<string, NFTStakeUnstakeData>) {
         let TXs = []
         for(let [contractId, stakeUnstakeNFTs] of stakeUnstakeNFTsMap) {
         // stakeUnstakeNFTsMap.forEach(async(stakeUnstakeNFTs: NFTStakeUnstakeData, contractId: string) => {
-            if(stakeUnstakeNFTs.nftsToStake.length > 0) {
-                const contractParams = await this.stakingContractData.getContractParams()
-                // NFT contracts need cheddar stake and it is not thought to have any other type of stake ft
-                const cheddarContract = (await this.stakingContractData.getStakeTokenContractList())[0].contract!
-                const amount = new BN(contractParams.cheddar_rate).mul(new BN(stakeUnstakeNFTs.nftsToStake.length)).toString()
-                const promise = cheddarContract.ft_transfer_call_without_send(
-                    this.stakingContractData.contract.contractId,
-                    amount,
-                    "cheddar stake" // required like this from staking contract
-                )
+            // if(stakeUnstakeNFTs.nftsToStake.length > 0) {
+            //     const contractParams = await this.stakingContractData.getContractParams()
+            //     // NFT contracts need cheddar stake and it is not thought to have any other type of stake ft
+            //     const cheddarContract = (await this.stakingContractData.getStakeTokenContractList())[0].contract!
+            //     const amount = new BN(contractParams.cheddar_rate).mul(new BN(stakeUnstakeNFTs.nftsToStake.length)).toString()
+            //     const promise = cheddarContract.ft_transfer_call_without_send(
+            //         this.stakingContractData.contract.contractId,
+            //         amount,
+            //         "cheddar stake" // required like this from staking contract
+            //     )
 
-                const promiseWithContract = {
-                    promise,
-                    contractName: cheddarContract.contractId
-                }
+            //     const promiseWithContract = {
+            //         promise,
+            //         contractName: cheddarContract.contractId
+            //     }
 
-                TXs.push(promiseWithContract)
-            }
+            //     TXs.push(promiseWithContract)
+            // }
             const stakeNFTContractList: NFTContractData[] = await this.stakingContractData.getStakeNFTContractList()
             // FIX This implementation is taking into consideration only one stake NFT by pool, but it should be done to consider many
             const stakeNFTContract: NFTContractData = stakeNFTContractList.find(a => a.contract.contractId == contractId)!
 
             for(let i = 0; i < stakeUnstakeNFTs.nftsToStake.length; i++) {
+                TXs.push(await this.transferCheddar())
+
                 const tokenId = stakeUnstakeNFTs.nftsToStake[i]
-                const promise = stakeNFTContract.contract.nft_transfer_call_without_send(
-                    this.stakingContractData.contract.contractId,
-                    tokenId
-                )
+                // const promise = stakeNFTContract.contract.nft_transfer_call_without_send(
+                //     this.stakingContractData.contract.contractId,
+                //     tokenId
+                // )
 
-                const promiseWithContract = {
-                    promise,
-                    contractName: contractId
-                }
+                // const promiseWithContract = {
+                //     promise,
+                //     contractName: contractId
+                // }
 
-                TXs.push(promiseWithContract)
+                TXs.push(this.transferNFT(stakeNFTContract, contractId, tokenId))
             }
 
             for(let i = 0; i < stakeUnstakeNFTs.nftsToUnstake.length; i++) {
@@ -120,7 +160,7 @@ export class PoolParamsNFT {
                 TXs.push(promiseWithContract)
             }
         }
-        await callMulipleTransactions(TXs, this.stakingContractData.contract)   
+        if(TXs.length > 0) await callMulipleTransactions(TXs, this.stakingContractData.contract)   
 
     }
 
