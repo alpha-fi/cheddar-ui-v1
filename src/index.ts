@@ -1045,6 +1045,7 @@ async function addTokenFarmLogos(poolParams: PoolParams|PoolParamsP3, header: HT
     
     addLogo(metaData, logoContainer, i)
   }
+  logoContainer.classList.add(`have-${tokenContractDataArray.length}-elements`)
 }
 
 async function addNFTFarmLogo(header: HTMLElement) {  
@@ -1061,7 +1062,7 @@ async function addNFTFarmLogo(header: HTMLElement) {
   newTokenLogoElement.classList.add(`farmed-token-logo`)
   logoContainer.append(newTokenLogoElement)
   
-  logoContainer.classList.add(`have-${NFTContractData.length}-elements`)
+  logoContainer.classList.add(`have-1-elements`)
 }
 
 async function addAllLogos(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, header: HTMLElement) {
