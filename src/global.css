@@ -1507,6 +1507,7 @@ input:checked + .slider:before {
   border-radius: 8px!important;
 }
 
+
 .news {
   font-family: Bubblegum Sans !important;
   font-size: 4rem;
@@ -1515,6 +1516,12 @@ input:checked + .slider:before {
   color: var(--second-yellow);
   letter-spacing: 3px;
   text-align: center;
+}
+
+#timer {
+  font-size: large;
+  text-align: center;
+  margin-top: 16px;
 }
 
 .pool-filter-container {

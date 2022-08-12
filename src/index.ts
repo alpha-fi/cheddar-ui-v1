@@ -55,6 +55,7 @@ const SECONDS = 1000
 const MINUTES = 60 * SECONDS
 const HOURS = 60 * MINUTES
 
+let countDownIntervalId: number
 const refreshTime = 60 * SECONDS
 
 const ONE_NEAR = BigInt(10) ** BigInt(24);
@@ -1934,6 +1935,25 @@ function closePublicityButtonHandler() {
   }
 }
 
+function setCountdown() {
+  var countDownDate = new Date("Aug 22, 2022 12:00:00 UTC");
+  var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
+  // Time calculations for days, hours, minutes and seconds
+  var d = new Date();
+  var d = new Date(d.getTime() - d.getTimezoneOffset() * 60000)
+  var distance = countDownDate.getTime() - d.getTime();
+
+  if(distance < 0) {
+    clearInterval(countDownIntervalId)
+    document.getElementById("timer")!.innerHTML = "";
+  }
+  var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+  var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+  var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+  document.getElementById("timer")!.innerHTML = `<h2><span style='color:#222'>New Pools Start In: </span><span style='color:rgba(80,41,254,0.88)'>${days} d : ${hours} h :  
+  ${minutes} m : ${seconds} s</span></h2>`;
+}
 
 window.onload = async function () {
   try {
@@ -1963,8 +1983,12 @@ window.onload = async function () {
     headerCheddarValueDisplayerContainer.innerHTML = `$ ${cheddarValue}`
 
 
-    var countDownDate = new Date("Jan 2, 2022 18:00:00 UTC");
-    var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
+    
+    countDownIntervalId = window.setInterval(function(){
+      setCountdown()
+    }, 1000);
+    
+
 
     //init narwallets listeners
     narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
