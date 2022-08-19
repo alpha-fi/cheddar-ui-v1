@@ -203,6 +203,13 @@ export function getConfig(env:string):GetConfigResults {
           contractName: 'p3-neko1.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
         },
+        {
+          index: 11,
+          poolType: 'multiple',
+          poolName : 'cheddar-neko',
+          contractName: 'p3-meta1.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+        },
       ]
     }
   case 'development':
