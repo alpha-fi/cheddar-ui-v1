@@ -347,8 +347,8 @@ function unstakeMultiple(poolParams: PoolParamsP3, newPool: HTMLElement) {
       const contractParams = await poolParams.stakingContractData.getContractParams()
       // const contractParams = poolParams.contractParams
       // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-      const isDateInRange = unixTimestamp > contractParams.farming_start
-      if (!isDateInRange) throw Error("Pools is not open yet.")
+      // const isDateInRange = unixTimestamp > contractParams.farming_start
+      // if (!isDateInRange) throw Error("Pools is not open yet.")
       
       const { htmlInputArray, amountValuesArray: amountValues, transferedAmountWithSymbolArray: unstakedAmountWithSymbol } = await getInputDataMultiple(poolParams, newPool, "unstake")
       inputArray = htmlInputArray
