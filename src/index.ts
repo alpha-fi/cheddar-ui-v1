@@ -1532,8 +1532,8 @@ async function resetNFTPoolListener(poolParams: PoolParamsNFT, pool: HTMLElement
 
   pool.replaceWith(newPool)
 
-  const event = new Event('click')
-  qs(".activeFilterButton").dispatchEvent(event)
+  // const event = new Event('click')
+  // qs(".activeFilterButton").dispatchEvent(event)
 }
 
 async function addFilterClasses(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT, newPool: HTMLElement) {

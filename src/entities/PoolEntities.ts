@@ -46,7 +46,9 @@ export class StakingContractDataP3 {
 
     refreshData() {
         this.contractParamsPromise = this.contract.get_contract_params()
-        this.userStatusPromise = this.contract.status()
+        if(this.contract.wallet.isConnected()) {
+            this.userStatusPromise = this.contract.status()
+        }
         this.contractParams = undefined
         this.userStatus = undefined
     }
@@ -172,7 +174,7 @@ export class TokenContractData {
 
             this.metaDataPromise = this.contract.ft_metadata()
             // TODO Dani check if user is logged
-            this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
+            if(wallet.isConnected()) this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
         } else {
             this.metaData = getNearMetadata(poolName)
             this.balancePromise = wallet.getAccountBalance()

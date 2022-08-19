@@ -45,7 +45,9 @@ export class StakingContractDataNFT {
 
     refreshData() {
         this.contractParamsPromise = this.contract.get_contract_params()
-        this.userStatusPromise = this.contract.status()
+        if(this.contract.wallet.isConnected()) {
+            this.userStatusPromise = this.contract.status()
+        }
         this.contractParams = undefined
         this.userStatus = undefined
     }
@@ -125,7 +127,9 @@ export class NFTContractData {
         
         this.contract = new NFTContract(contractId, nftBaseUrl!)
         this.contract.wallet = wallet
-        this.tokensForOwnerPromise = this.contract.nft_tokens_for_owner(wallet.getAccountId())
+        if(this.wallet.isConnected()) {
+            this.tokensForOwnerPromise = this.contract.nft_tokens_for_owner(wallet.getAccountId())
+        }
         // this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
         
     }
