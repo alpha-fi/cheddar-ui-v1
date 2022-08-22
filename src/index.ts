@@ -106,6 +106,7 @@ qs('#my-account').onclick =
     }
   }
 
+
 let moreGamesButton = qs(".games-dropdown") as HTMLElement
 moreGamesButton.addEventListener("click", gamesDropdownHandler())
 
@@ -1398,7 +1399,7 @@ function hideAllDynamicElements(newPool: HTMLElement) {
   })
 }
 
-function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
+async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   let infoIcon = newPool.querySelector(".new-pool-header .information-icon-container")! as HTMLElement;
   let poolStats = newPool.querySelector("#token-pool-stats")! as HTMLElement;
   
@@ -1407,12 +1408,18 @@ function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
   const isUserFarming = newPool.classList.contains("your-farms")
-  if(isUserFarming && !(poolParams instanceof PoolParamsNFT)) { // Displays staking/unstaking when hovering on the pool
+  const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
+  // Displays staking/unstaking when hovering on the pool
+  if(isUserFarming && !(poolParams instanceof PoolParamsNFT) || doesNeedStorageDeposit && !(poolParams instanceof PoolParamsNFT)) {
     let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
     vanishingIndicator?.classList.remove("transparent")
     vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
     newPool.addEventListener("mouseover", paintOrUnPaintElement("visual-tool-expanding-indication-hidden", vanishingIndicator));
-    newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",vanishingIndicator));
+    newPool.addEventListener("mouseout", paintOrUnPaintElement("visual-tool-expanding-indication-hidden",vanishingIndicator));    
+
+    let expandButtonStakingUnstaking = newPool.querySelector(".expand-button") as HTMLElement
+    newPool.addEventListener("mouseover", makeBlinkElement(expandButtonStakingUnstaking));
+    newPool.addEventListener("mouseout", makeBlinkElement(expandButtonStakingUnstaking));
   }
 }
 
@@ -2210,6 +2217,13 @@ function paintOrUnPaintElement(previousColoringClass: string, elementToPaint: HT
     event.preventDefault()
     elementToPaint.classList.toggle("transparent")
     elementToPaint.classList.toggle(previousColoringClass)
+  }
+}
+
+function makeBlinkElement(elementToMakeBlink: HTMLElement){
+  return function (event: Event){
+    event.preventDefault()
+    elementToMakeBlink.classList.toggle("blink")
   }
 }
 

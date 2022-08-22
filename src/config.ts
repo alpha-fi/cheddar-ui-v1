@@ -16,7 +16,7 @@ const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
-export const ENV = MAINNET_NETWORKID
+export const ENV = TESTNET_NETWORKID
 
 export type FarmData = {
   index?: number;
