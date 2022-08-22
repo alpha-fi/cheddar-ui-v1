@@ -1180,6 +1180,9 @@ section#my-account, section#faq {
 }
 
 #circulatingSupply {
+  position: relative;
+  z-index: 4;
+
   display    : flex;
   flex-flow  : row;
   align-items: center;
@@ -1283,6 +1286,12 @@ section#my-account, section#faq {
   overflow: hidden;
   height: max-content;
   width: max-content;
+  transition: all 0.3s step-end;
+}
+
+.games-dropdown-items.down {
+  z-index: 5;
+  transition: all 0.3s step-start;
 }
 
 .games-dropdown-hidden-position {

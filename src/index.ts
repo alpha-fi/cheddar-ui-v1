@@ -2,6 +2,7 @@ import { baseDecode } from 'borsh';
 import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount } from 'near-api-js'
 import { Action, createTransaction, functionCall } from 'near-api-js/lib/transaction';
 import { PublicKey } from 'near-api-js/lib/utils'
+import party from "party-js"; 
 
 import { ENV, CHEDDAR_CONTRACT_NAME, TESTNET_CHEDDAR_CONTRACT_NAME, getConfig } from './config'
 
@@ -36,6 +37,9 @@ import { TokenContractData } from './entities/PoolEntities';
 import { PoolParamsNFT } from './entities/poolParamsNFT';
 import { NFTContractData, StakingContractDataNFT } from './entities/PoolEntitiesNFT';
 import { NFTStakingContractParams } from './contracts/nft-structures';
+import {Color, Vector} from '../node_modules/party-js/lib/components';
+import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
+import * as variation from '../node_modules/party-js/lib/systems/variation';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -115,6 +119,9 @@ noLivePoolsMsg.addEventListener("click", gamesDropdownHandler())
 
 function gamesDropdownHandler() {
   return function(){
+    let gamesDropdownContainer = qs(".games-dropdown-items") as HTMLElement
+    gamesDropdownContainer.classList.toggle("down")
+
     let gamesLinksContainer = qs(".games-links-container") as HTMLElement
   
     gamesLinksContainer.classList.toggle("games-dropdown-hidden-position")
@@ -1102,6 +1109,7 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
   }
   newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
+
   for (let i=0; i < tokenSymbols.length; i++){ // Autofill inputs with correct rates
     newPool.querySelector(`.main-stake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-stake`, i))
     newPool.querySelector(`.main-unstake .${tokenSymbols[i]}-input input`)!.addEventListener("input", autoFillStakeAmount(poolParams, newPool, `.main-unstake`, i))
@@ -1406,6 +1414,18 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   infoIcon.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
+
+  let harvestButton = newPool.querySelector("#harvest-button") as HTMLButtonElement
+
+  //You can check how to configure it in https://party.js.org/
+  let confettiConfiguration = {
+    count: party.variation.range(25,30),
+    spread: party.variation.range(20,25)
+  }
+
+  harvestButton.addEventListener("click", function () {
+    party.confetti(harvestButton, confettiConfiguration);
+  });
 
   const isUserFarming = newPool.classList.contains("your-farms")
   const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
