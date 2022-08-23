@@ -239,7 +239,8 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, pool
     }
     await callMulipleTransactions(TXs, poolParams.stakingContractData.contract)
     
-    
+    sessionStorage.setItem("justActivated", "y")
+
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
   }
@@ -681,17 +682,26 @@ async function signedInFlow(wallet: WalletInterface) {
 function setDefaultFilter (){
   let allYourFarmsPools = qsa(".your-farms")
   let allLivePools = qsa(".active-pool")
+
+  let didJustActivate = sessionStorage.getItem("justActivated") as String
   const event= new Event ("click")
-  //If you don´t have farms show live pools as default
-  if (allYourFarmsPools.length > 0){    /*console.log("Your farms")*/
+
+  //If you don´t have farms show live pools as default. If you just activate a pool show live pools as default.
+  if(didJustActivate == "y"){
+    qs("#live-filter")!.dispatchEvent(event)
+
+  } else if (allYourFarmsPools.length > 0){    /*console.log("Your farms")*/
     qs("#your-farms-filter").dispatchEvent(event)
+
   } else if (allLivePools.length > 0){
     // console.log("Live")
     qs("#live-filter")!.dispatchEvent(event)
+
   } else {
     // console.log("Ended")
     qs("#ended-filter")!.dispatchEvent(event)
   }
+  sessionStorage.removeItem("justActivated")
 }
 
 // Initialize contract & set global variables
@@ -1428,10 +1438,9 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
     party.confetti(harvestButton, confettiConfiguration);
   });
 
-  const isUserFarming = newPool.classList.contains("your-farms")
   const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
   // Displays staking/unstaking when hovering on the pool
-  console.log("Condition:", poolParams.stakingContractData.contract.contractId, !(poolParams instanceof PoolParamsNFT), isUserFarming, doesNeedStorageDeposit)
+  
   if(!(poolParams instanceof PoolParamsNFT) && !doesNeedStorageDeposit) {
     let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
     vanishingIndicator?.classList.remove("transparent")
@@ -2052,10 +2061,9 @@ window.onload = async function () {
       qsInnerText("#nft-pools-section .cheddar-balance-container .cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 
       let circulatingSupply = await cheddarContract.ft_total_supply()
-      let allSuplyTextContainersToFill = document.querySelectorAll("#circulatingSupply span") as NodeListOf<HTMLElement>
-      allSuplyTextContainersToFill.forEach(textContainer => {
-        textContainer.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
-      });
+      let allSuplyTextContainersToFill = document.querySelector(".circulatingSupply.supply") as HTMLElement
+      
+      allSuplyTextContainersToFill.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
