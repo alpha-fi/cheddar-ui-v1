@@ -40,6 +40,7 @@ import { NFTStakingContractParams } from './contracts/nft-structures';
 import {Color, Vector} from '../node_modules/party-js/lib/components';
 import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
 import * as variation from '../node_modules/party-js/lib/systems/variation';
+import { StakingPoolNFT } from './contracts/nft-staking';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -244,11 +245,11 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, pool
   }
 }
 
-async function needsStorageDeposit(contract: NEP141Trait|StakingPoolP1|StakingPoolP3): Promise<boolean> {
+async function needsStorageDeposit(contract: NEP141Trait|StakingPoolP1|StakingPoolP3|StakingPoolNFT): Promise<boolean> {
   const contractStorageBalanceData = await contract.storageBalance()
   if(contractStorageBalanceData == null) return true
   const contractStorageBalanceBN = new BN(contractStorageBalanceData.total)
-  return contractStorageBalanceBN.gten(0)
+  return !contractStorageBalanceBN.gten(0)
 }
 
 async function getUnclaimedRewardsInUSDSingle(poolParams: PoolParams): Promise<number> {
@@ -1430,7 +1431,8 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   const isUserFarming = newPool.classList.contains("your-farms")
   const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
   // Displays staking/unstaking when hovering on the pool
-  if(isUserFarming && !(poolParams instanceof PoolParamsNFT) || doesNeedStorageDeposit && !(poolParams instanceof PoolParamsNFT)) {
+  console.log("Condition:", poolParams.stakingContractData.contract.contractId, !(poolParams instanceof PoolParamsNFT), isUserFarming, doesNeedStorageDeposit)
+  if(!(poolParams instanceof PoolParamsNFT) && !doesNeedStorageDeposit) {
     let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
     vanishingIndicator?.classList.remove("transparent")
     vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
@@ -2012,9 +2014,9 @@ window.onload = async function () {
 
 
     
-    countDownIntervalId = window.setInterval(function(){
-      setCountdown()
-    }, 1000);
+    // countDownIntervalId = window.setInterval(function(){
+    //   setCountdown()
+    // }, 1000);
     
 
 

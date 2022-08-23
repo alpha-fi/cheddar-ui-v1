@@ -1980,7 +1980,7 @@ button.activate {
   }
 }
 .blink {
-  animation: blink 1.5s linear 0s infinite;
+  animation: blink 1.2s linear 0s infinite;
 }
 
 #expanding-indicators {
