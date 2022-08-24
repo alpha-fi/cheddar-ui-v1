@@ -238,8 +238,6 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, pool
       })
     }
     await callMulipleTransactions(TXs, poolParams.stakingContractData.contract)
-    
-    sessionStorage.setItem("justActivated", "y")
 
     pool.querySelector("#deposit")!.classList.remove("hidden")
     pool.querySelector("#activated")!.classList.add("hidden")
@@ -679,15 +677,14 @@ async function signedInFlow(wallet: WalletInterface) {
   }
 }
 
-function setDefaultFilter (){
+function setDefaultFilter (didJustActivate: boolean = false){
   let allYourFarmsPools = qsa(".your-farms")
   let allLivePools = qsa(".active-pool")
 
-  let didJustActivate = sessionStorage.getItem("justActivated") as String
   const event= new Event ("click")
 
   //If you don´t have farms show live pools as default. If you just activate a pool show live pools as default.
-  if(didJustActivate == "y"){
+  if(didJustActivate){
     qs("#live-filter")!.dispatchEvent(event)
 
   } else if (allYourFarmsPools.length > 0){    /*console.log("Your farms")*/
@@ -701,7 +698,6 @@ function setDefaultFilter (){
     // console.log("Ended")
     qs("#ended-filter")!.dispatchEvent(event)
   }
-  sessionStorage.removeItem("justActivated")
 }
 
 // Initialize contract & set global variables
@@ -2038,7 +2034,7 @@ window.onload = async function () {
 
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
-
+    let didJustActivate = false
     
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
@@ -2111,6 +2107,7 @@ window.onload = async function () {
         // @ts-ignore
         // await nftStakeResult(args)
       } else if(method == "storage_deposit"){
+        didJustActivate = true
         showSuccess("Successfully activated", "Activate")
       } else if(method == "withdraw_crop") {
         showSuccess("Tokens harvested successfully")
@@ -2126,7 +2123,7 @@ window.onload = async function () {
     }
     const poolList = await getPoolList(wallet)
     await addPoolList(poolList)
-    setDefaultFilter()
+    setDefaultFilter(didJustActivate)
   }
   catch (ex) {
     showErr(ex as Error)
