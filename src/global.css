@@ -230,7 +230,7 @@ nav {
 }
 
 .burguer-content {
-  margin-top: 4px;
+  margin-top     : 12px;
   flex           : 1 1 30%;
   display        : flex;
   flex-flow      : row wrap;
