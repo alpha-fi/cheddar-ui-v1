@@ -40,8 +40,18 @@ function mouseDirection(e: MouseEvent) {
     mouseX = e.pageX;
     mouseY = e.pageY;
 
-    relMouseX = (mouseX - $canvas?.offsetLeft!);
-    relMouseY = (mouseY - $canvas?.offsetTop!);
+    //El problema creo que está acá
+    // relMouseX = (mouseX - $canvas!.offset().left);
+	// relMouseY = (mouseY - $canvas!.offset().top);
+
+    //Solución?
+    var button: HTMLElement = qs(".btn-liquid");
+    var rect = button.getBoundingClientRect();
+
+    relMouseY = rect.top + window.scrollY, 
+    relMouseX = rect.left + window.scrollX,
+    // relMouseX = (mouseX - $canvas?.offsetLeft!);
+    // relMouseY = (mouseY - $canvas?.offsetTop!);
 }
 
 document.addEventListener('mousemove', mouseDirection);
@@ -107,97 +117,97 @@ export function initButton() {
     pointsB.push(new Point(x, y, 2));
 }
 
-// class Point {
+class Point {
 
-//     x: number
-//     ix: number
-//     y: number
-//     iy: number
-//     vx: number
-//     vy: number
-//     cx1: number
-//     cy1: number
-//     cx2: number
-//     cy2: number
-//     level: number
+    x: number
+    ix: number
+    y: number
+    iy: number
+    vx: number
+    vy: number
+    cx1: number
+    cy1: number
+    cx2: number
+    cy2: number
+    level: number
 
-//     constructor(x: number, y: number, level: number) {
-//         this.x = this.ix = 50+x;
-//         this.y = this.iy = 50+y;
-//         this.vx = 0;
-//         this.vy = 0;
-//         this.cx1 = 0;
-//         this.cy1 = 0;
-//         this.cx2 = 0;
-//         this.cy2 = 0;
-//         this.level = level;
-//     }
-
-//     move() {
-//         this.vx += (this.ix - this.x) / (viscosity*this.level);
-//         this.vy += (this.iy - this.y) / (viscosity*this.level);
-
-//         var dx = this.ix - relMouseX,
-//             dy = this.iy - relMouseY;
-//         var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/mouseDist);
-
-//         // Move x
-//         if ((mouseDirectionX > 0 && relMouseX > this.x) || (mouseDirectionX < 0 && relMouseX < this.x)) {
-//             if (relDist > 0 && relDist < 1) {
-//                 this.vx = (mouseSpeedX / 4) * relDist;
-//             }
-//         }
-//         this.vx *= (1 - damping);
-//         this.x += this.vx;
-
-//         // Move y
-//         if ((mouseDirectionY > 0 && relMouseY > this.y) || (mouseDirectionY < 0 && relMouseY < this.y)) {
-//             if (relDist > 0 && relDist < 1) {
-//                 this.vy = (mouseSpeedY / 4) * relDist;
-//             }
-//         }
-//         this.vy *= (1 - damping);
-//         this.y += this.vy;
-//     }
-// }
-function Point(x: number, y: number, level: number) {
-    this.x = this.ix = 50+x;
-    this.y = this.iy = 50+y;
-    this.vx = 0;
-    this.vy = 0;
-    this.cx1 = 0;
-    this.cy1 = 0;
-    this.cx2 = 0;
-    this.cy2 = 0;
-    this.level = level;
-  }
-
-Point.prototype.move = function() {
-    this.vx += (this.ix - this.x) / (viscosity*this.level);
-    this.vy += (this.iy - this.y) / (viscosity*this.level);
-
-    var dx = this.ix - relMouseX,
-        dy = this.iy - relMouseY;
-    var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/mouseDist);
-
-    // Move x
-    if ((mouseDirectionX > 0 && relMouseX > this.x) || (mouseDirectionX < 0 && relMouseX < this.x)) {
-        if (relDist > 0 && relDist < 1) {
-            this.vx = (mouseSpeedX / 4) * relDist;
-        }
+    constructor(x: number, y: number, level: number) {
+        this.x = this.ix = 50+x;
+        this.y = this.iy = 50+y;
+        this.vx = 0;
+        this.vy = 0;
+        this.cx1 = 0;
+        this.cy1 = 0;
+        this.cx2 = 0;
+        this.cy2 = 0;
+        this.level = level;
     }
-    this.vx *= (1 - damping);
-    this.x += this.vx;
 
-    // Move y
-    if ((mouseDirectionY > 0 && relMouseY > this.y) || (mouseDirectionY < 0 && relMouseY < this.y)) {
-        if (relDist > 0 && relDist < 1) {
-            this.vy = (mouseSpeedY / 4) * relDist;
+    move() {
+        this.vx += (this.ix - this.x) / (viscosity*this.level);
+        this.vy += (this.iy - this.y) / (viscosity*this.level);
+
+        var dx = this.ix - relMouseX,
+            dy = this.iy - relMouseY;
+        var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/mouseDist);
+
+        // Move x
+        if ((mouseDirectionX > 0 && relMouseX > this.x) || (mouseDirectionX < 0 && relMouseX < this.x)) {
+            if (relDist > 0 && relDist < 1) {
+                this.vx = (mouseSpeedX / 4) * relDist;
+            }
         }
+        this.vx *= (1 - damping);
+        this.x += this.vx;
+
+        // Move y
+        if ((mouseDirectionY > 0 && relMouseY > this.y) || (mouseDirectionY < 0 && relMouseY < this.y)) {
+            if (relDist > 0 && relDist < 1) {
+                this.vy = (mouseSpeedY / 4) * relDist;
+            }
+        }
+        this.vy *= (1 - damping);
+        this.y += this.vy;
     }
-    this.vy *= (1 - damping);
-    this.y += this.vy;
-};
+}
+// function Point(x: number, y: number, level: number) {
+//     this.x = this.ix = 50+x;
+//     this.y = this.iy = 50+y;
+//     this.vx = 0;
+//     this.vy = 0;
+//     this.cx1 = 0;
+//     this.cy1 = 0;
+//     this.cx2 = 0;
+//     this.cy2 = 0;
+//     this.level = level;
+//   }
+
+// Point.prototype.move = function() {
+//     this.vx += (this.ix - this.x) / (viscosity*this.level);
+//     this.vy += (this.iy - this.y) / (viscosity*this.level);
+
+//     var dx = this.ix - relMouseX,
+//         dy = this.iy - relMouseY;
+//     var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/mouseDist);
+
+//     // Move x
+//     if ((mouseDirectionX > 0 && relMouseX > this.x) || (mouseDirectionX < 0 && relMouseX < this.x)) {
+//         if (relDist > 0 && relDist < 1) {
+//             this.vx = (mouseSpeedX / 4) * relDist;
+//         }
+//     }
+//     this.vx *= (1 - damping);
+//     this.x += this.vx;
+
+//     // Move y
+//     if ((mouseDirectionY > 0 && relMouseY > this.y) || (mouseDirectionY < 0 && relMouseY < this.y)) {
+//         if (relDist > 0 && relDist < 1) {
+//             this.vy = (mouseSpeedY / 4) * relDist;
+//         }
+//     }
+//     this.vy *= (1 - damping);
+//     this.y += this.vy;
+// };
 
 /**
 	 * Render canvas
