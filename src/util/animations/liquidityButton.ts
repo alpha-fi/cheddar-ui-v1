@@ -3,51 +3,59 @@ import {qs} from '../document';
 
 window.addEventListener("load", function() {
 	// Vars
-	var pointsA = [],
-		pointsB = [],
-		$canvas = null,
-		canvas = null,
-		context = null,
-		vars = null,
-		points = 8,
-		viscosity = 20,
-		mouseDist = 70,
-		damping = 0.05,
-		showIndicators = false;
-		mouseX = 0,
-		mouseY = 0,
-		relMouseX = 0,
-		relMouseY = 0,
-		mouseLastX = 0,
-		mouseLastY = 0,
-		mouseDirectionX = 0,
-		mouseDirectionY = 0,
-		mouseSpeedX = 0,
-		mouseSpeedY = 0;
+	let variables = {
+		pointsA: [],
+		pointsB: [],
+		$canvas: null,
+		canvas: null,
+		context: null,
+		vars: null,
+		points: 8,
+		viscosity: 20,
+		mouseDist: 70,
+		damping: 0.05,
+		showIndicators: false,
+		mouseX: 0,
+		mouseY: 0,
+		relMouseX: 0,
+		relMouseY: 0,
+		mouseLastX: 0,
+		mouseLastY: 0,
+		mouseDirectionX: 0,
+		mouseDirectionY: 0,
+		mouseSpeedX: 0,
+		mouseSpeedY: 0
+	}
 
 	/**
 	 * Get mouse direction
 	 */
-	function mouseDirection(e: Event) {
-		if (mouseX < e.pageX)
-			mouseDirectionX = 1;
-		else if (mouseX > e.pageX)
-			mouseDirectionX = -1;
-		else
-			mouseDirectionX = 0;
+	function mouseDirection(e: MouseEvent) {
+		if (variables.mouseX < e.pageX) {
+			variables.mouseDirectionX = 1;
+		}
+		else if (variables.mouseX > e.pageX) {
+			variables.mouseDirectionX = -1;
+		}
+		else {
+			variables.mouseDirectionX = 0;
+		}
 
-		if (mouseY < e.pageY)
-			mouseDirectionY = 1;
-		else if (mouseY > e.pageY)
-			mouseDirectionY = -1;
-		else
-			mouseDirectionY = 0;
+		if (variables.mouseY < e.pageY) {
+			variables.mouseDirectionY = 1;
+		}
+		else if (variables.mouseY > e.pageY) {
+			variables.mouseDirectionY = -1;
+		}
+		else {
+			variables.mouseDirectionY = 0;
+		}
 
-		mouseX = e.pageX;
-		mouseY = e.pageY;
+		variables.mouseX = e.pageX;
+		variables.mouseY = e.pageY;
 
-		relMouseX = (mouseX - $canvas.offset().left);
-		relMouseY = (mouseY - $canvas.offset().top);
+		variables.relMouseX = (variables.mouseX - variables.$canvas.offset().left);
+		variables.relMouseY = (variables.mouseY - variables.$canvas.offset().top);
 	}
 	document.addEventListener('mousemove', mouseDirection);
 
@@ -55,11 +63,11 @@ window.addEventListener("load", function() {
 	 * Get mouse speed
 	 */
 	function mouseSpeed() {
-		mouseSpeedX = mouseX - mouseLastX;
-		mouseSpeedY = mouseY - mouseLastY;
+		variables.mouseSpeedX = variables.mouseX - variables.mouseLastX;
+		variables.mouseSpeedY = variables.mouseY - variables.mouseLastY;
 
-		mouseLastX = mouseX;
-		mouseLastY = mouseY;
+		variables.mouseLastX = variables.mouseX;
+		variables.mouseLastY = variables.mouseY;
 
 		setTimeout(mouseSpeed, 50);
 	}
@@ -68,32 +76,36 @@ window.addEventListener("load", function() {
 	/**
 	 * Init button
 	 */
-	function initButton() {
+
+	//DUDA porqué no me deja exportar esta función?
+	function initButton(buttonSelector: string) {
 		// Get button
-		var button = qs('.btn-liquid');
-		var buttonWidth = button.width();
-		var buttonHeight = button.height();
+		var button = qs(buttonSelector);
+		var buttonWidth = button.getBoundingClientRect().width;
+		var buttonHeight = button.getBoundingClientRect().height;
 
 		// Create canvas
-		$canvas = $('<canvas></canvas>');
+		//DUDA cómo traduzco esto a vainilla?
+		variables.$canvas = $('<canvas></canvas>');
 		button.append($canvas);
 
-		canvas = $canvas.get(0);
-		canvas.width = buttonWidth+100;
-		canvas.height = buttonHeight+100;
-		context = canvas.getContext('2d');
+		variables.canvas = $canvas.get(0);
+		//Fin DUDA
+		variables.canvas.width = buttonWidth+100;
+		variables.canvas.height = buttonHeight+100;
+		variables.context = variables.canvas.getContext('2d');
 
 		// Add points
 
 		var x = buttonHeight/2;
-		for(var j = 1; j < points; j++) {
-			addPoints((x+((buttonWidth-buttonHeight)/points)*j), 0);
+		for(var j = 1; j < variables.points; j++) {
+			addPoints((x+((buttonWidth-buttonHeight)/variables.points)*j), 0);
 		}
 		addPoints(buttonWidth-buttonHeight/5, 0);
 		addPoints(buttonWidth+buttonHeight/10, buttonHeight/2);
 		addPoints(buttonWidth-buttonHeight/5, buttonHeight);
-		for(var j = points-1; j > 0; j--) {
-			addPoints((x+((buttonWidth-buttonHeight)/points)*j), buttonHeight);
+		for(var j = variables.points-1; j > 0; j--) {
+			addPoints((x+((buttonWidth-buttonHeight)/variables.points)*j), buttonHeight);
 		}
 		addPoints(buttonHeight/5, buttonHeight);
 
@@ -113,8 +125,8 @@ window.addEventListener("load", function() {
 	 * Add points
 	 */
 	function addPoints(x, y) {
-		pointsA.push(new Point(x, y, 1));
-		pointsB.push(new Point(x, y, 2));
+		variables.pointsA.push(new Point(x, y, 1));
+		variables.pointsB.push(new Point(x, y, 2));
 	}
 
 	/**
@@ -133,29 +145,29 @@ window.addEventListener("load", function() {
 	}
 
 	Point.prototype.move = function() {
-		this.vx += (this.ix - this.x) / (viscosity*this.level);
-		this.vy += (this.iy - this.y) / (viscosity*this.level);
+		this.vx += (this.ix - this.x) / (variables.viscosity*this.level);
+		this.vy += (this.iy - this.y) / (variables.viscosity*this.level);
 
-		var dx = this.ix - relMouseX,
-			dy = this.iy - relMouseY;
-		var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/mouseDist);
+		var dx = this.ix - variables.relMouseX,
+			dy = this.iy - variables.relMouseY;
+		var relDist = (1-Math.sqrt((dx * dx) + (dy * dy))/variables.mouseDist);
 
 		// Move x
-		if ((mouseDirectionX > 0 && relMouseX > this.x) || (mouseDirectionX < 0 && relMouseX < this.x)) {
+		if ((variables.mouseDirectionX > 0 && variables.relMouseX > this.x) || (variables.mouseDirectionX < 0 && variables.relMouseX < this.x)) {
 			if (relDist > 0 && relDist < 1) {
-				this.vx = (mouseSpeedX / 4) * relDist;
+				this.vx = (variables.mouseSpeedX / 4) * relDist;
 			}
 		}
-		this.vx *= (1 - damping);
+		this.vx *= (1 - variables.damping);
 		this.x += this.vx;
 
 		// Move y
-		if ((mouseDirectionY > 0 && relMouseY > this.y) || (mouseDirectionY < 0 && relMouseY < this.y)) {
+		if ((variables.mouseDirectionY > 0 && variables.relMouseY > this.y) || (variables.mouseDirectionY < 0 && variables.relMouseY < this.y)) {
 			if (relDist > 0 && relDist < 1) {
-				this.vy = (mouseSpeedY / 4) * relDist;
+				this.vy = (variables.mouseSpeedY / 4) * relDist;
 			}
 		}
-		this.vy *= (1 - damping);
+		this.vy *= (1 - variables.damping);
 		this.y += this.vy;
 	};
 
@@ -165,44 +177,49 @@ window.addEventListener("load", function() {
 	 */
 	function renderCanvas() {
 		// rAF
+		//DUDA de dónde sale este rafID?
 		rafID = requestAnimationFrame(renderCanvas);
 
 		// Clear scene
-		context.clearRect(0, 0, $canvas.width(), $canvas.height());
+		variables.context.clearRect(0, 0, variables.$canvas.getBoundingClientRect().width, variables.$canvas.getBoundingClientRect().height);
 		context.fillStyle = '#fff';
-		context.fillRect(0, 0, $canvas.width(), $canvas.height());
+		context.fillRect(0, 0, variables.$canvas.getBoundingClientRect().width, variables.$canvas.getBoundingClientRect().height);
 
 		// Move points
-		for (var i = 0; i <= pointsA.length - 1; i++) {
-			pointsA[i].move();
-			pointsB[i].move();
+
+		//DUDA esta función move de dónde está saliendo exactamente?
+		for (var i = 0; i <= variables.pointsA.length - 1; i++) {
+			variables.pointsA[i].move();
+			variables.pointsB[i].move();
 		}
 
 		// Create dynamic gradient
-		var gradientX = Math.min(Math.max(mouseX - $canvas.offset().left, 0), $canvas.width());
-		var gradientY = Math.min(Math.max(mouseY - $canvas.offset().top, 0), $canvas.height());
-		var distance = Math.sqrt(Math.pow(gradientX - $canvas.width()/2, 2) + Math.pow(gradientY - $canvas.height()/2, 2)) / Math.sqrt(Math.pow($canvas.width()/2, 2) + Math.pow($canvas.height()/2, 2));
+		//DUDA de dónde sale la función .offset
+		var gradientX = Math.min(Math.max(variables.mouseX - variables.$canvas.offset().left, 0), variables.$canvas.getBoundingClientRect().width);
+		var gradientY = Math.min(Math.max(variables.mouseY - variables.$canvas.offset().top, 0), variables.$canvas.getBoundingClientRect().height);
+		var distance = Math.sqrt(Math.pow(gradientX - variables.$canvas.getBoundingClientRect().width/2, 2) + Math.pow(gradientY - variables.$canvas.getBoundingClientRect().height/2, 2)) / Math.sqrt(Math.pow(variables.$canvas.getBoundingClientRect().width/2, 2) + Math.pow(variables.$canvas.getBoundingClientRect().height/2, 2));
 
-		var gradient = context.createRadialGradient(gradientX, gradientY, 300+(300*distance), gradientX, gradientY, 0);
+		//DUDA de dónde sale las funciones .createRadialGradient, .addColorStop, .beginPath, moveTo, bezierCurveTo y fill
+		var gradient = variables.context.createRadialGradient(gradientX, gradientY, 300+(300*distance), gradientX, gradientY, 0);
 		gradient.addColorStop(0, '#102ce5');
 		gradient.addColorStop(1, '#E406D6');
 
 		// Draw shapes
-		var groups = [pointsA, pointsB]
+		var groups = [variables.pointsA, variables.pointsB]
 
 		for (var j = 0; j <= 1; j++) {
 			var points = groups[j];
 
 			if (j == 0) {
 				// Background style
-				context.fillStyle = '#1CE2D8';
+				variables.context.fillStyle = '#1CE2D8';
 			} else {
 				// Foreground style
-				context.fillStyle = gradient;
+				variables.context.fillStyle = gradient;
 			}
 
-			context.beginPath();
-			context.moveTo(points[0].x, points[0].y);
+			variables.context.beginPath();
+			variables.context.moveTo(points[0].x, points[0].y);
 
 			for (var i = 0; i < points.length; i++) {
 				var p = points[i];
@@ -237,7 +254,7 @@ window.addEventListener("load", function() {
 						p.cx2 = (p.x+nextP.x)/2;
 						p.cy2 = (p.y+nextP.y)/2;
 
-						context.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
+						variables.context.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
 					// 	continue;
 					// }
 
@@ -247,38 +264,36 @@ nextP = points[0];
 						p.cx1 = (p.x+nextP.x)/2;
 						p.cy1 = (p.y+nextP.y)/2;
 
-						context.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
+						variables.context.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
 				}
 			}
 
 			// context.closePath();
-			context.fill();
+			variables.context.fill();
 		}
 
-		if (showIndicators) {
+		if (variables.showIndicators) {
 			// Draw points
-			context.fillStyle = '#000';
-			context.beginPath();
-			for (var i = 0; i < pointsA.length; i++) {
-				var p = pointsA[i];
+			variables.context.fillStyle = '#000';
+			variables.context.beginPath();
+			for (var i = 0; i < variables.pointsA.length; i++) {
+				var p = variables.pointsA[i];
 
-				context.rect(p.x - 1, p.y - 1, 2, 2);
+				variables.context.rect(p.x - 1, p.y - 1, 2, 2);
 			}
-			context.fill();
+			variables.context.fill();
 
 			// Draw controls
-			context.fillStyle = '#f00';
-			context.beginPath();
-			for (var i = 0; i < pointsA.length; i++) {
-				var p = pointsA[i];
+			variables.context.fillStyle = '#f00';
+			variables.context.beginPath();
+			for (var i = 0; i < variables.pointsA.length; i++) {
+				var p = variables.pointsA[i];
 
-				context.rect(p.cx1 - 1, p.cy1 - 1, 2, 2);
-				context.rect(p.cx2 - 1, p.cy2 - 1, 2, 2);
+				variables.context.rect(p.cx1 - 1, p.cy1 - 1, 2, 2);
+				variables.context.rect(p.cx2 - 1, p.cy2 - 1, 2, 2);
 			}
-			context.fill();
+			variables.context.fill();
 		}
 	}
-
-	// Init
-	initButton();
+	initButton()
 });
