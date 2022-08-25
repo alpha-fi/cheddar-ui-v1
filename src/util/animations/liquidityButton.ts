@@ -40,18 +40,11 @@ function mouseDirection(e: MouseEvent) {
     mouseX = e.pageX;
     mouseY = e.pageY;
 
-    //El problema creo que está acá
-    // relMouseX = (mouseX - $canvas!.offset().left);
-	// relMouseY = (mouseY - $canvas!.offset().top);
-
-    //Solución?
-    var button: HTMLElement = qs(".btn-liquid");
-    var rect = button.getBoundingClientRect();
-
-    relMouseY = rect.top + window.scrollY, 
-    relMouseX = rect.left + window.scrollX,
-    // relMouseX = (mouseX - $canvas?.offsetLeft!);
-    // relMouseY = (mouseY - $canvas?.offsetTop!);
+    //El problema creo que está en que está mal traducido esto.
+    // relMouseX = (mouseX - $canvas.offset().left);
+	// relMouseY = (mouseY - $canvas.offset().top);
+    relMouseX = (mouseX - $canvas?.offsetLeft!);
+    relMouseY = (mouseY - $canvas?.offsetTop!);
 }
 
 document.addEventListener('mousemove', mouseDirection);
