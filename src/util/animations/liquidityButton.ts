@@ -40,11 +40,8 @@ function mouseDirection(e: MouseEvent) {
     mouseX = e.pageX;
     mouseY = e.pageY;
 
-    //El problema creo que está en que está mal traducido esto.
-    // relMouseX = (mouseX - $canvas.offset().left);
-	// relMouseY = (mouseY - $canvas.offset().top);
-    relMouseX = (mouseX - $canvas?.offsetLeft!);
-    relMouseY = (mouseY - $canvas?.offsetTop!);
+    relMouseX = (mouseX - $canvas?.getBoundingClientRect().left!);
+    relMouseY = (mouseY - $canvas?.getBoundingClientRect().top!);
 }
 
 document.addEventListener('mousemove', mouseDirection);
@@ -211,7 +208,7 @@ class Point {
 
     // Clear scene
     context!.clearRect(0, 0, $canvas!.getBoundingClientRect().width, $canvas!.getBoundingClientRect().height);
-    context!.fillStyle = '#fff';
+    context!.fillStyle = 'transparent';
     context!.fillRect(0, 0, $canvas!.getBoundingClientRect().width, $canvas!.getBoundingClientRect().height);
 
     // Move points

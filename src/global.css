@@ -503,13 +503,13 @@ a.selected {
 	z-index: 1;
 }
 
-.user-info {
+/* .user-info {
   background-color: var(--second-yellow);
   color: var(--fg);
-}
+} */
 
 .user-info.selected {
-  background-color: var(--second-yellow-selected);
+  /* background-color: var(--second-yellow-selected); */
   color: var(--fg);
   font-weight: bold;
 }
