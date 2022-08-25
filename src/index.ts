@@ -41,6 +41,7 @@ import {Color, Vector} from '../node_modules/party-js/lib/components';
 import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
 import * as variation from '../node_modules/party-js/lib/systems/variation';
 import { StakingPoolNFT } from './contracts/nft-staking';
+import { initButton } from './util/animations/liquidityButton';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -2018,7 +2019,7 @@ window.onload = async function () {
     headerCheddarValueDisplayerContainer.innerHTML = `$ ${cheddarValue}`
 
 
-    
+    initButton()
     // countDownIntervalId = window.setInterval(function(){
     //   setCountdown()
     // }, 1000);
