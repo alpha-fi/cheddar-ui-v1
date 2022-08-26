@@ -69,8 +69,8 @@ export function initButton() {
     button.append($canvas);
 
     // canvas = $canvas.get(0);
-    $canvas.width = buttonWidth+100;
-    $canvas.height = buttonHeight+100;
+    $canvas.width = buttonWidth+90;
+    $canvas.height = buttonHeight+90;
     context = $canvas.getContext('2d');
 
     // Add points
@@ -229,8 +229,8 @@ class Point {
     var distance = Math.sqrt(Math.pow(gradientX - $canvas!.getBoundingClientRect().width/2, 2) + Math.pow(gradientY - $canvas!.getBoundingClientRect().height/2, 2)) / Math.sqrt(Math.pow($canvas!.getBoundingClientRect().width/2, 2) + Math.pow($canvas!.getBoundingClientRect().height/2, 2));
 
     var gradient = context!.createRadialGradient(gradientX, gradientY, 300+(300*distance), gradientX, gradientY, 0);
-    gradient.addColorStop(0, '#102ce5');
-    gradient.addColorStop(1, '#E406D6');
+    gradient.addColorStop(0, '#F9BA37');
+    gradient.addColorStop(1, '#FFD262');
 
     // Draw shapes
     var groups = [pointsA, pointsB]
@@ -240,7 +240,7 @@ class Point {
 
         if (j == 0) {
             // Background style
-            context!.fillStyle = '#1CE2D8';
+            context!.fillStyle = '#8542EB';
         } else {
             // Foreground style
             context!.fillStyle = gradient;
