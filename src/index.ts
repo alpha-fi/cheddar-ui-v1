@@ -41,7 +41,7 @@ import {Color, Vector} from '../node_modules/party-js/lib/components';
 import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
 import * as variation from '../node_modules/party-js/lib/systems/variation';
 import { StakingPoolNFT } from './contracts/nft-staking';
-import { initButton } from './util/animations/liquidityButton';
+import { initButton, redrawButton } from './util/animations/liquidityButton';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -160,12 +160,7 @@ function sayChoose() {
 qs('#sign-out').onclick =
   async function (event) {
     event.preventDefault();
-    let accountIdCanva = qs("#my-account canvas") as HTMLCanvasElement
-    var context = accountIdCanva.getContext('2d');
-    context!.clearRect(0, 0, accountIdCanva.width, accountIdCanva.height);
-    accountIdCanva.remove();
-
-
+    
     wallet.disconnect();
     wallet = disconnectedWallet;
     
@@ -2047,7 +2042,7 @@ window.onload = async function () {
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
     let didJustActivate = false
-    
+    initButton()
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
@@ -2058,7 +2053,7 @@ window.onload = async function () {
 
       accountName = wallet.getAccountId()
       qsInnerText("#account-id", accountName)      
-      initButton()
+      
       await signedInFlow(wallet)
       const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
       const cheddarContract = new NEP141Trait(cheddarContractName);

@@ -56,13 +56,12 @@ function mouseSpeed() {
     setTimeout(mouseSpeed, 50);
 }
 
-
 export function initButton() {
     // Get button
     mouseSpeed();
     var button: HTMLElement = qs(".btn-liquid");
     //I use this number after getting the button with to make the canva content visually bigger and work properly. In CSS use transform: translateX(-number/2) to center the content
-    var buttonWidth = button.getBoundingClientRect().width + 16;
+    var buttonWidth = button.getBoundingClientRect().width + 22;
     var buttonHeight = button.getBoundingClientRect().height;
 
     // Create canvas
@@ -256,48 +255,20 @@ class Point {
             var val = 30*0.552284749831;
 
             if (nextP != undefined) {
-                // if (nextP.ix > p.ix && nextP.iy < p.iy) {
-                // 	p.cx1 = p.x;
-                // 	p.cy1 = p.y-val;
-                // 	p.cx2 = nextP.x-val;
-                // 	p.cy2 = nextP.y;
-                // } else if (nextP.ix > p.ix && nextP.iy > p.iy) {
-                // 	p.cx1 = p.x+val;
-                // 	p.cy1 = p.y;
-                // 	p.cx2 = nextP.x;
-                // 	p.cy2 = nextP.y-val;
-                // }  else if (nextP.ix < p.ix && nextP.iy > p.iy) {
-                // 	p.cx1 = p.x;
-                // 	p.cy1 = p.y+val;
-                // 	p.cx2 = nextP.x+val;
-                // 	p.cy2 = nextP.y;
-                // } else if (nextP.ix < p.ix && nextP.iy < p.iy) {
-                // 	p.cx1 = p.x-val;
-                // 	p.cy1 = p.y;
-                // 	p.cx2 = nextP.x;
-                // 	p.cy2 = nextP.y+val;
-                // } else {
+                p.cx1 = (p.x+nextP.x)/2;
+                p.cy1 = (p.y+nextP.y)/2;
+                p.cx2 = (p.x+nextP.x)/2;
+                p.cy2 = (p.y+nextP.y)/2;
 
-                    p.cx1 = (p.x+nextP.x)/2;
-                    p.cy1 = (p.y+nextP.y)/2;
-                    p.cx2 = (p.x+nextP.x)/2;
-                    p.cy2 = (p.y+nextP.y)/2;
-
-                    context!.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
-                // 	continue;
-                // }
-
-                // context!.bezierCurveTo(p.cx1, p.cy1, p.cx2, p.cy2, nextP.x, nextP.y);
+                context!.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
             } else {
-nextP = points[0];
-                    p.cx1 = (p.x+nextP.x)/2;
-                    p.cy1 = (p.y+nextP.y)/2;
+                nextP = points[0];
+                p.cx1 = (p.x+nextP.x)/2;
+                p.cy1 = (p.y+nextP.y)/2;
 
-                    context!.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
+                context!.bezierCurveTo(p.x, p.y, p.cx1, p.cy1, p.cx1, p.cy1);
             }
         }
-
-        // context!.closePath();
         context!.fill();
     }
 
