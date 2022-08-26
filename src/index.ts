@@ -159,9 +159,17 @@ function sayChoose() {
 //button sign-out
 qs('#sign-out').onclick =
   async function (event) {
-    event.preventDefault()
+    event.preventDefault();
+    let accountIdCanva = qs("#my-account canvas") as HTMLCanvasElement
+    var context = accountIdCanva.getContext('2d');
+    context!.clearRect(0, 0, accountIdCanva.width, accountIdCanva.height);
+    accountIdCanva.remove();
+
+
     wallet.disconnect();
     wallet = disconnectedWallet;
+    
+    console.log("Esperando a Dani 1")
 
     signedOutFlow();
   }
@@ -651,7 +659,8 @@ function takeUserAmountFromHome(): string {
 }
 
 // Display the signed-out-flow container
-async function signedOutFlow() {
+async function signedOutFlow() {  
+  console.log("Esperando a Dani anteultimo")
   signedInFlow(disconnectedWallet)
   // showSection("#home")
   // await refreshAccountInfo();
@@ -672,6 +681,8 @@ async function signedInFlow(wallet: WalletInterface) {
 
   } else {
     qs(".not-connected-msg").classList.remove("hidden")
+    console.log("Esperando a Dani final")
+    // initButton()
     // If user is disconnected it, account Id is the default disconnected message
     qs(".user-info #account-id").innerText = wallet.getAccountId()
 
@@ -2120,7 +2131,6 @@ window.onload = async function () {
       
     }
     else {
-      initButton()
       //not signed-in 
       await signedOutFlow() //show home-not-connected -> select wallet page
     }
