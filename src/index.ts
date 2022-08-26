@@ -1452,7 +1452,12 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
     party.confetti(harvestButton, confettiConfiguration);
   });
 
-  const doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
+  let doesNeedStorageDeposit : boolean
+  if(poolParams instanceof PoolParams) {
+    doesNeedStorageDeposit = false
+  } else {
+    doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
+  }
   // Displays staking/unstaking when hovering on the pool
   
   if(!(poolParams instanceof PoolParamsNFT) && !doesNeedStorageDeposit) {
