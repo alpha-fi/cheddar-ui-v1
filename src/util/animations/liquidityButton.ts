@@ -61,7 +61,8 @@ export function initButton() {
     // Get button
     mouseSpeed();
     var button: HTMLElement = qs(".btn-liquid");
-    var buttonWidth = button.getBoundingClientRect().width
+    //I use this number after getting the button with to make the canva content visually bigger and work properly. In CSS use transform: translateX(-number/2) to center the content
+    var buttonWidth = button.getBoundingClientRect().width + 16;
     var buttonHeight = button.getBoundingClientRect().height;
 
     // Create canvas
@@ -69,8 +70,8 @@ export function initButton() {
     button.append($canvas);
 
     // canvas = $canvas.get(0);
-    $canvas.width = buttonWidth+90;
-    $canvas.height = buttonHeight+90;
+    $canvas.width = buttonWidth+100;
+    $canvas.height = buttonHeight+100;
     context = $canvas.getContext('2d');
 
     // Add points

@@ -2019,7 +2019,7 @@ window.onload = async function () {
     headerCheddarValueDisplayerContainer.innerHTML = `$ ${cheddarValue}`
 
 
-    initButton()
+    // initButton()
     // countDownIntervalId = window.setInterval(function(){
     //   setCountdown()
     // }, 1000);
@@ -2046,7 +2046,8 @@ window.onload = async function () {
       // await addPoolList(poolList)
 
       accountName = wallet.getAccountId()
-      qsInnerText("#account-id", accountName)
+      qsInnerText("#account-id", accountName)      
+      initButton()
       await signedInFlow(wallet)
       const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
       const cheddarContract = new NEP141Trait(cheddarContractName);
@@ -2119,6 +2120,7 @@ window.onload = async function () {
       
     }
     else {
+      initButton()
       //not signed-in 
       await signedOutFlow() //show home-not-connected -> select wallet page
     }
@@ -2131,7 +2133,6 @@ window.onload = async function () {
   } finally {
     qs(".loader").style.display = "none"
   }
-
 }
 
 async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id: string}]) {

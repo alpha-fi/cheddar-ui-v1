@@ -474,7 +474,7 @@ a.selected {
 }
 
 .btn-liquid {
-  width: 200px;
+  width: max-content;
   height: 42px;
   color: var(--fg);
   letter-spacing: .05em;
@@ -496,6 +496,7 @@ a.selected {
 }
 
 .btn-liquid canvas {
+  transform: translateX(-8px);
 	position: absolute;
 	top: -50px;
 	right: -50px;
@@ -530,13 +531,12 @@ a.selected {
 }
 
 .user-info span {
+  box-sizing: content-box;
   display     : inline-block;
   font-weight : 600;
   font-size   : 14px;
   line-height : 11px;
   margin-top: 15px;
-  max-width: 195px;
-  overflow: hidden;
 }
 
 .error {
