@@ -474,7 +474,7 @@ a.selected {
 }
 
 .btn-liquid {
-  width: max-content;
+  width: 129px;
   height: 42px;
   color: var(--fg);
   letter-spacing: .05em;
@@ -484,7 +484,8 @@ a.selected {
   font-size: 16px;
   font-family: Titillium Web,sans-serif;
   text-decoration: none;
-  display: inline-block;
+  display: flex;
+  justify-content: center;
   position: relative;
   margin-top: 10px;
 }
@@ -496,7 +497,7 @@ a.selected {
 }
 
 .btn-liquid canvas {
-  transform: translateX(-8px);
+  transform: translateX(-15px);
 	position: absolute;
 	top: -50px;
 	right: -50px;

@@ -670,8 +670,19 @@ async function signedInFlow(wallet: WalletInterface) {
   if(wallet.isConnected()) {
     // const poolList = await getPoolList(wallet);    
     // qs(".user-info #account-id").innerText = poolList[0].wallet.getAccountId()
-    
-    qs(".user-info #account-id").innerText = wallet.getDisplayableAccountId()
+    let walletID = wallet.getDisplayableAccountId();
+    let walletDisplayableID: string
+    if(walletID.length < 15){
+      walletDisplayableID = walletID
+    } else {
+      walletDisplayableID = walletID.slice(0, 12) + "..."
+    }
+
+    let accountIdElement = qs(".user-info #account-id") as HTMLSpanElement
+    accountIdElement.innerText = walletDisplayableID
+
+    accountIdElement.title = walletID
+
     // qs(".not-connected-msg").classList.add("hidden")
 
   } else {
