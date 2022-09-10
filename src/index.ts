@@ -1133,7 +1133,7 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
     const currentStakeTokenMetadata = await contractData.getMetadata()
     tokenSymbols.push(`${currentStakeTokenMetadata.symbolForHtml.toLowerCase()}`)
   }
-  // newPool.querySelector("#confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
+
   newPool.querySelector(".confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
 
@@ -1178,7 +1178,6 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
     const currentStakeTokenMetadata = await contractData.getMetadata()
     tokenSymbols.push(`${currentStakeTokenMetadata.symbolForHtml.toLowerCase()}`)
   }
-  // newPool.querySelector("#confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
   newPool.querySelector(".confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
   // Refresh every 5 seconds if it's live
@@ -1443,7 +1442,7 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
-  let harvestButton = newPool.querySelector("#harvest-button") as HTMLButtonElement
+  let harvestButton = newPool.querySelector(".confetti-button") as HTMLButtonElement
 
   //You can check how to configure it in https://party.js.org/
   let confettiConfiguration = {
@@ -1481,7 +1480,7 @@ async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLEleme
   // Harvest button listener
   const contractData = await poolParams.getStakeTokenContractData()
   const metaData = await contractData.getMetadata()
-  // newPool.querySelector("#confetti-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
+  newPool.querySelector(".confetti-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
   // Token symbols is done this way to emulate multiple case. Single case will be removed shortly
   let tokenSymbols = []
   tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
