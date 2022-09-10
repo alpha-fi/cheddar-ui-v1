@@ -499,8 +499,11 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
 function harvestMultipleOrNFT(poolParams: PoolParamsP3|PoolParamsNFT, newPool: HTMLElement) {
   return async function (event: Event) {
     event?.preventDefault()
-    showWait("Harvesting...")
 
+    let poolID = poolParams.html.id
+    poolParams.confettiButton?.clickButtonWithRedirection(poolID)
+
+    showWait("Harvesting...")
     await poolParams.stakingContractData.contract.withdraw_crop()
 
     showSuccess("Harvested successfully")
@@ -510,6 +513,10 @@ function harvestMultipleOrNFT(poolParams: PoolParamsP3|PoolParamsNFT, newPool: H
 function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
   return async function (event: Event) {
     event?.preventDefault()
+
+    let poolID = poolParams.html.id
+    poolParams.confettiButton?.clickButtonWithRedirection(poolID)
+
     showWait("Harvesting...")
 
     const poolUserStatus: UserStatusP2 = await poolParams.stakingContractData.getUserStatus()
@@ -1680,6 +1687,39 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   qs("#pool_list").append(newPool)
 
   newPool.querySelector(".deposit-fee-value")!.innerHTML = (contractParams.fee_rate) ? contractParams.fee_rate / 100 + "%" : "0%"
+
+  poolParams.confettiButton = new ConfettiButton(newPool)
+  poolParams.confettiButton.render(
+    poolParams.confettiButton.confettiButton,
+    poolParams.confettiButton.canvas,
+    poolParams.confettiButton.confetti,
+    poolParams.confettiButton.sequins
+  )
+
+  let harvestedSuccesfully = sessionStorage.getItem("cheddarFarmHarvestedSuccesfully")
+  
+  if(harvestedSuccesfully != null){
+    let isUserFarming = newPool.classList.contains("your-farms")
+    console.log("isUserFarming", isUserFarming)
+    isUserFarming && showSuccessOnHarvestAnimation(newPool, poolParams)
+  }
+}
+
+function showSuccessOnHarvestAnimation(newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3|PoolParamsNFT) {
+  let poolID = newPool.id
+  let harvestedPoolID = sessionStorage.getItem("cheddarFarmJustHarvested")
+  console.log("poolID", poolID)
+  console.log("harvestedPoolID", harvestedPoolID)
+  
+  if(poolID == harvestedPoolID) {
+    while(document.readyState != "complete"){
+      setTimeout(() => {
+      }, 1000);
+    }
+    poolParams.confettiButton?.successAnimation()
+    sessionStorage.removeItem("cheddarFarmJustHarvested")
+    sessionStorage.removeItem("cheddarFarmHarvestedSuccesfully")    
+  }
 }
 
 function displayInactivePool(newPool: HTMLElement) {
