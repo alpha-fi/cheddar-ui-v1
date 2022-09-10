@@ -42,6 +42,7 @@ import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
 import * as variation from '../node_modules/party-js/lib/systems/variation';
 import { StakingPoolNFT } from './contracts/nft-staking';
 import { initButton, redrawButton } from './util/animations/liquidityButton';
+import { ConfettiButton } from './util/animations/new-confetti-button';
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -1132,7 +1133,8 @@ async function addMultiplePoolListeners(poolParams: PoolParamsP3, newPool: HTMLE
     const currentStakeTokenMetadata = await contractData.getMetadata()
     tokenSymbols.push(`${currentStakeTokenMetadata.symbolForHtml.toLowerCase()}`)
   }
-  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
+
+  newPool.querySelector(".confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
 
   for (let i=0; i < tokenSymbols.length; i++){ // Autofill inputs with correct rates
@@ -1176,7 +1178,7 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
     const currentStakeTokenMetadata = await contractData.getMetadata()
     tokenSymbols.push(`${currentStakeTokenMetadata.symbolForHtml.toLowerCase()}`)
   }
-  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
+  newPool.querySelector(".confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
@@ -1440,7 +1442,7 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
-  let harvestButton = newPool.querySelector("#harvest-button") as HTMLButtonElement
+  let harvestButton = newPool.querySelector(".confetti-button") as HTMLButtonElement
 
   //You can check how to configure it in https://party.js.org/
   let confettiConfiguration = {
@@ -1478,7 +1480,7 @@ async function addSinglePoolListeners(poolParams: PoolParams, newPool: HTMLEleme
   // Harvest button listener
   const contractData = await poolParams.getStakeTokenContractData()
   const metaData = await contractData.getMetadata()
-  newPool.querySelector("#harvest-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
+  newPool.querySelector(".confetti-button")?.addEventListener("click", harvestSingle(poolParams, newPool))
   // Token symbols is done this way to emulate multiple case. Single case will be removed shortly
   let tokenSymbols = []
   tokenSymbols.push(`${metaData.symbol.toLowerCase()}`)
