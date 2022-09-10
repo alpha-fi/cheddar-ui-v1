@@ -2098,7 +2098,16 @@ window.onload = async function () {
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
     let didJustActivate = false
-    initButton()
+    initLiquidButton()
+
+    const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
+    const cheddarContract = new NEP141Trait(cheddarContractName);
+
+    let circulatingSupply = await cheddarContract.ft_total_supply()
+    let allSuplyTextContainersToFill = document.querySelector(".circulatingSupply.supply") as HTMLElement
+
+    allSuplyTextContainersToFill.innerHTML = toStringDec(yton(circulatingSupply)).split('.')[0];
+
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
@@ -2111,8 +2120,6 @@ window.onload = async function () {
       qsInnerText("#account-id", accountName)      
       
       await signedInFlow(wallet)
-      const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
-      const cheddarContract = new NEP141Trait(cheddarContractName);
       cheddarContract.wallet = wallet;
       const cheddarBalance = await cheddarContract.ft_balance_of(accountName)
       const amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
@@ -2120,10 +2127,6 @@ window.onload = async function () {
       qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
       qsInnerText("#nft-pools-section .cheddar-balance-container .cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
 
-      let circulatingSupply = await cheddarContract.ft_total_supply()
-      let allSuplyTextContainersToFill = document.querySelector(".circulatingSupply.supply") as HTMLElement
-      
-      allSuplyTextContainersToFill.innerHTML = "Circulating Supply:&nbsp;" + toStringDec(yton(circulatingSupply)).split('.')[0];
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
@@ -2174,6 +2177,7 @@ window.onload = async function () {
         didJustActivate = true
         showSuccess("Successfully activated", "Activate")
       } else if(method == "withdraw_crop") {
+        window.sessionStorage.setItem("cheddarFarmHarvestedSuccesfully", "yes")
         showSuccess("Tokens harvested successfully")
       } else {
         console.log("Method", method)
