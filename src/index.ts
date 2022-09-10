@@ -695,7 +695,6 @@ async function signedInFlow(wallet: WalletInterface) {
 
   } else {
     qs(".not-connected-msg").classList.remove("hidden")
-    console.log("Esperando a Dani final")
     // initButton()
     // If user is disconnected it, account Id is the default disconnected message
     qs(".user-info #account-id").innerText = wallet.getAccountId()
