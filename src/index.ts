@@ -513,11 +513,11 @@ function harvestMultipleOrNFT(poolParams: PoolParamsP3|PoolParamsNFT, newPool: H
 function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
   return async function (event: Event) {
     event?.preventDefault()
+    
+    showWait("Harvesting...")
 
     let poolID = poolParams.html.id
     poolParams.confettiButton?.clickButtonWithRedirection(poolID)
-
-    showWait("Harvesting...")
 
     const poolUserStatus: UserStatusP2 = await poolParams.stakingContractData.getUserStatus()
     
