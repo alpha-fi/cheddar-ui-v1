@@ -41,7 +41,7 @@ import {Color, Vector} from '../node_modules/party-js/lib/components';
 import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
 import * as variation from '../node_modules/party-js/lib/systems/variation';
 import { StakingPoolNFT } from './contracts/nft-staking';
-import { initButton, redrawButton } from './util/animations/liquidityButton';
+import { initButton as initLiquidButton } from './util/animations/liquidityButton';
 import { ConfettiButton } from './util/animations/new-confetti-button';
 
 //get global config
@@ -512,10 +512,8 @@ function harvestMultipleOrNFT(poolParams: PoolParamsP3|PoolParamsNFT, newPool: H
 
 function harvestSingle(poolParams: PoolParams, newPool: HTMLElement){
   return async function (event: Event) {
-    event?.preventDefault()
-    
+    event?.preventDefault()    
     showWait("Harvesting...")
-
     let poolID = poolParams.html.id
     poolParams.confettiButton?.clickButtonWithRedirection(poolID)
 
