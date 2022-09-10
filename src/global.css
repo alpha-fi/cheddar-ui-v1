@@ -497,7 +497,7 @@ a.selected {
 }
 
 .btn-liquid canvas {
-  transform: translateX(-15px);
+  transform: translate(13px, 23px);
 	position: absolute;
 	top: -50px;
 	right: -50px;
@@ -2451,21 +2451,8 @@ button.activate {
     display: block;
   }
 
-  .line1, .line2, .line3, .burger-button--toggle .line1, .burger-button--toggle .line2, .burger-button--toggle .line3 {
-    transition: all 0.4s ease-in-out;
-  }
-
-  .burger-button--toggle .line1{
-      margin-bottom: 0 !important;
-      transform: rotate(-45deg) translate(-7px, 5.5px);
-  }
-
-  .burger-button--toggle .line2{
-      opacity: 0;
-  }
-
-  .burger-button--toggle .line3{
-      transform: rotate(45deg) translate(-2.6px, -1.5px);
+  .btn-liquid {
+    transform: translateX(29px)
   }
 }
 

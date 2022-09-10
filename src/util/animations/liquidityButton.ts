@@ -69,8 +69,8 @@ export function initButton() {
     button.append($canvas);
 
     // canvas = $canvas.get(0);
-    $canvas.width = buttonWidth+100;
-    $canvas.height = buttonHeight+100;
+    $canvas.width = buttonWidth+30;
+    $canvas.height = buttonHeight+50;
     context = $canvas.getContext('2d');
 
     // Add points
@@ -122,8 +122,8 @@ class Point {
     level: number
 
     constructor(x: number, y: number, level: number) {
-        this.x = this.ix = 50+x;
-        this.y = this.iy = 50+y;
+        this.x = this.ix = 25+x;
+        this.y = this.iy = 25+y;
         this.vx = 0;
         this.vy = 0;
         this.cx1 = 0;
