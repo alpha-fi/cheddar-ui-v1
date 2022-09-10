@@ -12,6 +12,7 @@ import { DetailRow, RewardsTokenData, TokenIconData } from "./genericData";
 import { TokenContractData } from "./PoolEntities";
 import { NFTContractData, StakingContractDataNFT } from "./PoolEntitiesNFT";
 import { HtmlPoolParams } from "./poolParams";
+import {ConfettiButton} from '../util/animations/new-confetti-button';
 
 export class PoolParamsNFT {
     wallet: WalletInterface
@@ -27,6 +28,7 @@ export class PoolParamsNFT {
     farmTokenContractList: TokenContractData[] = [];
 
     nftContractForBoosting: NFTContract
+    confettiButton?: ConfettiButton
 
     constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string, nftBaseUrlForBoosting: string) {
         this.wallet = wallet

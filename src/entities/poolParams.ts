@@ -4,6 +4,7 @@ import { convertToDecimals } from "../util/conversions";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, RewardsTokenData, TokenIconData } from "./genericData";
 import { StakingContractDataP2, TokenContractData } from "./PoolEntities";
+import {ConfettiButton} from '../util/animations/new-confetti-button';
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -79,6 +80,8 @@ export class PoolParams {
     stakeTokenContract: NEP141Trait;
     stakeTokenContractList: TokenContractData[] = [];
     farmTokenContractList: TokenContractData[] = [];
+
+    confettiButton?: ConfettiButton
 
     constructor(wallet: WalletInterface, farmData: FarmData, cheddarContractId: string) {
         this.wallet = wallet

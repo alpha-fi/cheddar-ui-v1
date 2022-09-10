@@ -7,6 +7,7 @@ import { U128String } from "../wallet-api/util";
 import { WalletInterface } from "../wallet-api/wallet-interface";
 import { DetailRow, RewardsTokenData, TokenIconData } from "./genericData";
 import { StakingContractDataP3, TokenContractData } from "./PoolEntities";
+import {ConfettiButton} from '../util/animations/new-confetti-button';
 
 //JSON compatible struct returned from get_contract_state
 export class HtmlPoolParams {
@@ -61,6 +62,7 @@ export class PoolParamsP3 {
     farmTokenContractList: TokenContractData[] = [];
 
     nftContractForBoosting: NFTContract
+    confettiButton?: ConfettiButton
 
     constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string, nftBaseUrl: string) {
         this.wallet = wallet
