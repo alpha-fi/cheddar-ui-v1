@@ -1442,17 +1442,17 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   poolStats.addEventListener("mouseover", showElement(poolStats));
   poolStats.addEventListener("mouseout", hideElement(poolStats));
 
-  let harvestButton = newPool.querySelector(".confetti-button") as HTMLButtonElement
+  // let harvestButton = newPool.querySelector(".confetti-button") as HTMLButtonElement
 
-  //You can check how to configure it in https://party.js.org/
-  let confettiConfiguration = {
-    count: party.variation.range(25,30),
-    spread: party.variation.range(20,25)
-  }
+  // //You can check how to configure it in https://party.js.org/
+  // let confettiConfiguration = {
+  //   count: party.variation.range(25,30),
+  //   spread: party.variation.range(20,25)
+  // }
 
-  harvestButton.addEventListener("click", function () {
-    party.confetti(harvestButton, confettiConfiguration);
-  });
+  // harvestButton.addEventListener("click", function () {
+  //   party.confetti(harvestButton, confettiConfiguration);
+  // });
 
   let doesNeedStorageDeposit : boolean
   if(poolParams instanceof PoolParams) {
