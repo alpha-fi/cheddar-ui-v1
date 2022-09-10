@@ -210,6 +210,28 @@ export function getConfig(env:string):GetConfigResults {
           contractName: 'p3-meta1.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
         },
+        {
+          index: 12,
+          poolType: 'single',
+          poolName: 'cheddar-birthday',
+          contractName: 'p2-birthday1.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
+        {
+          index: 13,
+          poolType: 'multiple',
+          poolName: 'REF+Cheddar',
+          contractName: 'p3-ref.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
+        {
+          index: 14,
+          poolType: 'multiple',
+          poolName: 'MarmaJ+Cheddar',
+          contractName: 'p3-marmaj.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
+        
       ]
     }
   case 'development':

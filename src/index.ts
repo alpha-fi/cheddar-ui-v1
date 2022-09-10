@@ -449,10 +449,10 @@ function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
     
 
     try {
-      let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
-      const contractParams = await poolParams.stakingContractData.getContractParams()
-      const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
-      if (!isDateInRange) throw Error("Pools is Closed.")
+      // let unixTimestamp = new Date().getTime() / 1000; //unix timestamp (seconds)
+      // const contractParams = await poolParams.stakingContractData.getContractParams()
+      // const isDateInRange = contractParams.farming_start < unixTimestamp && unixTimestamp < contractParams.farming_end
+      // if (!isDateInRange) throw Error("Pools is Closed.")
       
       stakeInput.setAttribute("disabled", "disabled")
       let stakeAmount = parseFloat(stakeInput.value)

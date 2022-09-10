@@ -71,7 +71,7 @@ html {
 }
 
 body {
-  overflow: hidden;
+  overflow-y: auto;
   line-height: 1;
   max-width: 117rem;
   margin: 0 auto;
