@@ -16,7 +16,7 @@ const TESTNET_WALLETURL = 'https://wallet.testnet.near.org'
 const TESTNET_HELPERURL = 'https://helper.testnet.near.org'
 const TESTNET_EXPLORERURL = 'https://explorer.testnet.near.org'
 
-export const ENV = TESTNET_NETWORKID
+export const ENV = MAINNET_NETWORKID
 
 export type FarmData = {
   index?: number;
@@ -213,7 +213,7 @@ export function getConfig(env:string):GetConfigResults {
         {
           index: 12,
           poolType: 'single',
-          poolName: 'cheddar-birthday',
+          poolName: '_Cheddar B-Day! 🎉',
           contractName: 'p2-birthday1.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME
         },

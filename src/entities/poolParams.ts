@@ -113,6 +113,9 @@ export class PoolParams {
     }
 
     async getPoolName() {
+        /* Normally, pool names come from metadata, but in case it is requested a particular poolname
+        you have to set on config.ts the poolName param starting with _ */
+        if(this.poolName[0] === "_") return this.poolName.substring(1)
         const metadata = await this.stakeTokenContractList[0].getMetadata()
         return metadata.symbol
     }
