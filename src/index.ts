@@ -164,8 +164,6 @@ qs('#sign-out').onclick =
     
     wallet.disconnect();
     wallet = disconnectedWallet;
-    
-    console.log("Esperando a Dani 1")
 
     signedOutFlow();
   }
@@ -660,8 +658,7 @@ function takeUserAmountFromHome(): string {
 }
 
 // Display the signed-out-flow container
-async function signedOutFlow() {  
-  console.log("Esperando a Dani anteultimo")
+async function signedOutFlow() {
   signedInFlow(disconnectedWallet)
   // showSection("#home")
   // await refreshAccountInfo();
@@ -1697,7 +1694,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   
   if(harvestedSuccesfully != null){
     let isUserFarming = newPool.classList.contains("your-farms")
-    console.log("isUserFarming", isUserFarming)
+    // console.log("isUserFarming", isUserFarming)
     isUserFarming && showSuccessOnHarvestAnimation(newPool, poolParams)
   }
 }
@@ -1705,8 +1702,8 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
 function showSuccessOnHarvestAnimation(newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3|PoolParamsNFT) {
   let poolID = newPool.id
   let harvestedPoolID = sessionStorage.getItem("cheddarFarmJustHarvested")
-  console.log("poolID", poolID)
-  console.log("harvestedPoolID", harvestedPoolID)
+  // console.log("poolID", poolID)
+  // console.log("harvestedPoolID", harvestedPoolID)
   
   if(poolID == harvestedPoolID) {
     while(document.readyState != "complete"){
