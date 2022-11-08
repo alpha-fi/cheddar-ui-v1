@@ -44,7 +44,7 @@ export class NFTContract extends SmartContract {
     }
 
     async nft_metadata(): Promise<NFTMetadata> {
-        return this.view("nft_metadata")
+        return this.viewWithoutAccount("nft_metadata")
     }
 
     // async ft_balance_of(accountId:string) : Promise<U128String> {

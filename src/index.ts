@@ -248,6 +248,7 @@ function activateClicked(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, pool
 }
 
 async function needsStorageDeposit(contract: NEP141Trait|StakingPoolP1|StakingPoolP3|StakingPoolNFT): Promise<boolean> {
+  if(!wallet.isConnected()) return false
   const contractStorageBalanceData = await contract.storageBalance()
   if(contractStorageBalanceData == null) return true
   const contractStorageBalanceBN = new BN(contractStorageBalanceData.total)
@@ -1092,7 +1093,7 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   let newTokenLogoElement = tokenLogoElement.cloneNode(true) as HTMLElement
 
   // For the time being there is only one token
-  const baseUrl = poolParams.stakingContractData.nftBaseUrl[0]
+  // const baseUrl = poolParams.stakingContractData.nftBaseUrl[0]
   const stakeNFTContractList = await poolParams.stakingContractData.getStakeNFTContractList()
   const metadata: NFTMetadata = await stakeNFTContractList[0].getMetadata()
   
@@ -1105,6 +1106,7 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   logoContainer.append(newTokenLogoElement)
   
   logoContainer.classList.add(`have-1-elements`)
+  console.log("Logo container NFT", logoContainer)
 }
 
 async function addAllLogos(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, header: HTMLElement) {
@@ -1631,7 +1633,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   
   var newPool = genericPoolElement.cloneNode(true) as HTMLElement;
   
-  newPool.setAttribute("id", poolParams.html.id)
+  newPool.setAttribute("id", poolParams.html.id.toLowerCase().replace(" ", "_"))
   newPool.classList.remove("hidden")
   newPool.classList.add("pool-container")
 
