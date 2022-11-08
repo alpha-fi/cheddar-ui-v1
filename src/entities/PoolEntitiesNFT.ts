@@ -1,4 +1,4 @@
-import { NFT } from '../contracts/nft-structs';
+import { NFT, NFTMetadata } from '../contracts/nft-structs';
 import { NFTContract } from '../contracts/NFTContract';
 import {WalletInterface} from '../wallet-api/wallet-interface';
 import {getTokenContractList, TokenContractData} from './PoolEntities';
@@ -20,6 +20,8 @@ async function getNFTContractList(wallet:WalletInterface, contractNameArray: str
 export class StakingContractDataNFT {
     // Contract to which one staked and unstakes
     contract: StakingPoolNFT
+
+    nftBaseUrl: string[]
     // Staking contract parameters
     // @ts-ignore
     private contractParamsPromise: Promise<NFTStakingContractParams>
@@ -38,6 +40,7 @@ export class StakingContractDataNFT {
     constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string[]) {
         this.contract = new StakingPoolNFT(contractId)
         this.contract.wallet = wallet
+        this.nftBaseUrl = nftBaseUrl
         this.refreshData()
         this.stakeTokenContractListPromise = this.getStakeTokenContractListPromise()
         this.stakeNFTContractListPromise = this.getStakeNFTContractListPromise(nftBaseUrl)
@@ -121,6 +124,7 @@ export class NFTContractData {
     // private balancePromise: Promise<U128String> | undefined
     private tokensForOwner: NFT[] | undefined
     // private balance: U128String | undefined
+    private metadata: Promise<NFTMetadata> | undefined
 
     constructor(wallet: WalletInterface, contractId: string, nftBaseUrl: string, poolName: string = "") {
         this.wallet = wallet
@@ -129,6 +133,7 @@ export class NFTContractData {
         this.contract.wallet = wallet
         if(this.wallet.isConnected()) {
             this.tokensForOwnerPromise = this.contract.nft_tokens_for_owner(wallet.getAccountId())
+            this.metadata = this.contract.nft_metadata()
         }
         // this.balancePromise = this.contract.ft_balance_of(wallet.getAccountId())
         
@@ -149,6 +154,12 @@ export class NFTContractData {
         this.tokensForOwner = undefined
         
         this.tokensForOwnerPromise = this.contract.nft_tokens_for_owner(this.wallet.getAccountId())
-        
+    }
+
+    async getMetadata(): Promise<NFTMetadata> {
+        if(!this.metadata) {
+            this.metadata = this.contract.nft_metadata()
+        }
+        return this.metadata
     }
 }

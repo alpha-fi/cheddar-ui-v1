@@ -231,6 +231,22 @@ export function getConfig(env:string):GetConfigResults {
           contractName: 'p3-marmaj.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME
         },
+        {
+          index: 15,
+          poolType: 'nft',
+          poolName: 'Holistic',
+          nftBaseUrl: ['https://cloudflare-ipfs.com/ipfs/bafybeicx2okilwtljyac2b5prutqodxkouyvfgysuav6pspoznn2n2qs2i'],
+          contractName: 'p4-holistic.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
+        {
+          index: 15,
+          poolType: 'nft',
+          poolName: 'Near Nauts',
+          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          contractName: 'p4-nearnauts.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
         
       ]
     }

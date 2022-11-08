@@ -2178,6 +2178,8 @@ button.activate {
   width: max-content;
   max-width: 117rem;
   background-color: var(--second-new-grey);
+  min-width: 40%;
+  max-width: 25%;
 }
 
 .cheddar-balance-container {

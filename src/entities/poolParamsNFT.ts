@@ -107,25 +107,6 @@ export class PoolParamsNFT {
     async stakeUnstakeNFTs(stakeUnstakeNFTsMap: Map<string, NFTStakeUnstakeData>) {
         let TXs = []
         for(let [contractId, stakeUnstakeNFTs] of stakeUnstakeNFTsMap) {
-        // stakeUnstakeNFTsMap.forEach(async(stakeUnstakeNFTs: NFTStakeUnstakeData, contractId: string) => {
-            // if(stakeUnstakeNFTs.nftsToStake.length > 0) {
-            //     const contractParams = await this.stakingContractData.getContractParams()
-            //     // NFT contracts need cheddar stake and it is not thought to have any other type of stake ft
-            //     const cheddarContract = (await this.stakingContractData.getStakeTokenContractList())[0].contract!
-            //     const amount = new BN(contractParams.cheddar_rate).mul(new BN(stakeUnstakeNFTs.nftsToStake.length)).toString()
-            //     const promise = cheddarContract.ft_transfer_call_without_send(
-            //         this.stakingContractData.contract.contractId,
-            //         amount,
-            //         "cheddar stake" // required like this from staking contract
-            //     )
-
-            //     const promiseWithContract = {
-            //         promise,
-            //         contractName: cheddarContract.contractId
-            //     }
-
-            //     TXs.push(promiseWithContract)
-            // }
             const stakeNFTContractList: NFTContractData[] = await this.stakingContractData.getStakeNFTContractList()
             // FIX This implementation is taking into consideration only one stake NFT by pool, but it should be done to consider many
             const stakeNFTContract: NFTContractData = stakeNFTContractList.find(a => a.contract.contractId == contractId)!
@@ -134,15 +115,6 @@ export class PoolParamsNFT {
                 TXs.push(await this.transferCheddar())
 
                 const tokenId = stakeUnstakeNFTs.nftsToStake[i]
-                // const promise = stakeNFTContract.contract.nft_transfer_call_without_send(
-                //     this.stakingContractData.contract.contractId,
-                //     tokenId
-                // )
-
-                // const promiseWithContract = {
-                //     promise,
-                //     contractName: contractId
-                // }
 
                 TXs.push(this.transferNFT(stakeNFTContract, contractId, tokenId))
             }

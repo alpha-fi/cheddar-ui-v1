@@ -11,17 +11,12 @@ export interface NFTWithMetadata extends NFT {
 }
 
 export interface NFTMetadata {
-    title: string
-    description: string|null
-    media: string
-    media_hash: string|null
-    copies: null
-    issued_at: string
-    expires_at: string|null
-    starts_at: string|null
-    updated_at: string|null
-    extra: string|null
-    reference: string
+    spec: string
+    name: string
+    symbol: string
+    icon: string
+    base_uri: null
+    reference: string|null
     reference_hash: string|null
 }
 
