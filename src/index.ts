@@ -1350,7 +1350,6 @@ async function setBoostDisplay(poolParams: PoolParamsP3|PoolParamsNFT, newPool: 
   } else {
     hasNFTStaked = poolUserStatus.cheddy_nft != ''
   }
-  console.log("Dstaked", hasNFTStaked)
   // hasNFTStaked = poolUserStatus.cheddy_nft != ''
   if(hasNFTStaked) {
     newPool.querySelector(".boost-button svg")!.setAttribute("class", "full")
@@ -2621,7 +2620,6 @@ async function getNFTsToStakeAndUnstake(poolParams: PoolParamsNFT): Promise<Map<
   })
 
   let allSelectedNfts = NFTPoolSection.querySelectorAll(".nft-card.selected")
-
   allSelectedNfts.forEach(nft => {
     let nftNameContainer = nft.querySelector(".nft-name") as HTMLElement
     let nftName = nftNameContainer!.innerHTML
@@ -2629,6 +2627,12 @@ async function getNFTsToStakeAndUnstake(poolParams: PoolParamsNFT): Promise<Map<
     let thisNFTStakeButton = nft.querySelector(".stake-nft-button")
     let contractId: string = nft.getAttribute("contract_id")!
     let contractStakeUnstakeData: NFTStakeUnstakeData = output.get(contractId)!
+
+    // TODO: For some reason, this function is being called multiple times on confirm, and on some run this object is undefined
+    // The next line is set to avoid an error message, but it should be reviewed why this is happening.
+    // There is also some react involved for some reason. It is uncertained wheter it is called from NEAR, since this project
+    // doesn't have any react code involved, and it doesn't seem to be malicious
+    if(!contractStakeUnstakeData) return
     //If the stake button is hidden the pool needs to be unstaked
     //If not it needs to be staked
     if(thisNFTStakeButton?.classList.contains("hidden")) {
