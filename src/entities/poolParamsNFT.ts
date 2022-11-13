@@ -49,7 +49,7 @@ export class PoolParamsNFT {
         const poolUserStatus: PoolUserStatusP3NFT = await this.stakingContractData.getUserStatus()
         let hasStakedTokens = false
         for(let i = 0; i < poolUserStatus.stake_tokens.length; i++) {
-            hasStakedTokens ||= poolUserStatus.stake_tokens[i].some(token => Number(token) > 0)
+            hasStakedTokens ||= poolUserStatus.stake_tokens[i].some(token => token.length > 0)
         }
         return hasStakedTokens
     }
