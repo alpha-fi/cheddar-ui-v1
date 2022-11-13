@@ -2490,29 +2490,43 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
           base_url: contract.baseUrl
         }
       }))
-      // userUnstakedNFTsWithMetadata.concat(await contract.nft_tokens_for_owner(accountId))
+      
     }
-    // nftContract = (nftContractList)[0].contract
+    
     poolHasStaked = userStatus.stake_tokens.some(a => a.length > 0)
-    // @ts-ignore
-    userStatus.stake_tokens.forEach((contractTokens: string[], index: number) => {
-      contractTokens.forEach((tokenId: string) => {
+    for(let index = 0; index < userStatus.stake_tokens.length; index++) {
+      let contractTokens = userStatus.stake_tokens[index]
+      for(let tokenId of contractTokens) {
         const contract: NFTContract = nftContractList[index].contract
-        stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, contract.baseUrl, contract.contractId))
-      })
-    })
-    // console.log("D0", stakedOrBoostingNFTsToAdd)
-    // stakedOrBoostingNFTsToAdd = userStatus.stake_tokens.map(tokenId => newNFT(tokenId))
+        // Smart people were nice enough to match the token_id with the media name on drive. 
+        // Awful people, did differently, so it is needed to search into the staked tokens for the matching token_id
+        // To get the media from the metadata
+        const allStakedNFTs = await contract.nft_tokens_for_owner(poolParams.stakingContractData.contract.contractId)
+        let thisUserStakedNFT = allStakedNFTs.find((nft: NFT) => nft.token_id == tokenId) as NFTWithMetadata
+        // stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, contract.baseUrl, contract.contractId))
+        stakedOrBoostingNFTsToAdd.push({
+          ...thisUserStakedNFT,
+          contract_id: contract.contractId,
+          base_url: contract.baseUrl
+        })
+      }
+    }
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
-  
-  // console.log(nftContract)
-  // const nftBaseUrl = nftContract.baseUrl
 
   
   if(userUnstakedNFTsWithMetadata.length == 0 && !poolHasStaked) {
-    NFTContainer.innerHTML = "You don't have any cheddar NFT"
+    let tokenName = ""
+    if(poolParams instanceof PoolParamsP3) {
+      tokenName = "cheddar"
+    } else {
+      const nftContractList = await poolParams.stakingContractData.getStakeNFTContractList()
+      // It will be assumed there is only one NFT for staking
+      const nftContractMetadata = await nftContractList[0].getMetadata()
+      tokenName = nftContractMetadata.name.toLowerCase()
+    }   
+    NFTContainer.innerHTML = `You don't have any ${tokenName} NFT`
     return
   }
   if(stakedOrBoostingNFTsToAdd.length > 0) {

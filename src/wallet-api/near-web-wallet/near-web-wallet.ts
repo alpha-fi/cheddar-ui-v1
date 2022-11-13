@@ -36,12 +36,11 @@ export class NearWebWallet implements WalletInterface {
     setNetwork(value:string){ throw Error("can't change networkId")}
 
     isConnected() {
-        console.log("Is connected", this.walletConnection.isSignedIn())
         return this.walletConnection.isSignedIn()
     }
    
     disconnect(){
-        this.walletConnection.signOut();
+        this.walletConnection.signOut(); 
     }
 
     connectionHelp(){

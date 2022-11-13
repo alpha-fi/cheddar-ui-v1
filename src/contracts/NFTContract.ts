@@ -40,7 +40,7 @@ export class NFTContract extends SmartContract {
     }
 
     async nft_tokens_for_owner(accountId:string) : Promise<NFT[]> {
-        return this.view("nft_tokens_for_owner", {account_id: accountId})
+        return this.view("nft_tokens_for_owner", {account_id: accountId, from_index: "0", "limit": 9999})
     }
 
     async nft_metadata(): Promise<NFTMetadata> {
