@@ -2514,7 +2514,6 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
-
   
   if(userUnstakedNFTsWithMetadata.length == 0 && !poolHasStaked) {
     let tokenName = ""
