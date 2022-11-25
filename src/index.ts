@@ -429,18 +429,16 @@ async function getInputDataMultiple(poolParams: PoolParamsP3, newPool: HTMLEleme
       const balanceDisplayable = convertToDecimals(boundary[i], currentStakeTokenMetadata.decimals, 5)
       throw Error(`Only ${balanceDisplayable} ${currentStakeTokenMetadata.symbol} Available to ${action}.`)
     }
+    
+    amountValuesArray.push(stakeAmountBN)
+    stakedAmountWithSymbolArray.push(`${amount} ${currentStakeTokenMetadata.symbol}`)
   }
-
-qs('#near-balance a .max').onclick =
-  async function (event) {
-    try {
-      event.preventDefault()
-      qsi("#stakeAmount").value = (yton(accountInfo[0]) - 0.001).toString()
-    }
-    catch (ex) {
-      showErr(ex)
-    }
+  return {
+    htmlInputArray,
+    amountValuesArray,
+    transferedAmountWithSymbolArray: stakedAmountWithSymbolArray,
   }
+}
 
 function stakeSingle(poolParams: PoolParams, newPool: HTMLElement) {
   return async function (event: Event){
@@ -973,9 +971,22 @@ function calculateAmountToStake(stakeRates: bigint[], totalStaked: bigint[], amo
 }
 
 
-    var countDownDate = new Date("Sept 23, 2021 00:00:00 UTC");
-    var countDownDate = new Date(countDownDate.getTime() - countDownDate.getTimezoneOffset() * 60000)
-  
+function calculateAmountToUnstake(stakeRates: bigint[], totalStaked: bigint[], amount: bigint, alreadySetIndex: number, newIndex: number) {
+	const totalAmountStakedWithThisUnstake = totalStaked[alreadySetIndex] - amount
+  const output = totalStaked[newIndex] - totalAmountStakedWithThisUnstake * stakeRates[alreadySetIndex] / stakeRates[newIndex]
+  return output > 0n ? output : 0n
+}
+
+function autoFillStakeAmount(poolParams: PoolParamsP3, pool: HTMLElement, inputRoute: string, indexInputToken: number) {
+  return async function (event: Event) {
+    event.preventDefault()
+    const value1 = (event.target as HTMLInputElement).value
+    // const amountToStake = BigInt(value1)
+    const stakeTokenContractList = await poolParams.stakingContractData.getStakeTokenContractList()
+    const inputTokenMetadata = await stakeTokenContractList[indexInputToken].getMetadata()
+    const amountToStakingOrUnstaking = BigInt(convertToBase(value1, inputTokenMetadata.decimals.toString()))
+    const contractParams = await poolParams.stakingContractData.getContractParams()
+    const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
 
     let inputs: NodeListOf<HTMLInputElement> = pool.querySelectorAll(`${inputRoute} input`)! as NodeListOf<HTMLInputElement>
     const stakeRates = contractParams.stake_rates.map((rate: U128String) => BigInt(rate)) 
@@ -1088,6 +1099,9 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   
   // let imgUrl = `${baseUrl}/1.png`
   let imgUrl = metadata.icon
+  if(!imgUrl) {
+    imgUrl = poolParams.config.logo
+  }
   newTokenLogoElement?.setAttribute("src", imgUrl)
 
   toggleGenericClass(newTokenLogoElement)
@@ -1240,7 +1254,13 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
   
 
-  newPool.querySelector(".boost-button")!.classList.remove("hidden")
+  if(!poolParams.config.noBoost) {
+    newPool.querySelector(".boost-button")!.classList.remove("hidden")
+  } else {
+    newPool.querySelector(".equal-width-than-boost-button")!.classList.add("hidden")
+    let harvestSection: HTMLElement = newPool.querySelector(".harvest-section")!
+    harvestSection.style.justifyContent = "center"
+  }
   newPool.querySelector(".structural-in-simple-pools")!.classList.add("hidden")
 
   //TODO DANI check apr and staked value
@@ -2051,43 +2071,76 @@ window.onload = async function () {
   try {
     let env = ENV //default
 
-      document.getElementById("timer-non").innerHTML = "<h2><span style='color:#222'>Starts In: </span><span style='color:rgba(80,41,254,0.88)'>" + hours + "h : "
-      + minutes + "m : " + seconds + "s" + "</span></h2>";
-      
-      // If the count down is finished, write some text
-      if (distance < 0) {
-        clearInterval(x);
-        document.getElementById("timer").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-        document.getElementById("timer-non").innerHTML = "<h2 style='color:rgba(80,41,254,0.88)'>FARM IS LIVE!</h2>";
-      }
-    }, 1000);
+    if (env != nearConfig.networkId)
+      nearConfig = getConfig(ENV);
 
-    //init contract proxy
-    contract = new StakingPoolP1(nearConfig.contractName);
-    tokenContract = new NEP141Trait(nearConfig.tokenContractName);
+    near = await nearAPI.connect(
+      Object.assign(
+          {
+              deps: {
+                  keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore()
+              }
+          },
+          nearConfig
+      )
+    )
+
+    
+    closePublicityButton.addEventListener("click", closePublicityButtonHandler())
+    //Path tag is part of the svg tag and also need the event
+    closePublicityButton.querySelector("path")!.addEventListener("click", closePublicityButtonHandler())
+
+    let headerCheddarValueDisplayerContainer = qs(".header-extension_cheddar-value") as HTMLElement
+    let cheddarValue = Number((await getTokenData("cheddar")).price).toFixed(7)
+    headerCheddarValueDisplayerContainer.innerHTML = `$ ${cheddarValue}`
+
+
+    // initButton()
+    // countDownIntervalId = window.setInterval(function(){
+    //   setCountdown()
+    // }, 1000);
+    
+
 
     //init narwallets listeners
     narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
     addNarwalletsListeners(narwalletConnected, narwalletDisconnected) //listen to narwallets events
 
     //set-up auto-refresh loop (10 min)
-    autoRefresh()
-    //set-up auto-refresh rewards *display* (5 times/sec)
-    refreshRewardsDisplayLoop()
-    //set-up auto-adjust rewards *display* to real rewards (once a minute)
-    refreshRealRewardsLoop()
+    setInterval(autoRefresh, 10 * MINUTES)
 
     //check if signed-in with NEAR Web Wallet
     await initNearWebWalletConnection()
+    let didJustActivate = false
+    initLiquidButton()
+
+    const cheddarContractName = (ENV == 'mainnet') ? CHEDDAR_CONTRACT_NAME : TESTNET_CHEDDAR_CONTRACT_NAME
+    const cheddarContract = new NEP141Trait(cheddarContractName);
+
+    let circulatingSupply = await cheddarContract.ft_total_supply()
+    let allSuplyTextContainersToFill = document.querySelector(".circulatingSupply.supply") as HTMLElement
+
+    allSuplyTextContainersToFill.innerHTML = toStringDec(yton(circulatingSupply)).split('.')[0];
 
     if (nearWebWalletConnection.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
       wallet = new NearWebWallet(nearWebWalletConnection);
-      contract.wallet = wallet;
-      tokenContract.wallet = wallet;
+      
+      // const poolList = await getPoolList(wallet)
+      // await addPoolList(poolList)
 
-      await signedInFlow()
+      accountName = wallet.getAccountId()
+      qsInnerText("#account-id", accountName)      
+      
+      await signedInFlow(wallet)
+      cheddarContract.wallet = wallet;
+      const cheddarBalance = await cheddarContract.ft_balance_of(accountName)
+      const amountAvailable = toStringDec(yton(await wallet.getAccountBalance()))
+      qsInnerText("#my-account #wallet-available", amountAvailable)
+      qsInnerText("#my-account #cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
+      qsInnerText("#nft-pools-section .cheddar-balance-container .cheddar-balance", convertToDecimals(cheddarBalance, 24, 5))
+
 
       //check if we're re-spawning after a wallet-redirect
       //show transaction result depending on method called
@@ -2438,12 +2491,14 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
     const nftContractList = await poolParams.stakingContractData.getStakeNFTContractList()
     for(let i = 0; i < nftContractList.length; i++) {
       const contract = nftContractList[i].contract
+      const nftMetadata: Promise<NFTMetadata> = contract.nft_metadata()
       const userUnstakedNFTs: NFT[] = await contract.nft_tokens_for_owner(accountId)
+      const baseUrl = (await nftMetadata).base_uri
       userUnstakedNFTsWithMetadata = userUnstakedNFTsWithMetadata.concat(userUnstakedNFTs.map((nft: NFT) => {
         return {
           ...nft,
           contract_id: contract.contractId,
-          base_url: contract.baseUrl
+          base_url: baseUrl
         }
       }))
       
@@ -2470,7 +2525,6 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)
   }
-
   
   if(userUnstakedNFTsWithMetadata.length == 0 && !poolHasStaked) {
     let tokenName = ""

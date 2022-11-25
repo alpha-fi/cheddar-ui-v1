@@ -67,6 +67,7 @@ export class PoolParams {
     wallet: WalletInterface
     type: string
     html: HtmlPoolParams;
+    config: { [key: string]: any }
 
     poolDescription: string[]|undefined;
     descriptionLink: string[]|undefined;
@@ -88,6 +89,7 @@ export class PoolParams {
         this.type = farmData.poolType;
         this.html = new HtmlPoolParams(farmData.poolName)
         this.poolName = farmData.poolName
+        this.config = farmData.config ? farmData.config : []
 
         this.poolDescription = farmData.description;
         this.descriptionLink = farmData.descriptionLink;

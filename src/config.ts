@@ -27,6 +27,7 @@ export type FarmData = {
   nftBaseUrl?: string[];
   description?: string[];
   descriptionLink?: string[];
+  config?: {[key: string]: any};
 }
 
 type GetConfigResults = {
@@ -42,6 +43,7 @@ type GetConfigResults = {
   explorerUrl?:string;
   masterAccount?:string;
   farms: Array<FarmData>;
+  
 }
 
 export function getConfig(env:string):GetConfigResults {
@@ -246,6 +248,24 @@ export function getConfig(env:string):GetConfigResults {
           nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
           contractName: 'p4-nearnauts.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME
+        },
+        {
+          index: 16,
+          poolType: 'nft',
+          poolName: 'Near Nauts Mutants',
+          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          contractName: 'p4-nautmutants.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          config: { logo: "https://media.discordapp.net/attachments/955124480043262012/1045098073929551952/IMG_2695.jpg" }
+        },
+        {
+          index: 17,
+          poolType: 'nft',
+          poolName: 'Cheddy',
+          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          contractName: 'p4-cheddy.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          config: { noBoost: true }
         },
         
       ]

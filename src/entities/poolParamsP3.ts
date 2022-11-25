@@ -53,6 +53,7 @@ export class PoolParamsP3 {
     wallet: WalletInterface
     type: string
     html: HtmlPoolParams;
+    config: { [key: string]: any }
 
     poolDescription: string[]|undefined;
     descriptionLink: string[]|undefined;
@@ -67,6 +68,7 @@ export class PoolParamsP3 {
     constructor(wallet: WalletInterface, farmData: FarmData, nftContract: string, nftBaseUrl: string) {
         this.wallet = wallet
         this.type = farmData.poolType;
+        this.config = farmData.config ? farmData.config : []
         
         this.poolDescription = farmData.description;
         this.descriptionLink = farmData.descriptionLink;
