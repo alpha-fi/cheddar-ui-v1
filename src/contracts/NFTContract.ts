@@ -34,7 +34,7 @@ export class NFTContract extends SmartContract {
                 token_id,
                 msg: "to farm" 
             },
-            new BN(TGas(40)),
+            new BN(TGas(80)),
             new BN(1)
         )
     }
