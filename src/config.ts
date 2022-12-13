@@ -267,6 +267,15 @@ export function getConfig(env:string):GetConfigResults {
           tokenContractName: CHEDDAR_CONTRACT_NAME,
           config: { noBoost: true }
         },
+        {
+          index: 18,
+          poolType: 'nft',
+          poolName: 'Astropups',
+          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          contractName: 'p4-astropups.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+          config: { noBoost: false }
+        },
         
       ]
     }
