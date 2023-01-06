@@ -1474,9 +1474,9 @@ async function addAllCommonListeners(poolParams: PoolParams|PoolParamsP3|PoolPar
   } else {
     doesNeedStorageDeposit = await needsStorageDeposit(poolParams.stakingContractData.contract)
   }
-  // Displays staking/unstaking when hovering on the pool
+  // Displays staking/unstaking when hovering on the pool(only in Live and Your Farms)
   
-  if(!(poolParams instanceof PoolParamsNFT) && !doesNeedStorageDeposit) {
+  if(!(poolParams instanceof PoolParamsNFT) && !doesNeedStorageDeposit && !newPool.classList.contains("inactive-pool")) {
     let vanishingIndicator = newPool.querySelector("#vanishing-indicator") as HTMLElement
     vanishingIndicator?.classList.remove("transparent")
     vanishingIndicator?.classList.add("visual-tool-expanding-indication-hidden")
@@ -2367,8 +2367,6 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
 
 async function loadAndShowNfts(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
   await loadNFTs(poolParams, buttonId)
-  var body = document.body as HTMLElement
-  body.classList.toggle('noscroll')
   qs("#nft-pools-section").classList.remove("hidden")
 }
 
@@ -2832,14 +2830,10 @@ function showNFTFlexComponents() {
 function quitNFTFlex() {  
   return function (event: Event){
     event.preventDefault();
-
-    var body = document.body as HTMLElement
     
     let element = event.target as HTMLElement
     
     if (element.getAttribute("id") == "nft-pools-section" || element.getAttribute("id") == "cancel-stake-unstake") {
-      body.classList.toggle('noscroll')
-
       qs(".nft-flex").innerHTML = ""
       qs("#nft-pools-section").classList.add("hidden")
 
