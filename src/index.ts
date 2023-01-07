@@ -823,7 +823,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
       }
     }
 
-    if(!doesPoolNeedDeposit) {
+    if(!doesPoolNeedDeposit && newPool.classList.contains("inactive-pool")) {
       newPool.querySelector("#activate")?.classList.add("hidden")
     } else {
       newPool.querySelector("#activate")?.classList.remove("hidden")
@@ -1765,7 +1765,7 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
 }
 
 function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean) {
-  if(isAccountRegistered) {
+  if(isAccountRegistered && !newPool.classList.contains("inactive-pool")) {
     let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement;
     stakeUnstakeNftButton.classList.remove("hidden")
   }
@@ -1796,12 +1796,11 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
-  
+
   if(wallet != disconnectedWallet) {
     let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-    
-    if(!isAccountRegistered) {
+    if(!isAccountRegistered && !newPool.classList.contains("inactive-pool")) {
       activateButtonContainer.classList.remove("hidden")
       activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
