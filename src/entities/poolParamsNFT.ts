@@ -18,6 +18,7 @@ export class PoolParamsNFT {
     wallet: WalletInterface
     type: string
     html: HtmlPoolParams;
+    config: { [key: string]: any }
 
     poolDescription: string[]|undefined;
     descriptionLink: string[]|undefined;
@@ -36,6 +37,7 @@ export class PoolParamsNFT {
 
         this.poolDescription = farmData.description;
         this.descriptionLink = farmData.descriptionLink;
+        this.config = farmData.config ? farmData.config : []
 
         this.html = new HtmlPoolParams(farmData.poolName);
         this.stakingContractData = new StakingContractDataNFT(wallet, farmData.contractName, farmData.nftBaseUrl!)

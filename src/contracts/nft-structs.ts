@@ -15,7 +15,7 @@ export interface NFTMetadata {
     name: string
     symbol: string
     icon: string
-    base_uri: null
+    base_uri: string
     reference: string|null
     reference_hash: string|null
 }
