@@ -1764,8 +1764,12 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
-function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean) {
-  if(isAccountRegistered && !newPool.classList.contains("inactive-pool")) {
+function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean,hasUserStaked:boolean) {
+  if(isAccountRegistered) {
+    // if the pool has ended and user doesn't has any NFT staked don't show the stake/unstake btn
+    if(newPool.classList.contains("inactive-pool") && !hasUserStaked){
+      return;
+    } 
     let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement;
     stakeUnstakeNftButton.classList.remove("hidden")
   }
@@ -1815,8 +1819,10 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
       displayIfTokenPool(newPool, isAccountRegistered)
 
     } else if(poolParams instanceof PoolParamsNFT) {
-
-      displayIfNftPool(newPool, isAccountRegistered)
+      const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+      // check for user stake 
+      const hasUserStakedNFT = poolUserStatus.stake_tokens.find(total => total?.length > 0)?.length && poolUserStatus.stake != "0" ? true : false
+      displayIfNftPool(newPool, isAccountRegistered,hasUserStakedNFT)
 
     }
   }
