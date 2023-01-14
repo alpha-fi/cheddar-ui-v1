@@ -1804,7 +1804,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
   if(wallet != disconnectedWallet) {
     let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-    if(!isAccountRegistered && !newPool.classList.contains("inactive-pool")) {
+    if(!isAccountRegistered) {
       activateButtonContainer.classList.remove("hidden")
       activateButton.addEventListener("click", activateClicked(poolParams, newPool))
 
@@ -1821,7 +1821,7 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
     } else if(poolParams instanceof PoolParamsNFT) {
       const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
       // check for user stake 
-      const hasUserStakedNFT = poolUserStatus.stake_tokens.find(total => total?.length > 0)?.length && poolUserStatus.stake != "0" ? true : false
+      const hasUserStakedNFT = poolUserStatus.stake_tokens.some(total => total.length > 0) && poolUserStatus.stake != "0"
       displayIfNftPool(newPool, isAccountRegistered,hasUserStakedNFT)
 
     }
