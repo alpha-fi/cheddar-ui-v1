@@ -1276,6 +1276,9 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   addNFTPoolListeners(poolParams, newPool)  
 
   refreshNFTOrMultiplePoolInfo(poolParams, newPool)
+  await addRewardsPerDayDetail(poolParams, newPool)
+  await addRewardsTokenDetail(poolParams, newPool)
+  await addUnclaimedRewardsDetail(poolParams, newPool)
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
