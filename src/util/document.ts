@@ -13,6 +13,18 @@ export function qsaInnerText(selector:string, innerText:string){
     });
 }
 
+///set innerText for all matching HTMLElements
+export function qsaAttribute(selector:string, attributeKey: string, attributeValue:string){ 
+    document.querySelectorAll(selector).forEach(e=> {
+        if (e instanceof HTMLElement) e.setAttribute(attributeKey, attributeValue)
+    });
+}
+
+///set innerText for first matching HTMLElement
+export function qsInnerText(selector:string, innerText:string){ 
+    document.querySelector(selector)!.innerHTML = innerText
+}
+
 
 export function show(el:Element, onOff:boolean=true){
     (el as HTMLElement).style.display= (onOff?"":"none");

@@ -1,38 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Titillium Web');
+
 * {
   -webkit-font-smoothing: antialiased;
+  margin: 0;
+  padding: 0;
 }
 
 html {
-  --bg                 : #F8F9FA;
-  --fg                 : #333333;
-  --primary            : #8542EB;
-  --primary-low        : #8542eb70;
-  --secondary          : #4BC7EF;
-  --success            : rgb(90, 206, 132);
-  --input              : #F6F2FD;
-  --error              : #F9BA37;
-  --gray               : #555;
-  --light-gray         : #ccc;
-  --shadow             : #e6e6e6;
-  background-color     : var(--bg);
-  /*body font*/
-  font-size            : 13px;
-  font-weight          : 500;
+  --white                    : white;
+  --bg                       : #F8F9FA;
+  --fg                       : #333333;
+  --primary-selected         : #9D67EF;
+  --primary                  : #8542EB;
+  --primary-low              : #8542eb70;
+  --secondary                : #4BC7EF;
+  --success                  : rgb(90, 206, 132);
+  --input                    : #F6F2FD;
+  --yellow                   : #F9BA37;
+  --second-yellow            : #FFD262;
+  --second-yellow-selected   : rgba(255, 210, 98, 0.66);
+  --gray                     : #555;
+  --new-gray                 : #9C9494;
+  --second-new-grey          : #EBE7F5;
+  --light-gray               : #ccc;
+  --shadow                   : #e6e6e6;
+  background-color           : var(--bg);
+  font-family                : 'Titillium Web', sans-serif;
+  --publicity-height         : 130px;
+  /*body font*/   
+  font-size                  : 13px;
+  font-weight                : 500;
   /* identical to box height, or 123% */
-  color                : var(--fg);
-  font-feature-settings: 'case'on;
-  background     : url(assets/cheddar-farm-background.svg) no-repeat;
+  color                      : var(--fg);
+  background     : url(assets/newFarmBackground.png) top center / contain no-repeat;
   background-size: 100% auto;
   background-color: #5e8c01;
   /* Fill width, retain proportions */
 }
 
-*:focus {
+/* *:focus {
   outline-style: none;
   outline-color: (--primary);
   outline-width: 1px;
   box-shadow   : var(--primary-low) 0px 0px 0px 2px;
   border-radius: 6px;
+} */
+
+.focused {
+  outline-style: none;
+  outline-color: (--primary);
+  outline-width: 1px;
+  box-shadow   : var(--primary-low) 0px 0px 0px 2px;
+  border-radius: 6px;
+}
+
+.flipped {
+  transform: rotate(180deg);
 }
 
 #logo:focus {
@@ -47,15 +71,87 @@ html {
 }
 
 body {
+  overflow-y: auto;
   line-height: 1;
-  margin: 0;
+  max-width: 117rem;
+  margin: 0 auto;
+}
+
+.publicity-container {
+  width: 100%;
+  height: var(--publicity-height);
+  background: radial-gradient(var(--primary-selected), var(--primary));
+  /* border-bottom: solid black 3px; */
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.publicity-container img {
+  height: 40%;
+  margin: 10px;
+  aspect-ratio: 1;
+}
+
+.publicity-container .farm-img {
+  transform: translateY(-4px);
+}
+
+.publicity-container .learn-img {
+  transform: translateY(-2px);
+}
+
+.publicity-container span {
+  font-family: Bubblegum Sans !important;
+  font-size: 4rem;
+  font-weight: normal;
+  text-shadow: 1px 0px 0px #fd941f, -1px 0px 0px #fd941f, 0px 1px 0px #fd941f, 0px -1px 0px #fd941f, -1px -1px 0px #fd941f, 1px -1px 0px #fd941f, 1px 1px 0px #fd941f, -1px 1px 0px #fd941f, -1px 1px 0px #fd941f;
+  color: var(--bg);
+  letter-spacing: 3px;
+}
+
+.close-publicity {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  color: var(--bg);
+}
+
+.publicity-decoration {
+  position: absolute;
+  top: var(--publicity-height);
+  left: 0;
+  height: 30px;
+  z-index: 0;
+  width: 100%;
+  background: linear-gradient(180deg, var(--primary), transparent);
+}
+
+.publicity-decoration.no-publicity-position {
+  top: 0;
 }
 
 header {
   display    : flex;
   flex-flow  : row;
   align-items: center;
-  margin     : 15px 15px 15px 15px;
+  margin     : 164px 15px 0px 15px;
+  max-height: 59px;
+}
+
+main {
+  margin-top: 15px;
+}
+
+header.no-publicity-position {
+  margin: 33px 15px 0px 15px;
+}
+
+.header-extension {
+  display: flex;
 }
 
 h1 {
@@ -65,17 +161,6 @@ h1 {
   line-height: 40px;
   /* identical to box height, or 120% */
   color      : #272D36;
-}
-
-h2 {
-  font-weight  : 600;
-  font-size    : 20px;
-  line-height  : 20px;
-  /* identical to box height, or 109% */
-  color        : #fd941f;
-  text-align   : center;
-  margin-top   : 0px;
-  margin-bottom: 15px;
 }
 
 h2 img {
@@ -107,9 +192,8 @@ h4 {
   font-size  : 14px;
   line-height: 17px;
   /* identical to box height */
-
   text-align   : center;
-  margin-top   : 1em;
+  margin-top   : 0.25em;
   margin-bottom: 0;
 
   color: #333333;
@@ -133,10 +217,12 @@ p {
   font-size    : 13px;
   line-height  : 18px;
   /* identical to box height, or 146% */
-  margin-top   : 0.4em;
+  /* margin-top   : 0.4em; */
   margin-bottom: 0;
   font-weight  : 400;
 }
+
+
 
 header div.title {
   font-weight: bold;
@@ -147,49 +233,144 @@ header div.title {
   margin-left: 18px;
 }
 
-header nav {
-  flex           : 1 1 85%;
+nav {
+  width: calc(100% - 175px);
+  display: flex;
+  justify-content: space-between;
+}
+
+#burguer {
+  width: calc(100% - 88.5px);
+}
+
+.burguer-content {
+  margin-top     : 5px;
+  flex           : 1 1 30%;
   display        : flex;
   flex-flow      : row wrap;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items    : center;
+}
+
+.left-on-full-screen {
+  align-self: flex-start !important;
+  flex-direction: row !important;
+}
+
+#navigation {
+  display: flex;
+  align-items: center;
+}
+
+.cheddar-main-logo-container {
+  display: none;
+}
+
+.burger-button {
+  display: none;
+  cursor: pointer;
+}
+
+.burger-button div{
+  width: 19px;
+  height: 3.2px;
+  background-color: #000;
+}
+
+.burger-button div:not(:last-child) {
+  margin-bottom: 5px
 }
 
 a {
   text-decoration: none;
 }
 
-a:any-link {
+/* a:any-link {
   color      : var(--fg);
   font-weight: 500;
-}
+}*/
 
 a.selected {
-  color      : #8542EB;
+  color: hsla(0,0%,100%,.8901960784313725);
+  background-color: var(--primary-selected);
   font-weight: bold;
 }
 
-header nav a {
+.burguer-content a {
   flex         : 0 1 auto;
-  padding-left : 1em;
-  padding-right: 1em;
-  font-size    : 14px;
 }
 
-div {
+.navbar-links {
+  display: flex;
+  align-self: center;
+}
+
+.burguer-content .navbar-links {
+  flex-direction: column;
+  align-items: center;
+  transform: translateY(20px);
+  margin-top: 9px;
+}
+
+.navButton {
+  font-weight: 400;
+  font-size: 16px;
+  background: var(--primary);
+  border-radius: 16px;
+  color: hsla(0,0%,100%,.8901960784313725);
+  /* margin: 5px 7px; */
+  padding: 1rem 2rem;
+  box-shadow: inset 0 -1px 0 0 rgb(14 14 44 / 40%);
+}
+
+#swap-icon {
+  border: solid 4px #6495ed70;
+  border-radius: 100%;
+  background-color: #6495ed70;
+  padding: 2px;
+}
+
+/* div {
   margin: 0px;
   padding: 0px;
   border: 0px;
   font-size: 100%;
   vertical-align: baseline;
+} */
+
+.nft-img-container > * {
+  width: 100%;
 }
 
-.icon-header {
+.grid {
+  display: grid;
+  align-items: center;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-gap: 1rem;
+  justify-items: center;
+  grid-template-columns: repeat(4, 1fr);
+}
+.grid > div {
+  background-color: var(--second-new-grey);
+  display: flex;
+  align-items: center;
+  justify-items: start;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.grid > div {
+  width: 90%;
+  max-width: 500px;
+}
+
+#token-header {
   display: inline;
-  padding: 1em 0 2em 0;
+  padding: 1.2em 0 1.2em 0;
 }
 
-.icon-header img {
+#token-header span.icon, #token-header img.icon  {
+  display: inline-block;
   vertical-align : middle;
   box-shadow     : rgb(0 0 0 / 19%) 0px 2px 14px;
   width          : 35px;
@@ -199,7 +380,7 @@ div {
   justify-content: center;
 }
 
-.icon-header span {
+#token-header span.name {
   font-weight   : 600;
   font-size     : 22px;
   line-height   : 22px;
@@ -213,7 +394,7 @@ div {
   -moz-box-pack   : justify;
   -ms-flex-pack   : justify;
   justify-content : space-between;
-  min-width       : 75%;
+  min-width       : 80%;
 }
 
 .pool-meta div:nth-child(1) {
@@ -246,7 +427,7 @@ div {
 
 .pool-meta.earned, .pool-meta.staked {
   justify-content: left;
-  padding-top: 10px;
+  margin: 10px 1.7rem 0 1.7rem;
 }
 
 .pool-meta.earned div:nth-child(1), .pool-meta.staked div:nth-child(1) {
@@ -306,10 +487,49 @@ div {
   margin-bottom    : 10px;
 }
 
-.user-info {
-  background-color: #4BC7EF;
-  border-radius   : 10px;
-  padding          : 0.5em 1em;
+.btn-liquid {
+  width: 129px;
+  height: 42px;
+  color: var(--fg);
+  letter-spacing: .05em;
+  text-align: center;
+  border-radius: 27px;
+  font-weight: 400;
+  font-size: 16px;
+  font-family: Titillium Web,sans-serif;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  margin-top: 10px;
+}
+
+.btn-liquid .inner {
+	position: relative;
+
+	z-index: 2;
+}
+
+.btn-liquid canvas {
+  transform: translate(13px, 23px);
+	position: absolute;
+	top: -50px;
+	right: -50px;
+	bottom: -50px;
+	left: -50px;
+
+	z-index: 1;
+}
+
+/* .user-info {
+  background-color: var(--second-yellow);
+  color: var(--fg);
+} */
+
+.user-info.selected {
+  /* background-color: var(--second-yellow-selected); */
+  color: var(--fg);
+  font-weight: bold;
 }
 
 .pool-meta.actions {
@@ -326,17 +546,16 @@ div {
 }
 
 .user-info span {
+  box-sizing: content-box;
   display     : inline-block;
-  color       : var(--bg);
-  font-weight : 400;
+  font-weight : 600;
   font-size   : 14px;
   line-height : 11px;
-  padding-left: 0.5em;
-  margin-top  : 0px;
+  margin-top: 15px;
 }
 
 .error {
-  color: var(--error);
+  color: var(--yellow);
 }
 
 #wallet-selection {
@@ -368,12 +587,12 @@ div {
 }
 
 main {
-  display    : flex;
+/*  display    : flex;
   flex-flow  : column;
-  align-items: center;
+  align-items: center;*/
 }
 
-section,
+
 article,
 form,
 .popup,
@@ -390,46 +609,11 @@ form,
   background   : #FFFFFF;
   box-shadow   : 0px 0px 20px rgba(220, 226, 235, 0.7);
   border-radius: 12px;
-  margin       : 1em;
-  max-width    : min-content;
+  /* margin       : 1em; */
 }
 
-/*phones*/
-@media only screen and (max-width: 360px) {
-  html {
-    font-size: 11px;
-  }
-
-  section,
-  article,
-  form {
-    min-width: 280px;
-    max-width: min-content;
-  }
-
-  header div.title {
-    margin-left: 2px;
-  }
-
-  header nav a {
-    font-size     : 11px;
-    padding-bottom: 6px;
-  }
-
-  .user-info span {
-    font-size: 9px;
-  }
-
-}
-
-/*laptop/desktop*/
-@media only screen and (min-width: 600px) {
-
-  section,
-  article,
-  form {
-    min-width: 380px;
-  }
+.input-group-box {
+  flex-direction: column;
 }
 
 .input-group {
@@ -465,7 +649,7 @@ input,
   text-align: right;
 }
 
-button {
+.button {
   font-weight: 400;
   font-size: 16px;
   height: 48px;
@@ -477,6 +661,7 @@ button {
   padding: 0 24px;
   border: 0;
   box-shadow: inset 0 -1px 0 0 rgb(14 14 44 / 40%);
+  cursor: pointer;
 }
 
 button:disabled {
@@ -489,6 +674,52 @@ button.hollow {
   color         : var(--primary);
   padding-top   : 2px;
   padding-bottom: 2px;
+}
+
+.btn {
+  border: 2px solid gold;
+  padding: 8px 10px;
+  height: 32px;
+  background: white;
+  border-radius: 16px;
+  /* margin: 8px 16px 8px 0; */
+  line-height: 12px;
+  cursor: pointer;
+  text-decoration: none;
+  color: black;
+}
+
+.btn:disabled {
+    border-color: #ccc !important;;
+    background: white !important;
+    color: #ccc !important;
+}
+
+.btn:focus {
+    outline: none;
+}
+
+.btn:hover {
+    background: gold;
+}
+
+.btn:active {
+    color: white;
+    background: #0072CE;
+}
+
+.btn-outline-none {
+  border: none;
+  line-height: 32px;
+}
+
+#other-links .btn-outline-none {
+  margin-right: 6px !important;
+}
+
+.btn-outline-none svg {
+  top: 7px;
+  position: relative;
 }
 
 .hQrVZb {
@@ -557,12 +788,12 @@ button.hollow {
 }
 
 .overlay {
-  position        : absolute;
+  position        : fixed;
   top             : 0;
   right           : 0;
   left            : 0;
   bottom          : 0;
-  z-index         : 1;
+  z-index         : 30;
   justify-content : center;
   background-color: #d3d3d373;
   display         : flex;
@@ -609,7 +840,7 @@ fieldset {
   display        : flex;
   flex-flow      : row;
   justify-content: space-between;
-  padding        : 10px 0px;
+  padding        : 5px 0px;
   width          : 100%;
 }
 
@@ -699,7 +930,7 @@ small img {
   width        : 24em;
   left         : -11em;
   top          : 0.5em;
-  z-index      : 1;
+  z-index      : 30;
   word-break   : break-word;
   white-space  : break-spaces;
   max-width    : 50vw;
@@ -745,8 +976,7 @@ small img {
   white-space: nowrap;
 }
 
-.near:after,
-.meta:after {
+.nearico:after {
   display    : inline-block;
   content    : "\24c3";
   transform  : scale(0.65);
@@ -793,6 +1023,7 @@ small img {
 .box.popup button,
 .box.popup img {
   margin-top: 15px;
+  max-width: 25%;
 }
 
 .confirm-cancel-line {
@@ -805,17 +1036,75 @@ small img {
 }
 
 .hidden {
-  display: none;
+  display: none!important;
 }
 
 #max {
   display: none;
 }
 
+.show {
+  display: block;
+}
+
 a#terms-of-use {
   color: blue;
 }
 
+li {
+  list-style: none;
+}
+
+.harvest-section {
+  display: flex;
+  flex-wrap: nowrap;
+  align-content: center;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.equal-width-than-boost-button, .structural-in-simple-pools {
+  width: 62.531px;
+}
+
+.empty {
+  fill: none;
+}
+
+.full {
+  fill: #F9BA37
+}
+
+.main-contract-footer {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.main-contract-footer .button {
+  min-width: none;
+}
+
+#stake-unstake-nft {
+  max-width: 180px;
+  align-self: center;
+}
+
+.boost-button {
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 62.531px;
+  cursor: pointer;
+}
+
+.main-contract-footer p {
+  text-align: center;
+}
 
 input[type=checkbox][disabled]{
   outline:1px solid blue;
@@ -868,4 +1157,1456 @@ input[type="checkbox"]#terms-of-use:checked + label:before {
 
 #near-balance a {
   display: inline-block
+}
+
+#stake-form-not-connected{
+  max-width:  320px;
+  margin: 0 auto;
+}
+
+.loader {
+  border: 16px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 16px solid #fd941f;
+  width: 120px;
+  height: 120px;
+  -webkit-animation: spin 2s linear infinite; /* Safari */
+  animation: spin 2s linear infinite;
+  margin: 10% auto;
+  position: realative;
+  background-image: url(assets/cheddar.svg);
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+section#my-account, section#faq {
+  width: 65%;
+  margin: 0 auto;
+}
+
+#deposit button {
+  margin    : 0;
+  background: rgb(68, 196, 226);
+  color     : white;
+}
+
+#deposit button {
+  font-weight: 700;
+}
+
+#deposit {
+  text-align: center;
+  margin-bottom:  200px;
+}
+
+#deposit p {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+#poolOpen {
+  margin-bottom: 1.2em;
+}
+
+#poolOpen span {
+  font-size: 16px;
+  font-weight: bold;
+  color: rgba(80,41,254,0.88);
+}
+
+.show-smaller-screens {
+  display: none;
+}
+
+.show-bigger-screens {
+  display: block;
+}
+
+#our-social-media {
+  position: relative;
+  z-index: 4;
+
+  display    : flex;
+  flex-flow  : row;
+  align-items: center;
+  margin     : 5px 15px 0px 15px;
+}
+
+#our-social-media span {
+  font-family: Bubblegum Sans !important;
+  font-weight: bold;
+  font-size:  13px;
+  margin:  0 0.2rem 0 0.2rem;
+  white-space: nowrap;
+}
+
+#our-social-media a{
+  color:  #222;
+  margin: 0 0 0 0.1rem;
+  width:  1.5em;
+}
+
+#our-social-media a:focus {
+  outline-style: none;
+  outline-color: (--primary);
+  box-shadow   : none;
+  outline-width: 0px;
+}
+
+.cheddar-general-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cheddar-general-info span {
+  font-weight: 700;
+}
+
+.header-extension_cheddar-value-container {
+  display: flex;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.header-extension_cheddar-value-container svg {
+  background: var(--bg);
+  padding: 3px;
+  border-radius: 100%;
+  border: 1px var(--primary) solid;
+  margin-right: 5px;
+}
+
+#game-links {
+  position: relative;
+  margin-left: 1rem;
+}
+
+#game-links a, #coinFlip {
+  font-family: Bubblegum Sans !important;
+  font-weight: bold;
+  font-size:  14px;
+  white-space: nowrap;
+}
+
+#coinFlip img {
+  position: relative;
+  top: 5px;
+  height: 19px;
+  aspect-ratio: 1;
+}
+
+#checkers img {
+  height: 18px;
+  position: relative;
+  top: 4px;
+}
+
+#VRFarm svg {
+  top: 4px;
+}
+
+.games-dropdown {
+  text-align: center;
+  width: max-content;
+  margin: 5px;
+  user-select: none;
+}
+
+.games-dropdown svg {
+  top: 5px !important;
+  transition: all 0.3s linear;
+}
+
+.game-links {
+  position: relative;
+  top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.games-dropdown-items {
+  position: absolute;
+  z-index: 3;
+  top: 35px;
+  left: 4px;
+  overflow: hidden;
+  height: max-content;
+  width: max-content;
+  transition: all 0.3s step-end;
+}
+
+.games-dropdown-items.down {
+  z-index: 5;
+  transition: all 0.3s step-start;
+}
+
+.games-dropdown-hidden-position {
+  transform: translateY(-100%) !important;
+}
+
+.games-links-container {
+  transform: translateY(0%);
+  transition: all 0.3s ease-out;
+  position: relative;
+  padding: 8px 0;
+  border-radius: 16px;
+  text-align: right;
+  width: max-content;
+  max-width: 80vw;
+  background-color: white;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 35px;
+  height: 20px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 15px;
+  width: 15px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+/*laptop/desktop*/
+@media only screen and (min-width: 600px) {
+
+  section,
+  article,
+  form {
+    min-width: 280px;
+  }
+}
+
+@media screen and (max-width: 1000px) {
+
+  #home-connected, #nft-pools-section {
+    margin: 1rem;
+  }
+
+  #nft-pools-section {
+    left: -13px !important;
+    top: -26px !important;
+  }
+
+  .nft-flex {
+    flex-direction: column;
+  }
+}
+
+.tools {
+  display: flex;
+  align-items: flex-start;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-gap: 1rem;
+  justify-items: center;
+}
+
+.tools span {
+  font-weight:  bold;
+  font-size: .75rem;
+  line-height: 1rem;
+}
+
+/*phones*/
+@media only screen and (max-width: 360px) {
+
+  html {
+    font-size: 11px;
+  }
+
+  h2 {
+    font-size: 17px;
+  }
+
+  #logo img {
+    width:  70%;
+  }
+
+  #token-header span.name {
+    font-size: 20px;
+  }
+
+  #home-connected, #nft-pools-section {
+    margin: 0.25rem;
+  }
+
+  /* .btn-outline-none {
+    margin-left: 1rem;
+  } */
+
+  .popup {
+    min-width: 300px!important;
+  }
+
+  #game-links {
+    margin-left: 0!important;
+  }
+
+  .grid > div, .nft-card div {
+    max-width: 315px;
+  }
+
+  .pool-meta {
+    min-width:  90%;
+  }
+
+  section,
+  article,
+  form {
+    min-width: 280px;
+
+  }
+
+  header div.title {
+    margin-left: 2px;
+  }
+
+  .burguer-content a {
+    font-size     : 11px;
+    padding-bottom: 3px;
+  }
+}
+
+/* NEW CSS *//*I COMMENTED PREVIOUS DIV AND H2 SELECTORS AND HAVE PROBLEMS WITH .GRID > DIV SELECTOR*/
+.noscroll { 
+  overflow: hidden;
+}
+
+.transparent {
+  transition: all 0.5s linear;
+  opacity: 1;  
+  color: var(--yellow);
+  font-weight: bolder;
+}
+
+#home-connected {
+  margin: 0 15px;
+}
+
+#home-connected #pool_list {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+#pool_list .no-pools {
+  text-align: center; 
+  margin: 0 auto; 
+  width: 120%; 
+  color: #8542eb; 
+  outline: double; 
+  padding: 1rem;
+  /* text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff; /
+    / background-color: #333; */
+}
+
+.pool-container {
+  border-width: 12px;
+}
+
+.pool-container, .nft-card {
+  min-width: 330px;
+  height: max-content;
+  border-radius: 8px!important;
+}
+
+
+.news {
+  font-family: Bubblegum Sans !important;
+  font-size: 4rem;
+  font-weight: normal;
+  text-shadow: -1px -1px 0px #FFFFFF, -1px 0px 0px #FFFFFF, -1px 1px 0px #FFFFFF, 0px -1px 0px #FFFFFF, 0px 0px 0px #FFFFFF, 0px 1px 0px #FFFFFF, 1px -1px 0px #FFFFFF, 1px 0px 0px #FFFFFF, 1px 1px 0px #FFFFFF, 8px 8px 13px rgba(0,0,0,0.75);
+  color: var(--second-yellow);
+  letter-spacing: 3px;
+  text-align: center;
+}
+
+#timer {
+  font-size: large;
+  text-align: center;
+  margin-top: 16px;
+}
+
+.pool-filter-container {
+  background-color: var(--second-new-grey);
+  border-radius: 10px;
+  width: max-content;
+  color: var(--new-gray);
+  font-style: normal;
+  font-weight: 700;
+  font-size: 14px;
+  text-align: center;
+  letter-spacing: 1.25px;
+  margin: 32px 0 1.5rem 0;
+}
+
+.pool-filter-container ul {
+  display: flex;
+}
+
+.pool-filter-container li {
+  width: 133px;
+  height: 42px;
+  border-radius: 10px;
+  line-height: 42px;
+  cursor: pointer;
+  user-select: none;
+  max-width: 30vw;
+}
+
+.pool-filter-container li:hover, .activeFilterButton {
+  background-color: var(--primary);
+  color: var(--bg);
+}
+
+.no-live-pools-msg h2 {
+  color: var(--primary);
+  transition: all 0.3s linear;
+  font-size: x-large;
+  margin: 50px auto;
+  width: max-content;
+  background-color: var(--second-new-grey);
+  padding: 20px;
+  border-radius: 100px;
+  box-shadow: 4px 4px 4px #00000073;
+} 
+
+
+.no-live-pools-msg:hover {
+  transform: scale(1.01);
+  user-select: none;
+}
+
+.not-connected-msg h2 {
+  text-align: center;
+  display: block;
+  font-size: 2rem;
+  margin: 30px;
+}
+
+#pool-container {
+  position: relative;
+}
+
+#generic-pool-container, #pool-container, #activated {
+  border-color: var(--second-new-grey);
+  border-style: solid;
+  background-color: var(--white);
+}
+
+#pool-container {
+  padding: 0px 10px;
+}
+
+#pool-container, #activated {
+  width: 90%;
+  background: var(--white);
+  box-shadow: 0px 0px 20px rgb(220 226 235 / 70%);
+  border-radius: 12px;
+  position: relative;
+}
+
+#contract-period-container {
+  margin: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: black;
+}
+
+.date-in-range-indicator {
+  height: 20px;
+  aspect-ratio: 1;
+  position: absolute;
+  transform: translate(10px, -5px);
+}
+
+.onDate {
+  fill: rgb(151, 186, 16);
+}
+
+.offDate {
+  fill: rgb(255, 52, 52);
+}
+
+.no-opacity {
+  opacity: 1 !important;
+}
+
+.inactive-pool #contract-period-container, .inactive-pool .new-pool-header, .inactive-pool .main-contract-information li>:nth-child(1), .inactive-pool .main-contract-information li>:nth-child(2), .inactive-pool .detail-row, .inactive-pool .first-token, .inactive-pool .stats-container {
+  opacity: 0.5;
+}
+
+.new-pool-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0 8px 0;
+  align-items: center;
+}
+
+.token-logo-container {
+  width: 20%;
+  height: 44px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.token-logo-container img, .token-logo-svg-container svg {
+  max-width: 44px;
+  aspect-ratio: 1;
+  background-color: var(--white);
+  border-radius: 100%;
+  box-shadow: 0px 4px 4px rgb(0 0 0 / 25%);
+}
+
+.token-logo-container > *:first-child {
+  margin-left: 0;
+}
+
+.have-1-elements > * {
+  height: 100%;
+}
+
+.have-2-elements > * {
+  margin-left: -0.6rem;
+  height: 90%;
+}
+
+.have-3-elements > * {
+  margin-left: -1.3rem;
+  height: 85%;
+}
+
+.have-4-elements > * {
+  margin-left: -1.5rem;
+  height: 80%;
+}
+
+.have-5-elements > * {
+  margin-left: -1.3rem;
+  height: 70%;
+}
+
+.have-6-elements > * {
+  margin-left: -1.35rem;
+  height: 65%;
+}
+
+.have-7-elements > * {
+  margin-left: -1.4rem;
+  height: 63%;
+}
+
+.farmed-token-logo {
+  z-index: 10;
+}
+
+#token-pool-stats .farmed-token-logo {
+  z-index: 11;
+}
+
+.information-icon-container {
+  width: 20%;
+}
+
+.information-icon-container img {
+  margin-left: 53%;
+}
+
+.token-stats {
+  margin: 3px;
+  padding: 7px;
+}
+
+.max-button {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.token-name-container {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 19px;
+  width: 55%;
+  margin: 0 12%;
+}
+
+.token-name-container .token-name {
+  text-align: center;
+}
+
+#token-pool-stats {
+  z-index: 20;
+  width: 107%;
+  max-width: 468px;
+  min-width: 315px;
+  transform: translateX(-23px);
+  position: absolute;
+  top: 0px;
+  background-color: var(--white);
+  padding: 0 10px;
+  border-top: 0px;
+  border-right: 12px;
+  border-bottom: 12px;
+  border-left: 12px;
+  border-color: var(--second-new-grey);
+  border-style: solid;
+  border-radius: 18px;
+}
+
+#token-pool-stats #new-pool-header {
+  padding-top: 0px;
+}
+
+#token-pool-stats h3 {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.stats-container {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.stats-container li {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+  position: relative;
+  align-items: center;
+}
+
+#contract-information {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: space-between;
+}
+
+.multiple-nft-selection {
+  display: flex;
+  margin: 0 auto 10px auto;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.select-multiple-nfts-buttons-container {
+  display: flex; 
+}
+
+.multiple-nft-selection-structural-div, .select-multiple-info {
+  width: 20%;
+}
+
+.cheddar-needed-container {
+  background-color: var(--bg);
+  border-radius: 10px;
+}
+
+.select-multiple-info p {
+  font-weight: 900;
+}
+
+.select-multiple-info img {
+  margin-left: 5px;
+  display: inline-block;
+  height: 26px;
+}
+
+.cheddar-needed-to-stake-all-nfts {
+  line-height: 26px;
+  vertical-align: top;
+  font-weight: 600;
+}
+
+.needed-to-stake-each-nft {
+  text-align: center;
+}
+
+.select-multiple-nfts-buttons-container .button.selected, .nft-pools-container .selected .nft-actions-container .button {
+  background: white !important;
+  border: var(--primary-selected) 2px solid !important;
+  color: var(--primary) !important;
+}
+
+.stake-all-nft-button, .unstake-all-nft-button {
+  margin: 0px 5px;
+  min-width: 42%;
+}
+
+.stake-all-nft-button:hover, .unstake-all-nft-button:hover {
+  border: var(--light-gray) 2px solid;
+  box-shadow: inset 0 -1px 0 0 var(--primary);
+}
+
+.main-contract-information, .nft-basic-info-and-interaction, .stats-container {
+  width: 100%;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 32px;
+}
+
+.main-contract-information ul {
+  height: 100%;
+}
+
+.main-contract-information li, .nft-basic-info-and-interaction div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+h2.nft-name {
+  text-align: center;
+  padding: 11px;
+}
+
+.nft-name-row {
+  margin: 0 25px;
+}
+
+.nft-name-row h3 {
+  line-height: 32px;
+}
+
+.pool-legend {
+  font-weight: 400;
+  line-height: 21px;
+}
+
+.unclaimed-rewards-info-container, .reward-tokens-info-container, .total-staked-info-container, .total-staked-info-container, .rewards-per-day-info-container, .apr-info-container {
+  display: flex;
+  flex-direction: column-reverse;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  align-content: space-around;
+
+  position: absolute;
+  left: 80%;
+  transform: translateY(-61%);
+
+  background-color: var(--white);
+  border: 1px solid var(--second-new-grey);
+  border-radius: 12px;
+  margin: 10px 40px;
+  padding: 5px 9px;
+
+  z-index: 1;
+}
+
+.total-staked-info-container {
+  transform: translateY(-56%);
+}
+
+
+.unclaimed-rewards-info-container > div, .reward-tokens-info-container > div, .total-staked-info-container > div, .rewards-per-day-info-container > div, .apr-info-container > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.detail-row span {
+  padding: 5px;
+  border-width: 0px 1px;
+  border-radius: 12px;
+  margin: 1px;
+  line-height: 18px;
+}
+
+.reward-tokens-value {
+  display: flex;
+  justify-content: flex-end;
+  max-height: 32px;
+}
+
+.reward-tokens-value img {
+  margin-left: 3px;
+}
+
+.detail-row .mini-icon {
+  margin: -30% 0;
+  height: 18px;
+}
+
+.mini-icon {
+    height: 30px;
+}
+
+button.activate {
+    background-color: var(--yellow);
+    color: var(--fg);
+    font-weight: 500;
+}
+
+#activate .activate {
+  margin: 0 25%;
+}
+
+#stake-unstake-nft, #harvest-button, #stake-button, #unstake-button, .activate, .nft-actions-container .button {
+    background-color: var(--primary);
+    color: var(--white);
+    height: 36px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+}
+
+.visual-tool-expanding-indication-hidden {
+  text-align: center;
+  opacity: 0;
+  color: var(--yellow);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.0;
+  }
+}
+.blink {
+  animation: blink 1.5s linear 0s infinite;
+}
+
+#expanding-indicators {
+  height: 28px;
+  transform: translateY(3px);
+}
+
+#expanding-indicators .hide-expand-buttons-container {
+  margin: 0 auto;
+  width: max-content;
+  padding: 3px;
+}
+
+.expand-button {
+  transition: all 0.5s linear;
+}
+
+.flipped {
+  transform: rotate(180deg);
+}
+
+#expanding-indicators img {
+  border: 5px var(--light-gray) solid;
+  border-radius: 8px;
+  background-color: var(--light-gray);
+}
+
+#activated {
+  margin-bottom: 20px;
+}
+
+#staking-unstaking-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.show-type-container {
+  width: 100%;
+}
+
+.show-type-container button {
+  display: inline-block;
+  width: 49%;
+  text-align: center;
+  font-weight: 600;
+  color: var(--primary-low);
+  padding: 16px 0px;
+  border-width: 0 1px 2px 0;
+  border-color: var(--light-gray);
+  border-style: solid;
+}
+
+.show-type-container button.active {
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.main-stake, .main-unstake {
+  padding: 10px;
+  width: 100%;
+}
+
+.input-container {  
+  display: flex;
+  margin-top: 32px;
+  align-items: center;
+  background-color: var(--bg);
+  padding: 0 3px;
+}
+
+.input-container input:focus {
+  outline: none;
+}
+
+.input-container .token-logo, .input-container .token-logo-svg-container svg {
+  height: 40px;
+  margin-right: 10px;
+  background-color: var(--shadow);
+  border-radius: 50%;
+}
+
+.amount-available {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#staking-unstaking-container input {
+  height: 56px;
+  width: 99%;
+  background-color: var(--bg);
+  border-radius: 4px 4px 0 0;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+#staking-unstaking-container input::placeholder {
+  color: var(--primary);
+  margin: 0 -8%;
+}
+
+.available-info {
+  margin: 0 auto;
+  width: 64%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.available-info>* {
+  margin: 10px;
+}
+
+/* NFT section styles */
+#nft-pools-section {
+  background-color: #ffffffad;
+  position: fixed;
+  left: -25px;
+  top: -27px;
+  height: 105vh;
+  width: 103vw;
+  overflow: scroll;
+  z-index: 22;
+}
+
+.nft-pools-container {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  margin: 100px auto 100px auto;
+  padding: 30px 30px 30px 30px;
+  border-radius: 12px;
+  width: max-content;
+  max-width: 117rem;
+  background-color: var(--second-new-grey);
+  min-width: 40%;
+  max-width: 25%;
+}
+
+.cheddar-balance-container {
+  font-weight: 800;
+  position: absolute;
+  top: 6px;
+  right: 17px;
+  width: max-content;
+}
+
+.cheddar-balance-container img {
+  height: 26px;
+  display: inline-block;
+  position: relative;
+  top: 7px;
+}
+
+.nft-farm-info, .stake-nfts-title {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 32px;
+  line-height: 39px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.nft-flex {
+  display: flex;
+  grid-gap: 3rem;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.nft-card {
+  border-style: solid;
+  border-color: var(--second-new-grey);
+  border-width: 29px 12px 12px 12px;
+}
+
+.generic-nft-card, .nft-card {
+  /* background-color: var(--primary-low);
+  border-radius: 8px; */
+  filter: drop-shadow(0px 4px 4px rgba(0, 0, 0, 0.25));
+}
+
+.nft-presentation, .nft-basic-info-and-interaction {
+  background-color: var(--bg);
+  /* margin: 12px;
+  border-radius: 4px; */
+}
+
+.nft-basic-info-and-interaction {
+  padding: 8px;
+}
+
+.nft-presentation {
+  border-bottom: 12px var(--second-new-grey) solid;
+}
+
+.nft-card > div {
+  width: 380px;
+  max-width: 80vw;
+}
+
+.nft-actions-container {
+  display: flex;
+}
+
+.structural-container-nft-actions {
+  width: 10%;
+  height: 34px;
+}
+
+.confirm-or-cancel-stake-or-unstake-nft-container {
+  display: flex;
+  min-width: 50%;
+  max-width: 100%;
+}
+
+.nft-actions-container button.button {
+  height: 34px;
+}
+
+#confirm-stake-unstake, #cancel-stake-unstake {
+  margin-top: 20px;
+  width: 100%;
+  min-width: auto;
+}
+
+.not-enough-cheddar-warning {
+  color: rgb(255 0 0 / 73%);
+  font-size: large;
+  margin-top: 5px;
+  padding: 10px;
+  background-color: var(--bg);
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+@media screen and (max-width: 1630px) {
+  .nft-flex {
+    max-width: 80vw;
+  }
+}
+
+@media screen and (maX-width: 1132px) {
+  .nft-flex {
+    max-width: 478px;
+  }
+}
+
+@media screen and (max-width: 1500px) and (min-width: 1130px) {
+  .grid{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 1129px) and (min-width: 751px) {
+  .grid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 1210px) {
+  /*Burger*/
+
+  nav {    
+    margin-top: 3px;
+  }
+
+  .close-burguer {
+    color: var(--gray);
+    position: absolute;
+    right: 20px;
+    top: 2vw;
+    display: block !important;
+    z-index: 1;
+  }
+
+  #burguer {
+    z-index: 40;
+    width: auto;
+    justify-content: center;
+    position: fixed;
+    top: 40px;
+    right: 11px;
+    background-color: #ffffffc9;
+    padding: 10px;
+    border-radius: 20%;
+    height: 49px;
+    aspect-ratio: 1;
+  }
+
+  .burger-button {
+    margin: 4px auto;
+    width: max-content;
+  }
+
+  #burguer.no-publicity-position {
+    top: 26px;
+  }
+
+  .burguer-content {
+    z-index: 2;
+
+    display: flex;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 90%;
+    height: 100%;
+    background-color: var(--white);
+    box-shadow: -13px 6px 26px -8px rgb(0 0 0 / 40%);
+
+    margin: 0;
+
+    flex-direction: column;
+    justify-content: flex-start;
+    transform: translateX(110%);
+    transition: transform 0.4s ease-in-out;
+  }
+
+  .top-in-burguer {
+    order: 1;
+    width: 100%;
+    align-items: flex-start !important;
+  }
+
+  #other-links {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+  }
+
+  .games-dropdown {
+    border: 1px solid black !important;
+  }
+
+  .games-links-container {
+    border: 1px solid black;
+  }
+  
+  .games-dropdown-items {
+    right: auto;
+    left: 5px;
+  }
+
+  .cheddar-main-logo-container {
+    display: block;
+    margin: 5px 0 0px 16px;
+    order: 0;
+  }
+
+  #power-up {
+    width: 131px;
+  }
+
+  #ref-swap {
+    width: 110px;
+  }
+
+  .left-on-full-screen {
+    order: 2;
+    flex-direction: column-reverse !important;
+    width: 100%;
+  }
+
+  .left-on-full-screen .navButton {
+    align-self: self-start;
+  }
+
+  #power-up, #ref-swap {
+    order: 3;
+    border: black solid 1px;
+    position: relative;
+    height: 48px;
+    background-color: var(--input);
+    margin: 6px 14px;
+  }
+
+  #ref-swap svg {
+    top: 12px;
+  }
+  
+  #power-up img, #ref-swap svg {
+    position: absolute;
+    right: 11px;
+  }
+
+  a.selected {
+    color: black;
+    background-color: var(--second-yellow);
+  }
+
+  .navButton {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 0px;    
+    color: black;
+    padding: 12px 0px 12px 16px;
+    box-shadow: none;
+    margin: 0;
+    order: 2;
+    width: 100%;
+  }
+
+  .cheddar-general-info {
+    padding: 12px 0 12px 16px;
+    order: 1;
+    align-items: flex-start;
+  }
+
+  .circulatingSupply.supply {
+    position: relative;
+    top: 8px;
+  }
+
+  .show-right__nav {
+    transform: translateX(0);
+  }
+
+  .burger-button {
+    display: block;
+  }
+
+  .btn-liquid {
+    transform: translateX(29px)
+  }
+}
+
+
+@media screen and (max-width: 750px) {
+  .grid{
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  .publicity-container {
+    width: 100%;
+  }
+
+  .publicity-container img {
+    height: 40%;
+  }
+  
+  .publicity-container span {
+    font-size: 2rem;
+  }
+
+  .publicity-decoration {
+    width: 100%;
+  }
+
+
+  /* Burger
+  header nav {
+    justify-content: center;
+    position: fixed;
+    top: 11px;
+    right: 11px;
+    background-color: #ffffffc9;
+    padding: 10px;
+    border-radius: 20%;
+    height: 49px;
+    aspect-ratio: 1;
+  }
+
+  .cheddar-main-logo-container {
+    display: block;
+  }
+
+  .navbar-links{
+    display: flex;
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 90%;
+    height: 100%;
+    background-color: var(--white);
+    box-shadow: -13px 6px 26px -8px rgb(0 0 0 / 40%);
+
+    flex-direction: column;
+    justify-content: flex-start;
+    transform: translateX(110%);
+    transition: transform 0.4s ease-in-out;
+  }
+
+  .navbar-links > *:first-child {
+    margin: 21px 0 29px 16px;
+  }
+
+  a.selected {
+    color: black;
+    background-color: var(--second-yellow);
+  }
+
+  .navButton {
+    background-color: rgba(255, 255, 255, 0);
+    border-radius: 0px;    
+    color: black;
+    padding: 12px 0px 12px 16px;
+    box-shadow: none;
+    margin: 0;
+  }
+
+  .show-right__nav {
+    transform: translateX(0);
+  }
+
+  .burger-button {
+    display: block;
+  }
+
+  .line1, .line2, .line3, .burger-button--toggle .line1, .burger-button--toggle .line2, .burger-button--toggle .line3 {
+    transition: all 0.4s ease-in-out;
+  }
+
+  .burger-button--toggle .line1{
+      margin-bottom: 0 !important;
+      transform: rotate(-45deg) translate(-4px, 2.5px);
+  }
+
+  .burger-button--toggle .line2{
+      opacity: 0;
+  }
+
+  .burger-button--toggle .line3{
+      transform: rotate(45deg) translate(-5.6px, -4.5px);
+  } */
+
+  
+}
+
+@media screen and (max-width: 600px) {
+  .show-smaller-screens {
+    display: block;
+  }
+
+  .show-bigger-screens {
+    display: none;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .publicity-container img {
+    height: 30%;
+  }
+  
+  .publicity-container span {
+    font-size: 1.8rem;
+  }
+
+  main {
+    margin-top: 52px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .publicity-container img {
+    height: 20%;
+  }
+  
+  .publicity-container span {
+    font-size: 1.5rem;
+  }
 }

@@ -1,0 +1,83 @@
+<form id="" onkeydown="return event.key != 'Enter';">
+
+    <div><br><strong style="color:#222">This is BETA software, use at your own risk.</strong><br><br></div>
+    <div id="timer"></div>
+    <div id="token-header" class="icon-header">
+      <img class="icon" src="./assets/stakin-cheddar.svg" width="50px" height="50px">
+      <span class="name">Cheddar</span>
+    </div>
+<!--     <h2>Stake <span class="token-name">NEAR</span> -> Farm Cheddar</h2> -->
+    <div class="pool-meta">
+      <div>Deposit Fee:</div>
+      <div>0%</div>
+    </div>
+    <div class="pool-meta">
+      <div>Earn:</div>
+      <div>Cheddar🧀</div>
+    </div>
+    <div class="pool-meta">
+      <div>Starts:</div>
+      <div id="farming_start"></div>
+    </div>
+    <div class="pool-meta">
+      <div>Ends:</div>
+      <div id="farming_end"></div>
+    </div>
+    <div id="activated" style="display:none">
+    <div class="pool-meta earned">
+      <div class="">CHEDDAR</div>
+      <div class="">EARNED</div>
+    </div>
+    <div class="pool-meta earned amount">
+      <div id="cheddar-balance">0</div>
+      <div><button id="harvest" type="submit">Harvest</button></div>
+    </div>
+    <div class="pool-meta staked">
+      <div class="token-name">NEAR</div>
+      <div class="">Staked</div>
+    </div>
+    <div class="pool-meta staked amount">
+      <div id="near-balance"><span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
+      <div>&nbsp;</div>
+    </div>
+    <div class="pool-meta staked" style="display:none">
+      <div class="token-name">NEAR</div>
+      <div class="">Staked</div>
+    </div>
+    <div id="stakedAmount1" class="pool-meta staked amount" style="display:none">
+      <div id="near-balance"><span class="near balance"></span><a href="#"></a></div>
+      <div>&nbsp;</div>
+    </div>
+    <fieldset id="fieldset">
+      <div class="input-group">
+        <input id="stakeAmount" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
+        <span class="token-name">NEAR</span>
+      </div>
+      <div class="pool-meta wallet-balance">
+        <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
+      </div>
+      <div id="secondStakeAmount" class="input-group" style="display:none">
+        <input id="stakeAmount1" class="near amount input-box" inputmode="numeric" placeholder="Enter Amount" onfocus="this.placeholder = ''" onblur="this.placeholder = 'Enter Amount'" autocomplete="off">&nbsp;<span id="max" class="inside-input">Max</span>
+        <span class="token-name">NEAR</span>
+      </div>
+      <div class="pool-meta wallet-balance">
+        <div id="wallet-available">Available to stake:&nbsp;<span class="near balance"></span>&nbsp;<a href="#"><span class="max" style="display:none">max</span></a></div>
+      </div>
+      <div class="pool-meta actions">
+        <div class="hQrVZb">
+          <button id="unstake" class="gAaTZf" type="submit">UnStake</button>
+          <button id="stake" class="hwJKVX" type="submit">Stake</button>
+        </div>
+      </div>
+      <div class="disclaimer">
+
+          <label>✅&nbsp;&nbsp;By staking, I agree to the <a href="#" id="terms-of-use">terms of use</a></label><br>
+      </div>
+    </fieldset>
+    </div>
+    <div id="deposit" style="">
+      <br>
+      <button class="activate" type="submit">Activate</button>
+      <p>0.05 NEAR storage cost, refunded after unstaking all</p>
+    </div>
+  </form>

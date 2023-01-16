@@ -23,10 +23,30 @@ export function ntoy(near: number): string {
  * returns Near number with 5 decimal digits
  * @param {string} yoctoNEAR amount 
  */
-export function yton(yoctos: string): number {
+export function yton(yoctos: string|BigInt): number {
   try {
+    yoctos = yoctos.toString()
     if (yoctos == undefined) return 0;
     const decimals = 5
+    const bn = BigInt(yoctos) + BigInt(0.5 * 10 ** (24 - decimals)); //round 6th decimal
+    const truncated = ytonFull(bn.toString()).slice(0, (decimals - 24))
+    return Number(truncated)
+  }
+  catch (ex) {
+    console.log("ERR: yton(", yoctos, ")", ex)
+    return NaN;
+  }
+}
+
+//yoctoNEAR amount -> number, rounded
+/**
+ * returns Near number with 5 decimal digits
+ * @param {string} yoctoNEAR amount 
+ */
+ export function ytonLong(yoctos: string): number {
+  try {
+    if (yoctos == undefined) return 0;
+    const decimals = 8
     const bn = BigInt(yoctos) + BigInt(0.5 * 10 ** (24 - decimals)); //round 6th decimal
     const truncated = ytonFull(bn.toString()).slice(0, (decimals - 24))
     return Number(truncated)
@@ -49,6 +69,83 @@ export function ytonFull(yoctoString: string): string {
 //-------------------------------------
 //--- conversions User-input <-> Number
 //-------------------------------------
+
+/** rebase a number based on decimal. Examples
+*   convertToDecimals("1",3) = 0.001
+*   convertToDecimals("0",3) = 0.0
+*   convertToDecimals("1000",3) = 1.0
+*   convertToDecimals("1000",3) = 1.0
+*   convertToDecimals("12345678",3) = 123.45678
+*   If truncate is provided, then the fractional part of the number is truncated to the
+*   `truncate` decimal digits. If `truncate == 0` then the fractional part is ommited.
+*   Example:
+*   convertToDecimals("12345678", 1, 1) = 123.4
+*/ 
+export function convertToDecimals(str:string|BigInt, decimals: number, truncate:number) {
+  str = str.toString() // convert numbers and bigint
+  // clear leading zeros
+  let i = 0
+  for(; i<str.length && str[i]=="0"; ++i) {}
+  if (i != 0)
+    str = str.substring(i);
+  if (str == "0")
+    return "0";
+
+  // let decimals_n = Number(decimals);
+  if(decimals == 0)
+    return str;
+
+  // Pad zeros at the beginning.
+  // We add 1 to make sure the integer digit is included as well)
+  str = String(str).padStart(decimals + 1, "0");
+
+  let integer = str.slice(0, -decimals);
+  let fractional = str.slice(integer.length);
+  if(integer == "")
+    integer = "0";
+
+  if(fractional == "")
+    return integer;
+  if (truncate == undefined) {
+    return integer + "." + fractional;
+  }
+  else if(Number(fractional) > 0) {
+    return integer + "." + fractional.substring(0, truncate);
+  }
+  return integer;
+}
+
+/** Takes a decimal number in string and returns
+* a number as a string rebased to given decimal base.
+* Examples
+*   convertToBase("1", 3) = "1000"
+*   convertToBase("1234", 3) =   "1234000"
+*   convertToBase("1.234", 3) =  "1234"
+*   convertToBase("1.2345", 3) = "1234"
+* convertToBase("0.12345", 3) = "123"
+*/ 
+export function convertToBase(n:string, decimals:string) {
+  let decimals_n = Number(decimals);
+  // clear leading zeros
+  let i = 0
+  for(; i<n.length && n[i]=="0"; ++i) {}
+  if (i != 0)
+    n = n.substring(i);
+
+  let dotIdx = n.indexOf(".");
+  if (dotIdx < 0)  // no decimal part
+    return n + "0".padEnd(decimals, "0");
+
+  let integer = n.substring(0, dotIdx);
+  if(decimals_n == 0)
+    return integer;
+
+  let fractional = n.substring(dotIdx + 1, dotIdx + 1 + decimals).padEnd(decimals, "0");
+  if (integer.length == 0)
+    return fractional;
+  return integer + fractional;
+}
+
 /**
  * converts a string with and commas and decimal places into a number
  * @param {string} str
@@ -63,7 +160,7 @@ export function toNumber(str: string): number {
  * Formats a number in NEAR to a string with commas and 5 decimal places
  * @param {number} n 
  */
-function toStringDecSimple(n: number) {
+export function toStringDecSimple(n: number) {
   const decimals = 5
   const textNoDec = Math.round(n * 10 ** decimals).toString().padStart(decimals + 1, "0");
   return textNoDec.slice(0, -decimals) + "." + textNoDec.slice(-decimals);
@@ -72,10 +169,21 @@ function toStringDecSimple(n: number) {
  * Formats a number in NEAR to a string with commas and 5 decimal places
  * @param {number} n 
  */
-export function toStringDecLong(n: number) {
-  const decimals = 7
+export function toStringDecLong(n: number): string {
+  const decimals = 8
   const textNoDec = Math.round(n * 10 ** decimals).toString().padStart(decimals + 1, "0");
   return addCommas(textNoDec.slice(0, -decimals) + "." + textNoDec.slice(-decimals));
+}
+
+/**
+ * Formats a bigint in NEAR to a string with commas and 5 decimal places
+ * @param {number} n 
+ */
+ export function bigintToStringDecLong(n: bigint): string {
+   const nString = n.toString()
+   const nyton = ytonLong(nString)
+   const output = toStringDecLong(nyton)
+    return output
 }
 /**
 * Formats a number in NEAR to a string with commas and 5 decimal places

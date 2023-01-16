@@ -1,3 +1,4 @@
+import { Transaction } from "near-api-js/lib/transaction";
 import {BatchTransaction, FunctionCall, Transfer} from "./batch-transaction"
 import {U64String,U128String} from "./util"
 
@@ -9,6 +10,7 @@ export type EventHandler = (this:Document,ev:any)=>any;
 export interface WalletInterface {
     
     getAccountId():string;
+    getDisplayableAccountId():string;
     
     getAccountBalance(accountId?:string):Promise<U128String>;
 
@@ -43,4 +45,9 @@ export interface WalletInterface {
      * ASYNC, low level generic access
      */
     queryChain(method: string, args: object): Promise<any>;
+
+    requestSignTransactions(transactions: Transaction[], callbackUrl?: string, meta?: string): Promise<void>
+
+    requestSignTransactions(options: RequestSignTransactionsOptions): Promise<void>
+
 }

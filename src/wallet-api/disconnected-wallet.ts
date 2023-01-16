@@ -1,16 +1,26 @@
 import {WalletInterface} from "./wallet-interface"
 import {U64String,U128String} from "./util"
 import {BatchTransaction} from "./batch-transaction"
+import { Transaction } from "near-api-js/lib/transaction";
 
-const NOT_CONNECTED="not connected";
+const NOT_CONNECTED="Connect to NEAR";
 
 // -----------------------------
 // Default disconnected wallet
 // SmartContract proxies start with this dummy wallet until the user chooses a wallet
 // -----------------------------
 export class DisconnectedWallet implements WalletInterface {
+
+    requestSignTransactions(transactions: Transaction[], callbackUrl?: string, meta?: string): Promise<void>;
+    requestSignTransactions(options: RequestSignTransactionsOptions): Promise<void>;
+    requestSignTransactions(transactions: any, callbackUrl?: any, meta?: any): Promise<void> {
+        return Promise.resolve()
+    }
     
     getAccountId():string{ return NOT_CONNECTED }
+    getDisplayableAccountId(): string {
+        return this.getAccountId()
+    }
 
     async getAccountBalance(accountId?:string):Promise<U128String>{ return "0"};
 
