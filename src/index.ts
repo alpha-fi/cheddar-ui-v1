@@ -1247,9 +1247,7 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
-  // const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
-  // await updateDetail(newPool, farmTokenContractList, poolUserStatus.farmed_tokens, "unclaimed-rewards")
 
   if(!poolParams.config.noBoost) {
     newPool.querySelector(".boost-button")!.classList.remove("hidden")
