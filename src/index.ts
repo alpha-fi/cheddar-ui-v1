@@ -1,8 +1,4 @@
-import { baseDecode } from 'borsh';
-import { connect, Contract, keyStores, Near, WalletConnection, ConnectedWalletAccount } from 'near-api-js'
-import { Action, createTransaction, functionCall } from 'near-api-js/lib/transaction';
-import { PublicKey } from 'near-api-js/lib/utils'
-import party from "party-js"; 
+import { connect, keyStores, WalletConnection, ConnectedWalletAccount } from 'near-api-js'
 
 import { ENV, CHEDDAR_CONTRACT_NAME, TESTNET_CHEDDAR_CONTRACT_NAME, getConfig } from './config'
 
@@ -10,7 +6,7 @@ import { WalletInterface } from './wallet-api/wallet-interface';
 import { disconnectedWallet } from './wallet-api/disconnected-wallet';
 import { NearWebWallet } from './wallet-api/near-web-wallet/near-web-wallet';
 import { narwallets, addNarwalletsListeners } from './wallet-api/narwallets/narwallets';
-import { toNumber, ntoy, yton, ytonLong, toStringDec, toStringDecSimple, toStringDecLong, toStringDecMin, ytonFull, addCommas, convertToDecimals, removeDecZeroes, convertToBase } from './util/conversions';
+import { yton, toStringDec, toStringDecMin, convertToDecimals, convertToBase } from './util/conversions';
 
 //qs/qsa are shortcut for document.querySelector/All
 import { qs, qsa, qsi, showWait, showErr, showSuccess, showMessage, show, hide, hideOverlay, showError, showPopup, qsInnerText, qsaAttribute } from './util/document';
@@ -37,9 +33,6 @@ import { TokenContractData } from './entities/PoolEntities';
 import { PoolParamsNFT } from './entities/poolParamsNFT';
 import { NFTContractData, StakingContractDataNFT } from './entities/PoolEntitiesNFT';
 import { NFTStakingContractParams } from './contracts/nft-structures';
-import {Color, Vector} from '../node_modules/party-js/lib/components';
-import {ModuleFunction} from '../node_modules/party-js/lib/systems/modules';
-import * as variation from '../node_modules/party-js/lib/systems/variation';
 import { StakingPoolNFT } from './contracts/nft-staking';
 import { initButton as initLiquidButton } from './util/animations/liquidityButton';
 import { ConfettiButton } from './util/animations/new-confetti-button';
@@ -830,7 +823,7 @@ async function refreshPoolInfoSingle(poolParams: PoolParams, newPool: HTMLElemen
       }
     }
 
-    if(!doesPoolNeedDeposit) {
+    if(!doesPoolNeedDeposit && newPool.classList.contains("inactive-pool")) {
       newPool.querySelector("#activate")?.classList.add("hidden")
     } else {
       newPool.querySelector("#activate")?.classList.remove("hidden")
@@ -1109,7 +1102,6 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   logoContainer.append(newTokenLogoElement)
   
   logoContainer.classList.add(`have-1-elements`)
-  console.log("Logo container NFT", logoContainer)
 }
 
 async function addAllLogos(poolParams: PoolParams|PoolParamsP3|PoolParamsNFT, header: HTMLElement) {
@@ -1193,6 +1185,10 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
   }
   newPool.querySelector(".confetti-button")?.addEventListener("click", harvestMultipleOrNFT(poolParams, newPool))
 
+  let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
+  let stakeUnstakeNftButtonId = stakeUnstakeNftButton.id
+  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId))
+
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
   const contractParams = await poolParams.stakingContractData.getContractParams()
@@ -1252,7 +1248,6 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
   newPool.querySelector(".rewards-per-day-value-usd")!.innerHTML = `$ ${rewardsPerDayInUsd}`
-  
 
   if(!poolParams.config.noBoost) {
     newPool.querySelector(".boost-button")!.classList.remove("hidden")
@@ -1591,7 +1586,9 @@ async function resetNFTPoolListener(poolParams: PoolParamsNFT, pool: HTMLElement
   addFilterClasses(poolParams, newPool)
   addNFTPoolListeners(poolParams, newPool)
   
-  if(newPool.classList.contains("inactive-pool")) {
+  // For some reason, newPool.classList.contains("inactive-pool") returns false when it has that class from time to time
+  // So we're putting just pool. This should make the refresh to be bad on a first scenario, but good on a second one.
+  if(pool.classList.contains("inactive-pool")) {
     displayInactivePool(newPool)
   } else {
     displayActivePool(poolParams, newPool)
@@ -1676,7 +1673,6 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
     element.innerHTML = poolName
   })
 
-  
   if(newPool.classList.contains("inactive-pool")) {
     displayInactivePool(newPool)
   } else {
@@ -1768,8 +1764,12 @@ function setUnstakeTabListeners(newPool: HTMLElement) {
   unstakeTabButton.addEventListener("click", cancelActiveColor(stakeTabButton));
 }
 
-function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean) {
+function displayIfNftPool(newPool: HTMLElement, isAccountRegistered: boolean,hasUserStaked:boolean) {
   if(isAccountRegistered) {
+    // if the pool has ended and user doesn't has any NFT staked don't show the stake/unstake btn
+    if(newPool.classList.contains("inactive-pool") && !hasUserStaked){
+      return;
+    } 
     let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement;
     stakeUnstakeNftButton.classList.remove("hidden")
   }
@@ -1800,11 +1800,10 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
   let activateButtonContainer = newPool.querySelector("#activate") as HTMLElement
   let activateButton = newPool.querySelector(".activate") as HTMLElement
   let harvestSection = newPool.querySelector(".harvest-section") as HTMLElement
-  
+
   if(wallet != disconnectedWallet) {
     let isAccountRegistered = (await poolParams.stakingContractData.contract.storageBalance()) != null;
 
-    
     if(!isAccountRegistered) {
       activateButtonContainer.classList.remove("hidden")
       activateButton.addEventListener("click", activateClicked(poolParams, newPool))
@@ -1820,8 +1819,10 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
       displayIfTokenPool(newPool, isAccountRegistered)
 
     } else if(poolParams instanceof PoolParamsNFT) {
-
-      displayIfNftPool(newPool, isAccountRegistered)
+      const poolUserStatus = await poolParams.stakingContractData.getUserStatus()
+      // check for user stake 
+      const hasUserStakedNFT = poolUserStatus.stake_tokens.some(total => total.length > 0) && poolUserStatus.stake != "0"
+      displayIfNftPool(newPool, isAccountRegistered,hasUserStakedNFT)
 
     }
   }
@@ -2419,6 +2420,7 @@ function selectAllActionNftButtons(action: string, stakeRate: number){
 
 function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
   return async function () {
+    console.log("Test")
     const contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
     // const stakeRateStr: string = contractParams.stake_rates[0]    
     const stakeRate: number = yton(contractParams.cheddar_rate)
