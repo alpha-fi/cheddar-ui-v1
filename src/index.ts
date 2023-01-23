@@ -1240,10 +1240,6 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
 
   await addHeader(poolParams, newPool)
 
-  let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
-  let stakeUnstakeNftButtonId = stakeUnstakeNftButton.id
-  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId))
-
   const rewardsTokenDataArray = await poolParams.getRewardsTokenDetail()
   const rewardsPerDay = rewardsTokenDataArray.map(data => data.rewardsPerDayBN!.toString())
   const rewardsPerDayInUsd = await convertToUSDMultiple(farmTokenContractList, rewardsPerDay)
@@ -2431,7 +2427,6 @@ function selectAllActionNftButtons(action: string, stakeRate: number){
 
 function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
   return async function () {
-    console.log("Test")
     const contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
     // const stakeRateStr: string = contractParams.stake_rates[0]    
     const stakeRate: number = yton(contractParams.cheddar_rate)
