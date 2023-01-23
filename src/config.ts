@@ -281,6 +281,7 @@ export function getConfig(env:string):GetConfigResults {
           poolType: 'nft',
           poolName: 'Cheddy',
           nftBaseUrl: ['https://bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice.ipfs.nftstorage.link'],
+
           contractName: 'p4-cheddy1.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
           config: { noBoost: true }
