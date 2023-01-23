@@ -1530,7 +1530,7 @@ async function resetSinglePoolListener(poolParams: PoolParams, pool: HTMLElement
   
   addSinglePoolListeners(poolParams, newPool)
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool)
+    displayInactiveP2P3Pool(newPool)
   } else {
     displayActivePool(poolParams, newPool)
   }
@@ -1558,7 +1558,7 @@ async function resetMultiplePoolListener(poolParams: PoolParamsP3, pool: HTMLEle
   addMultiplePoolListeners(poolParams, newPool)
   
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool)
+    displayInactiveP2P3Pool(newPool)
   } else {
     displayActivePool(poolParams, newPool)
   }
@@ -1589,7 +1589,7 @@ async function resetNFTPoolListener(poolParams: PoolParamsNFT, pool: HTMLElement
   // For some reason, newPool.classList.contains("inactive-pool") returns false when it has that class from time to time
   // So we're putting just pool. This should make the refresh to be bad on a first scenario, but good on a second one.
   if(pool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool)
+    displayInactiveNFTPool(newPool, pool)
   } else {
     displayActivePool(poolParams, newPool)
   }
@@ -1674,7 +1674,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   })
 
   if(newPool.classList.contains("inactive-pool")) {
-    displayInactivePool(newPool)
+    displayInactiveP2P3Pool(newPool)
   } else {
     await displayActivePool(poolParams, newPool)
   }
@@ -1729,7 +1729,7 @@ function showSuccessOnHarvestAnimation(newPool: HTMLElement, poolParams: PoolPar
   }
 }
 
-function displayInactivePool(newPool: HTMLElement) {
+function displayInactiveP2P3Pool(newPool: HTMLElement) {
   const isUserFarming = newPool.classList.contains("your-farms")
   if(isUserFarming) {
     toggleStakeUnstakeSection(newPool)
@@ -1739,6 +1739,14 @@ function displayInactivePool(newPool: HTMLElement) {
     newPool.querySelector("#staking-unstaking-container .staking")!.setAttribute("disabled", "disabled")
     const event= new Event ("click")
     newPool.querySelector("#staking-unstaking-container .unstaking")!.dispatchEvent(event)
+  }
+}
+
+function displayInactiveNFTPool(newPool: HTMLElement, pool: HTMLElement) {
+  const isUserFarming = pool.classList.contains(`your-farms`)
+  if(isUserFarming) {
+    newPool.querySelector("#stake-unstake-nft")!.classList.remove("hidden")
+    newPool.querySelector(".harvest-section")!.classList.remove("hidden")
   }
 }
 
