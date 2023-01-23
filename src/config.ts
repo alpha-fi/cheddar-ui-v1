@@ -262,7 +262,7 @@ export function getConfig(env:string):GetConfigResults {
           index: 17,
           poolType: 'nft',
           poolName: 'Cheddy',
-          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          nftBaseUrl: ['https://bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice.ipfs.nftstorage.link'],
           contractName: 'p4-cheddy.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
           config: { noBoost: true }
@@ -280,7 +280,8 @@ export function getConfig(env:string):GetConfigResults {
           index: 19,
           poolType: 'nft',
           poolName: 'Cheddy',
-          nftBaseUrl: [''],
+          nftBaseUrl: ['https://bafybeicoln5rvccttgypzo26irjlskslnfynkzig6bowpsj6ay45geeice.ipfs.nftstorage.link'],
+
           contractName: 'p4-cheddy1.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
           config: { noBoost: true }
