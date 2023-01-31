@@ -1187,7 +1187,13 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
 
   let stakeUnstakeNftButton = newPool.querySelector("#stake-unstake-nft")! as HTMLButtonElement
   let stakeUnstakeNftButtonId = stakeUnstakeNftButton.id
-  stakeUnstakeNftButton.addEventListener("click", showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId))
+  stakeUnstakeNftButton.addEventListener("click", async function() {
+    stakeUnstakeNftButton.disabled = true;
+    stakeUnstakeNftButton.innerHTML = "Loading...";
+    await showStakeUnstakeNFTGrid(poolParams, stakeUnstakeNftButtonId);
+    stakeUnstakeNftButton.disabled = false;
+    stakeUnstakeNftButton.innerHTML = "STAKE/UNSTAKE";
+  });
 
   // Refresh every 5 seconds if it's live
   const now = Date.now() / 1000
@@ -2425,33 +2431,31 @@ function selectAllActionNftButtons(action: string, stakeRate: number){
   }
 }
 
-function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
-  return async function () {
-    const contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
-    // const stakeRateStr: string = contractParams.stake_rates[0]    
-    const stakeRate: number = yton(contractParams.cheddar_rate)
+async function showStakeUnstakeNFTGrid(poolParams: PoolParamsNFT, buttonId: string) {
+  const contractParams: NFTStakingContractParams = await poolParams.stakingContractData.getContractParams()
+  // const stakeRateStr: string = contractParams.stake_rates[0]    
+  const stakeRate: number = yton(contractParams.cheddar_rate)
 
-    qs(".needed-to-stake-each-nft .amount")!.innerHTML = stakeRate.toString()
+  qs(".needed-to-stake-each-nft .amount")!.innerHTML = stakeRate.toString()
 
-    const multipleNftSelectionButtons = qs(".multiple-nft-selection") as HTMLElement
-    multipleNftSelectionButtons.classList.remove("hidden")
+  const multipleNftSelectionButtons = qs(".multiple-nft-selection") as HTMLElement
+  multipleNftSelectionButtons.classList.remove("hidden")
 
-    const confirmButton = qs("#confirm-stake-unstake") as HTMLButtonElement
-    confirmButton.classList.remove("hidden")
+  const confirmButton = qs("#confirm-stake-unstake") as HTMLButtonElement
+  confirmButton.classList.remove("hidden")
 
-    const cancelButton = qs("#cancel-stake-unstake") as HTMLButtonElement
-    cancelButton.classList.remove("hidden")
+  const cancelButton = qs("#cancel-stake-unstake") as HTMLButtonElement
+  cancelButton.classList.remove("hidden")
 
-    const unstakeAllNftsButton = qs(".unstake-all-nft-button") as HTMLButtonElement
-    unstakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("unstake", stakeRate))
+  const unstakeAllNftsButton = qs(".unstake-all-nft-button") as HTMLButtonElement
+  unstakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("unstake", stakeRate))
 
-    const stakeAllNftsButton = qs(".stake-all-nft-button") as HTMLButtonElement
-    stakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("stake", stakeRate))
+  const stakeAllNftsButton = qs(".stake-all-nft-button") as HTMLButtonElement
+  stakeAllNftsButton.addEventListener("click", selectAllActionNftButtons("stake", stakeRate))
 
-    displayCheddarNeededToStakeNFTs(stakeRate)
+  displayCheddarNeededToStakeNFTs(stakeRate)
 
-    await loadAndShowNfts(poolParams, buttonId)
-  }
+  await loadAndShowNfts(poolParams, buttonId)
 }
 
 function showNFTGrid(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
