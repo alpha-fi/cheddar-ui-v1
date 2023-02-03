@@ -1215,12 +1215,6 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
   standardHoverToDisplayExtraInfo(newPool, "rewards-per-day")
   standardHoverToDisplayExtraInfo(newPool, "reward-tokens")
   standardHoverToDisplayExtraInfo(newPool, "unclaimed-rewards")
-
-  let confirmStakeUnstakeNFTButton = NFTPoolSection.querySelector("#confirm-stake-unstake")
-  let cancelStakeUnstakeNFTButton = NFTPoolSection.querySelector("#cancel-stake-unstake")
-
-  confirmStakeUnstakeNFTButton!.addEventListener("click", confirmStakeUnstakeNFTButtonHandler(poolParams))
-  cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
 }
 
 function addPoolTokensDescription (newPool: HTMLElement, poolParams: PoolParams|PoolParamsP3|PoolParamsNFT) {
@@ -2386,6 +2380,16 @@ function cancelActiveColor(elementToDisplayAsNotActive: HTMLElement) {
 async function loadAndShowNfts(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string) {
   await loadNFTs(poolParams, buttonId)
   qs("#nft-pools-section").classList.remove("hidden")
+
+  if(poolParams instanceof PoolParamsNFT) {
+    let confirmStakeUnstakeNFTButton = NFTPoolSection.querySelector("#confirm-stake-unstake")
+    let cancelStakeUnstakeNFTButton = NFTPoolSection.querySelector("#cancel-stake-unstake")
+
+    confirmStakeUnstakeNFTButton!.addEventListener("click", confirmStakeUnstakeNFTButtonHandler(poolParams))
+    cancelStakeUnstakeNFTButton!.addEventListener("click", quitNFTFlex())
+  }
+
+  
 }
 
 
@@ -2605,7 +2609,6 @@ function confirmStakeUnstakeNFTButtonHandler(poolParams: PoolParamsNFT) {
       showError("Select NFT's to stake or unstake")
       return
     }
-    
     try {
 
       const contractParams = await poolParams.stakingContractData.getContractParams()
