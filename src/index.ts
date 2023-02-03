@@ -1271,9 +1271,6 @@ async function addNFTPool(poolParams: PoolParamsNFT, newPool: HTMLElement): Prom
   addNFTPoolListeners(poolParams, newPool)  
 
   refreshNFTOrMultiplePoolInfo(poolParams, newPool)
-  await addRewardsPerDayDetail(poolParams, newPool)
-  await addRewardsTokenDetail(poolParams, newPool)
-  await addUnclaimedRewardsDetail(poolParams, newPool)
 }
 
 async function addPoolMultiple(poolParams: PoolParamsP3, newPool: HTMLElement): Promise<void> {
@@ -1643,6 +1640,11 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   newPool.classList.add("pool-container")
 
   addFilterClasses(poolParams, newPool)
+  await addRewardTokenIcons(poolParams, newPool)
+  await addTotalStakedDetail(poolParams, newPool)
+  await addRewardsPerDayDetail(poolParams, newPool)
+  await addRewardsTokenDetail(poolParams, newPool)
+  await addUnclaimedRewardsDetail(poolParams, newPool)
   if (poolParams instanceof PoolParams && poolParams.type == "single") {
     singlePoolParams = poolParams
     await addPoolSingle(singlePoolParams, newPool)
@@ -1677,11 +1679,7 @@ async function addPool(poolParams: PoolParams | PoolParamsP3 | PoolParamsNFT): P
   } else {
     await displayActivePool(poolParams, newPool)
   }
-  await addRewardTokenIcons(poolParams, newPool)
-  await addTotalStakedDetail(poolParams, newPool)
-  await addRewardsPerDayDetail(poolParams, newPool)
-  await addRewardsTokenDetail(poolParams, newPool)
-  await addUnclaimedRewardsDetail(poolParams, newPool)
+ 
   
   // await addTotalFarmedDetail(poolParams, newPool)
   
