@@ -1090,12 +1090,13 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   const stakeNFTContractList = await poolParams.stakingContractData.getStakeNFTContractList()
   const metadata: NFTMetadata = await stakeNFTContractList[0].getMetadata()
   
-  // let imgUrl = `${baseUrl}/1.png`
+  console.log(metadata.name, metadata.icon)
   let imgUrl = metadata.icon
   if(!imgUrl) {
     imgUrl = poolParams.config.logo
   }
   newTokenLogoElement?.setAttribute("src", imgUrl)
+  newTokenLogoElement?.setAttribute("alt", metadata.name)
 
   toggleGenericClass(newTokenLogoElement)
   newTokenLogoElement.classList.add(`farmed-token-logo`)
@@ -1842,7 +1843,8 @@ async function displayActivePool(poolParams: PoolParams|PoolParamsP3|PoolParamsN
 
 function addLogo(metaData: FungibleTokenMetadata, container: HTMLElement, index: number = 0) {
   let newTokenLogoElement: HTMLElement
-  if (metaData.icon != null){
+
+  if (metaData.icon != null && metaData.icon != ''){
     // inputLogoContainer.innerHTML= `${metaData.icon}`
     if(metaData.icon.startsWith("data:image")) { // icon is img
       const tokenLogoElement = qs(".generic-token-logo-img")
@@ -2734,7 +2736,13 @@ async function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLEle
   // imgElement?.setAttribute("src", new URL(nft.metadata.media, nftBaseUrl).href)
   
   const nftMedia: string = nft.metadata.media.indexOf("@") != -1 ? nft.metadata.media.split("@")[1] : nft.metadata.media
-  imgElement?.setAttribute("src", nft.base_url + "/" + nftMedia)
+  let src
+  if(nftMedia.startsWith("https://")) {
+    src = nftMedia
+  } else {
+    src = nft.base_url + "/" + nftMedia
+  }
+  imgElement?.setAttribute("src", src)
   imgElement!.setAttribute("alt", nft.metadata.media)
 
   

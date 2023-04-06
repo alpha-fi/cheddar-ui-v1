@@ -285,7 +285,14 @@ export function getConfig(env:string):GetConfigResults {
           tokenContractName: CHEDDAR_CONTRACT_NAME,
           config: { noBoost: true }
         },
-        
+        {
+          index: 20,
+          poolType: 'nft',
+          poolName : 'Cheddar-Cafe',
+          nftBaseUrl: ['https://nearnaut.mypinata.cloud/ipfs'],
+          contractName: 'p4-citizencafe.cheddar.near',
+          tokenContractName: CHEDDAR_CONTRACT_NAME,
+        },
       ]
     }
   case 'development':
