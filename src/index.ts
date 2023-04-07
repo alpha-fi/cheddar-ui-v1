@@ -1090,7 +1090,6 @@ async function addNFTFarmLogo(poolParams: PoolParamsNFT, header: HTMLElement) {
   const stakeNFTContractList = await poolParams.stakingContractData.getStakeNFTContractList()
   const metadata: NFTMetadata = await stakeNFTContractList[0].getMetadata()
   
-  console.log(metadata.name, metadata.icon)
   let imgUrl = metadata.icon
   if(!imgUrl) {
     imgUrl = poolParams.config.logo
@@ -1196,7 +1195,7 @@ async function addNFTPoolListeners(poolParams: PoolParamsNFT, newPool: HTMLEleme
     stakeUnstakeNftButton.innerHTML = "STAKE/UNSTAKE";
   });
 
-  // Refresh every 5 seconds if it's live
+  // Refresh every 60 seconds if it's live
   const now = Date.now() / 1000
   const contractParams = await poolParams.stakingContractData.getContractParams()
   const isDateInRange = contractParams.farming_start < now && now < contractParams.farming_end
@@ -2489,6 +2488,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
         base_url: nftContract.baseUrl
       }
     })
+    console.log(1, mapped.length)
     userUnstakedNFTsWithMetadata = userUnstakedNFTsWithMetadata.concat(mapped)
     let tokenId: string
     if("boost_nfts" in userStatus) {
@@ -2517,24 +2517,24 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
       }))
       
     }
-    
     poolHasStaked = userStatus.stake_tokens.some(a => a.length > 0)
     for(let index = 0; index < userStatus.stake_tokens.length; index++) {
+      const contract: NFTContract = nftContractList[index].contract
       let contractTokens = userStatus.stake_tokens[index]
+
+      let thisUserStakedNFTsPromises: Promise<NFT>[] = []
       for(let tokenId of contractTokens) {
-        const contract: NFTContract = nftContractList[index].contract
-        // Smart people were nice enough to match the token_id with the media name on drive. 
-        // Awful people, did differently, so it is needed to search into the staked tokens for the matching token_id
-        // To get the media from the metadata
-        const allStakedNFTs = await contract.nft_tokens_for_owner(poolParams.stakingContractData.contract.contractId)
-        let thisUserStakedNFT = allStakedNFTs.find((nft: NFT) => nft.token_id == tokenId) as NFTWithMetadata
-        // stakedOrBoostingNFTsToAdd.push(newNFT(tokenId, contract.baseUrl, contract.contractId))
+        thisUserStakedNFTsPromises.push(contract.nft_token(tokenId))
+      }
+      const thisUserStakedNFTs: NFT[] = await Promise.all(thisUserStakedNFTsPromises)
+      thisUserStakedNFTs.forEach(nft => {
         stakedOrBoostingNFTsToAdd.push({
-          ...thisUserStakedNFT,
+          ...nft,
           contract_id: contract.contractId,
           base_url: contract.baseUrl
         })
-      }
+      })
+
     }
   } else {
     throw new Error(`Object ${typeof poolParams} is not implemented for loading NFT's`)

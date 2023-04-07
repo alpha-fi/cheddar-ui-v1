@@ -3,7 +3,7 @@ import {SmartContract} from "../wallet-api/base-smart-contract"
 import * as nearAPI from "near-api-js"
 
 import {ntoy, TGas} from "../util/conversions"
-import { NFT, NFTMetadata } from "./nft-structs";
+import { NFT, NFTMetadata, NFTWithMetadata } from "./nft-structs";
 import { BN } from "bn.js";
 
 type U128String = string;
@@ -46,6 +46,11 @@ export class NFTContract extends SmartContract {
     async nft_metadata(): Promise<NFTMetadata> {
         return this.viewWithoutAccount("nft_metadata")
     }
+
+    async nft_token(tokenId: string): Promise<NFT> {
+        return this.viewWithoutAccount("nft_token", {token_id: tokenId})
+    }
+
 
     // async ft_balance_of(accountId:string) : Promise<U128String> {
     //     return this.view("ft_balance_of",{account_id:accountId }) 
