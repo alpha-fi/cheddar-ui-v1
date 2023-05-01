@@ -2507,7 +2507,8 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
       const contract = nftContractList[i].contract
       const nftMetadata: Promise<NFTMetadata> = contract.nft_metadata()
       const userUnstakedNFTs: NFT[] = await contract.nft_tokens_for_owner(accountId)
-      const baseUrl = (await nftMetadata).base_uri
+      let baseUrl = (await nftMetadata).base_uri
+      if(!baseUrl) baseUrl = contract.baseUrl
       userUnstakedNFTsWithMetadata = userUnstakedNFTsWithMetadata.concat(userUnstakedNFTs.map((nft: NFT) => {
         return {
           ...nft,
@@ -2560,6 +2561,7 @@ async function loadNFTs(poolParams: PoolParamsP3|PoolParamsNFT, buttonId: string
     
   }
   userUnstakedNFTsWithMetadata.forEach(nft => {
+    console.log(4, nft)
     addNFT(poolParams, NFTContainer, nft, poolHasStaked, "", buttonId, "", false)
   });
 }
@@ -2737,6 +2739,7 @@ async function addNFT(poolParams: PoolParamsP3|PoolParamsNFT, container: HTMLEle
   
   const nftMedia: string = nft.metadata.media.indexOf("@") != -1 ? nft.metadata.media.split("@")[1] : nft.metadata.media
   let src
+  console.log(3, nftMedia, nft.base_url)
   if(nftMedia.startsWith("https://")) {
     src = nftMedia
   } else {
