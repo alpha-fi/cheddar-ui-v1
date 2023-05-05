@@ -293,14 +293,14 @@ export function getConfig(env:string):GetConfigResults {
           contractName: 'p4-citizencafe.cheddar.near',
           tokenContractName: CHEDDAR_CONTRACT_NAME,
         },
-        {
-          index: 21,
-          poolType: 'nft',
-          poolName : 'Cheddar-Rogues',
-          nftBaseUrl: ['https://cloudflare-ipfs.com/ipfs/'],
-          contractName: 'p4-rogues.cheddar.near',
-          tokenContractName: CHEDDAR_CONTRACT_NAME,
-        },
+        // {
+        //   index: 21,
+        //   poolType: 'nft',
+        //   poolName : 'Cheddar-Rogues',
+        //   nftBaseUrl: ['https://cloudflare-ipfs.com/ipfs/'],
+        //   contractName: 'p4-rogues.cheddar.near',
+        //   tokenContractName: CHEDDAR_CONTRACT_NAME,
+        // },
         
       ]
     }
