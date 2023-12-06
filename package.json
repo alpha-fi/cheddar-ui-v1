@@ -5,6 +5,9 @@
   "description": "web front-ent for cheddar",
   "repository": "https://github.com/alpha-fi/cheddar-ui-v1",
   "scripts": {
+    "precompile":"yarn build",
+    "compile":"gh-pages -d build",
+    "build": "CI=false && react-scripts build",
     "build:tsc": "tsc --noEmit",
     "build:prod": "rm -rf dist-prod && parcel build src/index.html --no-cache --log-level verbose --public-url ./ --dist-dir dist-prod",
     "deploy:pages": "gh-pages -d dist/",
