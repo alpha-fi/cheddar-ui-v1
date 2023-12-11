@@ -6,7 +6,7 @@
   "repository": "https://github.com/alpha-fi/cheddar-ui-v1",
   "homepage": "https://alpha-fi.github.io/cheddar-ui-v1",
   "scripts": {
-    "precompile":"yarn build",
+    "precompile":"npm run build:prod",
     "compile":"gh-pages -d build",
     "build:tsc": "tsc --noEmit",
     "build:prod": "rm -rf dist-prod && parcel build src/index.html --no-cache --log-level verbose --public-url ./ --dist-dir dist-prod",
