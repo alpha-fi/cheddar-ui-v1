@@ -9,7 +9,7 @@
     "precompile":"npm run build:prod",
     "compile":"gh-pages -d dist-prod/",
     "build:tsc": "tsc --noEmit",
-    "build:prod": "rm -rf dist-prod && parcel build src/index.html --no-cache --log-level verbose --public-url ./ --dist-dir dist-prod",
+    "build:prod": "CI=false && rm -rf dist-prod && parcel build src/index.html --no-cache --log-level verbose --public-url ./ --dist-dir dist-prod",
     "deploy:pages": "gh-pages -d dist/",
     "start:dev": "echo The app is starting! It will automatically open in your browser when ready && parcel src/index.html --open",
     "start": "echo The app is starting! It will automatically open in your browser when ready && parcel --no-cache src/index.html --open",
