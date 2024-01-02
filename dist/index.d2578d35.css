@@ -10,13 +10,13 @@ section#faq ul {
 }
 
 .collapsible {
-  align-self: flex-start;
   width: 100%;
+  align-self: flex-start;
   margin-bottom: 1em;
   padding-bottom: 1em;
 }
 
-.collapsible:not(:last-child) {
+.collapsible:not(:nth-last-child(1)) {
   border-bottom: 1px dashed #d8dbe5;
 }
 
@@ -43,7 +43,7 @@ section#faq ul {
   padding: 0;
   transition: transform .25s ease-out;
   display: inline-flex;
-  transform: rotate(0);
+  transform: rotate(0deg);
 }
 
 .collapsible input:checked ~ .arrow, .collapsible input:checked ~ .collapser .arrow {
