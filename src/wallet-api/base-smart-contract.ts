@@ -22,16 +22,16 @@ export class SmartContract {
     )
     {
         this.wallet = disconnectedWallet; //default wallet is DisconnectedWallet
-        this.nearWallet = new nearAPI.WalletAccount(near, null)
+        this.nearWallet = new nearAPI.WalletConnection(near, null)
         this.account = this.nearWallet.account()
-        this.provider = new JsonRpcProvider(nearConfig.nodeUrl)
+        this.provider = new JsonRpcProvider(nearConfig.nodeUrl as any)
     }
 
     async viewWithoutAccount(method: string, args: any = {}): Promise<any> {
         try {
             const argsAsString = JSON.stringify(args)
             let argsBase64 = Buffer.from(argsAsString).toString("base64")
-            const rawResult = await this.provider.query({
+            const rawResult:any = await this.provider.query({
                 request_type: "call_function",
                 account_id: this.contractId,
                 method_name: method,
@@ -59,11 +59,11 @@ export class SmartContract {
         return this.wallet.call(this.contractId, method, args, gas, attachedYoctos)
     }
 
-    callWithoutSend(method:string, args:any, gas?:U64String, attachedYoctos?:U128String) : Promise<any> {
-        //console.log(this.contractId, method, args, gas, attachedYoctos)
-        if (!this.nearWallet) throw Error(`contract-proxy not connected ${this.contractId} trying to call ${method}`)
-        return this.nearWallet.call(this.contractId, method, args, gas, attachedYoctos)
-    }
+    // callWithoutSend(method:string, args:any, gas?:U64String, attachedYoctos?:U128String) : Promise<any> {
+    //     //console.log(this.contractId, method, args, gas, attachedYoctos)
+    //     if (!this.nearWallet) throw Error(`contract-proxy not connected ${this.contractId} trying to call ${method}`)
+    //     return this.nearWallet.call(this.contractId, method, args, gas, attachedYoctos)
+    // }
 
     disconnect(){
         this.wallet = disconnectedWallet; //set to DisconnectedWallet

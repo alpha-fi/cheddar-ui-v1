@@ -41,6 +41,10 @@ html {
   outline-width: 1px;
 }
 
+.flipped {
+  transform: rotate(180deg);
+}
+
 #logo:focus {
   outline-style: none;
   outline-color: (--primary);
@@ -60,11 +64,11 @@ body {
 }
 
 .publicity-container {
+  width: 100%;
   height: var(--publicity-height);
   background: radial-gradient(var(--primary-selected), var(--primary));
   justify-content: center;
   align-items: center;
-  width: 100%;
   display: flex;
   position: absolute;
   top: 0;
@@ -72,8 +76,8 @@ body {
 }
 
 .publicity-container img {
-  aspect-ratio: 1;
   height: 40%;
+  aspect-ratio: 1;
   margin: 10px;
 }
 
@@ -103,10 +107,10 @@ body {
 
 .publicity-decoration {
   top: var(--publicity-height);
-  z-index: 0;
-  background: linear-gradient(180deg, var(--primary), transparent);
-  width: 100%;
   height: 30px;
+  z-index: 0;
+  width: 100%;
+  background: linear-gradient(180deg, var(--primary), transparent);
   position: absolute;
   left: 0;
 }
@@ -116,9 +120,9 @@ body {
 }
 
 header {
+  max-height: 59px;
   flex-flow: row;
   align-items: center;
-  max-height: 59px;
   margin: 164px 15px 0;
   display: flex;
 }
@@ -144,10 +148,10 @@ h1 {
 
 h2 img {
   vertical-align: middle;
-  border-radius: 50%;
-  justify-content: center;
   width: 35px;
   height: 35px;
+  border-radius: 50%;
+  justify-content: center;
   padding: 5px;
   box-shadow: 0 2px 14px #00000030;
 }
@@ -200,8 +204,8 @@ header div.title {
 }
 
 nav {
-  justify-content: space-between;
   width: calc(100% - 175px);
+  justify-content: space-between;
   display: flex;
 }
 
@@ -238,9 +242,9 @@ nav {
 }
 
 .burger-button div {
-  background-color: #000;
   width: 19px;
   height: 3.2px;
+  background-color: #000;
 }
 
 .burger-button div:not(:last-child) {
@@ -303,11 +307,11 @@ a.selected {
 
 .grid > div {
   background-color: var(--second-new-grey);
+  width: 90%;
+  max-width: 500px;
   flex-direction: column;
   justify-content: center;
   place-items: center start;
-  width: 90%;
-  max-width: 500px;
   display: flex;
 }
 
@@ -318,10 +322,10 @@ a.selected {
 
 #token-header span.icon, #token-header img.icon {
   vertical-align: middle;
-  border-radius: 50%;
-  justify-content: center;
   width: 35px;
   height: 35px;
+  border-radius: 50%;
+  justify-content: center;
   padding: 5px;
   display: inline-block;
   box-shadow: 0 2px 14px #00000030;
@@ -336,12 +340,12 @@ a.selected {
 }
 
 .pool-meta {
-  justify-content: space-between;
   min-width: 80%;
+  justify-content: space-between;
   display: flex;
 }
 
-.pool-meta div:first-child {
+.pool-meta div:nth-child(1) {
   color: #063767;
   font-size: 16px;
   font-weight: 400;
@@ -355,7 +359,7 @@ a.selected {
   line-height: 1.5;
 }
 
-.pool-meta.deposit div:first-child {
+.pool-meta.deposit div:nth-child(1) {
   color: #063767;
   font-size: 20px;
   font-weight: 400;
@@ -374,7 +378,7 @@ a.selected {
   margin: 10px 1.7rem 0;
 }
 
-.pool-meta.earned div:first-child, .pool-meta.staked div:first-child {
+.pool-meta.earned div:nth-child(1), .pool-meta.staked div:nth-child(1) {
   color: #0f84f8;
   padding-right: 3px;
   font-size: 12px;
@@ -396,7 +400,7 @@ a.selected {
   padding-top: 0;
 }
 
-.pool-meta.earned.amount div:first-child, .pool-meta.staked.amount div:first-child {
+.pool-meta.earned.amount div:nth-child(1), .pool-meta.staked.amount div:nth-child(1) {
   color: #063767;
   font-size: 20px;
   font-weight: 600;
@@ -410,17 +414,17 @@ a.selected {
 }
 
 .pool-meta.wallet-balance {
-  justify-content: right;
   min-width: 95%;
+  justify-content: right;
   display: block;
 }
 
-.pool-meta.wallet-balance div:first-child {
+.pool-meta.wallet-balance div:nth-child(1) {
   box-align: center;
   color: #063767;
+  height: 22px;
   justify-content: center;
   align-items: center;
-  height: 22px;
   margin-bottom: 10px;
   font-size: 14px;
   font-weight: 700;
@@ -428,13 +432,13 @@ a.selected {
 }
 
 .btn-liquid {
+  width: 129px;
+  height: 42px;
   color: var(--fg);
   letter-spacing: .05em;
   text-align: center;
   border-radius: 27px;
   justify-content: center;
-  width: 129px;
-  height: 42px;
   margin-top: 10px;
   font-family: Titillium Web, sans-serif;
   font-size: 16px;
@@ -533,10 +537,10 @@ article, form, .box {
 }
 
 .input-group {
+  width: 95%;
   background: #f6f2fd;
   border-radius: 8px;
   flex-flow: row;
-  width: 95%;
   margin: 6px;
   padding: 10px;
   display: flex;
@@ -565,13 +569,13 @@ input, .input-group span {
 }
 
 .button {
+  height: 48px;
+  min-width: 50%;
   background: var(--primary);
   color: #ffffffe3;
   cursor: pointer;
   border: 0;
   border-radius: 16px;
-  min-width: 50%;
-  height: 48px;
   margin: 5px 7px;
   padding: 0 24px;
   font-size: 16px;
@@ -592,12 +596,12 @@ button.hollow {
 }
 
 .btn {
+  height: 32px;
   cursor: pointer;
   color: #000;
   background: #fff;
   border: 2px solid gold;
   border-radius: 16px;
-  height: 32px;
   padding: 8px 10px;
   line-height: 12px;
   text-decoration: none;
@@ -655,6 +659,8 @@ button.hollow {
   box-shadow: none;
   color: #fff;
   cursor: pointer;
+  width: max-content;
+  height: 48px;
   letter-spacing: .03em;
   opacity: 1;
   border: 0;
@@ -662,8 +668,6 @@ button.hollow {
   outline: 0;
   justify-content: center;
   align-items: center;
-  width: max-content;
-  height: 48px;
   margin-right: 6px;
   padding: 0 24px;
   font-family: inherit;
@@ -679,6 +683,7 @@ button.hollow {
   box-shadow: none;
   color: #fff;
   cursor: pointer;
+  width: max-content;
   letter-spacing: .03em;
   opacity: 1;
   border: 0;
@@ -686,7 +691,6 @@ button.hollow {
   outline: 0;
   justify-content: center;
   align-items: center;
-  width: max-content;
   padding: 0 24px;
   font-family: inherit;
   font-size: 16px;
@@ -723,10 +727,10 @@ h3.popup {
 }
 
 fieldset {
+  width: 100%;
   border: 0;
   flex-flow: column;
   align-items: center;
-  width: 100%;
   padding-block-start: .75em;
   display: flex;
 }
@@ -742,9 +746,9 @@ fieldset {
 }
 
 .stat-line {
+  width: 100%;
   flex-flow: row;
   justify-content: space-between;
-  width: 100%;
   padding: 5px 0;
   display: flex;
 }
@@ -766,8 +770,8 @@ fieldset {
 }
 
 .stat-small-line {
-  flex-flow: row;
   width: 100%;
+  flex-flow: row;
   margin-top: -.9em;
   padding: 2px 0 7px 10px;
   font-size: .8em;
@@ -822,12 +826,12 @@ small img {
 .tooltip .tooltip-text {
   text-align: center;
   visibility: hidden;
+  width: 24em;
   z-index: 30;
   word-break: break-word;
   white-space: break-spaces;
-  border-radius: 6px;
-  width: 24em;
   max-width: 50vw;
+  border-radius: 6px;
   padding: 5px;
   position: absolute;
   top: .5em;
@@ -969,9 +973,9 @@ li {
 }
 
 .main-contract-footer {
+  width: 100%;
   flex-direction: column;
   justify-content: center;
-  width: 100%;
   display: flex;
 }
 
@@ -980,18 +984,17 @@ li {
 }
 
 #stake-unstake-nft {
-  align-self: center;
   max-width: 180px;
+  align-self: center;
 }
 
 .boost-button {
-  -webkit-user-select: none;
   user-select: none;
+  width: 62.531px;
   cursor: pointer;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 62.531px;
   display: flex;
 }
 
@@ -1016,11 +1019,11 @@ input[type="checkbox"]#terms-of-use {
 }
 
 .disclaimer label:before {
+  height: 18px;
+  width: 18px;
   cursor: pointer;
   background: green;
   border: 1px solid #035f8f;
-  width: 18px;
-  height: 18px;
   display: inline-block;
 }
 
@@ -1059,20 +1062,20 @@ input[type="checkbox"]#terms-of-use:checked + label:before {
 }
 
 .loader {
+  width: 120px;
+  height: 120px;
   position: realative;
   background-image: url("cheddar.13fdfe40.svg");
   border: 16px solid #f3f3f3;
   border-top-color: #fd941f;
   border-radius: 50%;
-  width: 120px;
-  height: 120px;
   margin: 10% auto;
-  animation: 2s linear infinite spin;
+  animation: spin 2s linear infinite;
 }
 
 @-webkit-keyframes spin {
   0% {
-    -webkit-transform: rotate(0);
+    -webkit-transform: rotate(0deg);
   }
 
   100% {
@@ -1082,7 +1085,7 @@ input[type="checkbox"]#terms-of-use:checked + label:before {
 
 @keyframes spin {
   0% {
-    transform: rotate(0);
+    transform: rotate(0deg);
   }
 
   100% {
@@ -1198,8 +1201,8 @@ section#my-account, section#faq {
 }
 
 #coinFlip img {
-  aspect-ratio: 1;
   height: 19px;
+  aspect-ratio: 1;
   position: relative;
   top: 5px;
 }
@@ -1216,9 +1219,8 @@ section#my-account, section#faq {
 
 .games-dropdown {
   text-align: center;
-  -webkit-user-select: none;
-  user-select: none;
   width: max-content;
+  user-select: none;
   margin: 5px;
 }
 
@@ -1237,8 +1239,8 @@ section#my-account, section#faq {
 
 .games-dropdown-items {
   z-index: 3;
-  width: max-content;
   height: max-content;
+  width: max-content;
   transition: all .3s step-end;
   position: absolute;
   top: 35px;
@@ -1257,10 +1259,10 @@ section#my-account, section#faq {
 
 .games-links-container {
   text-align: right;
-  background-color: #fff;
-  border-radius: 16px;
   width: max-content;
   max-width: 80vw;
+  background-color: #fff;
+  border-radius: 16px;
   padding: 8px 0;
   transition: all .3s ease-out;
   position: relative;
@@ -1290,9 +1292,9 @@ section#my-account, section#faq {
 
 .slider:before {
   content: "";
-  background-color: #fff;
-  width: 15px;
   height: 15px;
+  width: 15px;
+  background-color: #fff;
   transition: all .4s;
   position: absolute;
   bottom: 2px;
@@ -1319,13 +1321,13 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-@media only screen and (width >= 600px) {
+@media only screen and (min-width: 600px) {
   section, article, form {
     min-width: 280px;
   }
 }
 
-@media screen and (width <= 1000px) {
+@media screen and (max-width: 1000px) {
   #home-connected, #nft-pools-section {
     margin: 1rem;
   }
@@ -1353,7 +1355,7 @@ input:checked + .slider:before {
   line-height: 1rem;
 }
 
-@media only screen and (width <= 360px) {
+@media only screen and (max-width: 360px) {
   html {
     font-size: 11px;
   }
@@ -1427,9 +1429,9 @@ input:checked + .slider:before {
 
 #pool_list .no-pools {
   text-align: center;
+  width: 120%;
   color: #8542eb;
   outline: double;
-  width: 120%;
   margin: 0 auto;
   padding: 1rem;
 }
@@ -1462,11 +1464,11 @@ input:checked + .slider:before {
 
 .pool-filter-container {
   background-color: var(--second-new-grey);
+  width: max-content;
   color: var(--new-gray);
   text-align: center;
   letter-spacing: 1.25px;
   border-radius: 10px;
-  width: max-content;
   margin: 32px 0 1.5rem;
   font-size: 14px;
   font-style: normal;
@@ -1478,13 +1480,12 @@ input:checked + .slider:before {
 }
 
 .pool-filter-container li {
-  cursor: pointer;
-  -webkit-user-select: none;
-  user-select: none;
-  border-radius: 10px;
   width: 133px;
-  max-width: 30vw;
   height: 42px;
+  cursor: pointer;
+  user-select: none;
+  max-width: 30vw;
+  border-radius: 10px;
   line-height: 42px;
 }
 
@@ -1495,9 +1496,9 @@ input:checked + .slider:before {
 
 .no-live-pools-msg h2 {
   color: var(--primary);
+  width: max-content;
   background-color: var(--second-new-grey);
   border-radius: 100px;
-  width: max-content;
   margin: 50px auto;
   padding: 20px;
   font-size: x-large;
@@ -1506,7 +1507,6 @@ input:checked + .slider:before {
 }
 
 .no-live-pools-msg:hover {
-  -webkit-user-select: none;
   user-select: none;
   transform: scale(1.01);
 }
@@ -1533,9 +1533,9 @@ input:checked + .slider:before {
 }
 
 #pool-container, #activated {
+  width: 90%;
   background: var(--white);
   border-radius: 12px;
-  width: 90%;
   position: relative;
   box-shadow: 0 0 20px #dce2ebb3;
 }
@@ -1548,8 +1548,8 @@ input:checked + .slider:before {
 }
 
 .date-in-range-indicator {
-  aspect-ratio: 1;
   height: 20px;
+  aspect-ratio: 1;
   position: absolute;
   transform: translate(10px, -5px);
 }
@@ -1566,7 +1566,7 @@ input:checked + .slider:before {
   opacity: 1 !important;
 }
 
-.inactive-pool #contract-period-container, .inactive-pool .new-pool-header, .inactive-pool .main-contract-information li > :first-child, .inactive-pool .main-contract-information li > :nth-child(2), .inactive-pool .detail-row, .inactive-pool .first-token, .inactive-pool .stats-container {
+.inactive-pool #contract-period-container, .inactive-pool .new-pool-header, .inactive-pool .main-contract-information li > :nth-child(1), .inactive-pool .main-contract-information li > :nth-child(2), .inactive-pool .detail-row, .inactive-pool .first-token, .inactive-pool .stats-container {
   opacity: .5;
 }
 
@@ -1578,19 +1578,19 @@ input:checked + .slider:before {
 }
 
 .token-logo-container {
+  width: 20%;
+  height: 44px;
   flex-flow: row;
   place-content: center flex-start;
   align-items: center;
-  width: 20%;
-  height: 44px;
   display: flex;
 }
 
 .token-logo-container img, .token-logo-svg-container svg {
+  max-width: 44px;
   aspect-ratio: 1;
   background-color: var(--white);
   border-radius: 100%;
-  max-width: 44px;
   box-shadow: 0 4px 4px #00000040;
 }
 
@@ -1673,15 +1673,15 @@ input:checked + .slider:before {
 
 #token-pool-stats {
   z-index: 20;
+  width: 107%;
+  max-width: 468px;
+  min-width: 315px;
   background-color: var(--white);
   border: 12px;
   border-top-width: 0;
   border-color: var(--second-new-grey);
   border-style: solid;
   border-radius: 18px;
-  width: 107%;
-  min-width: 315px;
-  max-width: 468px;
   padding: 0 10px;
   position: absolute;
   top: 0;
@@ -1719,10 +1719,10 @@ input:checked + .slider:before {
 }
 
 .multiple-nft-selection {
+  width: 100%;
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
   margin: 0 auto 10px;
   display: flex;
 }
@@ -1848,8 +1848,8 @@ h2.nft-name {
 }
 
 .reward-tokens-value {
-  justify-content: flex-end;
   max-height: 32px;
+  justify-content: flex-end;
   display: flex;
 }
 
@@ -1879,9 +1879,9 @@ button.activate {
 #stake-unstake-nft, #harvest-button, #stake-button, #unstake-button, .activate, .nft-actions-container .button {
   background-color: var(--primary);
   color: var(--white);
+  height: 36px;
   border: 1px solid #0000001f;
   border-radius: 4px;
-  height: 36px;
 }
 
 .visual-tool-expanding-indication-hidden {
@@ -1897,7 +1897,7 @@ button.activate {
 }
 
 .blink {
-  animation: 1.5s linear infinite blink;
+  animation: blink 1.5s linear infinite;
 }
 
 #expanding-indicators {
@@ -1939,12 +1939,12 @@ button.activate {
 }
 
 .show-type-container button {
+  width: 49%;
   text-align: center;
   color: var(--primary-low);
   border-width: 0 1px 2px 0;
   border-color: var(--light-gray);
   border-style: solid;
-  width: 49%;
   padding: 16px 0;
   font-weight: 600;
   display: inline-block;
@@ -1973,9 +1973,9 @@ button.activate {
 }
 
 .input-container .token-logo, .input-container .token-logo-svg-container svg {
+  height: 40px;
   background-color: var(--shadow);
   border-radius: 50%;
-  height: 40px;
   margin-right: 10px;
 }
 
@@ -1986,10 +1986,10 @@ button.activate {
 }
 
 #staking-unstaking-container input {
+  height: 56px;
+  width: 99%;
   background-color: var(--bg);
   border-radius: 4px 4px 0 0;
-  width: 99%;
-  height: 56px;
   font-size: 14px;
   font-weight: 700;
   line-height: 24px;
@@ -2001,9 +2001,9 @@ button.activate {
 }
 
 .available-info {
+  width: 64%;
   justify-content: space-between;
   align-items: center;
-  width: 64%;
   margin: 0 auto;
   display: flex;
 }
@@ -2013,10 +2013,10 @@ button.activate {
 }
 
 #nft-pools-section {
+  height: 105vh;
+  width: 103vw;
   z-index: 22;
   background-color: #ffffffad;
-  width: 103vw;
-  height: 105vh;
   position: fixed;
   top: -27px;
   left: -25px;
@@ -2024,14 +2024,15 @@ button.activate {
 }
 
 .nft-pools-container {
+  width: max-content;
+  max-width: 117rem;
   background-color: var(--second-new-grey);
+  min-width: 40%;
+  max-width: 90%;
   border-radius: 12px;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: max-content;
-  min-width: 40%;
-  max-width: 90%;
   margin: 100px auto;
   padding: 30px;
   display: flex;
@@ -2133,31 +2134,31 @@ button.activate {
   font-weight: 700;
 }
 
-@media screen and (width <= 1630px) {
+@media screen and (max-width: 1630px) {
   .nft-flex {
     max-width: 80vw;
   }
 }
 
-@media screen and (width <= 1132px) {
+@media screen and (maX-width: 1132px) {
   .nft-flex {
     max-width: 478px;
   }
 }
 
-@media screen and (width <= 1500px) and (width >= 1130px) {
+@media screen and (max-width: 1500px) and (min-width: 1130px) {
   .grid {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media screen and (width <= 1129px) and (width >= 751px) {
+@media screen and (max-width: 1129px) and (min-width: 751px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media screen and (width <= 1210px) {
+@media screen and (max-width: 1210px) {
   nav {
     margin-top: 3px;
   }
@@ -2173,12 +2174,12 @@ button.activate {
 
   #burguer {
     z-index: 40;
+    width: auto;
+    height: 49px;
     aspect-ratio: 1;
     background-color: #ffffffc9;
     border-radius: 20%;
     justify-content: center;
-    width: auto;
-    height: 49px;
     padding: 10px;
     position: fixed;
     top: 40px;
@@ -2196,11 +2197,11 @@ button.activate {
 
   .burguer-content {
     z-index: 2;
+    width: 90%;
+    height: 100%;
     background-color: var(--white);
     flex-direction: column;
     justify-content: flex-start;
-    width: 90%;
-    height: 100%;
     margin: 0;
     transition: transform .4s ease-in-out;
     display: flex;
@@ -2212,8 +2213,8 @@ button.activate {
   }
 
   .top-in-burguer {
-    order: 1;
     width: 100%;
+    order: 1;
     align-items: flex-start !important;
   }
 
@@ -2251,8 +2252,8 @@ button.activate {
   }
 
   .left-on-full-screen {
-    order: 2;
     width: 100%;
+    order: 2;
     flex-direction: column-reverse !important;
   }
 
@@ -2261,10 +2262,10 @@ button.activate {
   }
 
   #power-up, #ref-swap {
+    height: 48px;
     background-color: var(--input);
     border: 1px solid #000;
     order: 3;
-    height: 48px;
     margin: 6px 14px;
     position: relative;
   }
@@ -2286,10 +2287,10 @@ button.activate {
   .navButton {
     color: #000;
     box-shadow: none;
+    width: 100%;
     background-color: #fff0;
     border-radius: 0;
     order: 2;
-    width: 100%;
     margin: 0;
     padding: 12px 0 12px 16px;
   }
@@ -2318,7 +2319,7 @@ button.activate {
   }
 }
 
-@media screen and (width <= 750px) {
+@media screen and (max-width: 750px) {
   .grid {
     grid-template-columns: repeat(1, 1fr);
   }
@@ -2340,7 +2341,7 @@ button.activate {
   }
 }
 
-@media screen and (width <= 600px) {
+@media screen and (max-width: 600px) {
   .show-smaller-screens {
     display: block;
   }
@@ -2367,7 +2368,7 @@ button.activate {
   }
 }
 
-@media screen and (width <= 420px) {
+@media screen and (max-width: 420px) {
   .publicity-container img {
     height: 20%;
   }
