@@ -36,6 +36,22 @@ import { NFTStakingContractParams } from './contracts/nft-structures';
 import { StakingPoolNFT } from './contracts/nft-staking';
 import { initButton as initLiquidButton } from './util/animations/liquidityButton';
 import { ConfettiButton } from './util/animations/new-confetti-button';
+import { setupWalletSelector } from "@near-wallet-selector/core";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
+import type { WalletSelector, AccountState, NetworkId, Network } from "@near-wallet-selector/core";
+import { setupModal } from "@near-wallet-selector/modal-ui";
+import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
+import { setupSender } from "@near-wallet-selector/sender";
+import { setupNightly } from "@near-wallet-selector/nightly";
+import { setupHereWallet } from "@near-wallet-selector/here-wallet";
+import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupMintbaseWallet } from '@near-wallet-selector/mintbase-wallet';
+import { SelectorWallet } from './wallet-api/selector-wallet';
+
+
+let walletSelector : WalletSelector | null;
+let walletSelectorModal : WalletSelectorModal | null;
+
 
 //get global config
 //const nearConfig = getConfig(process.env.NODE_ENV || 'testnet')
@@ -98,14 +114,11 @@ qs('#my-account').onclick =
   async function (event) {
     event.preventDefault()
     if (wallet.isConnected()) {
-      console.log("Connected")
       signedInFlow(wallet)
-    } else {
-      console.log("Disconnected")
-      loginNearWebWallet();
+    } else if(walletSelectorModal) {
+      walletSelectorModal.show()
     }
   }
-
 
 let moreGamesButton = qs(".games-dropdown") as HTMLElement
 moreGamesButton.addEventListener("click", gamesDropdownHandler())
@@ -134,7 +147,7 @@ function navClickHandler_ConnectFirst(event: Event) {
   }
   else {
     showSection("#home")
-    loginNearWebWallet()
+    walletSelectorModal?.show()
     // sayChoose()
   }
 }
@@ -596,7 +609,7 @@ function showRemoveLiquidityResult(yoctoCheddar: string) {
 //--------------------------------------
 // AutoRefresh
 async function autoRefresh() {
-  if (wallet && wallet.isConnected()) {
+if (wallet && wallet.isConnected()) {
     try {
       //await refreshPoolInfo()
     }
@@ -653,6 +666,7 @@ function takeUserAmountFromHome(): string {
 
 // Display the signed-out-flow container
 async function signedOutFlow() {
+  wallet.disconnect()
   signedInFlow(disconnectedWallet)
   // showSection("#home")
   // await refreshAccountInfo();
@@ -714,40 +728,40 @@ function setDefaultFilter (didJustActivate: boolean = false){
   }
 }
 
-// Initialize contract & set global variables
-async function initNearWebWalletConnection() {
+// // Initialize contract & set global variables
+// async function initNearWebWalletConnection() {
 
-  // Initialize connection to the NEAR network
-  const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig))
-  // Initializing Wallet based Account.
-  nearWebWalletConnection = new WalletConnection(near, null)
-  nearConnectedWalletAccount = new ConnectedWalletAccount(nearWebWalletConnection, near.connection, nearWebWalletConnection.getAccountId())
-  //console.log(nearConnectedWalletAccount)
-}
+//   // Initialize connection to the NEAR network
+//   const near = await connect(Object.assign({ deps: { keyStore: new keyStores.BrowserLocalStorageKeyStore() } }, nearConfig))
+//   // Initializing Wallet based Account.
+//   nearWebWalletConnection = new WalletConnection(near, null)
+//   nearConnectedWalletAccount = new ConnectedWalletAccount(nearWebWalletConnection, near.connection, nearWebWalletConnection.getAccountId())
+//   //console.log(nearConnectedWalletAccount)
+// }
 
-function logoutNearWebWallet() {
+// function logoutNearWebWallet() {
 
-  nearWebWalletConnection.signOut()
-  wallet = disconnectedWallet
+//   nearWebWalletConnection.signOut()
+//   wallet = disconnectedWallet
 
-  // reload page
-  window.location.replace(window.location.origin + window.location.pathname)
-}
+//   // reload page
+//   window.location.replace(window.location.origin + window.location.pathname)
+// }
 
-function loginNearWebWallet() {
-  // Allow the current app to make calls to the specified contract on the user's behalf.
-  // This works by creating a new access key for the user's account and storing
-  // the private key in localStorage.
-  //save what the user typed before navigating out
-  // localStorage.setItem("amount", qsi("#stake-form-not-connected input.near").value)
-  nearWebWalletConnection.requestSignIn(nearConfig.farms[0].contractName)
-}
+// function loginNearWebWallet() {
+//   // Allow the current app to make calls to the specified contract on the user's behalf.
+//   // This works by creating a new access key for the user's account and storing
+//   // the private key in localStorage.
+//   //save what the user typed before navigating out
+//   // localStorage.setItem("amount", qsi("#stake-form-not-connected input.near").value)
+//   nearWebWalletConnection.requestSignIn({contractId:nearConfig.farms[0].contractName})
+// }
 
-function loginNarwallets() {
-  //login is initiated from the chrome-extension
-  //show step-by-step instructions
-  window.open("http://www.narwallets.com/help/connect-to-web-app")
-}
+// function loginNarwallets() {
+//   //login is initiated from the chrome-extension
+//   //show step-by-step instructions
+//   window.open("http://www.narwallets.com/help/connect-to-web-app")
+// }
 
 function showOrHideMaxButton(walletBalance: number, elem: HTMLElement) {
   if (walletBalance > 0) {
@@ -937,20 +951,20 @@ async function refreshAccountInfoGeneric(poolList: Array<PoolParams>) {
   });
 }
 
-/// when the user chooses "connect to web-page" in the narwallets-chrome-extension
-function narwalletConnected(ev: CustomEvent) {
-  wallet = narwallets;
-  loggedWithNarwallets = true
-  signedInFlow(wallet)
-}
+// /// when the user chooses "connect to web-page" in the narwallets-chrome-extension
+// function narwalletConnected(ev: CustomEvent) {
+//   wallet = narwallets as any;
+//   loggedWithNarwallets = true
+//   signedInFlow(wallet)
+// }
 
-/// when the user chooses "disconnect from web-page" in the narwallets-chrome-extension
-function narwalletDisconnected(ev: CustomEvent) {
-  loggedWithNarwallets = false
-  wallet = disconnectedWallet;
+// /// when the user chooses "disconnect from web-page" in the narwallets-chrome-extension
+// function narwalletDisconnected(ev: CustomEvent) {
+//   loggedWithNarwallets = false
+//   wallet = disconnectedWallet;
 
-  signedOutFlow()
-}
+//   signedOutFlow()
+// }
 
 function calculateAmountHaveStaked(stakeRates: bigint[], amount: bigint, amountIndex: number, newAmountIndex: number) {
 	const amountToStake = amount * stakeRates[newAmountIndex] / stakeRates[amountIndex]
@@ -2077,9 +2091,24 @@ function setCountdown() {
 window.onload = async function () {
   try {
     let env = ENV //default
-
+    
     if (env != nearConfig.networkId)
       nearConfig = getConfig(ENV);
+
+    const selector = await setupWalletSelector({
+      network: nearConfig.networkId as NetworkId | Network,
+      modules: [
+        setupSender(),
+        setupMyNearWallet(),
+        setupHereWallet(),
+        setupMeteorWallet(),
+        setupNightly(),
+        setupMintbaseWallet()
+      ],
+    })
+    walletSelector = selector;
+    walletSelectorModal = setupModal(selector, { contractId: "" });
+    if(selector.isSignedIn()) wallet = new SelectorWallet(selector) 
 
     near = await nearAPI.connect(
       Object.assign(
@@ -2110,14 +2139,14 @@ window.onload = async function () {
 
 
     //init narwallets listeners
-    narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
-    addNarwalletsListeners(narwalletConnected, narwalletDisconnected) //listen to narwallets events
+    //narwallets.setNetwork(nearConfig.networkId); //tell the wallet which network we want to operate on
+    //addNarwalletsListeners(narwalletConnected, narwalletDisconnected) //listen to narwallets events
 
     //set-up auto-refresh loop (10 min)
     setInterval(autoRefresh, 10 * MINUTES)
 
     //check if signed-in with NEAR Web Wallet
-    await initNearWebWalletConnection()
+    //await initNearWebWalletConnection()
     let didJustActivate = false
     initLiquidButton()
 
@@ -2129,10 +2158,11 @@ window.onload = async function () {
 
     allSuplyTextContainersToFill.innerHTML = toStringDec(yton(circulatingSupply)).split('.')[0];
 
-    if (nearWebWalletConnection.isSignedIn()) {
+    //if (nearWebWalletConnection.isSignedIn()) {
+    if (selector.isSignedIn()) {
       //already signed-in with NEAR Web Wallet
       //make the contract use NEAR Web Wallet
-      wallet = new NearWebWallet(nearWebWalletConnection);
+      wallet = new SelectorWallet(walletSelector)//NearWebWallet(nearWebWalletConnection) as any;
       
       // const poolList = await getPoolList(wallet)
       // await addPoolList(poolList)
@@ -2154,7 +2184,7 @@ window.onload = async function () {
       const searchParamsResultArray = await checkRedirectSearchParamsMultiple(nearWebWalletConnection, nearConfig.explorerUrl || "explorer");
       let method: string = ""
       let err
-      let args = []
+      let args = [] as any
       searchParamsResultArray.forEach(searchParamsResult => {
         const { err: errResult, data, method: methodResult, finalExecutionOutcome } = searchParamsResult
         if(errResult) {
@@ -2205,8 +2235,7 @@ window.onload = async function () {
         console.log("Args", args.join("\n"))
       }
       
-    }
-    else {
+    } else {
       //not signed-in 
       await signedOutFlow() //show home-not-connected -> select wallet page
     }
@@ -2228,7 +2257,7 @@ async function stakeResult(argsArray: [{amount: string, msg: string, receiver_id
   let pool: PoolParams | PoolParamsP3 | undefined
   for(let i = 0; i < poolList.length; i++) {
     if(argsArray[0].receiver_id == poolList[i].stakingContractData.contract.contractId) {
-      pool = poolList[i]
+      pool = poolList[i] as any
       break
     }
   }

@@ -6,8 +6,6 @@
 .pnp.js
 /out
 /.cache
-/dist
-/dist-prod
 /contract/node_modules/
 *.log
 

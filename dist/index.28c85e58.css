@@ -1,0 +1,12 @@
+@import "https://rsms.me/inter/inter.css";
+:root, button {
+  font-family: Titillium Web, sans-serif;
+}
+
+@supports (font-variation-settings: normal) {
+  :root, button {
+    font-family: Titillium Web, sans-serif;
+  }
+}
+
+/*# sourceMappingURL=index.28c85e58.css.map */
